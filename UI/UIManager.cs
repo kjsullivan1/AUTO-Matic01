@@ -115,7 +115,7 @@ namespace AUTO_Matic
             UIHelper.SetElementRect(uiElements["MainMenuTitle"], new Rectangle(new Point((int)(uiElements["MainMenuTitle"].Position.X + 180), (int)uiElements["MainMenuTitle"].Position.Y + 90), new Point(80, 40)));
             UIHelper.SetElementBGRect(uiElements["MainMenuTitle"], new Rectangle((int)uiElements["MainMenuTitle"].Position.X, (int)uiElements["MainMenuTitle"].Position.Y, 450, 200));
             //Exit Button
-            uiElements.Add("ExitButton", UIHelper.CreateButton("ExitButton", "Exit", (int)(dims.X - ((dims.X / 8) + 200)) , UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Bottom + 20));
+            uiElements.Add("ExitButton", UIHelper.CreateButton("ExitButton", "Exit", (int)(dims.X - ((dims.X / 8) + 200)) , 1000 + 40));
             //Play
             uiElements.Add("PlayButton", UIHelper.CreateButton("PlayButton", "Play", (int)(dims.X / 8), UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Bottom + 20));
             
