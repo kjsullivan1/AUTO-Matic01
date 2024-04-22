@@ -14,6 +14,15 @@ namespace AUTO_Matic
         public bool Visible { get; set; }
         public Vector2 Position { get; set; }
 
+        public void SetY(float value)
+        {
+            Position = new Vector2(Position.X, value);
+        }
+        public void SetX(float value)
+        {
+            Position = new Vector2(value, Position.Y);
+        }
+
         public UIWidget(string id, Vector2 position)
         {
             ID = id;

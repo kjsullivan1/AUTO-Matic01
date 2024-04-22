@@ -16,9 +16,10 @@ namespace AUTO_Matic
         ContentManager filePath;
         Game1 game;
 
+        Vector2 dims;
 
-
-      
+        Vector2 buttonPos;
+        Vector2 buttonPos2;
 
         public void UIButton_Clicked(object sender, UIButtonArgs e)
         {
@@ -29,12 +30,33 @@ namespace AUTO_Matic
                     game.Exit();
                     break;
                 case "MainMenuPlay":
+                    game.ChangeMenuState(Game1.MenuStates.StartGame);
+                    UIHelper.SetElementVisibility("StartNewGame", true, uiElements);
+                    UIHelper.SetElementVisibility("LoadGame", true, uiElements);
+                    UIHelper.SetElementVisibility("StartGameReturn", true, uiElements);
+                    UIHelper.SetButtonState("StartGameReturn", false, uiElements);
+
+                    UIHelper.SetElementVisibility("MainMenuPlay", false, uiElements);
+                    UIHelper.SetElementVisibility("MainMenuExit", false, uiElements);
+                    UIHelper.SetElementVisibility("MainMenuSetting", false, uiElements);
+                    UIHelper.SetButtonState("MainMenuSetting", true, uiElements);
+                    
                     break;
                 case "MainMenuSetting":
                     game.ChangeMenuState(Game1.MenuStates.Settings);
                     break;
                 case "SettingsReturnBtn":
                     game.ChangeMenuState(Game1.MenuStates.MainMenu);
+                  
+                   
+                    break;
+                case "StartGameReturn":
+                    game.ChangeMenuState(Game1.MenuStates.MainMenu);
+                    UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
+                    UIHelper.SetElementVisibility("LoadGame", false, uiElements);
+                    UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
+                    UIHelper.SetButtonState("MainMenuSetting", false, uiElements);
+                    UIHelper.SetButtonState("StartGameReturn", true, uiElements);
                     break;
                 //case "Left":
                 //    tanks[playerNumber].TurretRotation += 0.01f;
@@ -112,11 +134,62 @@ namespace AUTO_Matic
             //UIHelper.SetElementText(uiElements["p2Power"], "Power: " + p2Power.ToString("N2"));
         }
 
+        public void UpdateButton(string keyWord, float moveSpeed)
+        {
+            switch(keyWord)
+            {
+                case "StartGame":
+                    if(uiElements["StartNewGame"].Position.Y > uiElements["MainMenuPlay"].Position.Y)
+                    {
+                        uiElements["StartNewGame"].SetY(uiElements["StartNewGame"].Position.Y - moveSpeed);
+                    }
+                    if (uiElements["StartNewGame"].Position.Y == uiElements["MainMenuPlay"].Position.Y)
+                    {
+                        uiElements["StartNewGame"].SetY(uiElements["MainMenuPlay"].Position.Y);
+                        uiElements["MainMenuPlay"].SetY(buttonPos.Y);
+
+                    }
+
+                    if (uiElements["LoadGame"].Position.Y > uiElements["MainMenuExit"].Position.Y)
+                    {
+                        uiElements["LoadGame"].SetY(uiElements["LoadGame"].Position.Y - moveSpeed);
+                    }
+                    if (uiElements["LoadGame"].Position.Y == uiElements["MainMenuExit"].Position.Y)
+                    {
+                        uiElements["LoadGame"].SetY(uiElements["MainMenuExit"].Position.Y);
+                        uiElements["MainMenuExit"].SetY(buttonPos2.Y);
+                    }
+                    break;
+                case "MainMenu":
+                    if (uiElements["MainMenuPlay"].Position.Y > uiElements["StartNewGame"].Position.Y)
+                    {
+                        uiElements["MainMenuPlay"].SetY(uiElements["MainMenuPlay"].Position.Y - moveSpeed);
+                    }
+                    if(uiElements["MainMenuPlay"].Position.Y == uiElements["StartNewGame"].Position.Y)
+                    {
+                        uiElements["MainMenuPlay"].SetY(uiElements["StartNewGame"].Position.Y);
+                        uiElements["StartNewGame"].SetY(buttonPos.Y);
+                    }
+
+                    if (uiElements["MainMenuExit"].Position.Y > uiElements["LoadGame"].Position.Y)
+                    {
+                        uiElements["MainMenuExit"].SetY(uiElements["MainMenuExit"].Position.Y - moveSpeed);
+                    }
+                    if (uiElements["MainMenuExit"].Position.Y == uiElements["LoadGame"].Position.Y)
+                    {
+                        uiElements["MainMenuExit"].SetY(uiElements["LoadGame"].Position.Y);
+                        uiElements["LoadGame"].SetY(buttonPos2.Y);
+                    }
+                    break;
+            }
+        }
+
         public void CreateUIElements(Vector2 dims, Game1 game)
         {
             //filePath = content;
             //Title crawl elements
             uiElements.Clear();
+            this.dims = dims;
             this.game = game;
             uiElements.Add("TitleCrawl", UIHelper.CreateTextblock("TitleCrawl", "This is the title crawl", ((int)dims.X / 2) - (550/2), 20)); //Replace 550 with UIHelper.ScrollBG.Width
             UIHelper.SetElementRect(uiElements["TitleCrawl"], new Rectangle(new Point((int)uiElements["TitleCrawl"].Position.X, (int)uiElements["TitleCrawl"].Position.Y), new Point(80, 40)));
@@ -156,6 +229,19 @@ namespace AUTO_Matic
             uiElements.Add("SettingsReturnBtn", UIHelper.CreateButton("SettingsReturnBtn", "", UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Right - 65,
                 UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Bottom - 65));
             UIHelper.SetRectangle(uiElements["SettingsReturnBtn"], 50, 50);
+
+            ///Start Menu Elements
+            //New Game Btn
+            uiElements.Add("StartNewGame", UIHelper.CreateButton("StartNewGame", "New", ((int)dims.X / 2) - (200 / 2),
+                (int)(UIHelper.GetElementBGRect(uiElements["TitleCrawl"]).Bottom + dims.Y)));
+            buttonPos = uiElements["StartNewGame"].Position;
+            //Load Game
+            uiElements.Add("LoadGame", UIHelper.CreateButton("LoadGame", "Load", ((int)dims.X / 2) - (200 / 2),
+                (int)(UIHelper.GetRectangle(uiElements["StartNewGame"]).Bottom + 20)));
+            buttonPos2 = uiElements["LoadGame"].Position;
+            //Return 
+            uiElements.Add("StartGameReturn", UIHelper.CreateButton("StartGameReturn", "", (int)uiElements["MainMenuSetting"].Position.X, (int)uiElements["MainMenuSetting"].Position.Y));
+            UIHelper.SetRectangle(uiElements["StartGameReturn"], 50, 50);
 
 
 

@@ -21,7 +21,7 @@ namespace AUTO_Matic
         GameStates GameState = GameStates.TitleScreen;
 
         public enum MenuStates { TitleCrawl, MainMenu, Settings, StartGame}
-        MenuStates MenuState = MenuStates.TitleCrawl;
+        public MenuStates MenuState = MenuStates.TitleCrawl;
         bool startCrawl = false;
 
         Vector2 mainMenuPos;
@@ -49,7 +49,8 @@ namespace AUTO_Matic
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            //graphics.PreferredBackBufferWidth = (int)(graphics.PreferredBackBufferWidth * 1.5f);
+            graphics.PreferredBackBufferWidth = (int)(graphics.PreferredBackBufferWidth * 1.5f);
+            //graphics.PreferredBackBufferHeight = (int)(graphics.PreferredBackBufferHeight * 1.5f);
             //graphics.IsFullScreen = true;
             graphics.ApplyChanges();
           
@@ -129,6 +130,7 @@ namespace AUTO_Matic
         {
             float crawlSpeed = 2f;
       
+            
             switch (MenuState)
             {
                 case MenuStates.TitleCrawl:
@@ -168,9 +170,15 @@ namespace AUTO_Matic
                         mainMenuPos = camera.Position;
                         count++;
                     }
-                   
+                    UIHelper.SetElementVisibility("MainMenu", true, UIManager.uiElements);
                     UseMouse(kb, crawlSpeed);
                     UpdateCamera(mainMenuPos, 6);
+                    UIManager.UpdateButton("MainMenu", 6);
+                    break;
+                case MenuStates.StartGame:
+
+                    UIManager.UpdateButton("StartGame", 5f);
+                    UseMouse(kb, crawlSpeed);
                     break;
                 case MenuStates.Settings:
                     UseMouse(kb, crawlSpeed);
@@ -186,7 +194,7 @@ namespace AUTO_Matic
             ms = Mouse.GetState();
            
             UIManager.UpdateTextBlock("MainMenuTitle");
-            UIHelper.SetElementVisibility("MainMenu", true, UIManager.uiElements);
+ 
 
             if ((ms.X > 0) && (ms.Y > 0) &&
                (ms.X < graphics.PreferredBackBufferWidth) &&
@@ -196,7 +204,7 @@ namespace AUTO_Matic
                     (int)(ms.Position.Y + (camera.Position.Y - (graphics.PreferredBackBufferHeight / 2)))); //Can be Moved to UIManager. Sending the mspos
                 if (ms.RightButton == ButtonState.Released)
                 {
-                    if (ms.LeftButton == ButtonState.Pressed)
+                    if (ms.LeftButton == ButtonState.Pressed && prevMs.LeftButton == ButtonState.Released)
                     {
                         foreach (UIWidget widget in UIManager.uiElements.Values)
                         {
@@ -231,6 +239,8 @@ namespace AUTO_Matic
             {
                 camera.Update(new Vector2(camera.X - crawlSpeed, camera.Y));
             }
+
+            prevMs = ms;
         }
 
         public void ChangeMenuState(MenuStates menuState)

@@ -78,6 +78,7 @@ namespace AUTO_Matic
 
                     Text = temp2;
                 }
+                
                 spriteBatch.Draw(BackGroundText,TextureRect, color: Color.White);
                 spriteBatch.DrawString(spriteFont: Font, text: Text, position: new Vector2(Rect.X, Rect.Y) + TextOffset, color: TextTint,rotation: 0,origin: new Vector2(0,0), scale: Scale,SpriteEffects.None,layerDepth:0);
                
