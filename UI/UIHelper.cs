@@ -14,12 +14,13 @@ namespace AUTO_Matic
         public static Texture2D ButtonTexture;
         public static SpriteFont ButtonFont;
         public static SpriteFont CrawlFont;
+        public static SpriteFont TitleFont;
         public static Texture2D CrawlBgTxture;
         public static Rectangle Bounds;
 
-        public static UIButton CreateButton(string id, string text, int x, int y)
+        public static UIButton CreateButton(string id, string text, int x, int y)//ButtonTexture Width and Height need to change
         {
-            UIButton b = new UIButton(id, new Vector2(x, y), new Vector2(100 ,75), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
+            UIButton b = new UIButton(id, new Vector2(x, y), new Vector2(200 ,75), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
             b.Disabled = false;
             return b;
         }
@@ -30,6 +31,9 @@ namespace AUTO_Matic
                 case "TitleCrawl":
                     UITextBlock a = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, CrawlFont, text, Color.White, CrawlBgTxture);
                     return a;
+                case "SettingsMenuTitle":
+                    UITextBlock c = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, text, Color.White, CrawlBgTxture);
+                    return c;
                 default:
                     UITextBlock b = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, CrawlFont, text, Color.White, CrawlBgTxture);
                     return b;
@@ -97,6 +101,20 @@ namespace AUTO_Matic
                 return ((UITextBlock)uiElement).TextureRect;
             else
                 return Rectangle.Empty;
+        }
+
+        public static Rectangle GetRectangle(UIWidget uiElement)
+        {
+            if (uiElement is UIButton)
+                return ((UIButton)uiElement).Bounds;
+            else
+                return Rectangle.Empty;
+        }
+
+        public static void SetRectangle(UIWidget uiElement, int width, int height)
+        {
+            if (uiElement is UIButton)
+                ((UIButton)uiElement).SetBounds(width, height);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace AUTO_Matic
         enum GameStates { TitleScreen, Game, Exit }
         GameStates GameState = GameStates.TitleScreen;
 
-        enum MenuStates { TitleCrawl, MainMenu, Settings, StartGame}
+        public enum MenuStates { TitleCrawl, MainMenu, Settings, StartGame}
         MenuStates MenuState = MenuStates.TitleCrawl;
         bool startCrawl = false;
 
@@ -33,6 +33,7 @@ namespace AUTO_Matic
         MouseState ms;
         MouseState prevMs;
         Vector2 mousePos = Vector2.Zero;
+        int count = 0;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -48,7 +49,10 @@ namespace AUTO_Matic
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            //graphics.PreferredBackBufferWidth = (int)(graphics.PreferredBackBufferWidth * 1.5f);
+            //graphics.IsFullScreen = true;
+            graphics.ApplyChanges();
+          
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth/2, graphics.PreferredBackBufferHeight/2));
 
             ms = Mouse.GetState();
@@ -64,6 +68,8 @@ namespace AUTO_Matic
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            UIHelper.TitleFont = Content.Load<SpriteFont>(@"Fonts\TitleFont");
+
             UIHelper.ButtonTexture = Content.Load<Texture2D>(@"Textures\Button");
             UIHelper.ButtonFont = Content.Load<SpriteFont>(@"Fonts\CrawlFont");
             UIHelper.CrawlBgTxture = Content.Load<Texture2D>(@"Textures\TitleCrawlBG");
@@ -72,6 +78,9 @@ namespace AUTO_Matic
             UIManager.CreateUIElements(new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), this);
             UIHelper.SetElementVisibility("TitleCrawl", true, UIManager.uiElements);
             UIHelper.SetElementVisibility("MainMenuTitle", true, UIManager.uiElements);
+
+            UIHelper.SetElementVisibility("SettingsMenuTitle", true, UIManager.uiElements);
+            
            // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
 
 
@@ -154,51 +163,100 @@ namespace AUTO_Matic
                    }
                     break;
                 case MenuStates.MainMenu:
-                    this.IsMouseVisible = true;
-                    ms = Mouse.GetState();
-                   
-                    UIManager.UpdateTextBlock("MainMenuTitle");
-                    UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
-                    UIHelper.SetElementVisibility("PlayButton", true, UIManager.uiElements);
-
-                    if ((ms.X > 0) && (ms.Y > 0) &&
-                       (ms.X < graphics.PreferredBackBufferWidth) &&
-                       (ms.Y < graphics.PreferredBackBufferHeight))
+                    if(count == 0)
                     {
-                        mousePos = new Vector2((int)(ms.Position.X + (camera.Position.X - (graphics.PreferredBackBufferWidth / 2))), (int)(ms.Position.Y + (camera.Position.Y - (graphics.PreferredBackBufferHeight/2))));
-                        if (ms.RightButton == ButtonState.Released)
-                        {
-                            if (ms.LeftButton == ButtonState.Pressed)
-                            {
-                                foreach (UIWidget widget in UIManager.uiElements.Values)
-                                {
-                                    if (widget is UIButton)
-                                    {
-                                        ((UIButton)widget).HitTest(
-                                        new Point(ms.X, (int)mousePos.Y));
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                foreach (UIWidget widget in UIManager.uiElements.Values)
-                                {
-                                    if (widget is UIButton)
-                                    {
-                                        ((UIButton)widget).Pressed = false;
-                                    }
-                                }
-                            }
-                        }
+                        mainMenuPos = camera.Position;
+                        count++;
                     }
-                    else
-                        mousePos = Vector2.Zero;
-                  
-
+                   
+                    UseMouse(kb, crawlSpeed);
+                    UpdateCamera(mainMenuPos, 6);
+                    break;
+                case MenuStates.Settings:
+                    UseMouse(kb, crawlSpeed);
+                    UpdateCamera(new Vector2(graphics.PreferredBackBufferWidth * 2, camera.Y), 6);
+                    UIHelper.SetElementVisibility("Settings", true, UIManager.uiElements);
                     break;
             }
         }
 
+        private void UseMouse(KeyboardState kb, float crawlSpeed)
+        {
+            this.IsMouseVisible = true;
+            ms = Mouse.GetState();
+           
+            UIManager.UpdateTextBlock("MainMenuTitle");
+            UIHelper.SetElementVisibility("MainMenu", true, UIManager.uiElements);
+
+            if ((ms.X > 0) && (ms.Y > 0) &&
+               (ms.X < graphics.PreferredBackBufferWidth) &&
+               (ms.Y < graphics.PreferredBackBufferHeight))
+            {
+                mousePos = new Vector2((int)(ms.Position.X + (camera.Position.X - (graphics.PreferredBackBufferWidth / 2))),
+                    (int)(ms.Position.Y + (camera.Position.Y - (graphics.PreferredBackBufferHeight / 2)))); //Can be Moved to UIManager. Sending the mspos
+                if (ms.RightButton == ButtonState.Released)
+                {
+                    if (ms.LeftButton == ButtonState.Pressed)
+                    {
+                        foreach (UIWidget widget in UIManager.uiElements.Values)
+                        {
+                            if (widget is UIButton)
+                            {
+                                ((UIButton)widget).HitTest(
+                                new Point((int)mousePos.X, (int)mousePos.Y));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (UIWidget widget in UIManager.uiElements.Values)
+                        {
+                            if (widget is UIButton)
+                            {
+                                ((UIButton)widget).Pressed = false;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+                mousePos = Vector2.Zero;
+
+            if (kb.IsKeyDown(Keys.Right))
+            {
+                camera.Update(new Vector2(camera.X + crawlSpeed, camera.Y));
+            }
+
+            if (kb.IsKeyDown(Keys.Left))
+            {
+                camera.Update(new Vector2(camera.X - crawlSpeed, camera.Y));
+            }
+        }
+
+        public void ChangeMenuState(MenuStates menuState)
+        {
+            MenuState = menuState;
+        }
+
+        void UpdateCamera(Vector2 pos, float moveSpeed)
+        {
+            if(camera.X < pos.X)
+            {
+                camera.Update(new Vector2(camera.X + moveSpeed, camera.Y));
+            }
+            if(camera.X > pos.X)
+            {
+                camera.Update(new Vector2(camera.X - moveSpeed, camera.Y));
+            }
+            if(camera.Y > pos.Y)
+            {
+                camera.Update(new Vector2(camera.X , camera.Y - moveSpeed));
+            }
+            if(camera.Y < pos.Y)
+            {
+                camera.Update(new Vector2(camera.X, camera.Y + moveSpeed));
+            }
+        }
 
         void TitleCrawl(float crawlSpeed)
         {

@@ -34,12 +34,17 @@ namespace AUTO_Matic
             (int)position.Y,
             (int)RectBounds.X,
             (int)RectBounds.Y);
-            TextOffset = new Vector2(RectBounds.X / 2 + 35, (RectBounds.Y / 2) - 10);
+            TextOffset = new Vector2((RectBounds.X / 2) - 15, (RectBounds.Y / 2) - 10);
             Font = font;
             Text = text;
             txtColor = textTint;
         }
         #endregion
+
+        public void SetBounds(int width, int height)
+        {
+            this.Bounds = new Rectangle((int)Bounds.X, (int)Bounds.Y, width, height);
+        }
 
         #region Helper Methods
         public bool Contains(Point location)
@@ -71,6 +76,7 @@ namespace AUTO_Matic
         }
         #endregion
 
+
         #region Draw
         public override void Draw(SpriteBatch spriteBatch)
         {
@@ -82,7 +88,7 @@ namespace AUTO_Matic
                 if (Pressed)
                     drawBase = new Point(0, Bounds.Height * 2);//Make the pressed image
               
-                spriteBatch.Draw(Texture, Position, new Rectangle(0, 0, Bounds.Width * 2, Bounds.Height), Color.White);
+                spriteBatch.Draw(Texture, Position, new Rectangle(0, 0, Bounds.Width, Bounds.Height), Color.White);
                 spriteBatch.DrawString(Font, Text, Position + TextOffset, Color.Black);
 
             }
