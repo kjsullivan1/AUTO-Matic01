@@ -50,7 +50,7 @@ namespace AUTO_Matic
         {
             // TODO: Add your initialization logic here
             graphics.PreferredBackBufferWidth = (int)(graphics.PreferredBackBufferWidth * 1.5f);
-            //graphics.PreferredBackBufferHeight = (int)(graphics.PreferredBackBufferHeight * 1.5f);
+            graphics.PreferredBackBufferHeight = (int)(graphics.PreferredBackBufferHeight * 1.5f);
             //graphics.IsFullScreen = true;
             graphics.ApplyChanges();
           
@@ -145,7 +145,7 @@ namespace AUTO_Matic
                         TitleCrawl(crawlSpeed);
                         if(kb.IsKeyDown(Keys.G) && prevKB.IsKeyUp(Keys.G))
                         {
-                            camera.Update(new Vector2(camera.X, 1000 + crawlSpeed));
+                            camera.Update(new Vector2(camera.X, (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2))));
                             UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
                             MenuState = MenuStates.MainMenu;
                             startCrawl = false;
@@ -153,14 +153,16 @@ namespace AUTO_Matic
                         }
                    }
 
-                   if(camera.Y > 1000 && startCrawl)
+                   
+                   if(camera.Y >= (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight/2)) && startCrawl)
                    {
                         MenuState = MenuStates.MainMenu;
-                        screenCenter.X = this.Window.ClientBounds.Width / 2;
-                        screenCenter.Y = this.Window.ClientBounds.Height / 2;
+                        //screenCenter.X = this.Window.ClientBounds.Width / 2;
+                        //screenCenter.Y = this.Window.ClientBounds.Height / 2;
                        
                         UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
                         mainMenuPos = camera.Position;
+                        mainMenuPos.Y = (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2));
                         //break;
                    }
                     break;
