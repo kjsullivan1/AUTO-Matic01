@@ -39,7 +39,7 @@ namespace AUTO_Matic
                     UIHelper.SetElementVisibility("MainMenuPlay", false, uiElements);
                     UIHelper.SetElementVisibility("MainMenuExit", false, uiElements);
                     UIHelper.SetElementVisibility("MainMenuSetting", false, uiElements);
-                    UIHelper.SetButtonState("MainMenuSetting", true, uiElements);
+                    UIHelper.SetButtonState("MainMenu", true, uiElements);
                     
                     break;
                 case "MainMenuSetting":
@@ -55,7 +55,7 @@ namespace AUTO_Matic
                     UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
                     UIHelper.SetElementVisibility("LoadGame", false, uiElements);
                     UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
-                    UIHelper.SetButtonState("MainMenuSetting", false, uiElements);
+                    UIHelper.SetButtonState("MainMenu", false, uiElements);
                     UIHelper.SetButtonState("StartGameReturn", true, uiElements);
                     break;
                 //case "Left":
