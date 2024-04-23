@@ -116,5 +116,11 @@ namespace AUTO_Matic
             if (uiElement is UIButton)
                 ((UIButton)uiElement).SetBounds(width, height);
         }
+
+        public static void SetRectangle(UIWidget uiElement, Rectangle rectangle)
+        {
+            if (uiElement is UIButton)
+                ((UIButton)uiElement).Bounds = rectangle;
+        }
     }
 }

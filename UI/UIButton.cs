@@ -13,7 +13,7 @@ namespace AUTO_Matic
         public Texture2D Texture { get; set; }
         public bool Disabled { get; set; }
         public bool Pressed { get; set; }
-        public Rectangle Bounds { get; private set; }
+        public Rectangle Bounds { get; set; }
 
         public Vector2 TextOffset { get; set; }
         public SpriteFont Font { get; set; }

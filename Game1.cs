@@ -17,8 +17,11 @@ namespace AUTO_Matic
 
         UIManager UIManager = new UIManager();
 
-        enum GameStates { TitleScreen, Game, Exit }
-        GameStates GameState = GameStates.TitleScreen;
+        public enum GameScene { TitleScreen, Game, Exit }
+        public GameScene currScene = GameScene.TitleScreen;
+
+        public enum GameStates { SideScroll, TopDown, Paused}
+        public GameStates GameState = GameStates.SideScroll;
 
         public enum MenuStates { TitleCrawl, MainMenu, Settings, StartGame}
         public MenuStates MenuState = MenuStates.TitleCrawl;
@@ -97,6 +100,13 @@ namespace AUTO_Matic
             // TODO: Unload any non ContentManager content here
         }
 
+        public void StartNewGame()
+        {
+            camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2));
+            this.IsMouseVisible = false;
+        }
+
+
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -109,12 +119,20 @@ namespace AUTO_Matic
 
             KeyboardState kb = Keyboard.GetState();
 
-            switch(GameState)
+            switch(currScene)
             {
-                case GameStates.TitleScreen:
+                case GameScene.TitleScreen:
                     Menus(kb);
                     break;
-                case GameStates.Game:
+                case GameScene.Game:
+
+                    switch(GameState)
+                    {
+                        case GameStates.SideScroll:
+
+                            break;
+                    }
+
                     break;
 
             }
@@ -126,11 +144,30 @@ namespace AUTO_Matic
             base.Update(gameTime);
         }
 
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            //Window.Title = camera.Position.ToString() + "   MousePos: " + mousePos.ToString();
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
+
+            UIManager.Draw(spriteBatch);
+
+            spriteBatch.End();
+            // TODO: Add your drawing code here
+
+            base.Draw(gameTime);
+        }
         private void Menus(KeyboardState kb)
         {
-            float crawlSpeed = 2f;
-      
-            
+            float crawlSpeed = 3f;
+
+
             switch (MenuState)
             {
                 case MenuStates.TitleCrawl:
@@ -140,10 +177,10 @@ namespace AUTO_Matic
                         startCrawl = true;
                     }
                     UIManager.UpdateTextBlock("TitleCrawl");
-                   if(startCrawl)
-                   {
+                    if (startCrawl)
+                    {
                         TitleCrawl(crawlSpeed);
-                        if(kb.IsKeyDown(Keys.G) && prevKB.IsKeyUp(Keys.G))
+                        if (kb.IsKeyDown(Keys.G) && prevKB.IsKeyUp(Keys.G))
                         {
                             camera.Update(new Vector2(camera.X, (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2))));
                             UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
@@ -151,23 +188,23 @@ namespace AUTO_Matic
                             startCrawl = false;
                             prevKB = kb;
                         }
-                   }
+                    }
 
-                   
-                   if(camera.Y >= (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight/2)) && startCrawl)
-                   {
+
+                    if (camera.Y >= (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2)) && startCrawl)
+                    {
                         MenuState = MenuStates.MainMenu;
                         //screenCenter.X = this.Window.ClientBounds.Width / 2;
                         //screenCenter.Y = this.Window.ClientBounds.Height / 2;
-                       
+
                         UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
                         mainMenuPos = camera.Position;
                         mainMenuPos.Y = (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2));
                         //break;
-                   }
+                    }
                     break;
                 case MenuStates.MainMenu:
-                    if(count == 0)
+                    if (count == 0)
                     {
                         mainMenuPos = camera.Position;
                         count++;
@@ -181,6 +218,7 @@ namespace AUTO_Matic
 
                     UIManager.UpdateButton("StartGame", 5f);
                     UseMouse(kb, crawlSpeed);
+                    UpdateCamera(mainMenuPos, 6);
                     break;
                 case MenuStates.Settings:
                     UseMouse(kb, crawlSpeed);
@@ -194,9 +232,9 @@ namespace AUTO_Matic
         {
             this.IsMouseVisible = true;
             ms = Mouse.GetState();
-           
+
             UIManager.UpdateTextBlock("MainMenuTitle");
- 
+
 
             if ((ms.X > 0) && (ms.Y > 0) &&
                (ms.X < graphics.PreferredBackBufferWidth) &&
@@ -250,21 +288,26 @@ namespace AUTO_Matic
             MenuState = menuState;
         }
 
+        public void ChangeGameState(GameScene gamestate)
+        {
+            currScene = gamestate;
+        }
+
         void UpdateCamera(Vector2 pos, float moveSpeed)
         {
-            if(camera.X < pos.X)
+            if (camera.X < pos.X)
             {
                 camera.Update(new Vector2(camera.X + moveSpeed, camera.Y));
             }
-            if(camera.X > pos.X)
+            if (camera.X > pos.X)
             {
                 camera.Update(new Vector2(camera.X - moveSpeed, camera.Y));
             }
-            if(camera.Y > pos.Y)
+            if (camera.Y > pos.Y)
             {
-                camera.Update(new Vector2(camera.X , camera.Y - moveSpeed));
+                camera.Update(new Vector2(camera.X, camera.Y - moveSpeed));
             }
-            if(camera.Y < pos.Y)
+            if (camera.Y < pos.Y)
             {
                 camera.Update(new Vector2(camera.X, camera.Y + moveSpeed));
             }
@@ -273,25 +316,6 @@ namespace AUTO_Matic
         void TitleCrawl(float crawlSpeed)
         {
             camera.Update(new Vector2(camera.X, camera.Y + crawlSpeed));
-        }
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Draw(GameTime gameTime)
-        {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            Window.Title = camera.Position.ToString() + "   MousePos: " + mousePos.ToString();
-
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
-
-            UIManager.Draw(spriteBatch);
-
-            spriteBatch.End();
-            // TODO: Add your drawing code here
-
-            base.Draw(gameTime);
         }
     }
 }

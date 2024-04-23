@@ -44,6 +44,7 @@ namespace AUTO_Matic
                     break;
                 case "MainMenuSetting":
                     game.ChangeMenuState(Game1.MenuStates.Settings);
+                    UIHelper.SetElementVisibility("Settings", true, uiElements);
                     break;
                 case "SettingsReturnBtn":
                     game.ChangeMenuState(Game1.MenuStates.MainMenu);
@@ -57,6 +58,15 @@ namespace AUTO_Matic
                     UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
                     UIHelper.SetButtonState("MainMenu", false, uiElements);
                     UIHelper.SetButtonState("StartGameReturn", true, uiElements);
+                    break;
+                case "StartNewGame":
+                    game.ChangeGameState(Game1.GameScene.Game);
+                    UIHelper.SetElementVisibility("MainMenu", false, uiElements);
+                    UIHelper.SetElementVisibility("Settings", false, uiElements);
+                    UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
+                    UIHelper.SetElementVisibility("LoadGame", false, uiElements);
+                    UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
+                    game.StartNewGame();
                     break;
                 //case "Left":
                 //    tanks[playerNumber].TurretRotation += 0.01f;
@@ -148,6 +158,12 @@ namespace AUTO_Matic
                         uiElements["StartNewGame"].SetY(uiElements["MainMenuPlay"].Position.Y);
                         uiElements["MainMenuPlay"].SetY(buttonPos.Y);
 
+                        UIHelper.SetRectangle(uiElements["StartNewGame"], new Rectangle((int)uiElements["StartNewGame"].Position.X, (int)uiElements["StartNewGame"].Position.Y,
+                            UIHelper.GetRectangle(uiElements["StartNewGame"]).Width, UIHelper.GetRectangle(uiElements["StartNewGame"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["MainMenuPlay"], new Rectangle((int)uiElements["MainMenuPlay"].Position.X, (int)uiElements["MainMenuPlay"].Position.Y,
+                           UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
+
                     }
 
                     if (uiElements["LoadGame"].Position.Y > uiElements["MainMenuExit"].Position.Y)
@@ -158,6 +174,12 @@ namespace AUTO_Matic
                     {
                         uiElements["LoadGame"].SetY(uiElements["MainMenuExit"].Position.Y);
                         uiElements["MainMenuExit"].SetY(buttonPos2.Y);
+
+                        UIHelper.SetRectangle(uiElements["LoadGame"], new Rectangle((int)uiElements["LoadGame"].Position.X, (int)uiElements["LoadGame"].Position.Y,
+                           UIHelper.GetRectangle(uiElements["LoadGame"]).Width, UIHelper.GetRectangle(uiElements["LoadGame"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["MainMenuExit"], new Rectangle((int)uiElements["MainMenuExit"].Position.X, (int)uiElements["MainMenuExit"].Position.Y,
+                          UIHelper.GetRectangle(uiElements["MainMenuExit"]).Width, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Height));
                     }
                     break;
                 case "MainMenu":
@@ -169,6 +191,12 @@ namespace AUTO_Matic
                     {
                         uiElements["MainMenuPlay"].SetY(uiElements["StartNewGame"].Position.Y);
                         uiElements["StartNewGame"].SetY(buttonPos.Y);
+
+                        UIHelper.SetRectangle(uiElements["StartNewGame"], new Rectangle((int)uiElements["StartNewGame"].Position.X, (int)uiElements["StartNewGame"].Position.Y,
+                          UIHelper.GetRectangle(uiElements["StartNewGame"]).Width, UIHelper.GetRectangle(uiElements["StartNewGame"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["MainMenuPlay"], new Rectangle((int)uiElements["MainMenuPlay"].Position.X, (int)uiElements["MainMenuPlay"].Position.Y,
+                           UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
                     }
 
                     if (uiElements["MainMenuExit"].Position.Y > uiElements["LoadGame"].Position.Y)
@@ -179,6 +207,12 @@ namespace AUTO_Matic
                     {
                         uiElements["MainMenuExit"].SetY(uiElements["LoadGame"].Position.Y);
                         uiElements["LoadGame"].SetY(buttonPos2.Y);
+
+                        UIHelper.SetRectangle(uiElements["LoadGame"], new Rectangle((int)uiElements["LoadGame"].Position.X, (int)uiElements["LoadGame"].Position.Y,
+                           UIHelper.GetRectangle(uiElements["LoadGame"]).Width, UIHelper.GetRectangle(uiElements["LoadGame"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["MainMenuExit"], new Rectangle((int)uiElements["MainMenuExit"].Position.X, (int)uiElements["MainMenuExit"].Position.Y,
+                          UIHelper.GetRectangle(uiElements["MainMenuExit"]).Width, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Height));
                     }
                     break;
             }
@@ -226,7 +260,7 @@ namespace AUTO_Matic
             UIHelper.SetElementBGRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(525, 350)));
 
             //Return Button
-            uiElements.Add("SettingsReturnBtn", UIHelper.CreateButton("SettingsReturnBtn", "", UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Right - 65,
+            uiElements.Add("SettingsReturnBtn", UIHelper.CreateButton("SettingsReturnBtn", "", UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Right - 65, //50+15
                 UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Bottom - 65));
             UIHelper.SetRectangle(uiElements["SettingsReturnBtn"], 50, 50);
 
