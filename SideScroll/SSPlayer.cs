@@ -97,9 +97,11 @@ namespace AUTO_Matic.SideScroll
         #endregion
         
         #region Dashing
-        public float dashForceX = 16f;
+        public float dashForceX = 100f;
         public float dashForceY = 0f;
         public bool canDash = true;
+        float dashDistance = 3; //number of tiles that they can dash.
+        Vector2 startDashPos = Vector2.Zero;
         //public bool isDashing = false;
         float dashCoolDown = 0;
         float dashCoolDownMax = 3;
@@ -119,41 +121,35 @@ namespace AUTO_Matic.SideScroll
             {
                 Vector2 pos = velocity;
 
-                if (pos.X > maxRunSpeed && !isFalling && prevPlayerState != PlayerStates.Dashing)
+                if (pos.X > maxRunSpeed && !isFalling && playerState != PlayerStates.Dashing)
                 {
                     pos = new Vector2(maxRunSpeed, pos.Y);
                 }
-                if (pos.X > maxDashAirSpeed && prevPlayerState == PlayerStates.Dashing && isFalling)
+                if (pos.X > maxDashAirSpeed && playerState == PlayerStates.Dashing && isFalling)
                 {
                     pos = new Vector2(maxDashAirSpeed, pos.Y);
 
                 }
-                if (pos.X > maxDashSpeed && prevPlayerState == PlayerStates.Dashing && !isFalling)
+                if (pos.X > maxDashSpeed && playerState == PlayerStates.Dashing && !isFalling)
                 {
                     pos = new Vector2(maxDashSpeed, pos.Y);
                 }
-                if (pos.X < maxRunSpeed && prevPlayerState == PlayerStates.Dashing && pos.X > 0)
-                {
-                    //pos = new Vector2(maxDashSpeed, pos.Y); isdasing = false was here 
-                }
+             
 
-                if (pos.X < -maxRunSpeed && !isFalling && prevPlayerState != PlayerStates.Dashing)
+                if (pos.X < -maxRunSpeed && !isFalling && playerState != PlayerStates.Dashing)
                 {
                     pos = new Vector2(-maxRunSpeed, pos.Y);
                 }
-                if (pos.X < -maxDashSpeed && prevPlayerState == PlayerStates.Dashing && !isFalling)
+                if (pos.X < -maxDashSpeed && playerState == PlayerStates.Dashing && !isFalling)
                 {
                     pos = new Vector2(-maxDashSpeed, pos.Y);
                     //isDashing = false;
                 }
-                if (pos.X < -maxDashAirSpeed && prevPlayerState == PlayerStates.Dashing && isFalling)
+                if (pos.X < -maxDashAirSpeed && playerState == PlayerStates.Dashing && isFalling)
                 {
                     pos = new Vector2(-maxDashAirSpeed, pos.Y);
                 }
-                if (pos.X > -maxRunSpeed && prevPlayerState == PlayerStates.Dashing && pos.X < 0)
-                {
-                    //pos = new Vector2(-maxDashAirSpeed, pos.Y);
-                }
+       
 
 
                 if (pos.Y > terminalVel && isFalling)
@@ -173,7 +169,7 @@ namespace AUTO_Matic.SideScroll
         #region Helpers
         public Vector2 Position
         {
-            get { return position; }
+            get { return new Vector2(playerRect.X, playerRect.Y); }
             set { position = value; }
         }
         public Rectangle Rectangle
@@ -295,15 +291,13 @@ namespace AUTO_Matic.SideScroll
             ChangeAnimation();
             iMoveSpeed = moveSpeed;
             iShootDelay = shootDelay;
+            dashDistance *= pixelSize;
 
         }
 
         public void Update(GameTime gameTime, Vector2 gravity)
         {
-            if (!isColliding)
-            {
-                Input();
-            }
+           
 
             if(Velocity == Vector2.Zero && !isFalling)
             {
@@ -335,7 +329,8 @@ namespace AUTO_Matic.SideScroll
             {
                 #region Movement
                 case PlayerStates.Movement:
-                    if(prevPlayerState == PlayerStates.Dashing)
+                    Input();
+                    if (prevPlayerState == PlayerStates.Dashing)
                     {
                         //Slow down over time instead of instant set to run speed
                     }
@@ -377,11 +372,31 @@ namespace AUTO_Matic.SideScroll
                     gravity.Y = 0;
                     canDash = false;
 
-                    if(Velocity.X == maxDashSpeed && !isFalling)
+                    if(MathHelper.Distance(startDashPos.X, Position.X) >= dashDistance)
                     {
                         prevPlayerState = playerState;
                         playerState = PlayerStates.Movement;
                     }
+                    //if (Velocity.X >= maxDashAirSpeed && isFalling && Velocity.X > 0)
+                    //{
+                    //    prevPlayerState = playerState;
+                    //    playerState = PlayerStates.Movement;
+                    //}
+                    //else if (Velocity.X <= -maxDashAirSpeed && isFalling && Velocity.X < 0)
+                    //{
+                    //    prevPlayerState = playerState;
+                    //    playerState = PlayerStates.Movement;
+                    //}
+                    //if (Velocity.X >= maxDashSpeed && !isFalling && Velocity.X > 0)
+                    //{
+                    //    prevPlayerState = playerState;
+                    //    playerState = PlayerStates.Movement;
+                    //}
+                    //else if (Velocity.X <= -maxDashSpeed && isFalling && Velocity.X < 0)
+                    //{
+                    //    prevPlayerState = playerState;
+                    //    playerState = PlayerStates.Movement;
+                    //}
                     break;
                 #endregion
 
@@ -495,6 +510,8 @@ namespace AUTO_Matic.SideScroll
                             {
                                 accel = force / mass;
                             }
+
+                            startDashPos = Position;
                         }
 
                         if(kb.IsKeyDown(Keys.Space) && canJump && !isFalling)
@@ -574,6 +591,8 @@ namespace AUTO_Matic.SideScroll
 
                             velocity = new Vector2(DashForce.X, -DashForce.Y);
                             position.Y -= 1f;
+
+                            startDashPos = Position;
                         }
 
                         if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling)
@@ -653,6 +672,8 @@ namespace AUTO_Matic.SideScroll
                             velocity = new Vector2(-(DashForce.X), -DashForce.Y);
 
                             position.Y -= 1f;
+
+                            startDashPos = Position;
                         }
 
                         if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling)
@@ -782,9 +803,9 @@ namespace AUTO_Matic.SideScroll
                                 velocity = new Vector2(-(DashForce.X), -DashForce.Y);
                             }
 
-
-                            if (DashForce.Y != 0)
                                 position.Y -= 1f;
+
+                            startDashPos = Position;
                             //if (prevVel != Velocity)
                             //{
                             //    accel = force / mass;
