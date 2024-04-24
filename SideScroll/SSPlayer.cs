@@ -37,7 +37,7 @@ namespace AUTO_Matic.SideScroll
 
         float moveSpeed = .35f;
         float iMoveSpeed;
-        float fallMoveSpeed = .25f;
+        float fallMoveSpeed = .15f;
 
 
         float mass = 20.0f;
@@ -47,7 +47,7 @@ namespace AUTO_Matic.SideScroll
         float coeFric = 0;
         public float changeInTime = 0;
 
-        float maxRunSpeed = 6f;
+        float maxRunSpeed = 5f;
         float terminalVel = 12f;
         float maxJumpSpeed = 8f;
         float maxDashSpeed = 22.5f;
@@ -70,7 +70,7 @@ namespace AUTO_Matic.SideScroll
         float jumpForce = 18f;
         float iJumpF;
         int jumpDelay = 0;
-        int maxJumpDelay = 8;
+        int maxJumpDelay = 5;
         bool canJump = false;
         public float JumpForce
         {
@@ -119,38 +119,38 @@ namespace AUTO_Matic.SideScroll
             {
                 Vector2 pos = velocity;
 
-                if (pos.X > maxRunSpeed && !isFalling && animState != AnimationStates.Dash)
+                if (pos.X > maxRunSpeed && !isFalling && prevPlayerState != PlayerStates.Dashing)
                 {
                     pos = new Vector2(maxRunSpeed, pos.Y);
                 }
-                if (pos.X > maxDashAirSpeed && animState == AnimationStates.Dash && isFalling)
+                if (pos.X > maxDashAirSpeed && prevPlayerState == PlayerStates.Dashing && isFalling)
                 {
                     pos = new Vector2(maxDashAirSpeed, pos.Y);
 
                 }
-                if (pos.X > maxDashSpeed && animState == AnimationStates.Dash && !isFalling)
+                if (pos.X > maxDashSpeed && prevPlayerState == PlayerStates.Dashing && !isFalling)
                 {
                     pos = new Vector2(maxDashSpeed, pos.Y);
                 }
-                if (pos.X < maxRunSpeed && animState == AnimationStates.Dash && pos.X > 0)
+                if (pos.X < maxRunSpeed && prevPlayerState == PlayerStates.Dashing && pos.X > 0)
                 {
                     //pos = new Vector2(maxDashSpeed, pos.Y); isdasing = false was here 
                 }
 
-                if (pos.X < -maxRunSpeed && !isFalling && animState != AnimationStates.Dash)
+                if (pos.X < -maxRunSpeed && !isFalling && prevPlayerState != PlayerStates.Dashing)
                 {
                     pos = new Vector2(-maxRunSpeed, pos.Y);
                 }
-                if (pos.X < -maxDashSpeed && animState == AnimationStates.Dash && !isFalling)
+                if (pos.X < -maxDashSpeed && prevPlayerState == PlayerStates.Dashing && !isFalling)
                 {
                     pos = new Vector2(-maxDashSpeed, pos.Y);
                     //isDashing = false;
                 }
-                if (pos.X < -maxDashAirSpeed && animState == AnimationStates.Dash && isFalling)
+                if (pos.X < -maxDashAirSpeed && prevPlayerState == PlayerStates.Dashing && isFalling)
                 {
                     pos = new Vector2(-maxDashAirSpeed, pos.Y);
                 }
-                if (pos.X > -maxRunSpeed && animState == AnimationStates.Dash && pos.X < 0)
+                if (pos.X > -maxRunSpeed && prevPlayerState == PlayerStates.Dashing && pos.X < 0)
                 {
                     //pos = new Vector2(-maxDashAirSpeed, pos.Y);
                 }
@@ -283,6 +283,7 @@ namespace AUTO_Matic.SideScroll
             animManager.isDown = isDown;
         }
         #endregion
+
         public void Load(ContentManager Content, Rectangle bounds, float friction)
         {
             content = Content;
@@ -332,6 +333,7 @@ namespace AUTO_Matic.SideScroll
 
             switch (playerState)
             {
+                #region Movement
                 case PlayerStates.Movement:
                     if(prevPlayerState == PlayerStates.Dashing)
                     {
@@ -368,6 +370,9 @@ namespace AUTO_Matic.SideScroll
 
                   
                     break;
+                #endregion
+
+                #region Dashing
                 case PlayerStates.Dashing:
                     gravity.Y = 0;
                     canDash = false;
@@ -378,6 +383,9 @@ namespace AUTO_Matic.SideScroll
                         playerState = PlayerStates.Movement;
                     }
                     break;
+                #endregion
+
+                #region Jumping
                 case PlayerStates.Jumping:
                     if(Velocity.Y <= 0)
                     {
@@ -401,9 +409,10 @@ namespace AUTO_Matic.SideScroll
 
                     }
                     break;
+                    #endregion
             }
 
-           
+
 
             position += Velocity;
             animManager.Update(gameTime, position);
@@ -473,11 +482,11 @@ namespace AUTO_Matic.SideScroll
                             prevKb = kb;
                             if (right)
                             {
-                                velocity = new Vector2(DashForce.X + force, -DashForce.Y);
+                                velocity = new Vector2(DashForce.X, -DashForce.Y);
                             }
                             else
                             {
-                                velocity = new Vector2(-(DashForce.X + force), -DashForce.Y);
+                                velocity = new Vector2(-(DashForce.X), -DashForce.Y);
                             }
 
 
@@ -563,11 +572,11 @@ namespace AUTO_Matic.SideScroll
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
 
-                            velocity = new Vector2(DashForce.X + force, -DashForce.Y);
+                            velocity = new Vector2(DashForce.X, -DashForce.Y);
                             position.Y -= 1f;
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump)
+                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -641,12 +650,12 @@ namespace AUTO_Matic.SideScroll
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
 
-                            velocity = new Vector2(-(DashForce.X + force), -DashForce.Y);
+                            velocity = new Vector2(-(DashForce.X), -DashForce.Y);
 
                             position.Y -= 1f;
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump)
+                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -740,6 +749,25 @@ namespace AUTO_Matic.SideScroll
 
                             }
                         }
+
+                        if(isFalling)
+                        {
+                            if(velocity.X > 0)
+                            {
+                                velocity.X -= 1.5f;
+                                if (velocity.X < 0)
+                                    velocity.X = 0;
+                            }
+                            else if (velocity.X < 0)
+                            {
+                                velocity.X += 1.5f;
+                                if (velocity.X > 0)
+                                    velocity.X = 0;
+                            }
+
+
+                        }
+
                         if ((kb.IsKeyDown(Keys.LeftShift)) && canDash)
                         {
 
@@ -751,7 +779,7 @@ namespace AUTO_Matic.SideScroll
                             }
                             else
                             {
-                                velocity = new Vector2(-DashForce.X, -DashForce.Y);
+                                velocity = new Vector2(-(DashForce.X), -DashForce.Y);
                             }
 
 
@@ -764,7 +792,7 @@ namespace AUTO_Matic.SideScroll
 
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump)
+                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -820,6 +848,7 @@ namespace AUTO_Matic.SideScroll
                     ChangeAnimation();
                     //maxVelocity.X = 6;
                     prevKb = Keyboard.GetState();
+                    isColliding = false;
                 }
                 else if (playerState == PlayerStates.Jumping)
                 {
@@ -855,7 +884,7 @@ namespace AUTO_Matic.SideScroll
                 //position.Y += -(velocity.Y);
 
 
-                isColliding = true;
+                //isColliding = true;
                 blockBottom = true;
 
 
