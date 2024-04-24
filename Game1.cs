@@ -46,6 +46,7 @@ namespace AUTO_Matic
         Vector2 Gravity
         {
             get { return new Vector2(gravityX, gravityY); }
+
         }
 
         public int mapWidth = 25;

@@ -297,9 +297,9 @@ namespace AUTO_Matic.SideScroll
 
         public void Update(GameTime gameTime, Vector2 gravity)
         {
-           
 
-            if(Velocity == Vector2.Zero && !isFalling)
+            Input();
+            if (Velocity == Vector2.Zero && !isFalling)
             {
                 if (animState != AnimationStates.Idle)
                 {
@@ -329,7 +329,7 @@ namespace AUTO_Matic.SideScroll
             {
                 #region Movement
                 case PlayerStates.Movement:
-                    Input();
+                   
                     if (prevPlayerState == PlayerStates.Dashing)
                     {
                         //Slow down over time instead of instant set to run speed
