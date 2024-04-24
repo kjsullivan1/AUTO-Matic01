@@ -35,7 +35,7 @@ namespace AUTO_Matic.SideScroll
         KeyboardState prevKb;
         public bool blockBottom = false;
 
-        float moveSpeed = .35f;
+        float moveSpeed = .45f;
         float iMoveSpeed;
         float fallMoveSpeed = .15f;
 
@@ -47,7 +47,7 @@ namespace AUTO_Matic.SideScroll
         float coeFric = 0;
         public float changeInTime = 0;
 
-        float maxRunSpeed = 5f;
+        float maxRunSpeed = 5.5f;
         float terminalVel = 12f;
         float maxJumpSpeed = 8f;
         float maxDashSpeed = 22.5f;
@@ -897,13 +897,13 @@ namespace AUTO_Matic.SideScroll
                 {
                     while (playerRect.Right > newRect.Left)
                     {
-                        position.X -= .01f;
-                        playerRect.X = (int)position.X;
+                        playerRect.X -= 1;
                     }
-                    if (velocity.X >= 0)
+                    if (velocity.X > 0)
                     {
+                        position.X += -velocity.X;
                         velocity.X = 0;
-                        position.X += -moveSpeed;
+                       
                     }
                     isColliding = true;
                 }
@@ -911,13 +911,13 @@ namespace AUTO_Matic.SideScroll
                 {
                     while (playerRect.Right > newRect.Left)
                     {
-                        position.X -= .01f;
-                        playerRect.X = (int)position.X;
+                        playerRect.X -= 1;
                     }
-                    if (velocity.X >= 0)
+                    if (velocity.X > 0)
                     {
+                        position.X += -velocity.X;
                         velocity.X = 0;
-                        position.X += -moveSpeed * 2;
+                        
                     }
                     //position.X += -velocity.X;
                     //velocity.X = -2;
@@ -931,26 +931,28 @@ namespace AUTO_Matic.SideScroll
                 {
                     while (playerRect.Left < newRect.Right)
                     {
-                        position.X += .01f;
-                        playerRect.X = (int)position.X;
+
+                        playerRect.X += 1;
                     }
                     if (velocity.X < 0)
                     {
+                        position.X += -velocity.X;
                         velocity.X = 0;
-                        position.X += moveSpeed;
+                        
                     }
                 }
                 else
                 {
                     while (playerRect.Left < newRect.Right)
                     {
-                        position.X += .01f;
-                        playerRect.X = (int)position.X;
+                        playerRect.X += 1;
+                        //playerRect.X = (int)position.X;
                     }
-                    if (velocity.X <= 0)
+                    if (velocity.X < 0)
                     {
+                        position.X += -velocity.X;
                         velocity.X = 0;
-                        position.X += .1f;
+                        
                     }
                     //position.X += -velocity.X;
                     //velocity.X = +2;
@@ -1000,7 +1002,7 @@ namespace AUTO_Matic.SideScroll
             {
                 playerRect = new Rectangle((int)(position.X + collisionOffsetX), (int)position.Y, pixelSize / 2, pixelSize);
             }
-    
+
 
 
         }
