@@ -71,8 +71,9 @@
     <Content Include="Content\SideScroll\Animations\PlayerIdle.png" />
     <Content Include="Content\SideScroll\Animations\PlayerJump.png" />
     <Content Include="Content\SideScroll\Animations\PlayerWalk.png" />
-    <Content Include="Content\TextFiles\TitleCrawl.txt" />
     <Content Include="Icon.ico" />
+    <Content Include="TextFiles\MainMenuTitle.txt" />
+    <Content Include="TextFiles\TitleCrawl.txt" />
   </ItemGroup>
   <ItemGroup>
     <MonoGameContentReference Include="Content\Content.mgcb" />
