@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using AUTO_Matic.SideScroll;
 
 namespace AUTO_Matic
 {
@@ -37,6 +38,22 @@ namespace AUTO_Matic
         MouseState prevMs;
         Vector2 mousePos = Vector2.Zero;
         int count = 0;
+
+        #region Side-Scroll
+        SSPlayer ssPlayer;
+        float gravityX = .25f;
+        float gravityY = 1f;
+        Vector2 Gravity
+        {
+            get { return new Vector2(gravityX, gravityY); }
+        }
+
+        public int mapWidth = 25;
+        public int mapHeight = 12;
+        int[,] currMap = new int[20, 35];
+        float friction = .85f;
+        #endregion
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -52,12 +69,17 @@ namespace AUTO_Matic
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            graphics.PreferredBackBufferWidth = (int)(graphics.PreferredBackBufferWidth * 1.5f);
-            graphics.PreferredBackBufferHeight = (int)(graphics.PreferredBackBufferHeight * 1.5f);
+            graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
+            graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
+
+            //graphics.HardwareModeSwitch = false;
             //graphics.IsFullScreen = true;
             graphics.ApplyChanges();
-          
+
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth/2, graphics.PreferredBackBufferHeight/2));
+
+            
+            ssPlayer = new SSPlayer(this, 64);
 
             ms = Mouse.GetState();
             base.Initialize();
@@ -72,6 +94,7 @@ namespace AUTO_Matic
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            #region UI Menus
             UIHelper.TitleFont = Content.Load<SpriteFont>(@"Fonts\TitleFont");
 
             UIHelper.ButtonTexture = Content.Load<Texture2D>(@"Textures\Button");
@@ -84,8 +107,10 @@ namespace AUTO_Matic
             UIHelper.SetElementVisibility("MainMenuTitle", true, UIManager.uiElements);
 
             UIHelper.SetElementVisibility("SettingsMenuTitle", true, UIManager.uiElements);
-            
-           // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
+            #endregion
+
+            //StartNewGame();
+            // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
 
 
             // TODO: use this.Content to load your game content here
@@ -104,6 +129,29 @@ namespace AUTO_Matic
         {
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2));
             this.IsMouseVisible = false;
+            Tile.Content = Content;
+            currMap = new int[mapHeight, mapWidth];
+            int[,] dims =
+            {
+                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 2, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1},
+                {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+
+            };
+
+            currMap = dims;
+            SideTileMap.Generate(currMap, 64);
+
+            ssPlayer.Load(Content, Window.ClientBounds, friction);
         }
 
 
@@ -128,8 +176,22 @@ namespace AUTO_Matic
 
                     switch(GameState)
                     {
-                        case GameStates.SideScroll:
+                        case GameStates.SideScroll: //Default
+                            if(kb.IsKeyDown(Keys.Enter))//Reset Pos
+                            {
+                                ssPlayer.Position = new Vector2(0, 0);
+                            }
+                            ssPlayer.blockBottom = false;
+                            foreach (EmptyTile tile in SideTileMap.EmptyTiles)
+                            {
+                                ssPlayer.Collision(tile.Rectangle);
+                            }
+                            if (ssPlayer.blockBottom == false && ssPlayer.playerState != SSPlayer.PlayerStates.Jumping)
+                            {
+                                ssPlayer.isFalling = true;
 
+                            }
+                            ssPlayer.Update(gameTime, Gravity);
                             break;
                     }
 
@@ -152,13 +214,29 @@ namespace AUTO_Matic
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            //Window.Title = camera.Position.ToString() + "   MousePos: " + mousePos.ToString();
+            Window.Title = camera.Position.ToString() + "   MousePos: " + mousePos.ToString();
+            switch(currScene)
+            {
+                case GameScene.TitleScreen:
+                    spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
 
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
+                    UIManager.Draw(spriteBatch);
 
-            UIManager.Draw(spriteBatch);
+                    spriteBatch.End();
+                    break;
+                case GameScene.Game:
+                    Window.Title = "Gravity: " + Gravity.Y.ToString() + "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction + "   Vel = (" + /*(int)*/ssPlayer.velocity.X + ", " + ssPlayer.velocity.Y + ")" + "   isFalling = " + ssPlayer.isFalling + "   playerState = " + ssPlayer.playerState.ToString();
+                    spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
 
-            spriteBatch.End();
+                    SideTileMap.Draw(spriteBatch);
+                    ssPlayer.Draw(spriteBatch);
+
+                    spriteBatch.End();
+                    break;
+            }
+
+
+            
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);
@@ -236,12 +314,13 @@ namespace AUTO_Matic
             UIManager.UpdateTextBlock("MainMenuTitle");
 
 
+
             if ((ms.X > 0) && (ms.Y > 0) &&
-               (ms.X < graphics.PreferredBackBufferWidth) &&
-               (ms.Y < graphics.PreferredBackBufferHeight))
+               (ms.X < camera.viewport.Width) &&
+               (ms.Y < camera.viewport.Height))
             {
-                mousePos = new Vector2((int)(ms.Position.X + (camera.Position.X - (graphics.PreferredBackBufferWidth / 2))),
-                    (int)(ms.Position.Y + (camera.Position.Y - (graphics.PreferredBackBufferHeight / 2)))); //Can be Moved to UIManager. Sending the mspos
+                mousePos = new Vector2((int)(ms.Position.X + (camera.Position.X - (camera.viewport.Width/2))),
+                    (int)(ms.Position.Y + (camera.Position.Y - (camera.viewport.Height / 2)))); //Can be Moved to UIManager. Sending the mspos
                 if (ms.RightButton == ButtonState.Released)
                 {
                     if (ms.LeftButton == ButtonState.Pressed && prevMs.LeftButton == ButtonState.Released)
@@ -250,8 +329,17 @@ namespace AUTO_Matic
                         {
                             if (widget is UIButton)
                             {
-                                ((UIButton)widget).HitTest(
+                                if(graphics.IsFullScreen)
+                                {
+                                    ((UIButton)widget).HitTest(
                                 new Point((int)mousePos.X, (int)mousePos.Y));
+                                }
+                                else
+                                {
+                                    ((UIButton)widget).HitTest(
+                                new Point((int)mousePos.X, (int)mousePos.Y));
+                                }
+                                
                             }
                         }
                     }

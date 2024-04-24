@@ -13,7 +13,7 @@ namespace AUTO_Matic
         public Matrix transform;
 
         Vector2 center;
-        Viewport viewport;
+        public Viewport viewport;
         private float zoom = 1f;
         public Vector2 Position
         {
