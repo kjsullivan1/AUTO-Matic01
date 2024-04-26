@@ -23,6 +23,7 @@ namespace AUTO_Matic.SideScroll
         PlayerStates prevPlayerState;
 
         #region Fields
+        float dashHelperBuffer = 10f;
         float collisionOffsetX = 20f;
         int pixelSize = 64;
         Vector2 position = Vector2.Zero;
@@ -35,8 +36,9 @@ namespace AUTO_Matic.SideScroll
         KeyboardState prevKb;
         public bool blockBottom = false;
 
-        float moveSpeed = .45f;
+        float moveSpeed = .75f;
         float iMoveSpeed;
+        float iMaxRunSpeed;
         float fallMoveSpeed = .15f;
 
 
@@ -292,6 +294,7 @@ namespace AUTO_Matic.SideScroll
             iMoveSpeed = moveSpeed;
             iShootDelay = shootDelay;
             dashDistance *= pixelSize;
+            iMaxRunSpeed = maxRunSpeed;
 
         }
 
@@ -333,6 +336,16 @@ namespace AUTO_Matic.SideScroll
                     if (prevPlayerState == PlayerStates.Dashing)
                     {
                         //Slow down over time instead of instant set to run speed
+                        maxRunSpeed -= moveSpeed * force;
+                        if(maxRunSpeed < iMaxRunSpeed)
+                        {
+                            maxRunSpeed = iMaxRunSpeed;
+                            prevPlayerState = PlayerStates.Movement;
+                        }
+                    }
+                    else
+                    {
+                        maxRunSpeed = iMaxRunSpeed;
                     }
 
                     if (isFalling)
@@ -371,10 +384,17 @@ namespace AUTO_Matic.SideScroll
                 case PlayerStates.Dashing:
                     gravity.Y = 0;
                     canDash = false;
-
+                    if (isFalling)
+                    {
+                        maxRunSpeed = maxDashAirSpeed;
+                    }
+                    else
+                    {
+                        maxRunSpeed = maxDashSpeed;
+                    }
                     if(MathHelper.Distance(startDashPos.X, Position.X) >= dashDistance)
                     {
-                        prevPlayerState = playerState;
+                        //prevPlayerState = playerState; //uncomment for dash testing with force 
                         playerState = PlayerStates.Movement;
                     }
                     //if (Velocity.X >= maxDashAirSpeed && isFalling && Velocity.X > 0)
@@ -537,7 +557,10 @@ namespace AUTO_Matic.SideScroll
                             canJump = false;
                         }
                         break;
-                        #endregion
+                    #endregion
+                    case PlayerStates.Jumping:
+
+                        break;
                 }
             }
             else if(kb.IsKeyDown(Keys.D))
@@ -621,6 +644,18 @@ namespace AUTO_Matic.SideScroll
 
                         break;
                     #endregion
+                    #region Jumping
+                    case PlayerStates.Jumping:
+                        if (Velocity.X >= 0)
+                        {
+                            velocity.X += fallMoveSpeed;
+                        }
+                        else
+                        {
+                            velocity.X = -Velocity.X / 1.5f;//Can change to turn with exact momentum   
+                        }
+                        break;
+                    #endregion
                 }
             }
             else if(kb.IsKeyDown(Keys.A))
@@ -702,6 +737,18 @@ namespace AUTO_Matic.SideScroll
                         prevKb = kb;
                         break;
                     #endregion
+                    #region Jumping
+                    case PlayerStates.Jumping:
+                        if (Velocity.X <= 0)
+                        {
+                            velocity.X -= fallMoveSpeed;
+                        }
+                        else
+                        {
+                            velocity.X = -Velocity.X / 1.5f;//Can change to turn with exact momentum   
+                        }
+                        break;
+                        #endregion
                 }
             }
             else
@@ -873,16 +920,16 @@ namespace AUTO_Matic.SideScroll
                 }
                 else if (playerState == PlayerStates.Jumping)
                 {
-                    if (velocity.X > 0)
-                    {
-                        velocity.X = 0;
-                        position.X += -moveSpeed;
-                    }
-                    else if (velocity.X < 0)
-                    {
-                        velocity.X = 0;
-                        position.X += moveSpeed;
-                    }
+                    //if (velocity.X > 0)
+                    //{
+                    //    velocity.X = 0;
+                    //    position.X += -moveSpeed;
+                    //}
+                    //else if (velocity.X < 0)
+                    //{
+                    //    velocity.X = 0;
+                    //    position.X += moveSpeed;
+                    //}
 
                 }
                 else
@@ -913,75 +960,137 @@ namespace AUTO_Matic.SideScroll
 
             if (playerRect.TouchLeftOf(newRect))
             {
-
-                if (isFalling || playerState == PlayerStates.Jumping)
+                while (playerRect.Right > newRect.Left)
                 {
-                    while (playerRect.Right > newRect.Left)
-                    {
-                        playerRect.X -= 1;
-                    }
-                    if (velocity.X > 0)
-                    {
-                        position.X += -velocity.X;
-                        velocity.X = 0;
-                       
-                    }
-                    isColliding = true;
+                    playerRect.X -= 1;
+                    //position.X = playerRect.X;
                 }
-                else
-                {
-                    while (playerRect.Right > newRect.Left)
-                    {
-                        playerRect.X -= 1;
-                    }
-                    if (velocity.X > 0)
-                    {
-                        position.X += -velocity.X;
-                        velocity.X = 0;
-                        
-                    }
-                    //position.X += -velocity.X;
-                    //velocity.X = -2;
+                //if (velocity.X > 0)
+                //{
+                //    position.X += -velocity.X;
+                //    velocity.X = 0;
 
+                //}
+                switch (playerState)
+                {
+                    case PlayerStates.Movement:
+                        if (velocity.X > 0)
+                        {
+                            position.X += -velocity.X;
+                            velocity.X = 0;
+
+                        }
+                        isColliding = true;
+                        break;
+                    case PlayerStates.Jumping:
+                        if (velocity.X > 0)
+                        {
+                            position.X += -velocity.X;
+                            //velocity.X = 0;
+
+                        }
+                        break;
+                    case PlayerStates.Dashing:
+                        if (velocity.X > 0)
+                        {
+                            position.X += -velocity.X;
+                            //velocity.X = 0;
+
+                        }
+                        isColliding = true;
+                        playerState = PlayerStates.Movement;
+                        break;
                 }
+
+                #region Comments
+                //playerState = PlayerStates.Movement;
+                //if (isFalling || playerState == PlayerStates.Jumping)
+                //{
+                //    while (playerRect.Right > newRect.Left)
+                //    {
+                //        playerRect.X -= 1;
+                //    }
+                //    if (velocity.X > 0)
+                //    {
+                //        position.X += -velocity.X;
+                //        velocity.X = 0;
+
+                //    }
+                //    isColliding = true;
+                //}
+                //else
+                //{
+
+                //    while (playerRect.Right > newRect.Left)
+                //    {
+                //        playerRect.X -= 1;
+                //    }
+                //    if (velocity.X > 0)
+                //    {
+                //        position.X += -velocity.X;
+                //        velocity.X = 0;
+
+                //    }
+                //    //position.X += -velocity.X;
+                //    //velocity.X = -2;
+
+                //}
+
+                //switch (playerState)
+                //{
+                //    case PlayerStates.Dashing:
+                //        playerState = PlayerStates.Movement;
+
+                //        velocity.Y = (float)Math.Sin(Force) * dashHelperBuffer;
+                //        break;
+                //}
+
+                #endregion
+
 
             }
             if (playerRect.TouchRightOf(newRect))
             {
-                if (isFalling || playerState == PlayerStates.Jumping)
+                while (playerRect.Left < newRect.Right)
                 {
-                    while (playerRect.Left < newRect.Right)
-                    {
-
-                        playerRect.X += 1;
-                    }
-                    if (velocity.X < 0)
-                    {
-                        position.X += -velocity.X;
-                        velocity.X = 0;
-                        
-                    }
+                    playerRect.X += 1;
+                    //position.X = playerRect.X;
                 }
-                else
+                //if (velocity.X > 0)
+                //{
+                //    position.X += -velocity.X;
+                //    velocity.X = 0;
+
+                //}
+                switch (playerState)
                 {
-                    while (playerRect.Left < newRect.Right)
-                    {
-                        playerRect.X += 1;
-                        //playerRect.X = (int)position.X;
-                    }
-                    if (velocity.X < 0)
-                    {
-                        position.X += -velocity.X;
-                        velocity.X = 0;
-                        
-                    }
-                    //position.X += -velocity.X;
-                    //velocity.X = +2;
+                    case PlayerStates.Movement:
+                        if (velocity.X < 0)
+                        {
+                            position.X += -velocity.X;
+                            velocity.X = 0;
+
+                        }
+                        isColliding = true;
+                        break;
+                    case PlayerStates.Jumping:
+                        if (velocity.X < 0)
+                        {
+                            position.X += -velocity.X;
+
+                        }
+                        break;
+                    case PlayerStates.Dashing:
+                        if (velocity.X < 0)
+                        {
+                            position.X += -velocity.X;
+                            //velocity.X = 0;
+
+                        }
+                        isColliding = true;
+                        playerState = PlayerStates.Movement;
+                        break;
                 }
-
-
-
-                isColliding = true;
             }
             if (playerRect.TouchBottomOf(newRect))
             {

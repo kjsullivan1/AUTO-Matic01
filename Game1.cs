@@ -18,8 +18,8 @@ namespace AUTO_Matic
 
         UIManager UIManager = new UIManager();
 
-        public enum GameScene { TitleScreen, Game, Exit }
-        public GameScene currScene = GameScene.TitleScreen;
+        public enum GameScene { TitleScreen, InGame, Exit }
+        public GameScene currScene = GameScene.InGame;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -81,6 +81,7 @@ namespace AUTO_Matic
 
             
             ssPlayer = new SSPlayer(this, 64);
+            //StartNewGame();
 
             ms = Mouse.GetState();
             base.Initialize();
@@ -110,7 +111,9 @@ namespace AUTO_Matic
             UIHelper.SetElementVisibility("SettingsMenuTitle", true, UIManager.uiElements);
             #endregion
 
-            //StartNewGame();
+            //ssPlayer.Load(Content, Window.ClientBounds, friction);
+
+            StartNewGame();
             // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
 
 
@@ -141,7 +144,7 @@ namespace AUTO_Matic
                 {1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                 {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
                 {1, 1, 1, 2, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
                 {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                 {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                 {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -173,10 +176,11 @@ namespace AUTO_Matic
                 case GameScene.TitleScreen:
                     Menus(kb);
                     break;
-                case GameScene.Game:
-
+                case GameScene.InGame:
+                    camera.Update(new Vector2(camera.X, camera.Y));
                     switch(GameState)
                     {
+                        
                         case GameStates.SideScroll: //Default
                             if(kb.IsKeyDown(Keys.Enter))//Reset Pos
                             {
@@ -225,7 +229,7 @@ namespace AUTO_Matic
 
                     spriteBatch.End();
                     break;
-                case GameScene.Game:
+                case GameScene.InGame:
                     Window.Title = "Gravity: " + Gravity.Y.ToString() + "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction + "   Vel = (" + /*(int)*/ssPlayer.velocity.X + ", " + ssPlayer.velocity.Y + ")" + "   isFalling = " + ssPlayer.isFalling + "   playerState = " + ssPlayer.playerState.ToString();
                     spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
 
