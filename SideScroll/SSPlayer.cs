@@ -29,14 +29,14 @@ namespace AUTO_Matic.SideScroll
         Vector2 position = Vector2.Zero;
         Vector2 prevVel = Vector2.Zero;
         public Vector2 velocity = Vector2.Zero;
-        Rectangle playerRect;
+        public Rectangle playerRect;
         public bool isFalling = true;
         bool isColliding = false;
         Game1 game;
         KeyboardState prevKb;
         public bool blockBottom = false;
 
-        float moveSpeed = .75f;
+        float moveSpeed = 2.15f;
         float iMoveSpeed;
         float iMaxRunSpeed;
         float fallMoveSpeed = .15f;
@@ -73,7 +73,7 @@ namespace AUTO_Matic.SideScroll
         float iJumpF;
         int jumpDelay = 0;
         int maxJumpDelay = 5;
-        bool canJump = false;
+        public bool canJump = false;
         public float JumpForce
         {
             get
@@ -450,6 +450,8 @@ namespace AUTO_Matic.SideScroll
 
 
             position += Velocity;
+            //playerRect = new Rectangle((int)(position.X + (collisionOffsetX - 6)), (int)position.Y, pixelSize / 2, pixelSize);
+            // playerRect = new Rectangle()
             animManager.Update(gameTime, position);
             //switch (playerState)
             //{
@@ -569,7 +571,7 @@ namespace AUTO_Matic.SideScroll
                 {
                     #region Movement
                     case PlayerStates.Movement:
-                        if (animState != AnimationStates.Walking && animState != AnimationStates.Jump)
+                        if (animState != AnimationStates.Walking && animState != AnimationStates.Jump || animState != AnimationStates.Walking && blockBottom)
                         {
                             animState = AnimationStates.Walking;
                             ChangeAnimation();
@@ -667,7 +669,7 @@ namespace AUTO_Matic.SideScroll
 
                         animManager.isRight = false;
                         animManager.isLeft = true;
-                        if (animState != AnimationStates.Walking && animState != AnimationStates.Jump)
+                        if (animState != AnimationStates.Walking && animState != AnimationStates.Jump || animState != AnimationStates.Walking && blockBottom)
                         {
                             animState = AnimationStates.Walking;
                             ChangeAnimation();
@@ -817,6 +819,14 @@ namespace AUTO_Matic.SideScroll
 
                             }
                         }
+                        else if (velocity.X == 0)
+                        {
+                            if(animState != AnimationStates.Idle)
+                            {
+                                animState = AnimationStates.Idle;
+                                ChangeAnimation();
+                            }
+                        }
 
                         if(isFalling)
                         {
@@ -906,14 +916,24 @@ namespace AUTO_Matic.SideScroll
                         position.Y -= .1f;
                         playerRect.Y = (int)position.Y;
                     }
-
+                    //if (velocity.X > 0)
+                    //{
+                    //    velocity.X = 0;
+                    //    position.X += -moveSpeed;
+                    //}
+                    //else if (velocity.X < 0)
+                    //{
+                    //    velocity.X = 0;
+                    //    position.X += moveSpeed;
+                    //}
                     jumpDelay = 0;
                     //velocity.X += (float)Math.Cos(velocity.X);
                     isFalling = false;
                     
                     //isDashing = false;
-                    animState = AnimationStates.Idle;
-                    ChangeAnimation();
+
+                    //animState = AnimationStates.Idle;
+                    //ChangeAnimation();
                     //maxVelocity.X = 6;
                     prevKb = Keyboard.GetState();
                     isColliding = false;
@@ -1147,6 +1167,7 @@ namespace AUTO_Matic.SideScroll
             //{
             //    spriteBatch.Draw(texture, playerRect, Color.White);
             //}
+           
             spriteBatch.Draw(texture, playerRect, Color.White);
             animManager.Draw(spriteBatch);
 

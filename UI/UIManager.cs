@@ -60,7 +60,7 @@ namespace AUTO_Matic
                     UIHelper.SetButtonState("StartGameReturn", true, uiElements);
                     break;
                 case "StartNewGame":
-                    game.ChangeGameState(Game1.GameScene.InGame);
+                    game.ChangeGameState(Game1.Scenes.InGame);
                     UIHelper.SetElementVisibility("MainMenu", false, uiElements);
                     UIHelper.SetElementVisibility("Settings", false, uiElements);
                     UIHelper.SetElementVisibility("StartNewGame", false, uiElements);

@@ -18,8 +18,8 @@ namespace AUTO_Matic
 
         UIManager UIManager = new UIManager();
 
-        public enum GameScene { TitleScreen, InGame, Exit }
-        public GameScene currScene = GameScene.InGame;
+        public enum Scenes { TitleScreen, InGame, Exit }
+        public Scenes currScene = Scenes.InGame;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -41,7 +41,7 @@ namespace AUTO_Matic
 
         #region Side-Scroll
         SSPlayer ssPlayer;
-        float gravityX = .25f;
+        float gravityX = 0f;
         float gravityY = 1f;
         Vector2 Gravity
         {
@@ -55,6 +55,8 @@ namespace AUTO_Matic
         float friction = .85f;
         #endregion
 
+
+        SSEnemy enemy;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -112,7 +114,7 @@ namespace AUTO_Matic
             #endregion
 
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
-
+            
             StartNewGame();
             // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
 
@@ -140,10 +142,10 @@ namespace AUTO_Matic
                 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 2, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 1, 1, 2, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1},
+                {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1},
+                {1, 1, 1, 2, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
                 {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
                 {1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -156,6 +158,7 @@ namespace AUTO_Matic
             SideTileMap.Generate(currMap, 64);
 
             ssPlayer.Load(Content, Window.ClientBounds, friction);
+            enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
         }
 
 
@@ -173,10 +176,10 @@ namespace AUTO_Matic
 
             switch(currScene)
             {
-                case GameScene.TitleScreen:
+                case Scenes.TitleScreen:
                     Menus(kb);
                     break;
-                case GameScene.InGame:
+                case Scenes.InGame:
                     camera.Update(new Vector2(camera.X, camera.Y));
                     switch(GameState)
                     {
@@ -186,17 +189,24 @@ namespace AUTO_Matic
                             {
                                 ssPlayer.Position = new Vector2(0, 0);
                             }
+
+                            ssPlayer.Update(gameTime, Gravity);
+                            enemy.Update(gameTime, Gravity, ssPlayer);
+
                             ssPlayer.blockBottom = false;
+
+                          
                             foreach (EmptyTile tile in SideTileMap.EmptyTiles)
                             {
                                 ssPlayer.Collision(tile.Rectangle);
+                                
                             }
                             if (ssPlayer.blockBottom == false && ssPlayer.playerState != SSPlayer.PlayerStates.Jumping)
                             {
                                 ssPlayer.isFalling = true;
 
                             }
-                            ssPlayer.Update(gameTime, Gravity);
+                       
                             break;
                     }
 
@@ -222,20 +232,20 @@ namespace AUTO_Matic
             Window.Title = camera.Position.ToString() + "   MousePos: " + mousePos.ToString();
             switch(currScene)
             {
-                case GameScene.TitleScreen:
+                case Scenes.TitleScreen:
                     spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
 
                     UIManager.Draw(spriteBatch);
 
                     spriteBatch.End();
                     break;
-                case GameScene.InGame:
-                    Window.Title = "Gravity: " + Gravity.Y.ToString() + "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction + "   Vel = (" + /*(int)*/ssPlayer.velocity.X + ", " + ssPlayer.velocity.Y + ")" + "   isFalling = " + ssPlayer.isFalling + "   playerState = " + ssPlayer.playerState.ToString();
+                case Scenes.InGame:
+                    Window.Title = "Gravity: " + Gravity.Y.ToString() + "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction + "   Vel = (" + /*(int)*/ssPlayer.velocity.X + ", " + ssPlayer.velocity.Y + ")" + "   isFalling = " + ssPlayer.isFalling + "   enemyState = " + enemy.enemyState.ToString();
                     spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
 
                     SideTileMap.Draw(spriteBatch);
                     ssPlayer.Draw(spriteBatch);
-
+                    enemy.Draw(spriteBatch);
                     spriteBatch.End();
                     break;
             }
@@ -381,7 +391,7 @@ namespace AUTO_Matic
             MenuState = menuState;
         }
 
-        public void ChangeGameState(GameScene gamestate)
+        public void ChangeGameState(Scenes gamestate)
         {
             currScene = gamestate;
         }

@@ -47,7 +47,9 @@
     <Compile Include="Game1.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SideScroll\Enemy\GAJump.cs" />
     <Compile Include="SideScroll\SideRectangleHelper.cs" />
+    <Compile Include="SideScroll\Enemy\SSEnemy.cs" />
     <Compile Include="SideScroll\SSPlayer.cs" />
     <Compile Include="SideScroll\Tile.cs" />
     <Compile Include="SideScroll\SideTileMap.cs" />
