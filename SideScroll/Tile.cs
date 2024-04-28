@@ -14,7 +14,7 @@ namespace AUTO_Matic
         public Texture2D texture;
 
         private Rectangle rectangle;
-        public int[] mapPoint;
+        public int[,] mapPoint;
         public Rectangle Rectangle
         {
             get { return rectangle; }
@@ -50,7 +50,18 @@ namespace AUTO_Matic
         {
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
             this.Rectangle = newRect;
+            this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
         }
 
+    }
+
+    class PlatformTile:Tile
+    {
+        public PlatformTile(int i, Rectangle newRect)
+        {
+            texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
+            this.Rectangle = newRect;
+            this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+        }
     }
 }
