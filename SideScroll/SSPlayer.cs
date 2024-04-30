@@ -39,7 +39,7 @@ namespace AUTO_Matic.SideScroll
         float moveSpeed = 2.15f;
         float iMoveSpeed;
         float iMaxRunSpeed;
-        float fallMoveSpeed = .15f;
+        float fallMoveSpeed = .35f;
 
 
         float mass = 20.0f;
@@ -72,7 +72,7 @@ namespace AUTO_Matic.SideScroll
         float jumpForce = 18f;
         float iJumpF;
         int jumpDelay = 0;
-        int maxJumpDelay = 5;
+        int maxJumpDelay = 3;
         public bool canJump = false;
         public float JumpForce
         {

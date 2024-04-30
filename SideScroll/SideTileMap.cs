@@ -17,6 +17,7 @@ namespace AUTO_Matic
         public static SideTileMap tileMap = new SideTileMap();
         private static List<EmptyTile> emptyTiles = new List<EmptyTile>();
         private static List<PlatformTile> platformTiles = new List<PlatformTile>();
+
         public static List<EmptyTile> EmptyTiles
         {
             get { return emptyTiles; }
@@ -60,13 +61,14 @@ namespace AUTO_Matic
                 {
                     int num = map[y, x];
 
-                    if (num == 0 /*|| num == 2*/)
+                    if (num == 0 || num == 2)
                     {
                         emptyTiles.Add(new EmptyTile(0, new Rectangle(x * size, y * size, size, size)));
 
                     }
-                    if (num == 2)
+                    if (num == 3)
                     {
+                   
                         platformTiles.Add(new PlatformTile(0, new Rectangle(x * size, y * size, size, size)));
                     }
                 }
@@ -78,6 +80,61 @@ namespace AUTO_Matic
 
         }
 
+        public static Vector2 GetNumTilesOfGround(int row, int col) //Will be recieving tile landed on
+        {
+            int numTilesRight = 0; //Landed on 1 tile
+            int numTilesLeft = 0;
+            for(int i = col + 1; i < tileMap.mapWidth - 1; i++)
+            {
+                if (tileMap.getPoint(row - 1, i) == 3 || tileMap.getPoint(row - 1, i) == 2 || tileMap.getPoint(row - 1, i) == 0)
+                {
+                    break;
+                }
+
+
+                if (tileMap.getPoint(row, i) == 3 || tileMap.getPoint(row, i) == 2 || tileMap.getPoint(row, i) == 0)
+                {
+                    numTilesRight++;
+                }
+
+            }
+            for (int i = col - 1; i >= 0; i--)
+            {
+                if (tileMap.getPoint(row - 1, i) == 3 || tileMap.getPoint(row - 1, i) == 2 || tileMap.getPoint(row - 1, i) == 0)
+                {
+                    break;
+                }
+
+
+                if (tileMap.getPoint(row, i) == 3 || tileMap.getPoint(row, i) == 2 || tileMap.getPoint(row, i) == 0)
+                {
+                    numTilesLeft++;
+                }
+
+            }
+            return new Vector2(numTilesLeft, numTilesRight);
+        }
+
+        public static bool CanWalk(int row, int col, string dir)
+        {
+            switch(dir)
+            {
+                case "left":
+                    if (tileMap.getPoint(row, col - 1) != 3 && tileMap.getPoint(row, col - 1) != 2 && tileMap.getPoint(row, col - 1) != 0)
+                        return false;
+                    else
+                        return true;
+
+                    //break;
+                case "right":
+                    if (tileMap.getPoint(row, col + 1) != 3 && tileMap.getPoint(row, col + 1) != 2 && tileMap.getPoint(row, col + 1) != 0)
+                        return false;
+                    else
+                        return true;
+                    //break;
+            }
+            return true;
+        }
         //public void BuildAndSaveMap(int mapWidth, int mapHeight)
 
         public static int GetPoint(int row, int col)

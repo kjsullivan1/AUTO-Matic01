@@ -25,14 +25,14 @@ namespace AUTO_Matic.SideScroll
         #region Fields
         Vector2 bounds;
         int pixelSize = 64;
-        Vector2 position = new Vector2(64 * 15, 0);
+        Vector2 position = new Vector2(64 * 15 + 5, 0);
         Rectangle enemyRect;
         bool blockBottom = false;
         bool isFalling = true;
         bool isColliding = false;
         Vector2 TargetPos;
 
-        float moveSpeed = 2.5f;
+        float moveSpeed = 3f;
         float mass = 20.0f;
         public float accel = 0;
         public float force = 0;
@@ -40,11 +40,11 @@ namespace AUTO_Matic.SideScroll
         float coeFric = 0;
         public float changeInTime = 0;
         //bool canJump;
-        int jumpDelay = 0;
+        int jumpDelay = 5;
         int maxJumpDelay = 0;
         Vector2 gravity;
 
-        float maxRunSpeed = 4.2f;
+        float maxRunSpeed = 5f;
         float terminalVel = 12f;
         float maxJumpSpeed = 8f;
         int maxJumpForce = 18;
@@ -164,6 +164,12 @@ namespace AUTO_Matic.SideScroll
         bool blockTop = false;
         Rectangle currPlatform;
         public bool onPlatform = false;
+        bool blockLeft = false;
+        bool blockRight = false;
+        bool goTo = false; //A hard setting goTo that forces to go towards TargetPos regardless of checks
+        Vector2 landingPos;
+        bool canWalk = true;
+        int leftOnX = 0;
         #endregion
 
         private void CreateVision()
@@ -234,467 +240,403 @@ namespace AUTO_Matic.SideScroll
         }
 
 
-        void GoTo(Vector2 target, Vector2 bounds)
-        {
-            Vector2 tTarget = target;
-            Vector2 tempPos = Vector2.Zero;
-            if (position.X > target.X)
+        void GoTo(Vector2 bounds)//bounds is the min and max bounds in the x direction left to right
+        { //if + movespeed > Target velocity.x = 0
+            switch(enemyState)
             {
-                tTarget = new Vector2((int)(target.X / pixelSize) * (pixelSize), (int)(target.Y / pixelSize) * pixelSize);
-                tempPos = new Vector2((int)(position.X / pixelSize) * pixelSize, (int)(position.Y / pixelSize) * pixelSize);
-            }
-            else if(position.X < target.X)
-            {
-                tTarget = new Vector2((int)(target.X / pixelSize) * (pixelSize), (int)(target.Y / pixelSize) * pixelSize);
-                tempPos = new Vector2((int)(position.X / pixelSize) * pixelSize, (int)(position.Y / pixelSize) * pixelSize);
-            }
-
-
-
-            if (MathHelper.Distance(tempPos.X, target.X) < positionOffset.X)
-            {
-
-            }
-            else if ((int)tempPos.X < (int)tTarget.X)
-            { 
-                tTarget -= positionOffset;
-
-                if((int)tempPos.X < (int)tTarget.X && !isColliding)
-                {
-                    velocity.X += moveSpeed;
-                }
-            }
-            else if((int)tempPos.X > (int)tTarget.X)
-            {
-                tTarget += positionOffset;
-              
-                if ((int)tempPos.X > (int)tTarget.X && !isColliding)
-                {
-                    velocity.X -= moveSpeed;
-                }
-
-            }
-
-            if (onPlatform)
-            {
-                position += Velocity;
-                //if (enemyState == EnemyStates.GoTo && prevState == EnemyStates.Jumping)
-                //{
-
-                //}
-                //else
-                {
-                    if (position.X > bounds.Y)//bounds.Y is max
+                case EnemyStates.GoTo:
+                    if (position.X < TargetPos.X)
                     {
-                        position.X = bounds.Y;
-                    }
-                    if (position.X < bounds.X)
-                    {
-                        position.X = bounds.X;
-                    }
-                    if (isColliding && enemyState == EnemyStates.Jumping && prevState == EnemyStates.Jumping)
-                    {
-                        position.Y = goalRect.Top - enemyRect.Height;
-                    }
-                }
-                position -= Velocity;
-            }
-            else
-            {
-                if (/*(int)tempPos.X == (int)tTarget.X && */!isColliding /*&& (int)tempPos.Y == (int)tTarget.Y*/ && prevState == EnemyStates.Jumping /*&& enemyState == EnemyStates.Jumping*/)
-                {
-                    //enemyState = EnemyStates.OnPlatform;
-                    //enemyState = EnemyStates.GoTo;
-                    //if(currPlatfrom == platformTile){} //This will fix the teleport glitch
-                    //o
-                    //PlatformCollision(SideTileMap.pl);
-                    //this.bounds = new Vector2(tTarget.X, tTarget.X * pixelSize);
-                }
-                else if ((int)tempPos.X == (int)tTarget.X && !isColliding && tempPos.Y == tTarget.Y)
-                {
-                    velocity.X = 0;
-                    enemyState = EnemyStates.Attacking;
-                    //if(MathHelper.Distance((int)target.X, (int)tempPos.X) < positionOffset.X)
-                    //{
-                    //    //velocity.X += moveSpeed;
-                    //}
-                }
-            }
+                        if ((int)position.X + (int)velocity.X > (int)TargetPos.X)
+                        {
+                            velocity.X = 0;
+                            if (prevState == EnemyStates.Jumping)
+                            {
+                                position.X = TargetPos.X;
+                                goTo = false;
+                                onPlatform = true;
+                                prevState = EnemyStates.Idle;
+                            }
 
-
-           
+                            //Change enemyState
+                        }
+                        else if (MathHelper.Distance(position.X, landingPos.X) >= bounds.Y && prevState != EnemyStates.Jumping && goTo )
+                        {
+                            velocity.X = 0;
+                            position.X += 1;
+                            enemyRect.X = (int)position.X;
+                        }
+                        else
+                        {
+                            if(velocity.X <= 0)
+                            {
+                                velocity.X = -velocity.X;
+                            }
+                            velocity.X += moveSpeed;
+                        }
+                    }
+                    if (position.X > TargetPos.X)
+                    {
+                        if ((int)position.X - (int)velocity.X < (int)TargetPos.X)
+                        {
+                            velocity.X = 0;
+                            if(prevState == EnemyStates.Jumping)
+                            {
+                                position.X = TargetPos.X;
+                                goTo = false;
+                                onPlatform = true;
+                                prevState = EnemyStates.Idle;
+                            }
+                     
+                            //change enemyState
+                        }
+                        else if (MathHelper.Distance(position.X, landingPos.X) >= bounds.X && prevState != EnemyStates.Jumping && goTo)
+                        {
+                            velocity.X = 0;
+                            position.X -= 1;
+                            enemyRect.X = (int)position.X;
+                        }
+                        else
+                        {
+                            if (velocity.X >= 0)
+                            {
+                                velocity.X = -velocity.X;
+                            }
+                            velocity.X -= moveSpeed;
+                        }
+                    }
+                    if(position == TargetPos)
+                    {
+                        goTo = false;
+                    }
+                   
+                    break;
+                //case EnemyStates.Jumping:
+                //    if(position.X < TargetPos.X)
+                //    {
+                //        if ((int)position.X + (int)velocity.X > (int)TargetPos.X)
+                //        {
+                //            velocity.X = 0;
+                //            goTo = false;
+                //            onPlatform = true;
+                //            //prevState = EnemyStates.Idle;
+                //        }
+                //        else
+                //        {
+                            
+                //            velocity.X += moveSpeed;
+                //        }
+                //    }
+                //    if(position.X > TargetPos.X)
+                //    {
+                //        if((int)position.X - (int)velocity.X < (int)TargetPos.X)
+                //        {
+                //            velocity.X = 0;
+                //            goTo = false;
+                //            onPlatform = true;
+                //            //prevState = EnemyStates.Idle;
+                //        }
+                //        else
+                //        {
+                //            velocity.X -= moveSpeed;
+                //        }
+                //    }
+                //    break;
+            }
         }
 
         public void Update(GameTime gameTime, Vector2 gravity, SSPlayer player)
         {
             this.gravity = gravity;
-
             CreateVision();
-
             possibleJumpLocations.Clear();
-            //int j = 0;
             blockBottom = false;
-            isColliding = false;
-            blockTop = false;
-            onPlatform = false;
-            if(!onPlatform)
+            //blockTop = false;
+            //onPlatform = false;
+            //isFalling = true;
+            blockLeft = false;
+            blockRight = false;
+
+            foreach(EmptyTile tile in SideTileMap.EmptyTiles)
             {
-                foreach (EmptyTile tile in SideTileMap.EmptyTiles)
+                Collision(tile.Rectangle);
+            }
+
+            if(onPlatform || velocity.Y != 0)
+            {
+                foreach(PlatformTile tile in SideTileMap.PlatformTiles)
                 {
-                    TileCollision(tile);
+                    Collision(tile.Rectangle);
                 }
             }
-           
             
-            foreach(PlatformTile tile in SideTileMap.PlatformTiles)
-            {
-                    PlatformCollision(tile);
-            }
-            
-           
-            if (blockBottom)
+            //Collision
+            if(blockBottom)
             {
                 isFalling = false;
             }
-            if (!blockBottom)
+            else
             {
                 isFalling = true;
             }
 
-            switch (enemyState)
+            switch(enemyState)
             {
                 case EnemyStates.Idle:
                     foreach(Rectangle rect in vision)
                     {
                         if(rect.Intersects(player.playerRect))
                         {
-                            TargetPos = new Vector2(player.X + (player.playerRect.Width / 2), player.Y);
-                            //prevState = enemyState;
+                            if(enemyRect.Right < player.playerRect.X)
+                            {
+                                TargetPos = new Vector2(player.playerRect.X, enemyRect.Y); //Keep Y to only set the X coordinate...Y handled seperately
+                            }
+                            else if(enemyRect.Left > player.playerRect.X + player.playerRect.Width)
+                            {
+                                TargetPos = new Vector2(player.playerRect.X + player.playerRect.Width, enemyRect.Y);
+                            }
+                            else if(player.playerRect.Bottom < enemyRect.Top)//player is above enemy...Y is handled here
+                            {
+                                TargetPos = new Vector2(player.playerRect.X, player.playerRect.Top);
+                            }
                             enemyState = EnemyStates.GoTo;
                         }
+
                     }
                     break;
                 case EnemyStates.GoTo:
 
-                   
-
-
-                    if ((enemyRect.Bottom > (int)player.playerRect.Bottom && player.isFalling == false && player.blockBottom && velocity.Y == 0) /*&& prevState != EnemyStates.Jumping*/)
+                    if(!goTo)
                     {
-                        prevState = enemyState;
-                        enemyState = EnemyStates.Jumping;
-                        //canJump = true;
-
-                        //onPlatform = false;
-                    }
-                    else
-                    {
-                        Vector2 boundX = new Vector2(currPlatform.X, currPlatform.X + currPlatform.Width);
                         foreach (Rectangle rect in vision)
                         {
                             if (rect.Intersects(player.playerRect))
                             {
-                                TargetPos = new Vector2(player.X + (player.playerRect.Width / 2), player.Y);
+                                if (enemyRect.Right < player.playerRect.X)
+                                {
+                                    TargetPos = new Vector2(player.playerRect.X, enemyRect.Y); //Keep Y to only set the X coordinate...Y handled seperately
+                                }
+                                else if (enemyRect.Left > player.playerRect.X + player.playerRect.Width)
+                                {
+                                    TargetPos = new Vector2(player.playerRect.X + player.playerRect.Width, enemyRect.Y);
+                                }
                             }
                         }
                     }
-                    //prevState = enemyState;
-                    GoTo(TargetPos, bounds);
-                    break;
-                case EnemyStates.Attacking:
-                    if(position.X < player.X)
+                   
+                    if (player.playerRect.Bottom < enemyRect.Top && player.velocity.Y >= 0 && blockBottom /*&& player.blockBottom*/ || blockLeft || blockRight)
                     {
-                        if (MathHelper.Distance(position.X, player.X) > positionOffset.X * 2)
-                        {
-                            //prevState = enemyState;
-                            enemyState = EnemyStates.GoTo;
-                            TargetPos = new Vector2(player.X + (player.playerRect.Width / 2), player.Y);
-                        }
-                    }
-                    else if(position.X > player.X)
-                    {
-                        if (MathHelper.Distance(position.X, player.X) > positionOffset.X)
-                        {
-                            //prevState = enemyState;
-                            enemyState = EnemyStates.GoTo;
-                            TargetPos = new Vector2(player.X + (player.playerRect.Width/2), player.Y);
-                        }
-                    }
-
-                    if ((enemyRect.Bottom > (int)player.playerRect.Bottom && player.isFalling == false && player.blockBottom && velocity.Y == 0))
-                    {
-                        prevState = enemyState;
+                        //if (player.velocity.Y >= -5)
+                        //{
+                        //    leftOnX = player.playerRect.X; //where the playere was last to set direction priority if jump fails
+                        //}
                         enemyState = EnemyStates.Jumping;
-                        if(possibleJumpLocations.Count != 0)
-                        {
-                            goalRect = possibleJumpLocations[0];
-                        }
-                       
-                        //canJump = true;
+                      
+                        break;
                     }
-
-
+                    GoTo(bounds);
                     break;
                 case EnemyStates.Jumping:
-                 
-                    //Determine a X distance goal from the target pos and see if you can reach it. If you can...Execute
-                    if (prevState != EnemyStates.Jumping && blockBottom && !isFalling && possibleJumpLocations.Count != 0 && !blockTop && canJump)
+                    if(prevState != EnemyStates.Jumping /*|| player.playerRect.Bottom < enemyRect.Top && player.velocity.Y >= 0 && onPlatform*/)
                     {
-                        Vector2 tempVel = Velocity;
-
-                        if(Velocity.X > 0)
+                        possibleJumpLocations.Clear();
+                        foreach(PlatformTile tile in SideTileMap.PlatformTiles)
                         {
-                            tempVel.X = RandFloat((int)maxRunSpeed, (int)maxRunSpeed + 1);
-                        }
-                        else if(Velocity.X < 0)
-                        {
-                            tempVel.X = RandNegFloat((int)maxRunSpeed, (int)maxRunSpeed + 1);
-                        }
-                        float randForce = RandFloat(minJumpForce, maxJumpForce);
-                        //canJump = true;
-                        goalRect = possibleJumpLocations[0];
-                        foreach(Rectangle rect in possibleJumpLocations)
-                        {
-                           // Rectangle rect2 = new Rectangle()
-                            if(MathHelper.Distance(goalRect.Y ,position.Y) > MathHelper.Distance(rect.Y , position.Y))
+                            for(int i = vision.Count - 1; i >= 0; i--)
                             {
-                                
-                                
-                                goalRect = rect;
-                            }
-                            else if(MathHelper.Distance(goalRect.Y, position.Y) == MathHelper.Distance(rect.Y, position.Y))
-                            {
-                                
-                                if(MathHelper.Distance(goalRect.X, position.X) >= MathHelper.Distance(rect.X, position.X))
+                                if (vision[i].Intersects(tile.Rectangle))
                                 {
-                                 
-                                    if (MathHelper.Distance(goalRect.X, player.Position.X) >= MathHelper.Distance(rect.X, player.Position.X))
+                                    //if (rect.Bottom > enemyRect.Bottom && !onPlatform)//this is the small tile on the bottom
+                                    //{
+                                    //    currPlatform = tile.Rectangle;
+                                    //    onPlatform = true;
+                                    //}
+                                    if (possibleJumpLocations.Contains(tile.Rectangle) == false && enemyRect.TouchTopOf(tile.Rectangle) == false)
+                                        possibleJumpLocations.Add(tile.Rectangle);
+
+                                    //vision.Remove(vision[i]);
+                                }
+                            }
+                        }
+                        
+                        if(blockLeft || blockRight)
+                        {
+
+                        }
+                        else
+                        {
+                            if(possibleJumpLocations.Count != 0)
+                            {
+                                goalRect = possibleJumpLocations[0];
+                                foreach (Rectangle rect in possibleJumpLocations)
+                                {
+                                    if (MathHelper.Distance(goalRect.Y, position.Y) > MathHelper.Distance(rect.Y, position.Y))
                                     {
-                                          goalRect = rect;
-                                        
+                                        goalRect = rect;
                                     }
-                                    else
+                                    else if (MathHelper.Distance(goalRect.Y, position.Y) == MathHelper.Distance(rect.Y, position.Y))
                                     {
 
+                                        if (MathHelper.Distance(goalRect.X, player.Position.X) > MathHelper.Distance(rect.X, player.Position.X))
+                                        {
+                                            goalRect = rect;
+                                            //Save second best in case this doesnt work?
+                                        }
+                                        //else
+                                        //{
+                                        //    if (MathHelper.Distance(goalRect.X, position.X) > MathHelper.Distance(rect.X, position.X))
+                                        //    {
+                                        //        goalRect = rect;
+                                        //    }
+                                        //}
                                     }
-                                    
+                                    else if (Distance(new Vector2(goalRect.X, goalRect.Y), position) > Distance(new Vector2(rect.X, rect.Y), position))
+                                    {
+                                        goalRect = rect;
+                                    }
                                 }
-                            }
-                        }
-                        if (position.X < goalRect.X)
-                        {
-                            if (tempVel.X < 0)
-                            {
-                                tempVel = -tempVel;
-                            }
 
-                        }
-                        if (position.X > goalRect.X)
-                        {
-                            if (tempVel.X > 0)
-                            {
-                                tempVel = -tempVel;
-                            }
-                        }
-                         int i = TestJump(goalRect, randForce, position, tempVel.X, true);
-                        if (onPlatform)
-                        {
-                            while (i != 1)
-                            {
-                                randForce = RandFloat(minJumpForce, maxJumpForce);
-                                if (Velocity.X > 0)
-                                {
-                                    tempVel.X = RandFloat(1, (int)maxRunSpeed + 1);
-                                }
-                                else if (Velocity.X < 0)
-                                {
-                                    tempVel.X = RandNegFloat(1, (int)maxRunSpeed + 1);
-                                }
+                                Vector2 tempVel = Velocity;
                                 if (position.X < goalRect.X)
                                 {
-                                    if (tempVel.X < 0)
-                                    {
-                                        tempVel = -tempVel;
-                                    }
+                                    tempVel.X = maxRunSpeed;
 
                                 }
                                 if (position.X > goalRect.X)
                                 {
-                                    if (tempVel.X > 0)
+                                    tempVel.X = -maxRunSpeed;
+                                }
+                                float randForce = maxJumpForce;
+                                int i = TestJump(goalRect, randForce, position, tempVel.X, false);
+
+                                int jumpMin = 10;
+                                int speedMin = 1;
+
+                                while (i != 1)//Goes through every possible jump 
+                                {
+                                    for (int j = jumpMin; j < maxJumpForce; j++)
                                     {
-                                        tempVel = -tempVel;
+                                        if (tempVel.X > 0)
+                                        {
+                                            for (int k = speedMin; k < maxRunSpeed; k++)
+                                            {
+                                                i = TestJump(goalRect, j, position, k, false);
+
+                                                if (i == 1)
+                                                {
+                                                    tempVel.X = k;
+                                                    break;
+                                                }
+
+                                            }
+                                        }
+                                        if (tempVel.X < 0)
+                                        {
+                                            for (int k = -speedMin; k < -maxRunSpeed; k--)
+                                            {
+                                                i = TestJump(goalRect, j, position, k, false);
+                                                if (i == 1)
+                                                {
+                                                    tempVel.X = k;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        if (i == 1)
+                                        {
+                                            randForce = j;
+                                            break;
+                                        }
+
+                                    }
+                                    if (i == 2) //Failed every jump
+                                    {
+                                        break;
                                     }
                                 }
-                                i = TestJump(goalRect, randForce, position, tempVel.X, false);
 
-                                if ((int)randForce == (int)maxJumpForce - 1 && (int)Math.Abs(tempVel.X) == (int)(maxRunSpeed) && i != 1)//Couldnt succeed on max attempt try calculating distance needed to make jump
+                                if (i == 2)
                                 {
-                                    i = 3;
-                                    break;
+                                    if(position.X < TargetPos.X)
+                                    {
+                                        goTo = true;
+                                        TargetPos = new Vector2(leftOnX, position.Y);
+                                    }
+
+                                    enemyState = EnemyStates.GoTo;
+                                    //velocity.X = 0;
+                                    //if (position.X < player.Position.X)
+                                    //{
+                                    //    //SetTarget to the left most position of the current bounds
+
+                                    //    //if(position.x == bounds.x)
+                                    //    //{
+                                    //    //Can't reach...change logic
+                                    //    //}
+                                    //}
+                                    //if (position.X > player.Position.X)
+                                    //{
+                                    //    //SetTarget to right most position of current bounds
+
+                                    //    //if(position.x == bounds.x + width)
+                                    //    //{
+                                    //    //Can't reach...change logic
+                                    //    //}
+                                    //}
+
+
                                 }
-                            }
-                        }
-                        else
-                        {
-                            while (i != 1)
-                            {
-                                randForce = RandFloat(minJumpForce, maxJumpForce);
-
-                                i = TestJump(goalRect, randForce, position, tempVel.X, true);
-
-                                if ((int)randForce == (int)maxJumpForce - 1 && i != 1)//Couldnt succeed on max attempt try calculating distance needed to make jump
+                                if (i == 1)
                                 {
-                                    i = 3;
-                                    break;
+                                    velocity = new Vector2(tempVel.X, -randForce);
+                                    TargetPos = new Vector2((goalRect.X + goalRect.Width / 2) - (enemyRect.Width / 2), goalRect.Top - enemyRect.Height);
+                                    prevState = EnemyStates.Jumping;
+                                    goTo = true;
+                                    isFalling = true;
                                 }
-                              
-                            }
-                        }
-
-                      
-                        if(i == 1)
-                        {
-                            canJump = false;
-                            velocity = new Vector2(tempVel.X, -randForce);
-                            prevState = EnemyStates.Jumping;
-                            if(goalRect.X < position.X)
-                            {
-                                TargetPos = new Vector2(goalRect.X, goalRect.Top + (enemyRect.Height));
-                            }
-                            else if(goalRect.X > position.X)
-                            {
-                                TargetPos = new Vector2(goalRect.X + (goalRect.Width/2), goalRect.Top + (enemyRect.Height));
                             }
                             else
                             {
-                                TargetPos = new Vector2(goalRect.X + (goalRect.Width/2), goalRect.Top + (enemyRect.Height));
+                                enemyState = EnemyStates.GoTo;
                             }
-
-                            onPlatform = false;
+                           
                         }
-                        else if(i == 3) //Calculate distance needed to travel to get to jumping distance...Maybe make this loop itself
-                        {
-                            prevState = enemyState;
-                            enemyState = EnemyStates.GoTo;
-                        }
-                       
                     }
-                    else if (prevState == EnemyStates.Jumping)
+                    else if(prevState == EnemyStates.Jumping)
                     {
-                        //if(velocity.Y == 0 && (int)position.X == (int)TargetPos.X && blockBottom)
-                        //{
-                        //    enemyState = EnemyStates.GoTo;
-                        //}
-                        if(onPlatform)
+                        foreach (PlatformTile tile in SideTileMap.PlatformTiles)
                         {
-                            //currPlatform = goalRect;
-                            bounds = new Vector2(currPlatform.X, (currPlatform.X + currPlatform.Width) - enemyRect.Width);
-                            //GoTo(TargetPos, bounds);
-                            enemyState = EnemyStates.GoTo;
+                            Collision(tile.Rectangle);
                         }
-                        else
+                        enemyState = EnemyStates.GoTo;
+                        if (velocity.Y == 0 && blockBottom)
                         {
-                            GoTo(TargetPos, bounds); //This is the execution and what happens during and fixes direction going in 
+                            prevState = EnemyStates.Idle;
                         }
-                       
+
                     }
-
-
-                    #region Failed GA
-                    //if (possibleJumpLocations.Count != 0 && !gaJump.isStarted)
-                    //{
-                    //    gaJump.CreatePopulation(possibleJumpLocations, position, this, bounds);
-                    //    gaJump.CalcFitness();
-                    //    while (gaJump.GetBestFitness() != 25)
-                    //    {
-                    //        gaJump.CreatePopulation(possibleJumpLocations, position, this, bounds);
-                    //        gaJump.CalcFitness();
-                    //    }
-                    //    jumpInfo.startPos = gaJump.GetBestChromosome().startPos;
-                    //    jumpInfo.jumpForce = gaJump.GetBestChromosome().jumpForce;
-
-                    //}
-                    //if((canJump && position == jumpInfo.startPos) || isColliding)
-                    //{
-                    //    velocity.Y = jumpInfo.jumpForce * 2;
-                    //    position.Y -= 1;
-                    //    gaJump.isStarted = false;
-                    //    canJump = false;
-                    //    enemyState = EnemyStates.GoTo;
-                    //}
-                    //else if(!isColliding)
-                    //{
-                    //    if((int)position.X < jumpInfo.startPos.X)
-                    //    {
-
-                    //            velocity.X += moveSpeed;
-
-
-                    //    }
-                    //    else if((int)position.X > jumpInfo.startPos.X)
-                    //    {
-
-
-
-                    //            velocity.X -= moveSpeed;
-
-                    //    }
-
-                    //    //if ((int)position.X < player.Position.X)
-                    //    //{
-                    //    //    if (velocity.X >= 0)
-                    //    //    {
-                    //    //        if (velocity.X >= 0)
-                    //    //        {
-                    //    //            velocity.X += moveSpeed;
-                    //    //        }
-                    //    //        else
-                    //    //        {
-                    //    //            velocity.X = -velocity.X;
-                    //    //        }
-                    //    //    }
-                    //    //}
-                    //    //else if ((int)position.Y > player.Position.X)
-                    //    //{
-                    //    //    if (velocity.X <= 0)
-                    //    //    {
-                    //    //        velocity.X -= moveSpeed;
-                    //    //    }
-                    //    //    else
-                    //    //    {
-                    //    //        velocity.X = -velocity.X;
-                    //    //    }
-                    //    //}
-                    //    //GoTo(jumpInfo.startPos);
-                    //}
-
-                    //if ((enemyRect.Bottom == (int)player.playerRect.Bottom && player.canJump == true))
-                    //{
-                    //    enemyState = EnemyStates.GoTo;
-                    //}
-                    #endregion
                     break;
             }
 
-           
             if (isFalling)
             {
                 velocity.Y += gravity.Y;
             }
-             position += Velocity;
+            
+            if(velocity.X > 0 && velocity.X > maxRunSpeed)
+            {
+                velocity.X = maxRunSpeed;
+            }
+            if(velocity.X < 0 && velocity.X < -maxRunSpeed)
+            {
+                velocity.X = -maxRunSpeed;
+            }
+            if (velocity.Y > terminalVel)
+                velocity.Y = terminalVel;
+            position += velocity;
 
             enemyRect = new Rectangle((int)position.X, (int)position.Y, 48, 48);
 
-            //if(velocity.Y != 0 && blockBottom)
-            //{
-            //    if(enemyState == EnemyStates.Jumping)
-            //    {
-            //        enemyState = EnemyStates.GoTo;
-            //    }
-            //}
-
-           
-       
         }
 
         private void TileCollision(EmptyTile tile)
@@ -733,9 +675,9 @@ namespace AUTO_Matic.SideScroll
         public void Draw(SpriteBatch spriteBatch)
         {
            
-            Rectangle tRect = enemyRect;
+            
             //tRect.X += tRect.Width/5;
-            spriteBatch.Draw(texture, tRect, Color.White);
+            spriteBatch.Draw(texture, enemyRect, Color.White);
 
             foreach (Rectangle rect in vision)
             {
@@ -748,167 +690,172 @@ namespace AUTO_Matic.SideScroll
 
         public void Collision(Rectangle newRect)
         {
-             //blockBottom = false;
-         //isColliding = false;
-            if (enemyRect.TouchTopOf(newRect))
+           
+            if(enemyRect.TouchTopOf(newRect))
             {
-                //isColliding = true;
                 blockBottom = true;
-                //canJump = true;
+
                 if(isFalling)
                 {
                     while (enemyRect.Bottom > newRect.Top)
                     {
-                        velocity.Y += -(Velocity.Y);
-                        position.Y -= .1f;
+                        position.Y -= 1f;
                         enemyRect.Y = (int)position.Y;
                     }
-
+                    velocity.Y = 0;
                     isFalling = false;
-                    
-                    //animManager state changer here
+                    bounds = SideTileMap.GetNumTilesOfGround(newRect.Y / 64, newRect.X / 64);
+                    jumpDelay = 0;
+                   // if(bounds = new Vector2(0,0))
+                    if(bounds == Vector2.Zero)
+                    {
+                        bounds = new Vector2(64 - enemyRect.Width, 64 - enemyRect.Width);
+                    }
+                    else
+                    {
+                        bounds *= 64; //Calculate distance travled from this number to insure bound correction   
+                    }
+                  
+                    landingPos = position;
                 }
-                else if(enemyState == EnemyStates.Jumping)
+                if(enemyState == EnemyStates.Jumping)
                 {
-                    //currPlatform = newRect;
-                    //onPlatform = false;
+
                 }
                 else
                 {
                     while (enemyRect.Bottom > newRect.Top)
                     {
-                        velocity.Y += -(Velocity.Y);
-                        position.Y -= .1f;
+                        position.Y -= 1f;
                         enemyRect.Y = (int)position.Y;
+                        
                     }
+                    //jumpDelay++;
+                    //if(jumpDelay > maxJumpDelay)
+                    //{
 
-                    if(!canJump)
-                    {
-                        jumpDelay++;
-                    }
-                   
-                    if (jumpDelay >= maxJumpDelay)
-                    {
-                        canJump = true;
-                        jumpDelay = 0;
-                    }
-                }
-            }
-
-            if (enemyRect.TouchLeftOf(newRect))
-            {
-                while (enemyRect.Right > newRect.Left)
-                {
-                    position.X -= Math.Abs(Velocity.X);
-                    enemyRect.X = (int)position.X;
-                    //position.X = enemyRect.X;
-                }
-             
-                switch(enemyState)
-                {
-                    case EnemyStates.GoTo:
-                        if(velocity.X > 0)
-                        {
-                            position.X += -Velocity.X;
-                        }
-                        isColliding = true;
-                        //canJump = true;
-                        break;
-                    case EnemyStates.Jumping:
-                        if (velocity.X > 0)
-                        {
-                            //position.X += -Velocity.X;
-                        }
-                    
-                        break;
-                }
-               enemyRect.X = (int)position.X;
-            }
-
-            if(enemyRect.TouchRightOf(newRect))
-            {
-                float currX = position.X;
-                while (enemyRect.Left < newRect.Right)
-                {
-                    position.X += Math.Abs(Velocity.X);
-                    enemyRect.X = (int)position.X;
-                }
-
-                if(MathHelper.Distance(currX, position.X) > pixelSize * 2)
-                {
-                    position.X = (newRect.Left + enemyRect.Width) - 1;
-                    enemyRect.X = (int)position.X;
+                    //}
+                    //if(velocity.X > 0)
+                    //{
+                    //    canWalk = SideTileMap.CanWalk(newRect.Y / 64, newRect.X / 64, "right");
+                    //}
+                    //if(velocity.X < 0)
+                    //{
+                    //    canWalk = SideTileMap.CanWalk(newRect.Y / 64, newRect.X / 64, "right");
+                    //}
                 }
 
                
-                switch (enemyState)
+            }
+
+            if(enemyRect.TouchLeftOf(newRect))//enemy is colliding to the right
+            {
+                blockRight = true;
+                
+                while(enemyRect.Right > newRect.Left)
                 {
-                    case EnemyStates.GoTo:
-                        if(velocity.X < 0)
-                        {
-                            position.X += -Velocity.X;
-                            
-                        }
-                        isColliding = true;
-                        //canJump = true;
-                        break;
-                    case EnemyStates.Jumping:
-                        if (velocity.X < 0)
-                        {
-                            //position.X += -Velocity.X;
-                        }
-                        break;
+                    position.X -= 1f;
+                    enemyRect.X = (int)position.X;
                 }
+
+                position.X += -Velocity.X;
                 enemyRect.X = (int)position.X;
             }
 
-            if (enemyRect.TouchBottomOf(newRect))
+            if(enemyRect.TouchRightOf(newRect))//enemy is Colliding to the left
             {
+                blockLeft = true;
 
-                if (isFalling || enemyState == EnemyStates.Jumping)
+                while(enemyRect.Left < newRect.Right)
                 {
-                    while (enemyRect.Top < newRect.Bottom)
-                    {
-                        //velocity.Y = 0;
-                        position.Y += .01f;
-                        enemyRect.Y = (int)position.Y;
-                    }
-
-                    if (velocity.Y < 0)
-                    {
-                        velocity.Y = 0;
-                    }
-
-
-                }
-                else
-                {
-                    while (enemyRect.Top < newRect.Bottom)
-                    {
-                        velocity.Y = 0;
-                        position.Y += .01f;
-                        enemyRect.Y = (int)position.Y;
-                    }
-                    if (velocity.Y < 0)
-                    {
-                        velocity.Y = 0;
-                    }
+                    position.X += 1;
+                    enemyRect.X = (int)position.X;
                 }
 
-                if(enemyState == EnemyStates.Jumping)
-                {
-                    enemyState = EnemyStates.Idle;
-                }
-
-                //position.Y += -(velocity.Y);
-
-
-                isColliding = true;
+                position.X += -Velocity.X;
+                enemyRect.X = (int)position.X;
             }
 
+            if(enemyRect.TouchBottomOf(newRect))
+            {
+                while(enemyRect.Top < newRect.Bottom)
+                {
+                    position.Y += 1;
+                    enemyRect.Y = (int)position.Y;
+                }
 
+                if(velocity.Y < 0)
+                {
+                    velocity.Y = 0;
+                }
+                if(!isFalling)
+                {
+                    isFalling = true;
+                }
+            }
+        }
 
+        void TestCollision(Vector2 startPos, Rectangle tile, Vector2 goalPos, Vector2 tempVel, bool isPlatforms)
+        {
+            Rectangle eRect = new Rectangle((int)startPos.X, (int)startPos.Y, enemyRect.Width, enemyRect.Height);
+            if(eRect.TouchTopOf(tile))
+            {
 
+                if(tempVel.Y > 0)
+                {
+                    if (startPos.X == goalPos.X && isPlatforms || goalRect == tile)
+                    {
+                        jumpSuccess = true;
+                    }
+                    else if(!isPlatforms)
+                    {
+                        jumpFail = true;
+                    }
+                }
+                else if(tempVel.Y < 0) //Simulation of while jumping dont collide 
+                {
+
+                }
+               
+            }
+
+            if(eRect.TouchLeftOf(tile))
+            {
+                while (eRect.Right > tile.Left)
+                {
+                    eRect.X -= 1;
+                  
+                }
+
+                eRect.X += (int)-tempVel.X;
+               
+            }
+
+            if(eRect.TouchRightOf(tile))
+            {
+                while (eRect.Left < tile.Right)
+                {
+                    eRect.X += 1;
+
+                }
+
+                eRect.X += (int)-tempVel.X;
+            }
+
+            if(eRect.TouchBottomOf(tile))
+            {
+                while(eRect.Top < tile.Bottom)
+                {
+                    eRect.Y += 1;
+                }
+                if(tempVel.Y < 0)
+                    tempVel.Y = 0;
+                if(isPlatforms)
+                {
+                    if (tile == goalRect)
+                        jumpFail = true;
+                }
+            }
         }
 
         void PlatformCollision(PlatformTile tile)
@@ -943,62 +890,70 @@ namespace AUTO_Matic.SideScroll
 
         public int TestJump(Rectangle goalRect, float jumpForce, Vector2 startPos, float moveSpeedX, bool failTop)
         {
-            jumpSuccess = false;
             jumpFail = false;
-            bool isJumping = true;
-            Vector2 tempVel = new Vector2(moveSpeedX, -jumpForce);
-            Vector2 tempPos = position;
-            Rectangle testRect = enemyRect;
+            jumpSuccess = false;
+            Vector2 goalPos = new Vector2((goalRect.X + goalRect.Width / 2) - (enemyRect.Width/2), goalRect.Top - enemyRect.Height);
+            startPos.Y -= 1;
             int num = 0;
-            while(num == 0)
+            Vector2 velocity = new Vector2(moveSpeedX, -jumpForce);
+            while (num == 0)
             {
-
-                
-
-                if(isJumping)
+                if (startPos.X < goalPos.X)
                 {
-                    tempVel += gravity;
-                    //tempPos += tempVel;
-                    if (tempVel.Y > terminalVel * 1000)
+                    velocity.X += moveSpeed;
+                    if (velocity.X > maxRunSpeed)
                     {
-                        num = 2;
-                        break;
+                        velocity.X = maxRunSpeed;
+                    }
 
+                    if (startPos.X + velocity.X > goalPos.X)
+                    {
+                        startPos.X = goalPos.X;
+                        velocity.X = 0;
+                    }
+
+                }
+                if (startPos.X > goalPos.X)
+                {
+                    velocity.X -= moveSpeed;
+                    if (velocity.X < -maxRunSpeed)
+                    {
+                        velocity.X = -maxRunSpeed;
+                    }
+
+                    if (startPos.X + velocity.X < goalPos.X)
+                    {
+                        startPos.X = goalPos.X;
+                        velocity.X = 0;
                     }
                 }
 
-                tempPos += tempVel;
-                isColliding = false;
-                testRect = new Rectangle((int)tempPos.X, (int)tempPos.Y, enemyRect.Width, enemyRect.Height);
-                jumpFail = false;
-                jumpSuccess = false;
+                velocity.Y += gravity.Y;
+                if(velocity.Y > terminalVel)
+                {
+                    velocity.Y = terminalVel;
+                }
+
+                startPos += velocity;
+
                 foreach(EmptyTile tile in SideTileMap.EmptyTiles)
                 {
-                    testRect = TestCollision(tile.Rectangle, testRect, tempVel, tempPos, goalRect, isJumping, failTop);
-
+                    TestCollision(startPos, tile.Rectangle, goalPos, velocity, false);
                     if(jumpFail)
                     {
                         num = 2;
-                        break;
                     }
                 }
-
                 foreach(PlatformTile tile1 in SideTileMap.PlatformTiles)
                 {
-                    testRect = TestCollision(tile1.Rectangle, testRect, tempVel, tempPos, goalRect, isJumping, failTop);
-
+                    TestCollision(startPos, tile1.Rectangle, goalPos, velocity, true);
                     if (jumpSuccess)
-                    {
                         num = 1;
-                        break;
-                    }
+                    if (jumpFail)
+                        num = 2;
                 }
-
-               
             }
-
             return num;
-
         }
 
         public float Distance(Vector2 pos1, Vector2 pos2)
@@ -1006,122 +961,6 @@ namespace AUTO_Matic.SideScroll
             return (float)Math.Sqrt(Math.Pow(pos2.X - pos1.X, 2) + Math.Pow(pos2.Y - pos1.Y, 2));
         }
 
-        public Rectangle TestCollision(Rectangle newRect, Rectangle testRect, Vector2 tempVel, Vector2 tempPos, Rectangle goalRect, bool isJumping, bool failTop)
-        {
-            //blockBottom = false;
-            //isColliding = false;
-            if (testRect.TouchTopOf(newRect))
-            {
-                while (testRect.Bottom > newRect.Top)
-                {
-                    tempVel.Y += -(tempVel.Y);
-                    tempPos.Y -= .1f;
-                    testRect.Y = (int)tempPos.Y;
-                }
-
-                if(isJumping)
-                {
-                    if (newRect == goalRect)
-                    {
-                        jumpSuccess = true;
-                    }
-                    else
-                    {
-                        jumpFail = true;
-                    }
-                }
-               
-                //isColliding = true;
-                //blockBottom = true;
-                //if (isFalling)
-                //{
-                //    while (testRect.Bottom > newRect.Top)
-                //    {
-                //        velocity.Y += -(Velocity.Y);
-                //        position.Y -= .1f;
-                //        enemyRect.Y = (int)position.Y;
-                //    }
-
-                //    isFalling = false;
-
-                //    //animManager state changer here
-                //}
-                //else if (enemyState == EnemyStates.Jumping)
-                //{
-
-                //}
-                //else
-                //{
-                //    while (testRect.Bottom > newRect.Top)
-                //    {
-                //        tempVel.Y += -(tempVel.Y);
-                //        testRect.Y -= .1f;
-                //        enemy.Y = (int)position.Y;
-                //    }
-                //    jumpDelay++;
-                //    if (jumpDelay >= maxJumpDelay)
-                //    {
-                //        canJump = true;
-                //    }
-                //}
-            }
-
-            if (testRect.TouchLeftOf(newRect))
-            {
-                while (testRect.Right > newRect.Left)
-                {
-                    testRect.X -= 1;
-                    //position.X = playerRect.X;
-                }
-                isColliding = true;
-                //switch (enemyState)
-                //{
-                //    case EnemyStates.GoTo:
-                //        position.X += -Velocity.X;
-                //        break;
-                //}
-            }
-
-            if (testRect.TouchRightOf(newRect))
-            {
-                while (testRect.Left < newRect.Right)
-                {
-                    testRect.X += 1;
-                    //position.X = playerRect.X;
-                }
-
-                isColliding = true;
-                //switch (enemyState)
-                //{
-                //    case EnemyStates.GoTo:
-                //        position.X += -Velocity.X;
-                //        break;
-                //}
-            }
-
-            if (testRect.TouchBottomOf(newRect))
-            {
-                while(testRect.Top < newRect.Bottom)
-                {
-                    testRect.Y += 1;
-                }
-                if(failTop)
-                {
-                    jumpFail = true;
-                }
-               
-
-
-
-                //position.Y += -(velocity.Y);
-
-
-
-            }
-
-            return testRect;
-
-        }
         public float RandFloat(int min, int max)
         {
             Random r = new Random();
