@@ -262,7 +262,8 @@ namespace AUTO_Matic
                     }
                     else if(GameState == GameStates.TopDown)
                     {
-
+                        //if (changeLevel)
+                        //    map.Refresh(PosXLevel.xLevels, PosYLevel.yLevels, Diagonal.dLevels, pixelBits, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, PosXLevel.Points, PosYLevel.Points, Diagonal.Points);
                     }
                    
                     break;

@@ -110,6 +110,7 @@ namespace AUTO_Matic.TopDown
             PosYLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
 
         }
+
         #endregion
 
         #region Map Tracker
@@ -142,6 +143,13 @@ namespace AUTO_Matic.TopDown
         public int levelInY = 1;
         public List<Vector2> BoundIndexs = new List<Vector2>();
         #endregion
+
+        public void Load(ContentManager Content, Rectangle bounds)
+        {
+            texture = Content.Load<Texture2D>("TopDown/Textures/Player");
+            upperBound = 0 + (bounds.Height * -(levelInY - 1));
+            lowerBound = bounds.Height + (bounds.Height * -(levelInY - 1));
+        }
 
         public void GenerateMap(bool xLevel, bool yLevel, bool dLevel)
         {
@@ -269,9 +277,37 @@ namespace AUTO_Matic.TopDown
             {
                 case PlayerState.Movement:
                     Input();
+                    if(levelInX >= 1 && levelInY >= 1)
+                    {
+                        foreach(WallTiles tile in map.WallTiles)
+                        {
+                            Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
+                            if (changeLevel)
+                                break;
+                        }
+                    }
+                    else if(levelInY > 1 && levelInX == 1)
+                    {
+                        foreach(WallTiles tile in map.WallTiles)
+                        {
+                            Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
+                            if (changeLevel)
+                                break;
+                        }
+                    }
+                    else if(levelInY > 1 && levelInX > 1)
+                    {
+                        foreach(WallTiles tile in map.WallTiles)
+                        {
+                            Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
+                            if (changeLevel)
+                                break;
+                        }
+                    }
                     break;
-                
             }
+
+            
         }
 
         private void Input()
@@ -295,7 +331,7 @@ namespace AUTO_Matic.TopDown
             }
         }
 
-        public void Collision(Rectangle newRect, int xOffset, int yOffset)
+        public void Collision(Rectangle newRect, int xOffset, int yOffset, Rectangle bounds)
         {
 
 

@@ -30,7 +30,7 @@ namespace AUTO_Matic.TopDown
             get { return floorTiles; }
         }
 
-        int width, height;
+        private int width, height;
         public List<int[,]> xMapDims = new List<int[,]>();
         public List<int[,]> yMapDims = new List<int[,]>();
         public List<int[,]> dMapDims = new List<int[,]>();
@@ -39,6 +39,16 @@ namespace AUTO_Matic.TopDown
         int floorCount = 0;
         public List<int> rows = new List<int>();
         public List<int> cols = new List<int>();
+
+        public int Width
+        {
+            get { return width; }
+        }
+
+        public int Height
+        {
+            get { return height; }
+        }
 
         public void Generate(List<int[,]> maps, List<int[,]> yMaps, List<int[,]> dMaps, int size, int screenWidth, int screenHeight, List<Vector2> xPoints, List<Vector2> yPoints, List<Vector2> diagPoints)
         {
@@ -101,12 +111,13 @@ namespace AUTO_Matic.TopDown
                         {
                             //playerT.Add(new Playert(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                         }
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
 
-                        
                     }
                 }
-                width = maps[i].GetLength(1);
-                height = maps[i].GetLength(0);
+                //width = maps[i].GetLength(1);
+                //height = maps[i].GetLength(0);
             }
 
             for (int i = 1; i < yMaps.Count + 1; i++)
@@ -145,11 +156,12 @@ namespace AUTO_Matic.TopDown
                             //playerT.Add(new Playert(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                         }
 
-                        
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
                     }
                 }
-                width = yMaps[i].GetLength(1);
-                height = yMapDims[i].GetLength(0);
+                //width = yMaps[i].GetLength(1);
+                //height = yMapDims[i].GetLength(0);
             }
 
 
@@ -191,12 +203,12 @@ namespace AUTO_Matic.TopDown
                             //playerT.Add(new Playert(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                         }
 
-                        //width = (x + 1) * size;
-                        //height = (y + 1) * size;
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
                     }
                 }
-                width = dMaps[i].GetLength(1);
-                height = dMaps[i].GetLength(0);
+                //width = dMaps[i].GetLength(1);
+                //height = dMaps[i].GetLength(0);
             }
         }
 
@@ -270,12 +282,12 @@ namespace AUTO_Matic.TopDown
                             //playerT.Add(new Playert(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                         }
 
-                        //width = (x + 1) * size;
-                        //height = (y + 1) * size;
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
                     }
                 }
-                width = maps[i].GetLength(1);
-                height = maps[i].GetLength(0);
+                //width = maps[i].GetLength(1);
+                //height = maps[i].GetLength(0);
             }
 
             for (int i = 1; i < yMaps.Count + 1; i++)
@@ -315,12 +327,12 @@ namespace AUTO_Matic.TopDown
                             //playerT.Add(new Playert(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                         }
 
-                        //width = (x + 1) * size;
-                        //height = (y + 1) * size;
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
                     }
                 }
-                width = yMaps[i].GetLength(1);
-                height = yMaps[i].GetLength(0);
+                //width = yMaps[i].GetLength(1);
+                //height = yMaps[i].GetLength(0);
             }
 
 
@@ -362,12 +374,12 @@ namespace AUTO_Matic.TopDown
                             //playerT.Add(new Playert(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                         }
 
-                        //width = (x + 1) * size;
-                        //height = (y + 1) * size;
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
                     }
                 }
-                width = dMaps[i].GetLength(1);
-                height = dMaps[i].GetLength(0);
+                //width = dMaps[i].GetLength(1);
+                //height = dMaps[i].GetLength(0);
             }
 
         }
