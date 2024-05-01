@@ -210,7 +210,13 @@ namespace AUTO_Matic
                                 ssPlayer.isFalling = true;
 
                             }
-                       
+                            if(kb.IsKeyDown(Keys.RightShift))
+                            {
+                                GameState = GameStates.TopDown;
+                            }
+                            break;
+                        case GameStates.TopDown:
+
                             break;
                     }
 
@@ -244,13 +250,21 @@ namespace AUTO_Matic
                     spriteBatch.End();
                     break;
                 case Scenes.InGame:
-                    Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
-                    spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
+                    if(GameState == GameStates.SideScroll)
+                    {
+                        Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
+                        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
 
-                    SideTileMap.Draw(spriteBatch);
-                    ssPlayer.Draw(spriteBatch);
-                    enemy.Draw(spriteBatch);
-                    spriteBatch.End();
+                        SideTileMap.Draw(spriteBatch);
+                        ssPlayer.Draw(spriteBatch);
+                        enemy.Draw(spriteBatch);
+                        spriteBatch.End();
+                    }
+                    else if(GameState == GameStates.TopDown)
+                    {
+
+                    }
+                   
                     break;
             }
 

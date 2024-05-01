@@ -359,6 +359,8 @@ namespace AUTO_Matic.SideScroll
 
             foreach(EmptyTile tile in SideTileMap.EmptyTiles)
             {
+                if (enemyRect.TouchTopOf(tile.Rectangle))
+                    onPlatform = false;
                 Collision(tile.Rectangle);
             }
 
@@ -430,8 +432,16 @@ namespace AUTO_Matic.SideScroll
                         //{
                         //    leftOnX = player.playerRect.X; //where the playere was last to set direction priority if jump fails
                         //}
-                        enemyState = EnemyStates.Jumping;
-                      
+
+                        if (player.blockBottom)
+                        {
+                            enemyState = EnemyStates.Jumping;
+                        }
+                        else
+                        {
+                            leftOnX = (int)velocity.X;
+                            velocity.X = 0;
+                        }
                         break;
                     }
                     GoTo(bounds);
@@ -458,16 +468,21 @@ namespace AUTO_Matic.SideScroll
                                 }
                             }
                         }
-                        
-                        if(blockLeft || blockRight)
-                        {
 
+                        if (blockLeft || blockRight)
+                        {
+                            //int hello = 0;
                         }
                         else
                         {
                             if(possibleJumpLocations.Count != 0)
                             {
                                 goalRect = possibleJumpLocations[0];
+                                //Rectangle closestToPlayer = possibleJumpLocations[0]; in the code using this it grabs the wrong tile?
+                                //foreach(Rectangle rectangle in possibleJumpLocations)
+                                //{
+                                //    if (Distance(new Vector2(closestToPlayer.X, closestToPlayer.Y), player.Position) < Distance(new Vector2(rectangle.X, rectangle.Y), player.Position)) ;
+                                //}
                                 foreach (Rectangle rect in possibleJumpLocations)
                                 {
                                     if (MathHelper.Distance(goalRect.Y, position.Y) > MathHelper.Distance(rect.Y, position.Y))
@@ -476,11 +491,22 @@ namespace AUTO_Matic.SideScroll
                                     }
                                     else if (MathHelper.Distance(goalRect.Y, position.Y) == MathHelper.Distance(rect.Y, position.Y))
                                     {
-
+                                       
+                                        //if (MathHelper.Distance(goalRect.X, position.X) > MathHelper.Distance(rect.X, position.X))
+                                        //{
+                                        //    goalRect = rect;
+                                        //    //if (closestToPlayer.Y == goalRect.Y)
+                                        //    //{
+                                        //    //    if(MathHelper.Distance(closestToPlayer.X, position.X) < MathHelper.Distance(goalRect.X, position.X))
+                                        //    //    {
+                                        //    //        goalRect = closestToPlayer;
+                                        //    //    }
+                                        //    //}
+                                        //}
                                         if (MathHelper.Distance(goalRect.X, player.Position.X) > MathHelper.Distance(rect.X, player.Position.X))
                                         {
                                             goalRect = rect;
-                                            //Save second best in case this doesnt work?
+                                            //Save second best in case this doesnt work?...Saved the closest to player (works better than second best?)
                                         }
                                         //else
                                         //{
@@ -499,12 +525,12 @@ namespace AUTO_Matic.SideScroll
                                 Vector2 tempVel = Velocity;
                                 if (position.X < goalRect.X)
                                 {
-                                    tempVel.X = maxRunSpeed;
+                                    tempVel.X = (int)maxRunSpeed;
 
                                 }
                                 if (position.X > goalRect.X)
                                 {
-                                    tempVel.X = -maxRunSpeed;
+                                    tempVel.X = (int)-maxRunSpeed;
                                 }
                                 float randForce = maxJumpForce;
                                 int i = TestJump(goalRect, randForce, position, tempVel.X, false);
@@ -557,11 +583,50 @@ namespace AUTO_Matic.SideScroll
 
                                 if (i == 2)
                                 {
-                                    if(position.X < TargetPos.X)
+                                    if(leftOnX != 0)
                                     {
-                                        goTo = true;
-                                        TargetPos = new Vector2(leftOnX, position.Y);
+                                        velocity.X = leftOnX;
                                     }
+                                    else if(position.X > ((goalRect.X + goalRect.Width) + goalRect.Width/2))
+                                    {
+                                        velocity.X = -maxRunSpeed;
+                                        TargetPos = new Vector2(((goalRect.X + goalRect.Width) ), enemyRect.Y);
+                                    }
+                                    else if(position.X < goalRect.Left)
+                                    {
+                                        velocity.X = maxRunSpeed;
+                                        TargetPos = new Vector2(((goalRect.X - goalRect.Width)), enemyRect.Y);
+                                    }
+                                    else
+                                    {
+                                        if(RandFloat(0,1) > .5f)
+                                        {
+                                            TargetPos = new Vector2(((goalRect.X - goalRect.Width)), enemyRect.Y);
+                                        }
+                                        else
+                                        {
+                                            TargetPos = new Vector2(((goalRect.X + goalRect.Width)), enemyRect.Y);
+                                        }
+                                    }
+
+                                    if (blockRight)
+                                    {
+                                        velocity.X = -maxRunSpeed;
+                                    }
+                                    else if (blockLeft)
+                                    {
+                                        velocity.X = maxRunSpeed;
+                                    }
+                                    //else if (RandFloat(0, 1) > .5f)
+                                    //{
+                                    //    velocity.X = maxRunSpeed;
+                                    //}
+                                    //else
+                                    //{
+                                    //    velocity.X = -maxRunSpeed;
+                                    //}
+
+
 
                                     enemyState = EnemyStates.GoTo;
                                     //velocity.X = 0;

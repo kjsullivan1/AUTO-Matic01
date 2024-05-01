@@ -49,7 +49,7 @@ namespace AUTO_Matic.SideScroll
         float coeFric = 0;
         public float changeInTime = 0;
 
-        float maxRunSpeed = 5.5f;
+        public float maxRunSpeed = 5.5f;
         float terminalVel = 12f;
         float maxJumpSpeed = 8f;
         float maxDashSpeed = 22.5f;
