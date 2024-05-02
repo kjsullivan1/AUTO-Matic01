@@ -30,7 +30,7 @@ namespace AUTO_Matic.SideScroll
         Vector2 prevVel = Vector2.Zero;
         public Vector2 velocity = Vector2.Zero;
         public Rectangle playerRect;
-        public bool isFalling = true;
+        public bool isFalling = false;
         bool isColliding = false;
         Game1 game;
         KeyboardState prevKb;
@@ -39,7 +39,6 @@ namespace AUTO_Matic.SideScroll
         float moveSpeed = 2.15f;
         float iMoveSpeed;
         float iMaxRunSpeed;
-        float fallMoveSpeed = .35f;
 
 
         float mass = 20.0f;
@@ -50,6 +49,7 @@ namespace AUTO_Matic.SideScroll
         public float changeInTime = 0;
 
         public float maxRunSpeed = 5.5f;
+        float maxAirSpeed = 3.5f;
         float terminalVel = 12f;
         float maxJumpSpeed = 8f;
         float maxDashSpeed = 22.5f;
@@ -60,12 +60,14 @@ namespace AUTO_Matic.SideScroll
         Texture2D gunTexture;
         List<Bullet> bullets = new List<Bullet>();
         MouseState prevMs;
-        float bulletSpeed = .5f;
+        float bulletSpeed = 3.5f;
         float bulletMaxX = 15f;
         float bulletMaxY = 0;
         bool isShootDelay = false;
         float shootDelay = .8f;//In seconds
         float iShootDelay;
+        bool startShoot = false;
+        float bulletDmg = .65f;
         #endregion
 
         #region Jumping
@@ -99,14 +101,14 @@ namespace AUTO_Matic.SideScroll
         #endregion
         
         #region Dashing
-        public float dashForceX = 100f;
+        public float dashForceX = 25f;
         public float dashForceY = 0f;
         public bool canDash = true;
         float dashDistance = 3; //number of tiles that they can dash.
         Vector2 startDashPos = Vector2.Zero;
         //public bool isDashing = false;
         float dashCoolDown = 0;
-        float dashCoolDownMax = 3;
+        float dashCoolDownMax = 1.5f;
         Vector2 DashForce
         {
             get
@@ -123,31 +125,39 @@ namespace AUTO_Matic.SideScroll
             {
                 Vector2 pos = velocity;
 
-                if (pos.X > maxRunSpeed && !isFalling && playerState != PlayerStates.Dashing)
+                if (pos.X > maxRunSpeed && velocity.Y == 0 && playerState != PlayerStates.Dashing)
                 {
                     pos = new Vector2(maxRunSpeed, pos.Y);
                 }
-                if (pos.X > maxDashAirSpeed && playerState == PlayerStates.Dashing && isFalling)
+                if(pos.X > maxAirSpeed && velocity.Y != 0 && playerState != PlayerStates.Dashing)
+                {
+                    pos = new Vector2(maxAirSpeed, pos.Y);
+                }
+                if (pos.X > maxDashAirSpeed && playerState == PlayerStates.Dashing && velocity.Y != 0)
                 {
                     pos = new Vector2(maxDashAirSpeed, pos.Y);
 
                 }
-                if (pos.X > maxDashSpeed && playerState == PlayerStates.Dashing && !isFalling)
+                if (pos.X > maxDashSpeed && playerState == PlayerStates.Dashing && velocity.Y == 0)
                 {
                     pos = new Vector2(maxDashSpeed, pos.Y);
                 }
              
 
-                if (pos.X < -maxRunSpeed && !isFalling && playerState != PlayerStates.Dashing)
+                if (pos.X < -maxRunSpeed && velocity.Y == 0 && playerState != PlayerStates.Dashing)
                 {
                     pos = new Vector2(-maxRunSpeed, pos.Y);
                 }
-                if (pos.X < -maxDashSpeed && playerState == PlayerStates.Dashing && !isFalling)
+                if (pos.X < -maxAirSpeed && velocity.Y != 0 && playerState != PlayerStates.Dashing)
+                {
+                    pos = new Vector2(-maxAirSpeed, pos.Y);
+                }
+                if (pos.X < -maxDashSpeed && playerState == PlayerStates.Dashing && velocity.Y == 0)
                 {
                     pos = new Vector2(-maxDashSpeed, pos.Y);
                     //isDashing = false;
                 }
-                if (pos.X < -maxDashAirSpeed && playerState == PlayerStates.Dashing && isFalling)
+                if (pos.X < -maxDashAirSpeed && playerState == PlayerStates.Dashing && velocity.Y != 0)
                 {
                     pos = new Vector2(-maxDashAirSpeed, pos.Y);
                 }
@@ -262,6 +272,13 @@ namespace AUTO_Matic.SideScroll
                     SheetSize = new Point(4, 1);
                     fpms = 95;
                     break;
+                case AnimationStates.Shoot:
+                    texture = content.Load<Texture2D>("SideScroll/Animations/PlayerShoot");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(0, 0);
+                    SheetSize = new Point(3, 1);
+                    fpms = 120;
+                    break;
             }
 
             bool isRight = true, isLeft = false, isUp = false, isDown = false;
@@ -273,7 +290,7 @@ namespace AUTO_Matic.SideScroll
                 isDown = animManager.isDown;
             }
 
-            animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, Position);
+            animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, position);
 
             animManager.isRight = isRight;
             animManager.isLeft = isLeft;
@@ -282,7 +299,7 @@ namespace AUTO_Matic.SideScroll
         }
         #endregion
 
-        public void Load(ContentManager Content, Rectangle bounds, float friction)
+        public void Load(ContentManager Content, Rectangle bounds, float friction, Vector2 pos)
         {
             content = Content;
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile4");
@@ -295,14 +312,15 @@ namespace AUTO_Matic.SideScroll
             iShootDelay = shootDelay;
             dashDistance *= pixelSize;
             iMaxRunSpeed = maxRunSpeed;
+            position = pos;
 
         }
 
-        public void Update(GameTime gameTime, Vector2 gravity)
+        public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies)
         {
 
             Input();
-            if (Velocity == Vector2.Zero && !isFalling)
+            if (Velocity == Vector2.Zero && !isFalling && playerState != PlayerStates.Shooting)
             {
                 if (animState != AnimationStates.Idle)
                 {
@@ -351,7 +369,7 @@ namespace AUTO_Matic.SideScroll
                     if (isFalling)
                     {
                         velocity.Y += gravity.Y;
-                        moveSpeed = fallMoveSpeed;
+                        //moveSpeed = fallMoveSpeed;
 
                         if (Velocity.X > 0)
                         {
@@ -444,7 +462,24 @@ namespace AUTO_Matic.SideScroll
 
                     }
                     break;
-                    #endregion
+                #endregion
+
+                #region Shooting
+                case PlayerStates.Shooting:
+                    if (animManager.GetCurrFrame().X >= animManager.GetSheetSize().X - 1)
+                    {
+                        animManager.StopLoop();
+                        startShoot = true;
+                    }
+                    else
+                        startShoot = false;
+
+                    if(startShoot)
+                    {
+                        Input();
+                    }
+                    break;
+                #endregion
             }
 
 
@@ -453,6 +488,25 @@ namespace AUTO_Matic.SideScroll
             //playerRect = new Rectangle((int)(position.X + (collisionOffsetX - 6)), (int)position.Y, pixelSize / 2, pixelSize);
             // playerRect = new Rectangle()
             animManager.Update(gameTime, position);
+            if(bullets.Count != 0)
+            {
+                for (int i = bullets.Count - 1; i >= 0; i--)
+                {
+                    bullets[i].Update();
+                    foreach (SSEnemy enemy in enemies)
+                    {
+                        if (bullets[i].rect.TouchBottomOf(enemy.enemyRect) || bullets[i].rect.TouchTopOf(enemy.enemyRect)
+                        || bullets[i].rect.TouchLeftOf(enemy.enemyRect) || bullets[i].rect.TouchRightOf(enemy.enemyRect))
+                        {
+                            enemy.Health -= bulletDmg;
+                            bullets.RemoveAt(i);
+                            break;
+                        }
+                    }
+
+                }
+            }
+            
             //switch (playerState)
             //{
             //    case PlayerStates.Movement:
@@ -469,7 +523,11 @@ namespace AUTO_Matic.SideScroll
 
             if(kb.IsKeyDown(Keys.D) && kb.IsKeyDown(Keys.A))
             {
-                switch(playerState)
+                if (playerState == PlayerStates.Shooting)
+                {
+                    playerState = PlayerStates.Movement;
+                }
+                switch (playerState)
                 {
                     #region Movement
                     case PlayerStates.Movement:
@@ -567,7 +625,11 @@ namespace AUTO_Matic.SideScroll
             }
             else if(kb.IsKeyDown(Keys.D))
             {
-                switch(playerState)
+                if (playerState == PlayerStates.Shooting)
+                {
+                    playerState = PlayerStates.Movement;
+                }
+                switch (playerState)
                 {
                     #region Movement
                     case PlayerStates.Movement:
@@ -650,7 +712,7 @@ namespace AUTO_Matic.SideScroll
                     case PlayerStates.Jumping:
                         if (Velocity.X >= 0)
                         {
-                            velocity.X += fallMoveSpeed;
+                            velocity.X += moveSpeed;
                         }
                         else
                         {
@@ -662,7 +724,11 @@ namespace AUTO_Matic.SideScroll
             }
             else if(kb.IsKeyDown(Keys.A))
             {
-                switch(playerState)
+                if (playerState == PlayerStates.Shooting)
+                {
+                    playerState = PlayerStates.Movement;
+                }
+                switch (playerState)
                 {
                     #region Movement
                     case PlayerStates.Movement:
@@ -743,7 +809,7 @@ namespace AUTO_Matic.SideScroll
                     case PlayerStates.Jumping:
                         if (Velocity.X <= 0)
                         {
-                            velocity.X -= fallMoveSpeed;
+                            velocity.X -= moveSpeed;
                         }
                         else
                         {
@@ -821,7 +887,7 @@ namespace AUTO_Matic.SideScroll
                         }
                         else if (velocity.X == 0)
                         {
-                            if(animState != AnimationStates.Idle)
+                            if(animState != AnimationStates.Idle || animState != AnimationStates.Shoot)
                             {
                                 animState = AnimationStates.Idle;
                                 ChangeAnimation();
@@ -895,6 +961,53 @@ namespace AUTO_Matic.SideScroll
                         break;
                     #endregion
                 }
+            }
+
+
+
+            if (kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && blockBottom)
+            {
+                playerState = PlayerStates.Shooting;
+
+                if (velocity.Y != 0)
+                {
+                    if(velocity.Y < 0)
+                    {
+                        velocity.Y = 0.1f;
+                    }
+                }
+                velocity.X = 0;
+
+                animState = AnimationStates.Shoot;
+                ChangeAnimation();
+                animManager.StartLoop();
+            }
+
+            if (kb.IsKeyDown(Keys.S) && playerState == PlayerStates.Shooting && prevKb.IsKeyDown(Keys.S) && blockBottom)
+            {
+                playerState = PlayerStates.Shooting;
+                float fallSpeed = 2;
+                if(velocity.Y > 0)
+                {
+                    velocity.Y += fallSpeed;
+                }
+
+                if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter))
+                {
+                    if(animManager.isRight)
+                    {
+                        bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18/2), position.Y + playerRect.Height/1.5f), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content));
+                    }
+                    if(animManager.isLeft)
+                    {
+                        bullets.Add(new Bullet(new Vector2(position.X - (18/2), position.Y + playerRect.Height / 1.5f), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content));
+                    }
+                    
+                }
+            }
+            else if(playerState == PlayerStates.Shooting)
+            {
+                playerState = PlayerStates.Movement;
             }
 
             prevKb = kb;
@@ -1168,7 +1281,7 @@ namespace AUTO_Matic.SideScroll
             //    spriteBatch.Draw(texture, playerRect, Color.White);
             //}
            
-            spriteBatch.Draw(texture, playerRect, Color.White);
+            //spriteBatch.Draw(texture, playerRect, Color.White);
             animManager.Draw(spriteBatch);
 
             foreach (Bullet bullet in bullets)

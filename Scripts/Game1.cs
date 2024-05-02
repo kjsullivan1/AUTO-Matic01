@@ -55,8 +55,10 @@ namespace AUTO_Matic
         float friction = .85f;
         #endregion
 
+        List<Rectangle> healthBar = new List<Rectangle>();
 
-        SSEnemy enemy;
+        List<SSEnemy> enemies = new List<SSEnemy>();
+        //SSEnemy enemy;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -133,34 +135,37 @@ namespace AUTO_Matic
 
         public void StartNewGame()
         {
-            camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2));
+            camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2 - (64*3.5f), graphics.PreferredBackBufferHeight / 2));
             this.IsMouseVisible = false;
             Tile.Content = Content;
-            currMap = new int[mapHeight, mapWidth];
-            int[,] dims =
+
+            string filePath = Content.RootDirectory + "/SideScroll/Maps/Map0.txt";
+            SideTileMap.LoadMap(filePath);
+            enemies.Clear();
+            for(int i = 0; i < SideTileMap.enemySpawns.Count - 1; i++)
             {
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 3, 2, 3, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-
-            };
-
-            currMap = dims;
-            SideTileMap.Generate(currMap, 64);
+                enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i]));
+            }
+           
           
-            ssPlayer.Load(Content, Window.ClientBounds, friction);
-            enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
+            ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
+            healthBar.Clear();
+            for (int i = 0; i < 3; i++)
+            {
+                healthBar.Add(new Rectangle(25 + (i * 96), 136, 96, 64));
+            }
+            
+            //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
         }
 
+        public void TakeDamage()
+        {
+            if(healthBar.Count != 0)
+            {
+                healthBar.Remove(healthBar[healthBar.Count - 1]);
+            }
+            
+        }
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,
@@ -185,18 +190,63 @@ namespace AUTO_Matic
                     {
                         
                         case GameStates.SideScroll: //Default
-                            if(kb.IsKeyDown(Keys.Enter))//Reset Pos
+                            if(kb.IsKeyDown(Keys.P))//Reset Pos
                             {
-                                ssPlayer.Position = new Vector2(0, 0);
+                                StartNewGame();
+
                             }
 
-                            ssPlayer.Update(gameTime, Gravity);
-                            enemy.Update(gameTime, Gravity, ssPlayer);
+                            ssPlayer.Update(gameTime, Gravity, enemies);
+                            if(ssPlayer.Position.X > 1430)
+                            {
+                                camera.X = graphics.PreferredBackBufferWidth;
+                                //if(healthBar[0].X == ssPlayer.X && ssPlayer.X > 1435)
+                                //{
+
+                                //}
+                                //else
+                                //{
+                                //    if(healthBar.Count != 0)
+                                //    {
+                                //        for (int i = 0; i < healthBar.Count - 1; i++)
+                                //        {
+                                //            healthBar[i] = new Rectangle(1430, 120, 96, 64);
+                                //        }
+                                //    }
+                                   
+                                //}
+                               
+                            }
+                            if(ssPlayer.Position.X > 2610)
+                            {
+                                camera.X = graphics.PreferredBackBufferWidth + 64 * 7;
+                                //if (healthBar[0].X == ssPlayer.X && ssPlayer.X > 2615)
+                                //{
+
+                                //}
+                                //else
+                                //{
+                                //    if (healthBar.Count != 0)
+                                //    {
+                                //        for (int i = 0; i < healthBar.Count - 1; i++)
+                                //        {
+                                //            healthBar[i] = new Rectangle(2610, 120, 96, 64);
+                                //        }
+                                //    }
+
+                                //}
+
+                            }
+                            foreach(SSEnemy enemy in enemies)
+                            {
+                                enemy.Update(gameTime, Gravity, ssPlayer, this);
+                            }
+                            //enemy.Update(gameTime, Gravity, ssPlayer);
 
                             ssPlayer.blockBottom = false;
 
                           
-                            foreach (EmptyTile tile in SideTileMap.EmptyTiles)
+                            foreach (GroundTile tile in SideTileMap.GroundTiles)
                             {
                                 ssPlayer.Collision(tile.Rectangle);
                                 
@@ -252,12 +302,22 @@ namespace AUTO_Matic
                 case Scenes.InGame:
                     if(GameState == GameStates.SideScroll)
                     {
-                        Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
+                        Window.Title = camera.Position.ToString() + " PlayerPos: " + ssPlayer.Position.ToString();
+                        //Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
                         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
 
                         SideTileMap.Draw(spriteBatch);
                         ssPlayer.Draw(spriteBatch);
-                        enemy.Draw(spriteBatch);
+                        foreach(SSEnemy enemy in enemies)
+                        {
+                            enemy.Draw(spriteBatch);
+                        }
+                        for(int i = 0; i < healthBar.Count; i++)
+                        {
+                            spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), new Vector2(healthBar[i].X, healthBar[i].Y), healthBar[i], Color.Red);
+                        }
+                       
+                        //enemy.Draw(spriteBatch);
                         spriteBatch.End();
                     }
                     else if(GameState == GameStates.TopDown)

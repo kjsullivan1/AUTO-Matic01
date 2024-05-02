@@ -44,9 +44,9 @@ namespace AUTO_Matic
         }
     }
 
-    class EmptyTile : Tile
+    class GroundTile : Tile
     {
-        public EmptyTile(int i, Rectangle newRect)
+        public GroundTile(int i, Rectangle newRect)
         {
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
             this.Rectangle = newRect;
@@ -58,6 +58,48 @@ namespace AUTO_Matic
     class PlatformTile:Tile
     {
         public PlatformTile(int i, Rectangle newRect)
+        {
+            texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
+            this.Rectangle = newRect;
+            this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+        }
+    }
+
+    class BackgroundTile: Tile
+    {
+        public BackgroundTile(int i, Rectangle newRect)
+        {
+            texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
+            this.Rectangle = newRect;
+            this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+        }
+    }
+
+    class TopDoorTile:Tile
+    {
+        public TopDoorTile(int i, Rectangle newRect)
+        {
+            texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
+            this.Rectangle = newRect;
+            this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+        }
+
+    }
+
+    class BottomDoorTile : Tile
+    {
+        public BottomDoorTile(int i, Rectangle newRect)
+        {
+            texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
+            this.Rectangle = newRect;
+            this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+        }
+
+    }
+
+    class DungeonEntrance :Tile
+    {
+        public DungeonEntrance(int i, Rectangle newRect)
         {
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
             this.Rectangle = newRect;

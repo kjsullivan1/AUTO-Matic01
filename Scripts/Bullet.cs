@@ -19,7 +19,7 @@ namespace AUTO_Matic
         Texture2D bulletTexture;
         int width = 14;
         int height = 14;
-
+        public Rectangle rect;
 
 
         public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content)
@@ -27,13 +27,15 @@ namespace AUTO_Matic
             position = pos;
             moveSpeed = speed;
             this.maxSpeed = maxSpeed;
-            bulletTexture = content.Load<Texture2D>("Tile4");
+            bulletTexture = content.Load<Texture2D>("TopDown/Textures/Player");
+            rect = new Rectangle((int)pos.X, (int)pos.Y, width, height);
         }
 
         public void Update()
         {
             velocity.X += moveSpeed;
             position += velocity;
+            rect = new Rectangle((int)position.X, (int)position.Y, width, height);
         }
 
         public void Draw(SpriteBatch spriteBatch)

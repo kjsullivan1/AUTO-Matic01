@@ -26,13 +26,25 @@ namespace AUTO_Matic.SideScroll
         Vector2 bounds;
         int pixelSize = 64;
         Vector2 position = new Vector2(64 * 15 + 5, 0);
-        Rectangle enemyRect;
+        public Rectangle enemyRect;
         bool blockBottom = false;
         bool isFalling = true;
         bool isColliding = false;
         Vector2 TargetPos;
+        public float health = 3;
+        public bool dead = false;
+        public float Health
+        {
+            get { return health; }
+            set { health = value; 
+                if(health <= 0)
+                {
+                    dead = true;
+                }
+            }
+        }
 
-        float moveSpeed = 3f;
+        float moveSpeed = .5f;
         float mass = 20.0f;
         public float accel = 0;
         public float force = 0;
@@ -44,7 +56,7 @@ namespace AUTO_Matic.SideScroll
         int maxJumpDelay = 0;
         Vector2 gravity;
 
-        float maxRunSpeed = 5f;
+        float maxRunSpeed = 3.75f;
         float terminalVel = 12f;
         float maxJumpSpeed = 8f;
         int maxJumpForce = 18;
@@ -138,8 +150,10 @@ namespace AUTO_Matic.SideScroll
         #endregion
 
         #region Constructor
-        public SSEnemy(ContentManager manager, Rectangle Bounds, int visionLength)
+        public SSEnemy(ContentManager manager, Rectangle Bounds, int visionLength, Vector2 position)
         {
+            this.position = position;
+            enemyRect = new Rectangle((int)position.X, (int)position.Y, 48, 48);
             content = manager;
             bounds = new Vector2(0, Bounds.Width);
             texture = manager.Load<Texture2D>(@"Textures\TitleCrawlBG");
@@ -170,6 +184,9 @@ namespace AUTO_Matic.SideScroll
         Vector2 landingPos;
         bool canWalk = true;
         int leftOnX = 0;
+        #endregion
+
+        #region Attack Helpers
         #endregion
 
         private void CreateVision()
@@ -345,7 +362,7 @@ namespace AUTO_Matic.SideScroll
             }
         }
 
-        public void Update(GameTime gameTime, Vector2 gravity, SSPlayer player)
+        public void Update(GameTime gameTime, Vector2 gravity, SSPlayer player, Game1 game)
         {
             this.gravity = gravity;
             CreateVision();
@@ -357,7 +374,12 @@ namespace AUTO_Matic.SideScroll
             blockLeft = false;
             blockRight = false;
 
-            foreach(EmptyTile tile in SideTileMap.EmptyTiles)
+            if(dead)
+            {
+                position = new Vector2(-100, 10000);
+            }
+
+            foreach(GroundTile tile in SideTileMap.GroundTiles)
             {
                 if (enemyRect.TouchTopOf(tile.Rectangle))
                     onPlatform = false;
@@ -372,6 +394,7 @@ namespace AUTO_Matic.SideScroll
                 }
             }
             
+
             //Collision
             if(blockBottom)
             {
@@ -698,13 +721,30 @@ namespace AUTO_Matic.SideScroll
             }
             if (velocity.Y > terminalVel)
                 velocity.Y = terminalVel;
+
+            if(MathHelper.Distance(enemyRect.X, player.Position.X) < player.playerRect.Width)
+            {
+                game.TakeDamage();
+                if(velocity.X > 0)
+                {
+                    position.X += enemyRect.Width * 2;
+                    player.velocity.X -= maxRunSpeed;
+                }
+                if(velocity.X < 0)
+                {
+                    position.X -= enemyRect.Width * 2;
+                    player.velocity.X += maxRunSpeed;
+                }
+                
+            }
+
             position += velocity;
 
             enemyRect = new Rectangle((int)position.X, (int)position.Y, 48, 48);
 
         }
 
-        private void TileCollision(EmptyTile tile)
+        private void TileCollision(GroundTile tile)
         {
             Collision(tile.Rectangle);
 
@@ -1001,7 +1041,7 @@ namespace AUTO_Matic.SideScroll
 
                 startPos += velocity;
 
-                foreach(EmptyTile tile in SideTileMap.EmptyTiles)
+                foreach(GroundTile tile in SideTileMap.GroundTiles)
                 {
                     TestCollision(startPos, tile.Rectangle, goalPos, velocity, false);
                     if(jumpFail)
