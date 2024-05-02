@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using AUTO_Matic.SideScroll;
 using AUTO_Matic.TopDown;
 using System;
+using AUTO_Matic.Scripts.TopDown;
+using System.Threading;
 
 namespace AUTO_Matic
 {
@@ -21,7 +23,7 @@ namespace AUTO_Matic
         UIManager UIManager = new UIManager();
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.TitleScreen;
+        public Scenes currScene = Scenes.InGame;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -66,6 +68,18 @@ namespace AUTO_Matic
         TDPlayer tdPlayer;
         public List<Vector2> BoundIndexes = new List<Vector2>();
         int pixelBits = 64;
+        List<TDEnemy> tdEnemies = new List<TDEnemy>();
+        public int levelCount = 0;
+
+        public Rectangle Boss;
+        float shootRate = .5f;
+        float maxShootRate;
+        bool canShoot = false;
+        List<Bullet> bossBullets = new List<Bullet>();
+        float bulletSpeed = 6.25f;
+        float maxBulletSpeed = 20;
+        float bulletDmg = .5f;
+        float bossHealth = 8.65f;
         #endregion
         //SSEnemy enemy;
         public Game1()
@@ -89,7 +103,7 @@ namespace AUTO_Matic
             //graphics.HardwareModeSwitch = false;
             //graphics.IsFullScreen = true;
             graphics.ApplyChanges();
-
+            maxShootRate = shootRate;
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth/2, graphics.PreferredBackBufferHeight/2));
 
             
@@ -126,7 +140,7 @@ namespace AUTO_Matic
 
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             
-            //StartNewGame();
+            StartNewGame();
             // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
 
 
@@ -142,29 +156,72 @@ namespace AUTO_Matic
             // TODO: Unload any non ContentManager content here
         }
 
-        public void GenerateNewMap(bool xLevel, bool yLevel, bool dLevel)
+        public void GenerateNewMap(bool xLevel, bool yLevel, bool dLevel, bool isBoss)
         {
-            Random rand = new Random();
-            int num = rand.Next(1, 11);
+            if(!isBoss)
+            {
+                Random rand = new Random();
+                int num = rand.Next(1, 11);
 
-            string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + num + ".txt";
+                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + num + ".txt";
 
-            if (xLevel)
-                tdPlayer.PosXLevels.xLevels.Add(tdMap.GenerateMap(filePath));
-            if (yLevel)
-                tdPlayer.PosYLevels.yLevels.Add(tdMap.GenerateMap(filePath));
-            if (dLevel)
-                tdPlayer.DiagLevels.dLevels.Add(tdMap.GenerateMap(filePath));
+                if (xLevel)
+                    tdPlayer.PosXLevels.xLevels.Add(tdMap.GenerateMap(filePath));
+                if (yLevel)
+                    tdPlayer.PosYLevels.yLevels.Add(tdMap.GenerateMap(filePath));
+                if (dLevel)
+                    tdPlayer.DiagLevels.dLevels.Add(tdMap.GenerateMap(filePath));
 
-            tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
-                tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                tdEnemies.Clear();
+
+                tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+
+                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                    (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                    new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                foreach (Vector2 enemySpawn in tdMap.EnemySpawns)
+                {
+                    if (currBounds.Contains(enemySpawn))
+                        tdEnemies.Add(new TDEnemy(Content, enemySpawn, tdMap, tdMap.GenerateMap(filePath)));
+                }
+            }
+            if(isBoss)
+            {
+                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 0 + ".txt";
+
+                if (xLevel)
+                    tdPlayer.PosXLevels.xLevels.Add(tdMap.GenerateMap(filePath));
+                if (yLevel)
+                    tdPlayer.PosYLevels.yLevels.Add(tdMap.GenerateMap(filePath));
+                if (dLevel)
+                    tdPlayer.DiagLevels.dLevels.Add(tdMap.GenerateMap(filePath));
+
+                tdEnemies.Clear();
+
+                tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+
+                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                    (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                    new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                foreach (Vector2 enemySpawn in tdMap.EnemySpawns)
+                {
+                    if (currBounds.Contains(enemySpawn))
+                        Boss = new Rectangle((int)enemySpawn.X, (int)enemySpawn.Y, 320, 320);
+                }
+
+                canShoot = true;
+            }
         }
+
 
         public void StartDungeon()
         {
-            tdPlayer = new TDPlayer(this, 64, 120, 120);
+            tdPlayer = new TDPlayer(this, 64, 12, 12);
             tdMap = new TopDownMap();
-
+            Boss = new Rectangle();
+            levelCount = 0;
 
             graphics.PreferredBackBufferWidth = 64 * 25; //1600  // pixelBits * col
             graphics.PreferredBackBufferHeight = 64 * 15; //960  // pixelBits * row
@@ -176,19 +233,19 @@ namespace AUTO_Matic
 
             if (tdPlayer.levelInX == 1 && tdPlayer.levelInY == 1)
             {
-                GenerateNewMap(true, false, false);
+                GenerateNewMap(true, false, false, false);
             }
             else if (tdPlayer.levelInX > 1 && tdPlayer.levelInY == 1)
             {
-                GenerateNewMap(true, false, false);
+                GenerateNewMap(true, false, false, false);
             }
             else if (tdPlayer.levelInY > 1 && tdPlayer.levelInX == 1)
             {
-                GenerateNewMap(false, true, false);
+                GenerateNewMap(false, true, false, false);
             }
             else if (tdPlayer.levelInX > 1 && tdPlayer.levelInY > 1)
             {
-                GenerateNewMap(false, false, true);
+                GenerateNewMap(false, false, true, false);
             }
             BoundIndexes.Clear();
             BoundIndexes.Add(camera.Position);
@@ -278,7 +335,6 @@ namespace AUTO_Matic
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
             KeyboardState kb = Keyboard.GetState();
 
             switch(currScene)
@@ -376,8 +432,128 @@ namespace AUTO_Matic
                                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
                                     tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
                                 tdPlayer.changeLevel = false;
+                                levelCount++;
                             }
-                                
+                            
+                            for(int i = tdEnemies.Count - 1; i >= 0; i--)
+                            {
+                                tdEnemies[i].Upate(gameTime, tdPlayer.rectangle);
+                            }
+
+                            if(tdPlayer.bullets.Count != 0)
+                            {
+                                for(int i = tdPlayer.bullets.Count - 1; i >=0; i--)
+                                {
+                                    tdPlayer.bullets[i].Update();
+                                }
+                            }
+
+                            foreach(WallTiles tile in tdMap.WallTiles)
+                            {
+                                if (tdPlayer.bullets.Count != 0)
+                                {
+                                    for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                    {
+                                        if(tdPlayer.bullets[i].rect.Intersects(tile.Rectangle))
+                                        {
+                                            tdPlayer.bullets.RemoveAt(i);
+                                        }
+                                    }
+                                }
+                            }
+
+                            if(tdEnemies.Count != 0)
+                            {
+                                for (int j = tdEnemies.Count - 1; j >= 0; j--)
+                                {
+                                    if (tdPlayer.bullets.Count != 0)
+                                    {
+                                        for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                        {
+                                            if (tdPlayer.bullets[i].rect.Intersects(tdEnemies[j].Rectangle))
+                                            {
+                                                tdEnemies[j].Health -= tdPlayer.bulletDmg;
+                                                if(tdEnemies[j].Health <= 0)
+                                                {
+                                                    tdEnemies.RemoveAt(j);
+                                                    break;
+                                                }
+                                                tdPlayer.bullets.RemoveAt(i);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if(!canShoot)
+                            {
+                                shootRate -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                                if(shootRate < 0)
+                                {
+                                    shootRate = maxShootRate;
+                                    canShoot = true;
+                                }
+                            }
+
+                            if(canShoot)
+                            {
+                                if(tdPlayer.position.X < Boss.X + Boss.Width/2)
+                                {
+                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed, maxBulletSpeed), Content, true));
+                                }
+                                if(tdPlayer.position.X > Boss.X + Boss.Width/2)
+                                {
+                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, true));
+                                }
+                                if(tdPlayer.position.Y < Boss.Y + Boss.Height/2)
+                                {
+                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(maxBulletSpeed, -maxBulletSpeed), Content, false));
+                                }
+                                if (tdPlayer.position.Y > Boss.Y + Boss.Height / 2)
+                                {
+                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, false));
+                                }
+
+                                canShoot = false;
+                            }
+
+                            foreach(Bullet bullet in bossBullets)
+                            {
+                                bullet.Update();
+                            }
+
+
+                            for(int i = bossBullets.Count - 1; i >= 0; i--)
+                            {
+                                if(bossBullets[i].rect.Intersects(tdPlayer.rectangle))
+                                {
+                                    tdPlayer.Health -= bulletDmg;
+
+                                    if(tdPlayer.Health <= 0)
+                                    {
+                                        StartDungeon();
+                                    }
+
+                                    bossBullets.RemoveAt(i);
+                                }
+                            }
+                           
+                            if(levelCount >= tdPlayer.bossRoom)
+                            {
+                                for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                {
+                                    if (tdPlayer.bullets[i].rect.Intersects(Boss))
+                                    {
+                                         bossHealth -= tdPlayer.bulletDmg;
+                                        if (bossHealth <= 0)
+                                        {
+                                            Boss = new Rectangle();
+                                            break;
+                                        }
+                                        tdPlayer.bullets.RemoveAt(i);
+                                    }
+                                }
+                            }
+                            
                             break;
                     }
 
@@ -388,7 +564,6 @@ namespace AUTO_Matic
            
 
             // TODO: Add your update logic here
-
             base.Update(gameTime);
         }
 
@@ -436,6 +611,15 @@ namespace AUTO_Matic
                         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
                         tdMap.Draw(spriteBatch);
                         tdPlayer.Draw(spriteBatch);
+                        foreach(TDEnemy enemy in tdEnemies)
+                        {
+                            enemy.Draw(spriteBatch);
+                        }
+                        foreach(Bullet bullet in bossBullets)
+                        {
+                            bullet.Draw(spriteBatch);
+                        }
+                        spriteBatch.Draw(Content.Load<Texture2D>("TopDown/MapTiles/Tile11"), Boss, Color.White);
                         spriteBatch.End();
 
                         //if (changeLevel)

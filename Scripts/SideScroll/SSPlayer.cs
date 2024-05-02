@@ -996,11 +996,11 @@ namespace AUTO_Matic.SideScroll
                 {
                     if(animManager.isRight)
                     {
-                        bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18/2), position.Y + playerRect.Height/1.5f), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content));
+                        bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18/2), position.Y + playerRect.Height/1.5f), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true));
                     }
                     if(animManager.isLeft)
                     {
-                        bullets.Add(new Bullet(new Vector2(position.X - (18/2), position.Y + playerRect.Height / 1.5f), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content));
+                        bullets.Add(new Bullet(new Vector2(position.X - (18/2), position.Y + playerRect.Height / 1.5f), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true));
                     }
                     
                 }

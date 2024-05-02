@@ -20,20 +20,29 @@ namespace AUTO_Matic
         int width = 14;
         int height = 14;
         public Rectangle rect;
+        bool shootX = true;
 
-
-        public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content)
+        public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content, bool isX)
         {
             position = pos;
             moveSpeed = speed;
             this.maxSpeed = maxSpeed;
             bulletTexture = content.Load<Texture2D>("TopDown/Textures/Player");
             rect = new Rectangle((int)pos.X, (int)pos.Y, width, height);
+            shootX = isX;
         }
 
         public void Update()
         {
-            velocity.X += moveSpeed;
+            if (shootX)
+            {
+                velocity.X += moveSpeed;
+            }
+            else
+            {
+                velocity.Y += moveSpeed;
+            }
+           
             position += velocity;
             rect = new Rectangle((int)position.X, (int)position.Y, width, height);
         }

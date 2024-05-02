@@ -19,6 +19,8 @@ namespace AUTO_Matic.TopDown
         public enum PlayerState {Movement, Shooting, Death, Hit}
         public PlayerState playerState = PlayerState.Movement;
 
+        public int bossRoom = 3;
+
         #region Animations
         AnimationManager animManager;
         Texture2D texture;
@@ -74,17 +76,29 @@ namespace AUTO_Matic.TopDown
         #region Fields
         public Vector2 position;
         public Rectangle rectangle;
-        float moveSpeed = 3f;
+        float moveSpeed = 6f;
         public bool changeLevel = false;
         public bool isColliding = false;
         KeyboardState kb;
         KeyboardState prevKb;
         Game1 game;
-        int upperBound;
-        int lowerBound;
+        public int upperBound;
+        public int lowerBound;
         int pixelSize = 32;
         TopDownMap map;
         Rectangle bounds;
+        string shootDir = "";
+        float health = 1.5f;
+        public float Health
+        {
+            get { return health; }
+            set { health = value;
+                if(health <= 0)
+                {
+                    health = 0;
+                }
+            }
+        }
         #endregion
 
         #region Constructor
@@ -144,12 +158,27 @@ namespace AUTO_Matic.TopDown
         public List<Vector2> BoundIndexs = new List<Vector2>();
         #endregion
 
+        #region Shooting
+        Texture2D gunTexture;
+        public List<Bullet> bullets = new List<Bullet>();
+        MouseState prevMs;
+        float bulletSpeed = 3.5f;
+        float bulletMaxX = 15f;
+        float bulletMaxY = 15f;
+        bool isShootDelay = false;
+        float shootDelay = .8f;//In seconds
+        float iShootDelay;
+        bool startShoot = false;
+        public float bulletDmg = .65f;
+        #endregion
+
         public void Load(ContentManager Content, Rectangle bounds)
         {
             texture = Content.Load<Texture2D>("TopDown/Textures/Player");
             upperBound = 0 + (bounds.Height * -(levelInY - 1));
             lowerBound = bounds.Height + (bounds.Height * -(levelInY - 1));
             this.bounds = bounds;
+            this.content = Content;
         }
 
         public void GenerateMap(bool xLevel, bool yLevel, bool dLevel)
@@ -307,7 +336,6 @@ namespace AUTO_Matic.TopDown
                     }
                     break;
             }
-
             
         }
 
@@ -317,19 +345,44 @@ namespace AUTO_Matic.TopDown
             if (kb.IsKeyDown(Keys.D))
             {
                 position.X += moveSpeed;
+                shootDir = "right";
             }
-            if (kb.IsKeyDown(Keys.A))
+            else if (kb.IsKeyDown(Keys.A))
             {
                 position.X += -moveSpeed;
+                shootDir = "left";
             }
-            if (kb.IsKeyDown(Keys.W))
+            else if (kb.IsKeyDown(Keys.W))
             {
                 position.Y += -moveSpeed;
+                shootDir = "up";
             }
-            if (kb.IsKeyDown(Keys.S))
+            else if (kb.IsKeyDown(Keys.S))
             {
                 position.Y += moveSpeed;
+                shootDir = "down";
             }
+
+            if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter))
+            {
+                switch(shootDir)
+                {
+                    case "up":
+                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false));
+                        break;
+                    case "down":
+                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false));
+                        break;
+                    case "left":
+                        bullets.Add(new Bullet(new Vector2(rectangle.Left, rectangle.Y + (rectangle.Height/2)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true));
+                        break;
+                    case "right":
+                        bullets.Add(new Bullet(new Vector2(rectangle.Right, rectangle.Y + (rectangle.Height / 2)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true));
+                        break;
+                }
+                
+            }
+            prevKb = kb;
         }
 
         public void Collision(Rectangle newRect, int xOffset, int yOffset, Rectangle bounds)
@@ -407,7 +460,15 @@ namespace AUTO_Matic.TopDown
                     {
                         PosXLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosXLevels.xIndex = PosXLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        game.GenerateNewMap(true, false, false);
+                        if(game.levelCount >= bossRoom)
+                        {
+                            game.GenerateNewMap(true, false, false, true);
+                        }
+                        else
+                        {
+                            game.GenerateNewMap(true, false, false, false);
+                        }
+                        
                     }
 
                     changeLevel = true;
@@ -429,7 +490,16 @@ namespace AUTO_Matic.TopDown
 
                         DiagLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         DiagLevels.diagIndex = DiagLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        game.GenerateNewMap(false, false, true);
+
+                        if(game.levelCount >= bossRoom)
+                        {
+                            game.GenerateNewMap(false, false, true, true);
+                        }
+                        else
+                        {
+                            game.GenerateNewMap(false, false, true, false);
+                        }
+                       
                     }
 
                     changeLevel = true;
@@ -491,7 +561,16 @@ namespace AUTO_Matic.TopDown
                     {
                         PosXLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosXLevels.xIndex = PosXLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        game.GenerateNewMap(true, false, false);
+
+                        if(levelCount >= bossRoom)
+                        {
+                            game.GenerateNewMap(true, false, false, true);
+                        }
+                        else
+                        {
+                            game.GenerateNewMap(true, false, false, false);
+                        }
+                       
                     }
 
                     changeLevel = true;
@@ -518,7 +597,16 @@ namespace AUTO_Matic.TopDown
 
                         PosYLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosYLevels.yIndex = PosYLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        game.GenerateNewMap(false, true, false);
+
+                        if(game.levelCount >= bossRoom)
+                        {
+                            game.GenerateNewMap(false, true, false, true);
+                        }
+                        else
+                        {
+                            game.GenerateNewMap(false, true, false, false);
+                        }
+                       
                     }
 
                     changeLevel = true;
@@ -540,7 +628,16 @@ namespace AUTO_Matic.TopDown
 
                         DiagLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         DiagLevels.diagIndex = DiagLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        game.GenerateNewMap(false, false, true);
+
+                        if(game.levelCount >= bossRoom)
+                        {
+                            game.GenerateNewMap(false, false, true, true);
+                        }
+                        else
+                        {
+                            game.GenerateNewMap(false, false, true, false);
+                        }
+                       
                     }
 
                     changeLevel = true;
@@ -573,7 +670,16 @@ namespace AUTO_Matic.TopDown
                     {
                         PosYLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosYLevels.yIndex = PosYLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        game.GenerateNewMap(false, true, false);
+
+                        if (game.levelCount >= 0)
+                        {
+                            game.GenerateNewMap(false, true, false, true);
+                        }
+                        else
+                        {
+                            game.GenerateNewMap(false, true, false, false);
+                        }
+                       
                     }
 
                     changeLevel = true;
@@ -603,7 +709,16 @@ namespace AUTO_Matic.TopDown
 
                         DiagLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         DiagLevels.diagIndex = DiagLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        game.GenerateNewMap(false, false, true);
+
+                        if(game.levelCount >= bossRoom)
+                        {
+                            game.GenerateNewMap(false, false, true, true);
+                        }
+                        else
+                        {
+                            game.GenerateNewMap(false, false, true, false);
+                        }
+                      
                         upperBound += -bounds;
                         lowerBound += -bounds;
                     }
@@ -635,7 +750,16 @@ namespace AUTO_Matic.TopDown
                     {
                         PosYLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosYLevels.yIndex = PosYLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        game.GenerateNewMap(false, true, false);
+
+                        if(game.levelCount >= bossRoom)
+                        {
+                            game.GenerateNewMap(false, true, false, true);
+                        }
+                        else
+                        {
+                            game.GenerateNewMap(false, true, false, false);
+                        }
+                        
                     }
 
                     changeLevel = true;
@@ -669,7 +793,16 @@ namespace AUTO_Matic.TopDown
 
                         PosXLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosXLevels.xIndex = PosXLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        game.GenerateNewMap(true, false, false);
+
+                        if(game.levelCount >= bossRoom)
+                        {
+                            game.GenerateNewMap(true, false, false, true);
+                        }
+                        else
+                        {
+                            game.GenerateNewMap(true, false, false, false);
+                        }
+                       
                         upperBound += bounds;
                         lowerBound += bounds;
                     }
@@ -695,7 +828,16 @@ namespace AUTO_Matic.TopDown
 
                         DiagLevels.Points.Add(new Vector2(levelInX, levelInY));
                         DiagLevels.diagIndex = DiagLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        game.GenerateNewMap(false, false, true);
+
+                        if(game.levelCount >= bossRoom)
+                        {
+                            game.GenerateNewMap(false, false, true, true);
+                        }
+                        else
+                        {
+                            game.GenerateNewMap(false, false, true, false);
+                        }
+                       
                         upperBound += bounds;
                         lowerBound += bounds;
                     }
@@ -739,6 +881,11 @@ namespace AUTO_Matic.TopDown
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, rectangle, Color.White);
+
+            foreach(Bullet bullet in bullets)
+            {
+                bullet.Draw(spriteBatch);
+            }
         }
 
     }

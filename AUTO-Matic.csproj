@@ -53,10 +53,11 @@
     <Compile Include="Scripts\SideScroll\SSPlayer.cs" />
     <Compile Include="Scripts\SideScroll\Tile.cs" />
     <Compile Include="Scripts\SideScroll\SideTileMap.cs" />
+    <Compile Include="Scripts\TopDown\TDEnemy.cs" />
     <Compile Include="Scripts\TopDown\TDPlayer.cs" />
     <Compile Include="Scripts\TopDown\TDRectangleHelper.cs" />
-    <Compile Include="Scripts\TopDown\MapScripts\Tiles.cs" />
-    <Compile Include="Scripts\TopDown\MapScripts\TopDownMap.cs" />
+    <Compile Include="Scripts\TopDown\Tiles.cs" />
+    <Compile Include="Scripts\TopDown\TopDownMap.cs" />
     <Compile Include="Scripts\UI\UIButton.cs" />
     <Compile Include="Scripts\UI\UIButtonArgs.cs" />
     <Compile Include="Scripts\UI\UIHelper.cs" />

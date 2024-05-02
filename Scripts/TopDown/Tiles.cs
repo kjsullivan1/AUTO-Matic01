@@ -14,7 +14,7 @@ namespace AUTO_Matic.TopDown
         public Texture2D texture;
 
         private Rectangle rectangle;
-        public int index;
+        public int[] mapPoint;
         public Rectangle Rectangle
         {
             get { return rectangle; }
@@ -55,7 +55,7 @@ namespace AUTO_Matic.TopDown
         {
             texture = Content.Load<Texture2D>("TopDown/MapTiles/Tile" + i);
             this.Rectangle = newRect;
-            index = i;
+            //mapPoint = i;
         }
     }
 
@@ -65,7 +65,7 @@ namespace AUTO_Matic.TopDown
         {
             texture = Content.Load<Texture2D>("TopDown/MapTiles/Tile" + i);
             this.Rectangle = newRect;
-            index = i;
+           // mapPoint = i;
         }
     }
 
