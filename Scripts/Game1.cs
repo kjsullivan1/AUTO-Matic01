@@ -23,7 +23,7 @@ namespace AUTO_Matic
         UIManager UIManager = new UIManager();
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -140,7 +140,7 @@ namespace AUTO_Matic
 
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             
-            StartNewGame();
+            //StartNewGame();
             // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
 
 
