@@ -53,7 +53,7 @@ namespace AUTO_Matic.TopDown
     {
         public FloorTiles(int i, Rectangle newRect)
         {
-            texture = Content.Load<Texture2D>("TopDown/Textures/Tile" + i);
+            texture = Content.Load<Texture2D>("TopDown/MapTiles/Tile" + i);
             this.Rectangle = newRect;
             index = i;
         }
@@ -63,7 +63,7 @@ namespace AUTO_Matic.TopDown
     {
         public WallTiles(int i, Rectangle newRect)
         {
-            texture = Content.Load<Texture2D>("TopDown/Textures/Tile" + i);
+            texture = Content.Load<Texture2D>("TopDown/MapTiles/Tile" + i);
             this.Rectangle = newRect;
             index = i;
         }

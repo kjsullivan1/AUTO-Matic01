@@ -59,7 +59,7 @@ namespace AUTO_Matic.SideScroll
         float maxRunSpeed = 3.75f;
         float terminalVel = 12f;
         float maxJumpSpeed = 8f;
-        int maxJumpForce = 18;
+        int maxJumpForce = 50;
         int minJumpForce = 16;
         float maxAirSpeed;
         

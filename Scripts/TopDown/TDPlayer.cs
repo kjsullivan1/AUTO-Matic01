@@ -88,13 +88,13 @@ namespace AUTO_Matic.TopDown
         #endregion
 
         #region Constructor
-        public TDPlayer(Game1 game, int pixelSize, int levelInX, int levelInY, Rectangle bounds)
+        public TDPlayer(Game1 game, int pixelSize, int levelInX, int levelInY)
         {
             this.game = game;
-            this.pixelSize = pixelSize - 4;
+            this.pixelSize = pixelSize - 6;
             this.levelInX = levelInX;
             this.levelInY = levelInY;
-            this.bounds = bounds;
+            //this.bounds = bounds;
 
             DiagLevels.dLevels = new List<int[,]>();
             DiagLevels.Points = new List<Vector2>();
@@ -149,6 +149,7 @@ namespace AUTO_Matic.TopDown
             texture = Content.Load<Texture2D>("TopDown/Textures/Player");
             upperBound = 0 + (bounds.Height * -(levelInY - 1));
             lowerBound = bounds.Height + (bounds.Height * -(levelInY - 1));
+            this.bounds = bounds;
         }
 
         public void GenerateMap(bool xLevel, bool yLevel, bool dLevel)
@@ -277,27 +278,27 @@ namespace AUTO_Matic.TopDown
             {
                 case PlayerState.Movement:
                     Input();
-                    if(levelInX >= 1 && levelInY >= 1)
+                    if (levelInX >= 1 && levelInY >= 1)
                     {
-                        foreach(WallTiles tile in map.WallTiles)
+                        foreach (WallTiles tile in map.WallTiles)
                         {
                             Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
                             if (changeLevel)
                                 break;
                         }
                     }
-                    else if(levelInY > 1 && levelInX == 1)
+                    else if (levelInY > 1 && levelInX == 1)
                     {
-                        foreach(WallTiles tile in map.WallTiles)
+                        foreach (WallTiles tile in map.WallTiles)
                         {
                             Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
                             if (changeLevel)
                                 break;
                         }
                     }
-                    else if(levelInY > 1 && levelInX > 1)
+                    else if (levelInY > 1 && levelInX > 1)
                     {
-                        foreach(WallTiles tile in map.WallTiles)
+                        foreach (WallTiles tile in map.WallTiles)
                         {
                             Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
                             if (changeLevel)
@@ -334,7 +335,38 @@ namespace AUTO_Matic.TopDown
         public void Collision(Rectangle newRect, int xOffset, int yOffset, Rectangle bounds)
         {
 
-
+            if(rectangle.TouchTopOf(newRect))
+            {
+                while(rectangle.Bottom > newRect.Top)
+                {
+                    rectangle.Y -= 1;
+                }
+                position.Y -= moveSpeed;
+            }
+            if(rectangle.TouchBottomOf(newRect))
+            {
+                while(rectangle.Top < newRect.Bottom)
+                {
+                    rectangle.Y += 1;
+                }
+                position.Y += moveSpeed;
+            }
+            if(rectangle.TouchLeftOf(newRect))
+            {
+                while(rectangle.Right > newRect.Left)
+                {
+                    rectangle.X -= 1;
+                }
+                position.X -= moveSpeed;
+            }
+            if(rectangle.TouchRightOf(newRect))
+            {
+                while(rectangle.Left < newRect.Right)
+                {
+                    rectangle.X += 1;
+                }
+                position.X += moveSpeed;
+            }
 
             //Border collisions
             if ((position.X + (rectangle.Width / 8f) < (xOffset - (xOffset / (levelInX)))))
@@ -375,7 +407,7 @@ namespace AUTO_Matic.TopDown
                     {
                         PosXLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosXLevels.xIndex = PosXLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        GenerateMap(true, false, false);
+                        game.GenerateNewMap(true, false, false);
                     }
 
                     changeLevel = true;
@@ -397,7 +429,7 @@ namespace AUTO_Matic.TopDown
 
                         DiagLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         DiagLevels.diagIndex = DiagLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        GenerateMap(false, false, true);
+                        game.GenerateNewMap(false, false, true);
                     }
 
                     changeLevel = true;
@@ -459,7 +491,7 @@ namespace AUTO_Matic.TopDown
                     {
                         PosXLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosXLevels.xIndex = PosXLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        GenerateMap(true, false, false);
+                        game.GenerateNewMap(true, false, false);
                     }
 
                     changeLevel = true;
@@ -486,7 +518,7 @@ namespace AUTO_Matic.TopDown
 
                         PosYLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosYLevels.yIndex = PosYLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        GenerateMap(false, true, false);
+                        game.GenerateNewMap(false, true, false);
                     }
 
                     changeLevel = true;
@@ -508,7 +540,7 @@ namespace AUTO_Matic.TopDown
 
                         DiagLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         DiagLevels.diagIndex = DiagLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        GenerateMap(false, false, true);
+                        game.GenerateNewMap(false, false, true);
                     }
 
                     changeLevel = true;
@@ -541,7 +573,7 @@ namespace AUTO_Matic.TopDown
                     {
                         PosYLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosYLevels.yIndex = PosYLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        GenerateMap(false, true, false);
+                        game.GenerateNewMap(false, true, false);
                     }
 
                     changeLevel = true;
@@ -571,7 +603,7 @@ namespace AUTO_Matic.TopDown
 
                         DiagLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         DiagLevels.diagIndex = DiagLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        GenerateMap(false, false, true);
+                        game.GenerateNewMap(false, false, true);
                         upperBound += -bounds;
                         lowerBound += -bounds;
                     }
@@ -603,7 +635,7 @@ namespace AUTO_Matic.TopDown
                     {
                         PosYLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosYLevels.yIndex = PosYLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        GenerateMap(false, true, false);
+                        game.GenerateNewMap(false, true, false);
                     }
 
                     changeLevel = true;
@@ -637,7 +669,7 @@ namespace AUTO_Matic.TopDown
 
                         PosXLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         PosXLevels.xIndex = PosXLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        GenerateMap(true, false, false);
+                        game.GenerateNewMap(true, false, false);
                         upperBound += bounds;
                         lowerBound += bounds;
                     }
@@ -663,7 +695,7 @@ namespace AUTO_Matic.TopDown
 
                         DiagLevels.Points.Add(new Vector2(levelInX, levelInY));
                         DiagLevels.diagIndex = DiagLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
-                        GenerateMap(false, false, true);
+                        game.GenerateNewMap(false, false, true);
                         upperBound += bounds;
                         lowerBound += bounds;
                     }

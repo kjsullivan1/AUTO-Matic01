@@ -133,12 +133,12 @@ namespace AUTO_Matic.SideScroll
                 {
                     pos = new Vector2(maxAirSpeed, pos.Y);
                 }
-                if (pos.X > maxDashAirSpeed && playerState == PlayerStates.Dashing && velocity.Y != 0)
+                if (pos.X > maxDashAirSpeed && playerState == PlayerStates.Dashing && isFalling)
                 {
                     pos = new Vector2(maxDashAirSpeed, pos.Y);
 
                 }
-                if (pos.X > maxDashSpeed && playerState == PlayerStates.Dashing && velocity.Y == 0)
+                if (pos.X > maxDashSpeed && playerState == PlayerStates.Dashing && !isFalling)
                 {
                     pos = new Vector2(maxDashSpeed, pos.Y);
                 }
@@ -152,12 +152,12 @@ namespace AUTO_Matic.SideScroll
                 {
                     pos = new Vector2(-maxAirSpeed, pos.Y);
                 }
-                if (pos.X < -maxDashSpeed && playerState == PlayerStates.Dashing && velocity.Y == 0)
+                if (pos.X < -maxDashSpeed && playerState == PlayerStates.Dashing && !isFalling)
                 {
                     pos = new Vector2(-maxDashSpeed, pos.Y);
                     //isDashing = false;
                 }
-                if (pos.X < -maxDashAirSpeed && playerState == PlayerStates.Dashing && velocity.Y != 0)
+                if (pos.X < -maxDashAirSpeed && playerState == PlayerStates.Dashing && isFalling)
                 {
                     pos = new Vector2(-maxDashAirSpeed, pos.Y);
                 }

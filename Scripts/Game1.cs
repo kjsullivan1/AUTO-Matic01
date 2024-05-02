@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using AUTO_Matic.SideScroll;
+using AUTO_Matic.TopDown;
+using System;
 
 namespace AUTO_Matic
 {
@@ -19,7 +21,7 @@ namespace AUTO_Matic
         UIManager UIManager = new UIManager();
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -58,6 +60,13 @@ namespace AUTO_Matic
         List<Rectangle> healthBar = new List<Rectangle>();
 
         List<SSEnemy> enemies = new List<SSEnemy>();
+
+        #region TopDown
+        TopDownMap tdMap;
+        TDPlayer tdPlayer;
+        public List<Vector2> BoundIndexes = new List<Vector2>();
+        int pixelBits = 64;
+        #endregion
         //SSEnemy enemy;
         public Game1()
         {
@@ -117,7 +126,7 @@ namespace AUTO_Matic
 
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             
-            StartNewGame();
+            //StartNewGame();
             // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
 
 
@@ -133,6 +142,60 @@ namespace AUTO_Matic
             // TODO: Unload any non ContentManager content here
         }
 
+        public void GenerateNewMap(bool xLevel, bool yLevel, bool dLevel)
+        {
+            Random rand = new Random();
+            int num = rand.Next(1, 11);
+
+            string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + num + ".txt";
+
+            if (xLevel)
+                tdPlayer.PosXLevels.xLevels.Add(tdMap.GenerateMap(filePath));
+            if (yLevel)
+                tdPlayer.PosYLevels.yLevels.Add(tdMap.GenerateMap(filePath));
+            if (dLevel)
+                tdPlayer.DiagLevels.dLevels.Add(tdMap.GenerateMap(filePath));
+
+            tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+        }
+
+        public void StartDungeon()
+        {
+            tdPlayer = new TDPlayer(this, 64, 120, 120);
+            tdMap = new TopDownMap();
+
+
+            graphics.PreferredBackBufferWidth = 64 * 25; //1600  // pixelBits * col
+            graphics.PreferredBackBufferHeight = 64 * 15; //960  // pixelBits * row
+            graphics.IsFullScreen = false;
+            graphics.ApplyChanges();
+            camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)), graphics.PreferredBackBufferHeight - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
+            camera.Zoom = 1f;
+            Tiles.Content = Content;
+
+            if (tdPlayer.levelInX == 1 && tdPlayer.levelInY == 1)
+            {
+                GenerateNewMap(true, false, false);
+            }
+            else if (tdPlayer.levelInX > 1 && tdPlayer.levelInY == 1)
+            {
+                GenerateNewMap(true, false, false);
+            }
+            else if (tdPlayer.levelInY > 1 && tdPlayer.levelInX == 1)
+            {
+                GenerateNewMap(false, true, false);
+            }
+            else if (tdPlayer.levelInX > 1 && tdPlayer.levelInY > 1)
+            {
+                GenerateNewMap(false, false, true);
+            }
+            BoundIndexes.Clear();
+            BoundIndexes.Add(camera.Position);
+            tdPlayer.Load(Content, camera.viewport.Bounds);
+            tdPlayer.position = new Vector2((graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) + (64 * 2), -(graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) + (64 * 2));
+        }
+
         public void StartNewGame()
         {
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2 - (64*3.5f), graphics.PreferredBackBufferHeight / 2));
@@ -146,8 +209,9 @@ namespace AUTO_Matic
             {
                 enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i]));
             }
-           
-          
+
+            camera.Zoom = 1.35f;
+
             ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
             healthBar.Clear();
             for (int i = 0; i < 3; i++)
@@ -165,6 +229,44 @@ namespace AUTO_Matic
                 healthBar.Remove(healthBar[healthBar.Count - 1]);
             }
             
+        }
+
+        Vector2 CameraPos()
+        {
+            Vector2 pos = camera.Position;
+            //pos = new Vector2(Window.ClientBounds.Width / 2 + (Window.ClientBounds.Width * (levelInX - 1)), graphics.PreferredBackBufferHeight / 2 + (graphics.PreferredBackBufferHeight * (levelInY - 1)));
+            if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) > pos.X))
+            {
+                pos.X += graphics.PreferredBackBufferWidth / pixelBits;
+            }
+            else if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) < pos.X))
+            {
+                pos.X -= graphics.PreferredBackBufferWidth / pixelBits;
+            }
+            if (((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))) < pos.Y))
+            {
+                pos.Y -= graphics.PreferredBackBufferHeight / pixelBits;
+            }
+            else if ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) > pos.Y))
+            {
+                pos.Y += graphics.PreferredBackBufferHeight / pixelBits;
+            }
+
+            if (BoundIndexes.Contains(new Vector2((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1))), 
+                (graphics.PreferredBackBufferHeight / 2 + (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))))))
+            {
+
+            }
+            else
+            {
+                BoundIndexes.Add(new Vector2((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1))), 
+                    (graphics.PreferredBackBufferHeight / 2 + (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)))));
+            }
+
+
+            return pos;
+
+
         }
 
         /// <summary>
@@ -262,11 +364,20 @@ namespace AUTO_Matic
                             }
                             if(kb.IsKeyDown(Keys.RightShift))
                             {
+                                StartDungeon();
                                 GameState = GameStates.TopDown;
                             }
                             break;
                         case GameStates.TopDown:
-
+                            tdPlayer.Update(gameTime, tdMap);
+                            camera.Update(CameraPos());
+                            if(tdPlayer.changeLevel)
+                            {
+                                tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                                tdPlayer.changeLevel = false;
+                            }
+                                
                             break;
                     }
 
@@ -322,6 +433,11 @@ namespace AUTO_Matic
                     }
                     else if(GameState == GameStates.TopDown)
                     {
+                        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
+                        tdMap.Draw(spriteBatch);
+                        tdPlayer.Draw(spriteBatch);
+                        spriteBatch.End();
+
                         //if (changeLevel)
                         //    map.Refresh(PosXLevel.xLevels, PosYLevel.yLevels, Diagonal.dLevels, pixelBits, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, PosXLevel.Points, PosYLevel.Points, Diagonal.Points);
                     }
@@ -498,6 +614,19 @@ namespace AUTO_Matic
         void TitleCrawl(float crawlSpeed)
         {
             camera.Update(new Vector2(camera.X, camera.Y + crawlSpeed));
+        }
+
+        public float RandFloat(int min, int max)
+        {
+            Random r = new Random();
+            float decimalNumber;
+            string beforePoint = r.Next(min, max).ToString();//number before decimal point
+            string afterPoint = r.Next(0, 10).ToString();
+            string afterPoint2 = r.Next(0, 10).ToString();
+            string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
+                                                          //string secondDP = r.Next(0, 9).ToString();//2nd decimal point
+            string combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
+            return decimalNumber = float.Parse(combined);
         }
     }
 }

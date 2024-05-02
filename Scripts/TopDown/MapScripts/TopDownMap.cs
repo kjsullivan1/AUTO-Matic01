@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,8 +19,8 @@ namespace AUTO_Matic.TopDown
 
         //public class player to create the player 
 
-        private List<EnemySpawn> enemySpawns = new List<EnemySpawn>();
-        public List<EnemySpawn> EnemySpawns
+        private List<Vector2> enemySpawns = new List<Vector2>();
+        public List<Vector2> EnemySpawns
         {
             get { return enemySpawns; }
         }
@@ -89,28 +90,32 @@ namespace AUTO_Matic.TopDown
                     {
                         int num = maps[i][y, x];
 
-                        if (num == 2)//Walls
+                        if (num == 10 || num == 1 || num == 2 || num == 3|| num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
                         {
                             wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             wallTiles[wallCount].index = num;
                             wallCount++;
                         }
-                        if (num == 3) //enemy
+                        if (num == 11) //enemy
                         {
+                            enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), y * size));
+                            floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorTiles[floorCount].index = 9;
+                            floorCount++;
                             //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             //skullTiles[skullCount].mapPoint = new int[] { y, x };
                             //skullCount++;
                         }
-                        if (num == 1) //Floors
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15) //Floors
                         {
                             floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             floorTiles[floorCount].index = num;
                             floorCount++;
                         }
-                        if (num == 4)//player 
-                        {
-                            //playerT.Add(new Playert(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
-                        }
+                        //if (num == 4)//player 
+                        //{
+                        //    //playerT.Add(new Playert(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                        //}
                         width = (x + 1) * size;
                         height = (y + 1) * size;
 
@@ -132,28 +137,29 @@ namespace AUTO_Matic.TopDown
                     {
                         int num = yMaps[i - 1][y, x];
 
-                        if (num == 2)
+                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
                         {
                             wallTiles.Add(new WallTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             wallTiles[wallCount].index = num;
                             wallCount++;
                         }
-                        if (num == 3)//enemies
+                        if (num == 11) //enemy
                         {
-                            //skullTiles.Add(new SkullTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            enemySpawns.Add(new Vector2(x * size, (y * size) - (levelInY * screenHeight)));
+                            floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            //floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            floorTiles[floorCount].index = num;
+                            floorCount++;
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             //skullTiles[skullCount].mapPoint = new int[] { y, x };
                             //skullCount++;
                         }
-                        if (num == 1)
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15) //Floors
                         {
                             floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             //floorTiles[floorCount].mapPoint = new int[] { y, x };
                             floorTiles[floorCount].index = num;
                             floorCount++;
-                        }
-                        if (num == 4)//player
-                        {
-                            //playerT.Add(new Playert(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                         }
 
                         width = (x + 1) * size;
@@ -178,29 +184,30 @@ namespace AUTO_Matic.TopDown
                         int levelInX = (int)diagPoints[i].X;
                         int levelInY = (int)diagPoints[i].Y;
 
-                        if (num == 2)
+                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
                         {
                             wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             //wallTiles[wallCount].mapPoint = new int[] { y, x };
                             wallTiles[wallCount].index = num;
                             wallCount++;
                         }
-                        if (num == 3)//enemy
+                        if (num == 11) //enemy
                         {
-                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight)));
+                            floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            //floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            floorTiles[floorCount].index = num;
+                            floorCount++;
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             //skullTiles[skullCount].mapPoint = new int[] { y, x };
                             //skullCount++;
                         }
-                        if (num == 1)
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15) //Floors
                         {
                             floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             //floorTiles[floorCount].mapPoint = new int[] { y, x };
                             floorTiles[floorCount].index = num;
                             floorCount++;
-                        }
-                        if (num == 4)//player
-                        {
-                            //playerT.Add(new Playert(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                         }
 
                         width = (x + 1) * size;
@@ -257,29 +264,27 @@ namespace AUTO_Matic.TopDown
                     {
                         int num = maps[i][y, x];
 
-                        if (num == 2)
+                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
                         {
                             wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
-                           // wallTiles[wallCount].mapPoint = new int[] { y, x };
                             wallTiles[wallCount].index = num;
                             wallCount++;
                         }
-                        if (num == 3) //enemy
+                        if (num == 11) //enemy
                         {
+                            enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), y * size));
+                            floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorTiles[floorCount].index = 9;
+                            floorCount++;
                             //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             //skullTiles[skullCount].mapPoint = new int[] { y, x };
                             //skullCount++;
                         }
-                        if (num == 1)
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15) //Floors
                         {
                             floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
-                            //floorTiles[floorCount].mapPoint = new int[] { y, x };
                             floorTiles[floorCount].index = num;
                             floorCount++;
-                        }
-                        if (num == 4)//player
-                        {
-                            //playerT.Add(new Playert(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                         }
 
                         width = (x + 1) * size;
@@ -302,29 +307,29 @@ namespace AUTO_Matic.TopDown
                     {
                         int num = yMaps[i - 1][y, x];
 
-                        if (num == 2)
+                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
                         {
                             wallTiles.Add(new WallTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
-                            //wallTiles[wallCount].mapPoint = new int[] { y, x };
                             wallTiles[wallCount].index = num;
                             wallCount++;
                         }
-                        if (num == 3)//enemy
+                        if (num == 11) //enemy
                         {
-                            //skullTiles.Add(new SkullTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            enemySpawns.Add(new Vector2(x * size, (y * size) - (levelInY * screenHeight)));
+                            floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            //floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            floorTiles[floorCount].index = num;
+                            floorCount++;
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             //skullTiles[skullCount].mapPoint = new int[] { y, x };
                             //skullCount++;
                         }
-                        if (num == 1)
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15) //Floors
                         {
                             floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             //floorTiles[floorCount].mapPoint = new int[] { y, x };
                             floorTiles[floorCount].index = num;
                             floorCount++;
-                        }
-                        if (num == 4)//player
-                        {
-                            //playerT.Add(new Playert(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                         }
 
                         width = (x + 1) * size;
@@ -349,29 +354,30 @@ namespace AUTO_Matic.TopDown
                         int levelInX = (int)diagPoints[i].X;
                         int levelInY = (int)diagPoints[i].Y;
 
-                        if (num == 2)
+                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
                         {
                             wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             //wallTiles[wallCount].mapPoint = new int[] { y, x };
                             wallTiles[wallCount].index = num;
                             wallCount++;
                         }
-                        if (num == 3)//enemy
+                        if (num == 11) //enemy
                         {
-                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight)));
+                            floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            //floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            floorTiles[floorCount].index = num;
+                            floorCount++;
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             //skullTiles[skullCount].mapPoint = new int[] { y, x };
                             //skullCount++;
                         }
-                        if (num == 1)
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15) //Floors
                         {
                             floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             //floorTiles[floorCount].mapPoint = new int[] { y, x };
                             floorTiles[floorCount].index = num;
                             floorCount++;
-                        }
-                        if (num == 4)//player
-                        {
-                            //playerT.Add(new Playert(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                         }
 
                         width = (x + 1) * size;
@@ -384,7 +390,97 @@ namespace AUTO_Matic.TopDown
 
         }
 
-       
+
+        public int[,] GenerateMap(string filePath)
+        {
+            if (System.IO.File.Exists(filePath))
+            {
+                string mapInfo = File.ReadAllText(filePath);
+                int lenghtTilDims = 0;
+                int StartWidthIndex = 0;
+                int StartHeightIndex = 0;
+                int width = 25;
+                int height = 0;
+                string tHeight = "";
+
+                for (int k = 0; k < mapInfo.Length - 6; k++) //Lets run through the file :)
+                {
+                    if (mapInfo.Substring(k, 6).Contains("Width:"))//Search for Width: containing 6 characters
+                    {
+                        width = int.Parse(mapInfo.Substring(k + 6, (mapInfo.Length - (k + 6))));
+                        StartWidthIndex = k;
+
+                    }
+                }
+                //int subLength = mapInfo.Length - StartWidthIndex;
+                for (int l = 0; l < mapInfo.Length; l++)
+                {
+                    if (mapInfo.Substring(l, 7).Contains("Height:"))//Search for Height: containing, 7 characters
+                    {
+                        int j = 7;
+                        while (true)
+                        {
+                            tHeight += mapInfo.Substring(l + j, 1);
+                            try
+                            {
+                                height = int.Parse(tHeight);
+                                StartHeightIndex = l + j;
+                                j++;
+                            }
+                            catch
+                            {
+                                break;
+                            }
+
+                        }
+
+                        break;
+                    }
+                }
+                //int width = int.Parse(mapInfo.Substring(mapInfo.Length -2, 2));
+                //int height = int.Parse(mapInfo.Substring(mapInfo.Length - 4, 2));
+                int[,] map = new int[height, width];
+                int i = 0;
+                int x = 0;
+                int y = 0;
+                int length = mapInfo.Length;
+
+                while (i < length && mapInfo.Substring(i, 1).Contains("H") == false)
+                {
+                    if (mapInfo.Substring(i, 1) != ",")
+                    {
+                        int j = i + 1;
+                        string num = mapInfo.Substring(i, 1);
+                        i++;
+                        while (mapInfo.Substring(j, 1) != ",")
+                        {
+                            num += mapInfo.Substring(j, 1);
+                            i++;
+                            j++;
+                        }
+                        map[y, x] = int.Parse(num);
+                        x++;
+                        if (x >= width)
+                        {
+                            x = 0;
+                            y += 1;
+                        }
+
+                        if (y >= height)
+                        {
+                            break;
+                        }
+                    }
+                    i++;
+                }
+
+                return map;
+
+            }
+            return new int[15, 25];
+        }
+    
+
 
         public int GetPointLevelX(int row, int col, int lvlNum)
         {

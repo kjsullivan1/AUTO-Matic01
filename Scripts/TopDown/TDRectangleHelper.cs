@@ -18,7 +18,7 @@ namespace AUTO_Matic.TopDown
         }
         public static bool TouchBottomOf(this Rectangle r1, Rectangle r2)
         {
-            return (r1.Top <= r2.Bottom 
+            return (r1.Top <= r2.Bottom
                 && r1.Top >= r2.Top + (r2.Height / 2)
                 && r1.Right >= r2.Left
                 && r1.Left <= r2.Right);
