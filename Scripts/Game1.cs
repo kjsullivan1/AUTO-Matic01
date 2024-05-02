@@ -357,7 +357,11 @@ namespace AUTO_Matic
                             ssPlayer.Update(gameTime, Gravity, enemies);
                             if(ssPlayer.Position.X > 1430)
                             {
-                                camera.X = graphics.PreferredBackBufferWidth;
+                                if(camera.X <= graphics.PreferredBackBufferWidth)
+                                {
+                                    camera.X += 64;
+                                }
+                                //camera.X = graphics.PreferredBackBufferWidth;
                                 //if(healthBar[0].X == ssPlayer.X && ssPlayer.X > 1435)
                                 //{
 
@@ -377,7 +381,11 @@ namespace AUTO_Matic
                             }
                             if(ssPlayer.Position.X > 2610)
                             {
-                                camera.X = graphics.PreferredBackBufferWidth + 64 * 7;
+                                if(camera.X <= 2610)
+                                {
+                                    camera.X += 64;
+                                }
+                                //camera.X = graphics.PreferredBackBufferWidth + 64 * 7;
                                 //if (healthBar[0].X == ssPlayer.X && ssPlayer.X > 2615)
                                 //{
 
