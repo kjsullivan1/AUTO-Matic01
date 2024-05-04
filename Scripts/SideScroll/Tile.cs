@@ -14,6 +14,7 @@ namespace AUTO_Matic
         public Texture2D texture;
 
         private Rectangle rectangle;
+        public Vector2 position;
         public int[,] mapPoint;
         public Rectangle Rectangle
         {
@@ -22,13 +23,13 @@ namespace AUTO_Matic
         }
 
 
-        public void setX(int x)
+        public void setX(float x)
         {
-            rectangle.X = x;
+            position.X = x;
         }
-        public void setY(int y)
+        public void setY(float y)
         {
-            rectangle.Y = y;
+            position.Y = y;
         }
 
         private static ContentManager content;
@@ -40,6 +41,7 @@ namespace AUTO_Matic
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
             spriteBatch.Draw(texture, rectangle, Color.White);
         }
     }
@@ -51,6 +53,7 @@ namespace AUTO_Matic
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
             this.Rectangle = newRect;
             this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+            position = new Vector2(newRect.X, newRect.Y);
         }
 
     }
@@ -62,38 +65,51 @@ namespace AUTO_Matic
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
             this.Rectangle = newRect;
             this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+            position = new Vector2(newRect.X, newRect.Y);
         }
     }
 
     class BackgroundTile: Tile
     {
+        BackgroundTile tile;
         public BackgroundTile(int i, Rectangle newRect)
         {
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
             this.Rectangle = newRect;
             this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+            tile = this;
+            position = new Vector2(newRect.X, newRect.Y);
         }
     }
 
     class TopDoorTile:Tile
     {
+        public TopDoorTile tile;
         public TopDoorTile(int i, Rectangle newRect)
         {
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
             this.Rectangle = newRect;
             this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+            tile = this;
+            position = new Vector2(newRect.X, newRect.Y);
+            
         }
 
     }
 
     class BottomDoorTile : Tile
     {
+        public BottomDoorTile tile;
         public BottomDoorTile(int i, Rectangle newRect)
         {
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
             this.Rectangle = newRect;
             this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+            tile = this;
+            position = new Vector2(newRect.X, newRect.Y);
         }
+
+        public BottomDoorTile() { }
 
     }
 
@@ -104,6 +120,7 @@ namespace AUTO_Matic
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
             this.Rectangle = newRect;
             this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+            position = new Vector2(newRect.X, newRect.Y);
         }
     }
 }

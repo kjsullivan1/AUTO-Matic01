@@ -23,7 +23,7 @@ namespace AUTO_Matic
         UIManager UIManager = new UIManager();
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.TitleScreen;
+        public Scenes currScene = Scenes.InGame;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -57,6 +57,9 @@ namespace AUTO_Matic
         public int mapHeight = 12;
         int[,] currMap = new int[20, 35];
         float friction = .85f;
+        bool updateDoor = false;
+        int topIndex, bottomIndex;
+        float doorOpenSpeed = 1f;
         #endregion
 
         List<Rectangle> healthBar = new List<Rectangle>();
@@ -82,6 +85,15 @@ namespace AUTO_Matic
         float bossHealth = 8.65f;
         #endregion
         //SSEnemy enemy;
+
+        class Door
+        {
+            BottomDoorTile bottomDoor;
+            TopDoorTile topDoor;
+            int topIndex, bottomIndex;
+            float doorOpenSpeed = 1f;
+            bool updateDoor = false;
+        }
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -139,8 +151,8 @@ namespace AUTO_Matic
             #endregion
 
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
-            
-            //StartNewGame();
+            if(currScene == Scenes.InGame)
+                StartNewGame();
             // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
 
 
@@ -264,7 +276,7 @@ namespace AUTO_Matic
             enemies.Clear();
             for(int i = 0; i < SideTileMap.enemySpawns.Count - 1; i++)
             {
-                enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i]));
+                enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
             }
 
             camera.Zoom = 1.35f;
@@ -326,6 +338,8 @@ namespace AUTO_Matic
 
         }
 
+
+       
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -353,7 +367,10 @@ namespace AUTO_Matic
                                 StartNewGame();
 
                             }
-
+                            if(updateDoor)
+                            {
+                                UpdateDoor(topIndex, bottomIndex);
+                            }
                             ssPlayer.Update(gameTime, Gravity, enemies);
                             if(ssPlayer.Position.X > 1430)
                             {
@@ -403,10 +420,36 @@ namespace AUTO_Matic
                                 //}
 
                             }
-                            foreach(SSEnemy enemy in enemies)
+
+                            for(int i = 0; i < enemies.Count; i++)
                             {
-                                enemy.Update(gameTime, Gravity, ssPlayer, this);
+                                enemies[i].Update(gameTime, Gravity, ssPlayer, this);
+                                for (int j = i + 1; j < enemies.Count; j++)
+                                {
+                                    if(enemies[i].enemyRect.Intersects(enemies[j].enemyRect))
+                                    {
+                                        if (enemies[i].velocity.X == enemies[j].velocity.X)
+                                            enemies[i].velocity.X /= 2;
+                                        else
+                                        {
+                                            if(enemies[i].velocity.X != enemies[i].maxRunSpeed || enemies[i].velocity.X != -enemies[i].maxRunSpeed)
+                                            {
+                                                if (enemies[i].velocity.X < 0)
+                                                    enemies[i].velocity.X = -enemies[i].maxRunSpeed;
+                                                else if (enemies[i].velocity.X > 0)
+                                                    enemies[i].velocity.X = enemies[i].maxRunSpeed;
+
+                                            }
+                                        }
+                                            
+                                    }
+                                   
+                                }
                             }
+                            //foreach(SSEnemy enemy in enemies)
+                            //{
+                            //    enemy.Update(gameTime, Gravity, ssPlayer, this);
+                            //}
                             //enemy.Update(gameTime, Gravity, ssPlayer);
 
                             ssPlayer.blockBottom = false;
@@ -417,7 +460,17 @@ namespace AUTO_Matic
                                 ssPlayer.Collision(tile.Rectangle);
                                 
                             }
-                            foreach(PlatformTile tile1 in SideTileMap.PlatformTiles)
+                            foreach (TopDoorTile tile in SideTileMap.TopDoorTiles)
+                            {
+                                ssPlayer.Collision(tile.Rectangle);
+
+                            }
+                            foreach (BottomDoorTile tile in SideTileMap.BottomDoorTiles)
+                            {
+                                ssPlayer.Collision(tile.Rectangle);
+
+                            }
+                            foreach (PlatformTile tile1 in SideTileMap.PlatformTiles)
                             {
                                 ssPlayer.Collision(tile1.Rectangle);
                             }
@@ -435,6 +488,11 @@ namespace AUTO_Matic
                         case GameStates.TopDown:
                             tdPlayer.Update(gameTime, tdMap);
                             camera.Update(CameraPos());
+                            if(kb.IsKeyDown(Keys.L))//Switching back to sidescroll
+                            {
+                                GameState = GameStates.SideScroll;
+                                //Camera position not updated
+                            }
                             if(tdPlayer.changeLevel)
                             {
                                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
@@ -506,19 +564,19 @@ namespace AUTO_Matic
                             {
                                 if(tdPlayer.position.X < Boss.X + Boss.Width/2)
                                 {
-                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed, maxBulletSpeed), Content, true));
+                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed, maxBulletSpeed), Content, true, 64 * 6));
                                 }
                                 if(tdPlayer.position.X > Boss.X + Boss.Width/2)
                                 {
-                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, true));
+                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, true, 64 * 6));
                                 }
                                 if(tdPlayer.position.Y < Boss.Y + Boss.Height/2)
                                 {
-                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(maxBulletSpeed, -maxBulletSpeed), Content, false));
+                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(maxBulletSpeed, -maxBulletSpeed), Content, false, 64 * 6));
                                 }
                                 if (tdPlayer.position.Y > Boss.Y + Boss.Height / 2)
                                 {
-                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, false));
+                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, false, 64 * 6));
                                 }
 
                                 canShoot = false;
@@ -575,6 +633,43 @@ namespace AUTO_Matic
             base.Update(gameTime);
         }
 
+
+        public void OpenDoor(Rectangle bottomTile)
+        {
+            //Find top door
+            int bottomTileIndex = 0;
+            int topTileIndex = 0;
+            for(int i = 0; i < SideTileMap.BottomDoorTiles.Count; i++)
+            {
+                if(SideTileMap.BottomDoorTiles[i].Rectangle == bottomTile)
+                {
+                    bottomTileIndex = i;
+                }
+            }
+            bottomTile.Y -= pixelBits;
+            for (int i = 0; i < SideTileMap.TopDoorTiles.Count; i++)
+            {
+                if(SideTileMap.TopDoorTiles[i].Rectangle == bottomTile)
+                {
+                    topTileIndex = i;
+                }    
+            }
+            bottomIndex = bottomTileIndex;
+            topIndex = topTileIndex;
+
+            updateDoor = true;
+        }
+
+        void UpdateDoor(int topTile, int bottomTile)
+        {
+            SideTileMap.TopDoorTiles[topTile].setY((SideTileMap.TopDoorTiles[topTile].Rectangle.Y - doorOpenSpeed));
+            SideTileMap.BottomDoorTiles[bottomTile].setY((SideTileMap.BottomDoorTiles[bottomTile].Rectangle.Y + doorOpenSpeed));
+
+            if (MathHelper.Distance(SideTileMap.TopDoorTiles[topTile].Rectangle.Bottom, SideTileMap.BottomDoorTiles[bottomTile].Rectangle.Top) > pixelBits * 2)
+            {
+                updateDoor = false;
+            }
+        }
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -596,7 +691,7 @@ namespace AUTO_Matic
                 case Scenes.InGame:
                     if(GameState == GameStates.SideScroll)
                     {
-                        Window.Title = camera.Position.ToString() + " PlayerPos: " + ssPlayer.Position.ToString();
+                        Window.Title = camera.Position.ToString() + " PlayerPos: " + ssPlayer.Position.ToString() + "  EnemyState0: " + enemies[0].enemyState.ToString() + "    EnemeyState1: " + enemies[1].enemyState.ToString();
                         //Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
                         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
 

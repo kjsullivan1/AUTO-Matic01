@@ -170,6 +170,7 @@ namespace AUTO_Matic.TopDown
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = .65f;
+        public float bulletTravelDist = 64 * 3;
         #endregion
 
         public void Load(ContentManager Content, Rectangle bounds)
@@ -347,17 +348,17 @@ namespace AUTO_Matic.TopDown
                 position.X += moveSpeed;
                 shootDir = "right";
             }
-            else if (kb.IsKeyDown(Keys.A))
+            if (kb.IsKeyDown(Keys.A))
             {
                 position.X += -moveSpeed;
                 shootDir = "left";
             }
-            else if (kb.IsKeyDown(Keys.W))
+            if (kb.IsKeyDown(Keys.W))
             {
                 position.Y += -moveSpeed;
                 shootDir = "up";
             }
-            else if (kb.IsKeyDown(Keys.S))
+            if (kb.IsKeyDown(Keys.S))
             {
                 position.Y += moveSpeed;
                 shootDir = "down";
@@ -368,16 +369,16 @@ namespace AUTO_Matic.TopDown
                 switch(shootDir)
                 {
                     case "up":
-                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false));
+                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist));
                         break;
                     case "down":
-                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false));
+                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist));
                         break;
                     case "left":
-                        bullets.Add(new Bullet(new Vector2(rectangle.Left, rectangle.Y + (rectangle.Height/2)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true));
+                        bullets.Add(new Bullet(new Vector2(rectangle.Left, rectangle.Y + (rectangle.Height/2)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                         break;
                     case "right":
-                        bullets.Add(new Bullet(new Vector2(rectangle.Right, rectangle.Y + (rectangle.Height / 2)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true));
+                        bullets.Add(new Bullet(new Vector2(rectangle.Right, rectangle.Y + (rectangle.Height / 2)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                         break;
                 }
                 

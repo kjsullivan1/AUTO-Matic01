@@ -24,6 +24,9 @@ namespace AUTO_Matic
         public static List<Vector2> enemySpawns = new List<Vector2>();
         public static List<Vector2> playerSpawns = new List<Vector2>();
         private static List<DungeonEntrance> dungeonEntrances = new List<DungeonEntrance>();
+        public static List<int> GroundIndexes = new List<int>();
+        public static List<int> BackgroundIndexes = new List<int>();
+        public static List<int> PlatformIndexes = new List<int>();
 
         //public static List<EmptyTile> EmptyTiles
         //{
@@ -104,36 +107,47 @@ namespace AUTO_Matic
                     if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19 || num == 20|| num ==21 || num ==22 || num ==23)
                     {
                         groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
+                        if (GroundIndexes.Contains(num) == false)
+                            GroundIndexes.Add(num);
 
                     }
                     if (num == 3 || num == 4)
                     {
                    
                         platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
+                        if (PlatformIndexes.Contains(num) == false)
+                            PlatformIndexes.Add(num);
                     }
                     if(num == 1)
                     {
                         backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
+                        if (BackgroundIndexes.Contains(num) == false)
+                            BackgroundIndexes.Add(num);
                     }
                     if(num == 9 || num == 12)
                     {
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         topDoorTiles.Add(new TopDoorTile(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     if(num == 8 || num == 11)
                     {
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         bottomDoorTiles.Add(new BottomDoorTile(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     if(num == 25)
                     {
                         enemySpawns.Add(new Vector2(x * size, y * size));
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                     }
                     if(num == 7 || num == 8)
                     {
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         dungeonEntrances.Add(new DungeonEntrance(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     if(num == 24)
                     {
                         playerSpawns.Add(new Vector2(x * size, y * size));
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                     }
                 }
             }
@@ -150,29 +164,31 @@ namespace AUTO_Matic
             int numTilesLeft = 0;
             for(int i = col + 1; i < tileMap.mapWidth - 1; i++)
             {
-                if (tileMap.getPoint(row - 1, i) == 3 || tileMap.getPoint(row - 1, i) == 2 || tileMap.getPoint(row - 1, i) == 0)
-                {
-                    break;
-                }
-
-
-                if (tileMap.getPoint(row, i) == 3 || tileMap.getPoint(row, i) == 2 || tileMap.getPoint(row, i) == 0)
+                if (GroundIndexes.Contains(tileMap.getPoint(row, i)) || PlatformIndexes.Contains(tileMap.getPoint(row, i)))
                 {
                     numTilesRight++;
+                }
+                else
+                {
+                    break;
                 }
 
             }
             for (int i = col - 1; i >= 0; i--)
             {
-                if (tileMap.getPoint(row - 1, i) == 3 || tileMap.getPoint(row - 1, i) == 2 || tileMap.getPoint(row - 1, i) == 0)
-                {
-                    break;
-                }
+                //if (tileMap.getPoint(row - 1, i) == 3 || tileMap.getPoint(row - 1, i) == 2 || tileMap.getPoint(row - 1, i) == 0)
+                //{
+                //    break;
+                //}
 
 
-                if (tileMap.getPoint(row, i) == 3 || tileMap.getPoint(row, i) == 2 || tileMap.getPoint(row, i) == 0)
+                if (GroundIndexes.Contains(tileMap.getPoint(row, i)) || PlatformIndexes.Contains(tileMap.getPoint(row, i)))
                 {
                     numTilesLeft++;
+                }
+                else
+                {
+                    break;
                 }
 
             }

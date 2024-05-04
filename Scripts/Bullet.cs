@@ -22,9 +22,15 @@ namespace AUTO_Matic
         public Rectangle rect;
         bool shootX = true;
 
-        public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content, bool isX)
+        Vector2 startPos;
+        float travelDist;
+        public bool delete = false;
+
+        public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content, bool isX, float travelDist)
         {
             position = pos;
+            startPos = pos;
+            this.travelDist = travelDist;
             moveSpeed = speed;
             this.maxSpeed = maxSpeed;
             bulletTexture = content.Load<Texture2D>("TopDown/Textures/Player");
@@ -44,12 +50,22 @@ namespace AUTO_Matic
             }
            
             position += velocity;
+
+            if(Distance(position, startPos) > travelDist)
+            {
+                delete = true;
+            }
             rect = new Rectangle((int)position.X, (int)position.Y, width, height);
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), Color.White);
+        }
+
+        public float Distance(Vector2 pos1, Vector2 pos2)
+        {
+            return (float)Math.Sqrt(Math.Pow(pos2.X - pos1.X, 2) + Math.Pow(pos2.Y - pos1.Y, 2));
         }
     }
 }

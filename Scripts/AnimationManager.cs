@@ -104,15 +104,16 @@ namespace AUTO_Matic
             position = pos;
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, Color color)
         {
             if (isRight)
             {
-                spriteBatch.Draw(CurrTexture, position, new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X, FrameSize.Y), Color.White);
+                
+                spriteBatch.Draw(CurrTexture, position, new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X, FrameSize.Y), color);
             }
             else if (isLeft)
             {
-                spriteBatch.Draw(CurrTexture, position: position, sourceRectangle: new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X, FrameSize.Y), color: Color.White, effects: SpriteEffects.FlipHorizontally);
+                spriteBatch.Draw(CurrTexture, position: position, sourceRectangle: new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X, FrameSize.Y), color: color, effects: SpriteEffects.FlipHorizontally);
             }
 
 

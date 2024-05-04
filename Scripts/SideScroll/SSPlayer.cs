@@ -40,6 +40,27 @@ namespace AUTO_Matic.SideScroll
         float iMoveSpeed;
         float iMaxRunSpeed;
 
+       
+        float health = 1.5f;
+        public int redFrames = 4;
+        public int redCount = 0;
+        int whiteFrames = 10;
+        int whiteCount = 0;
+        bool damaged = false;
+        public float Health
+        {
+            get
+            {
+                return health;
+            }
+            set
+            {
+                damaged = true;
+                health = value;
+                if (health <= 0)
+                    health = 0;
+            }
+        }
 
         float mass = 20.0f;
         public float accel = 0;
@@ -68,6 +89,7 @@ namespace AUTO_Matic.SideScroll
         float iShootDelay;
         bool startShoot = false;
         float bulletDmg = .65f;
+        float bulletTravelDist = 64 * 3;
         #endregion
 
         #region Jumping
@@ -188,6 +210,20 @@ namespace AUTO_Matic.SideScroll
         {
             get { return playerRect; }
         }
+
+        public Rectangle InteractionBox
+        {
+            get { 
+               if(animManager.isRight)
+               {
+                    return new Rectangle(playerRect.Right, playerRect.Top + playerRect.Height/3, playerRect.Width/2, playerRect.Height/2);
+               }
+               else
+                {
+                    return new Rectangle(playerRect.Left - playerRect.Width/2, playerRect.Top + playerRect.Height / 3, playerRect.Width/2, playerRect.Height/2);
+                }
+            }
+        }
         public SSPlayer(Game1 game1, int pixelSize)
         {
             game = game1;
@@ -241,7 +277,7 @@ namespace AUTO_Matic.SideScroll
         #endregion
 
         #region Animations
-        AnimationManager animManager;
+        public AnimationManager animManager;
         Texture2D texture;
         Point FrameSize;//Size of frame
         Point CurrFrame;//Location of currFram on the sheet
@@ -310,7 +346,7 @@ namespace AUTO_Matic.SideScroll
             ChangeAnimation();
             iMoveSpeed = moveSpeed;
             iShootDelay = shootDelay;
-            dashDistance *= pixelSize;
+            dashDistance = 3 * pixelSize;
             iMaxRunSpeed = maxRunSpeed;
             position = pos;
 
@@ -318,6 +354,8 @@ namespace AUTO_Matic.SideScroll
 
         public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies)
         {
+
+       
 
             Input();
             if (Velocity == Vector2.Zero && !isFalling && playerState != PlayerStates.Shooting)
@@ -493,6 +531,11 @@ namespace AUTO_Matic.SideScroll
                 for (int i = bullets.Count - 1; i >= 0; i--)
                 {
                     bullets[i].Update();
+                    if (bullets[i].delete)
+                    {
+                        bullets.RemoveAt(i);
+                        break;
+                    }
                     foreach (SSEnemy enemy in enemies)
                     {
                         if (bullets[i].rect.TouchBottomOf(enemy.enemyRect) || bullets[i].rect.TouchTopOf(enemy.enemyRect)
@@ -963,7 +1006,17 @@ namespace AUTO_Matic.SideScroll
                 }
             }
 
-
+            if(kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyUp(Keys.E))
+            {
+                foreach(BottomDoorTile doorTile in SideTileMap.BottomDoorTiles)
+                {
+                    if (InteractionBox.Intersects(doorTile.Rectangle))
+                    {
+                        game.OpenDoor(doorTile.Rectangle);
+                    }
+                }
+              
+            }
 
             if (kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && blockBottom)
             {
@@ -996,11 +1049,11 @@ namespace AUTO_Matic.SideScroll
                 {
                     if(animManager.isRight)
                     {
-                        bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18/2), position.Y + playerRect.Height/1.5f), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true));
+                        bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18/2), position.Y + playerRect.Height/1.5f), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                     }
                     if(animManager.isLeft)
                     {
-                        bullets.Add(new Bullet(new Vector2(position.X - (18/2), position.Y + playerRect.Height / 1.5f), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true));
+                        bullets.Add(new Bullet(new Vector2(position.X - (18/2), position.Y + playerRect.Height / 1.5f), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                     }
                     
                 }
@@ -1282,8 +1335,32 @@ namespace AUTO_Matic.SideScroll
             //}
            
             //spriteBatch.Draw(texture, playerRect, Color.White);
-            animManager.Draw(spriteBatch);
 
+            if(damaged)
+            {
+                if(redCount <= whiteCount || redCount == 0 && whiteCount == 0)
+                {
+                    animManager.Draw(spriteBatch, Color.Red);
+                    redCount++;
+                }
+                if(whiteCount < redCount)
+                {
+                    animManager.Draw(spriteBatch, Color.White * .5f);
+                    whiteCount++;
+                }
+                if(whiteCount == whiteFrames)
+                {
+                    damaged = false;
+                    whiteCount = 0;
+                    redCount = 0;
+                }
+            }
+            else
+            {
+                animManager.Draw(spriteBatch, Color.White);
+            }
+           
+            spriteBatch.Draw(texture, InteractionBox, Color.White);
             foreach (Bullet bullet in bullets)
             {
                 bullet.Draw(spriteBatch);
