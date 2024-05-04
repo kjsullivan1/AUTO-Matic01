@@ -121,13 +121,13 @@ namespace AUTO_Matic
             switch(keyWord)
             {
                 case "TitleCrawl":
-                    StreamReader sr = new StreamReader(Directory.GetCurrentDirectory() + "/TextFiles/TitleCrawl.txt");
-                    string text = sr.ReadToEnd();
+                    //StreamReader sr = new StreamReader(Directory.GetCurrentDirectory() + "/TextFiles/TitleCrawl.txt");
+                    string text = "This is the text crawl kjdashgflkjaswhfuksehfjkashdfjashdfkjahsfdkjhaskjdfhsakjfhjksahfjsdhfjkashdfjkhasgjkfhasdkfhasjkdfhjaskhdfjkashdfjkashdfkjashdfkjashdflkjhaskljdfhaskjdhfakjshdfkjashdfjkashdfkjdashfkjashfkjshadjkfhaskjdfhaskjhdfkjashdfkjashfjkahskjfdhaskjdfhaskjdfhkjashfdlkjashlkfsdhfkjashdfkjahlsdfkjhasjdfkhaslkdjfhaskjdfhkalsjdhfkjashdfjkashdfkjashdlfk";
                     UIHelper.SetElementText(uiElements[keyWord], text);
                     break;
                 case "MainMenuTitle":
-                    StreamReader sr1 = new StreamReader(Directory.GetCurrentDirectory() + "/TextFiles/MainMenuTitle.txt");
-                    string text1 = sr1.ReadToEnd();
+                    //StreamReader sr1 = new StreamReader(Directory.GetCurrentDirectory() + "/TextFiles/MainMenuTitle.txt");
+                    string text1 = "AUTO-Matic";
                     UIHelper.SetElementText(uiElements[keyWord], text1);
                     break;
 

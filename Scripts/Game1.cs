@@ -23,7 +23,7 @@ namespace AUTO_Matic
         UIManager UIManager = new UIManager();
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -701,10 +701,10 @@ namespace AUTO_Matic
                         {
                             enemy.Draw(spriteBatch);
                         }
-                        for(int i = 0; i < healthBar.Count; i++)
-                        {
-                            spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), new Vector2(healthBar[i].X, healthBar[i].Y), healthBar[i], Color.Red);
-                        }
+                        //for(int i = 0; i < healthBar.Count; i++)
+                        //{
+                        //    spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), new Vector2(healthBar[i].X, healthBar[i].Y), healthBar[i], Color.Red);
+                        //}
                        
                         //enemy.Draw(spriteBatch);
                         spriteBatch.End();
