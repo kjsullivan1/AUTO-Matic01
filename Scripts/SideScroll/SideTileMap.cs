@@ -139,7 +139,7 @@ namespace AUTO_Matic
                         enemySpawns.Add(new Vector2(x * size, y * size));
                         backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                     }
-                    if(num == 7 || num == 8)
+                    if(num == 7)
                     {
                         backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         dungeonEntrances.Add(new DungeonEntrance(num, new Rectangle(x * size, y * size, size, size)));
