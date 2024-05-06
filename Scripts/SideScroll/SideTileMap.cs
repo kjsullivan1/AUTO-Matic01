@@ -15,6 +15,8 @@ namespace AUTO_Matic
         public int[,] Map;
         public int mapWidth;
         public int mapHeight;
+        public int worldWidth;
+        public int worldHeight;
         public static SideTileMap tileMap = new SideTileMap();
         private static List<GroundTile> groundTiles = new List<GroundTile>();
         private static List<PlatformTile> platformTiles = new List<PlatformTile>();
@@ -63,6 +65,11 @@ namespace AUTO_Matic
             get { return groundTiles; }
         }
 
+        public void SetWorldDims(int width, int height)
+        {
+            worldWidth = width;
+            worldHeight = height;
+        }
         public void SetDims(int width, int height)
         {
             mapWidth = width;
@@ -82,7 +89,10 @@ namespace AUTO_Matic
         {
             return pixelY / pixelSize;
         }
-
+        static public Vector2 GetWorldDims()
+        {
+            return new Vector2(tileMap.worldWidth, tileMap.worldHeight);
+        }
         public static void Generate(int[,] map, int size)
         {
             //pixelSize = size;
@@ -149,11 +159,13 @@ namespace AUTO_Matic
                         playerSpawns.Add(new Vector2(x * size, y * size));
                         backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                     }
+                    
                 }
             }
 
             tileMap.SetDims(map.GetLength(1), map.GetLength(0));
             tileMap.SetMap(map);
+            tileMap.SetWorldDims(map.GetLength(1) * 64, map.GetLength(0) * 64);
 
 
         }

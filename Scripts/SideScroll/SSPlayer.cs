@@ -41,12 +41,12 @@ namespace AUTO_Matic.SideScroll
         float iMaxRunSpeed;
 
        
-        float health = 1.5f;
+        float health = 5f;
         public int redFrames = 4;
         public int redCount = 0;
         int whiteFrames = 10;
         int whiteCount = 0;
-        bool damaged = false;
+        public bool damaged = false;
         public float Health
         {
             get
@@ -389,20 +389,21 @@ namespace AUTO_Matic.SideScroll
                 #region Movement
                 case PlayerStates.Movement:
                    
-                    if (prevPlayerState == PlayerStates.Dashing)
-                    {
-                        //Slow down over time instead of instant set to run speed
-                        maxRunSpeed -= moveSpeed * force;
-                        if(maxRunSpeed < iMaxRunSpeed)
-                        {
-                            maxRunSpeed = iMaxRunSpeed;
-                            prevPlayerState = PlayerStates.Movement;
-                        }
-                    }
-                    else
-                    {
-                        maxRunSpeed = iMaxRunSpeed;
-                    }
+                    //if (prevPlayerState == PlayerStates.Dashing)
+                    //{
+                    //    //Slow down over time instead of instant set to run speed
+                    //    maxRunSpeed -= moveSpeed * force;
+                    //    if(maxRunSpeed < iMaxRunSpeed)
+                    //    {
+                    //        maxRunSpeed = iMaxRunSpeed;
+                    //        prevPlayerState = PlayerStates.Movement;
+                    //    }
+                    //}
+                    //else
+                    //{
+                       
+                    //}
+                    maxRunSpeed = iMaxRunSpeed;
 
                     if (isFalling)
                     {
@@ -1070,80 +1071,6 @@ namespace AUTO_Matic.SideScroll
         {
             isColliding = false;
             //blockBottom = false;
-            if (playerRect.TouchTopOf(newRect))
-            {
-
-
-                if (isFalling)
-                {
-                    while (playerRect.Bottom > newRect.Top)
-                    {
-                        velocity.Y += -(Velocity.Y);
-                        position.Y -= .1f;
-                        playerRect.Y = (int)position.Y;
-                    }
-                    //if (velocity.X > 0)
-                    //{
-                    //    velocity.X = 0;
-                    //    position.X += -moveSpeed;
-                    //}
-                    //else if (velocity.X < 0)
-                    //{
-                    //    velocity.X = 0;
-                    //    position.X += moveSpeed;
-                    //}
-                    jumpDelay = 0;
-                    //velocity.X += (float)Math.Cos(velocity.X);
-                    isFalling = false;
-                    
-                    //isDashing = false;
-
-                    //animState = AnimationStates.Idle;
-                    //ChangeAnimation();
-                    //maxVelocity.X = 6;
-                    prevKb = Keyboard.GetState();
-                    isColliding = false;
-                }
-                else if (playerState == PlayerStates.Jumping)
-                {
-                    //if (velocity.X > 0)
-                    //{
-                    //    velocity.X = 0;
-                    //    position.X += -moveSpeed;
-                    //}
-                    //else if (velocity.X < 0)
-                    //{
-                    //    velocity.X = 0;
-                    //    position.X += moveSpeed;
-                    //}
-
-                }
-                else
-                {
-                    while (playerRect.Bottom > newRect.Top)
-                    {
-                        velocity.Y += -(Velocity.Y);
-                        position.Y -= 1f;
-                        playerRect.Y = (int)position.Y;
-                    }
-                    jumpDelay++;
-                    if (jumpDelay >= maxJumpDelay)
-                    {
-                        canJump = true;
-                    }
-                }
-
-
-
-                //position.Y += -(velocity.Y);
-
-
-                //isColliding = true;
-                blockBottom = true;
-
-
-            }
-
             if (playerRect.TouchLeftOf(newRect))
             {
                 while (playerRect.Right > newRect.Left)
@@ -1163,9 +1090,10 @@ namespace AUTO_Matic.SideScroll
                         if (velocity.X > 0)
                         {
                             position.X += -velocity.X;
-                            velocity.X = 0;
+
 
                         }
+                        velocity.X = 0;
                         isColliding = true;
                         break;
                     case PlayerStates.Jumping:
@@ -1180,9 +1108,10 @@ namespace AUTO_Matic.SideScroll
                         if (velocity.X > 0)
                         {
                             position.X += -velocity.X;
-                            //velocity.X = 0;
+                           
 
                         }
+                        velocity.X = 0;
                         isColliding = true;
                         playerState = PlayerStates.Movement;
                         break;
@@ -1254,9 +1183,10 @@ namespace AUTO_Matic.SideScroll
                         if (velocity.X < 0)
                         {
                             position.X += -velocity.X;
-                            velocity.X = 0;
+
 
                         }
+                        velocity.X = 0;
                         isColliding = true;
                         break;
                     case PlayerStates.Jumping:
@@ -1273,11 +1203,94 @@ namespace AUTO_Matic.SideScroll
                             //velocity.X = 0;
 
                         }
+                        velocity.X = 0;
                         isColliding = true;
                         playerState = PlayerStates.Movement;
                         break;
                 }
             }
+
+            if (playerRect.TouchTopOf(newRect))
+            {
+
+
+                if (velocity.Y > 0 && playerState != PlayerStates.Dashing)
+                {
+                    while (playerRect.Bottom > newRect.Top)
+                    {
+                        velocity.Y += -(Velocity.Y);
+                        position.Y -= .1f;
+                        playerRect.Y = (int)position.Y;
+                    }
+                    //if (velocity.X > 0)
+                    //{
+                    //    velocity.X = 0;
+                    //    position.X += -moveSpeed;
+                    //}
+                    //else if (velocity.X < 0)
+                    //{
+                    //    velocity.X = 0;
+                    //    position.X += moveSpeed;
+                    //}
+                    jumpDelay = 0;
+                    //velocity.X += (float)Math.Cos(velocity.X);
+                    isFalling = false;
+                    
+                    //isDashing = false;
+
+                    //animState = AnimationStates.Idle;
+                    //ChangeAnimation();
+                    //maxVelocity.X = 6;
+                    prevKb = Keyboard.GetState();
+                    isColliding = false;
+                    blockBottom = true;
+                }
+                else if (playerState == PlayerStates.Jumping)
+                {
+                    //if (velocity.X > 0)
+                    //{
+                    //    velocity.X = 0;
+                    //    position.X += -moveSpeed;
+                    //}
+                    //else if (velocity.X < 0)
+                    //{
+                    //    velocity.X = 0;
+                    //    position.X += moveSpeed;
+                    //}
+
+                }
+                else if(playerState == PlayerStates.Dashing)
+                {
+
+                }
+                else
+                {
+                    while (playerRect.Bottom > newRect.Top)
+                    {
+                        velocity.Y += -(Velocity.Y);
+                        position.Y -= 1f;
+                        playerRect.Y = (int)position.Y;
+                    }
+                    jumpDelay++;
+                    if (jumpDelay >= maxJumpDelay)
+                    {
+                        canJump = true;
+                    }
+                    blockBottom = true;
+                }
+
+
+
+                //position.Y += -(velocity.Y);
+
+
+                //isColliding = true;
+                
+
+
+            }
+
+           
             if (playerRect.TouchBottomOf(newRect))
             {
 
@@ -1360,7 +1373,7 @@ namespace AUTO_Matic.SideScroll
                 animManager.Draw(spriteBatch, Color.White);
             }
            
-            spriteBatch.Draw(texture, InteractionBox, Color.White);
+            //spriteBatch.Draw(texture, InteractionBox, Color.White);
             foreach (Bullet bullet in bullets)
             {
                 bullet.Draw(spriteBatch);

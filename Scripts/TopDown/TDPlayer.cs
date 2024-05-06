@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AUTO_Matic.Scripts;
+using AUTO_Matic.Scripts.TopDown;
 
 namespace AUTO_Matic.TopDown
 {
@@ -19,7 +21,7 @@ namespace AUTO_Matic.TopDown
         public enum PlayerState {Movement, Shooting, Death, Hit}
         public PlayerState playerState = PlayerState.Movement;
 
-        public int bossRoom = 3;
+        public int bossRoom = 5;
 
         #region Animations
         AnimationManager animManager;
@@ -76,7 +78,7 @@ namespace AUTO_Matic.TopDown
         #region Fields
         public Vector2 position;
         public Rectangle rectangle;
-        float moveSpeed = 6f;
+        float moveSpeed = 5.25f;
         public bool changeLevel = false;
         public bool isColliding = false;
         KeyboardState kb;
@@ -88,13 +90,18 @@ namespace AUTO_Matic.TopDown
         TopDownMap map;
         Rectangle bounds;
         string shootDir = "";
-        float health = 1.5f;
+        float health = 5;
+        public bool damaged = false;
         public float Health
         {
             get { return health; }
-            set { health = value;
+            set {
+                damaged = true;
+                health = value;
                 if(health <= 0)
                 {
+                    
+                    
                     health = 0;
                 }
             }
@@ -105,7 +112,7 @@ namespace AUTO_Matic.TopDown
         public TDPlayer(Game1 game, int pixelSize, int levelInX, int levelInY)
         {
             this.game = game;
-            this.pixelSize = pixelSize - 6;
+            this.pixelSize = pixelSize - 12;
             this.levelInX = levelInX;
             this.levelInY = levelInY;
             //this.bounds = bounds;
@@ -162,15 +169,15 @@ namespace AUTO_Matic.TopDown
         Texture2D gunTexture;
         public List<Bullet> bullets = new List<Bullet>();
         MouseState prevMs;
-        float bulletSpeed = 3.5f;
-        float bulletMaxX = 15f;
-        float bulletMaxY = 15f;
+        float bulletSpeed = 2f;
+        float bulletMaxX = 10f;
+        float bulletMaxY = 10f;
         bool isShootDelay = false;
         float shootDelay = .8f;//In seconds
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = .65f;
-        public float bulletTravelDist = 64 * 3;
+        public float bulletTravelDist = 64 * 4;
         #endregion
 
         public void Load(ContentManager Content, Rectangle bounds)
@@ -180,6 +187,7 @@ namespace AUTO_Matic.TopDown
             lowerBound = bounds.Height + (bounds.Height * -(levelInY - 1));
             this.bounds = bounds;
             this.content = Content;
+            
         }
 
         public void GenerateMap(bool xLevel, bool yLevel, bool dLevel)
@@ -299,7 +307,7 @@ namespace AUTO_Matic.TopDown
 
         }
 
-        public void Update(GameTime gameTime, TopDownMap map)
+        public void Update(GameTime gameTime, TopDownMap map, ShotGunBoss boss)
         {
             this.map = map;
             kb = Keyboard.GetState();
@@ -313,6 +321,42 @@ namespace AUTO_Matic.TopDown
                         foreach (WallTiles tile in map.WallTiles)
                         {
                             Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
+                            if (boss != null)
+                            {
+                                if (rectangle.TouchLeftOf(boss.worldRect))
+                                {
+                                    while (rectangle.Right > boss.worldRect.Left)
+                                    {
+                                        rectangle.X -= 1;
+                                        position.X -= 1;
+                                    }
+                                }
+                                else if (rectangle.TouchRightOf(boss.worldRect))
+                                {
+                                    while (rectangle.Left < boss.worldRect.Right)
+                                    {
+                                        rectangle.X += 1;
+                                        position.X += 1;
+                                    }
+                                }
+                                else if(rectangle.TouchBottomOf(boss.worldRect))
+                                {
+                                    while(rectangle.Top < boss.worldRect.Bottom)
+                                    {
+                                        rectangle.Y += 1;
+                                        position.Y += 1;
+                                    }
+                                }
+                                else if(rectangle.TouchTopOf(boss.worldRect))
+                                {
+                                    while(rectangle.Bottom > boss.worldRect.Top)
+                                    {
+                                        rectangle.Y -= 1;
+                                        position.Y -= 1;
+                                    }
+                                }
+                            }
+                               
                             if (changeLevel)
                                 break;
                         }
@@ -322,6 +366,41 @@ namespace AUTO_Matic.TopDown
                         foreach (WallTiles tile in map.WallTiles)
                         {
                             Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
+                            if (boss != null)
+                            {
+                                if (rectangle.TouchLeftOf(boss.worldRect))
+                                {
+                                    while (rectangle.Right > boss.worldRect.Left)
+                                    {
+                                        rectangle.X -= 1;
+                                        position.X -= 1;
+                                    }
+                                }
+                                if (rectangle.TouchRightOf(boss.worldRect))
+                                {
+                                    while (rectangle.Left < boss.worldRect.Right)
+                                    {
+                                        rectangle.X += 1;
+                                        position.X += 1;
+                                    }
+                                }
+                                if (rectangle.TouchBottomOf(boss.worldRect))
+                                {
+                                    while (rectangle.Top < boss.worldRect.Bottom)
+                                    {
+                                        rectangle.Y += 1;
+                                        position.Y += 1;
+                                    }
+                                }
+                                if (rectangle.TouchTopOf(boss.worldRect))
+                                {
+                                    while (rectangle.Bottom > boss.worldRect.Top)
+                                    {
+                                        rectangle.Y -= 1;
+                                        position.Y -= 1;
+                                    }
+                                }
+                            }
                             if (changeLevel)
                                 break;
                         }
@@ -331,13 +410,72 @@ namespace AUTO_Matic.TopDown
                         foreach (WallTiles tile in map.WallTiles)
                         {
                             Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
+                            if (boss != null)
+                            {
+                                if (rectangle.TouchLeftOf(boss.worldRect))
+                                {
+                                    while (rectangle.Right > boss.worldRect.Left)
+                                    {
+                                        rectangle.X -= 1;
+                                        position.X -= 1;
+                                    }
+                                }
+                                if (rectangle.TouchRightOf(boss.worldRect))
+                                {
+                                    while (rectangle.Left < boss.worldRect.Right)
+                                    {
+                                        rectangle.X += 1;
+                                        position.X += 1;
+                                    }
+                                }
+                                if (rectangle.TouchBottomOf(boss.worldRect))
+                                {
+                                    while (rectangle.Top < boss.worldRect.Bottom)
+                                    {
+                                        rectangle.Y += 1;
+                                        position.Y += 1;
+                                    }
+                                }
+                                if (rectangle.TouchTopOf(boss.worldRect))
+                                {
+                                    while (rectangle.Bottom > boss.worldRect.Top)
+                                    {
+                                        rectangle.Y -= 1;
+                                        position.Y -= 1;
+                                    }
+                                }
+                            }
                             if (changeLevel)
                                 break;
                         }
                     }
                     break;
             }
-            
+
+            if (bullets.Count != 0)
+            {
+                for (int i = bullets.Count - 1; i >= 0; i--)
+                {
+                    bullets[i].Update();
+                    if (bullets[i].delete)
+                    {
+                        bullets.RemoveAt(i);
+                        break;
+                    }
+                    //foreach (SSEnemy enemy in enemies)
+                    //{
+                    //    if (bullets[i].rect.TouchBottomOf(enemy.enemyRect) || bullets[i].rect.TouchTopOf(enemy.enemyRect)
+                    //    || bullets[i].rect.TouchLeftOf(enemy.enemyRect) || bullets[i].rect.TouchRightOf(enemy.enemyRect))
+                    //    {
+                    //        enemy.Health -= bulletDmg;
+                    //        bullets.RemoveAt(i);
+                    //        break;
+                    //    }
+                    //}
+
+                }
+            }
+
         }
 
         private void Input()
@@ -348,17 +486,17 @@ namespace AUTO_Matic.TopDown
                 position.X += moveSpeed;
                 shootDir = "right";
             }
-            if (kb.IsKeyDown(Keys.A))
+            else if (kb.IsKeyDown(Keys.A))
             {
                 position.X += -moveSpeed;
                 shootDir = "left";
             }
-            if (kb.IsKeyDown(Keys.W))
+            else if (kb.IsKeyDown(Keys.W))
             {
                 position.Y += -moveSpeed;
                 shootDir = "up";
             }
-            if (kb.IsKeyDown(Keys.S))
+            else if (kb.IsKeyDown(Keys.S))
             {
                 position.Y += moveSpeed;
                 shootDir = "down";
@@ -369,10 +507,10 @@ namespace AUTO_Matic.TopDown
                 switch(shootDir)
                 {
                     case "up":
-                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist));
+                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
                         break;
                     case "down":
-                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist));
+                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
                         break;
                     case "left":
                         bullets.Add(new Bullet(new Vector2(rectangle.Left, rectangle.Y + (rectangle.Height/2)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
@@ -436,11 +574,13 @@ namespace AUTO_Matic.TopDown
             {
                 if ((position.Y + (rectangle.Height / 1.2f)) > lowerBound)
                 {
-                    CheckBorderCollisionBottom(bounds.Height, newRect, (yOffset - rectangle.Height) + ((yOffset - rectangle.Height) * -(levelInY - 1)));
+                    CheckBorderCollisionBottom(bounds.Height, newRect, lowerBound/*(yOffset - rectangle.Height) + ((yOffset - rectangle.Height) * -(levelInY - 1))*/);
                 }//else do negative 
             }
             else if (PosYLevels.yIndex - 1 >= 0 && (position.Y + (rectangle.Height / 1.2f)) > lowerBound)
                 CheckBorderCollisionBottom(bounds.Height, newRect, (yOffset - rectangle.Height) + ((yOffset - rectangle.Height) * -(levelInY - 1)));
+            //if (PosYLevels.yIndex - 1 >= 0 && (position.Y + (rectangle.Height / 1.2f)) > lowerBound)
+            //    CheckBorderCollisionBottom(bounds.Height, newRect, (yOffset - rectangle.Height) + ((yOffset - rectangle.Height) * -(levelInY - 1)));
         }
 
         void CheckBorderCollisionRight(int xOffset, Rectangle newRect, int border) // No Y because in max right
@@ -827,7 +967,7 @@ namespace AUTO_Matic.TopDown
                     else
                     {
 
-                        DiagLevels.Points.Add(new Vector2(levelInX, levelInY));
+                        DiagLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
                         DiagLevels.diagIndex = DiagLevels.Points.IndexOf(new Vector2(levelInX - 1, levelInY - 1));
 
                         if(game.levelCount >= bossRoom)
@@ -881,6 +1021,30 @@ namespace AUTO_Matic.TopDown
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            //if (damaged)
+            //{
+            //    if (redCount <= whiteCount || redCount == 0 && whiteCount == 0)
+            //    {
+            //        animManager.Draw(spriteBatch, Color.Red);
+            //        redCount++;
+            //    }
+            //    if (whiteCount < redCount)
+            //    {
+            //        animManager.Draw(spriteBatch, Color.White * .5f);
+            //        whiteCount++;
+            //    }
+            //    if (whiteCount == whiteFrames)
+            //    {
+            //        damaged = false;
+            //        whiteCount = 0;
+            //        redCount = 0;
+            //    }
+            //}
+            //else
+            //{
+            //    animManager.Draw(spriteBatch, Color.White);
+            //}
+
             spriteBatch.Draw(texture, rectangle, Color.White);
 
             foreach(Bullet bullet in bullets)

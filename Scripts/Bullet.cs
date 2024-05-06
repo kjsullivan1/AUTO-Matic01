@@ -14,39 +14,57 @@ namespace AUTO_Matic
     {
         Vector2 position;
         Vector2 velocity;
-        float moveSpeed;
+        //float moveSpeed;
         Vector2 maxSpeed;
         Texture2D bulletTexture;
         int width = 14;
         int height = 14;
         public Rectangle rect;
         bool shootX = true;
+        bool shootY = false;
+        public Vector2 bulletSpeed;
+        float angle;
 
         Vector2 startPos;
         float travelDist;
         public bool delete = false;
 
-        public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content, bool isX, float travelDist)
+
+        public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content, bool isX, float travelDist, bool isY = false, float speedY = 0, float angle = 0)
         {
             position = pos;
             startPos = pos;
             this.travelDist = travelDist;
-            moveSpeed = speed;
             this.maxSpeed = maxSpeed;
             bulletTexture = content.Load<Texture2D>("TopDown/Textures/Player");
             rect = new Rectangle((int)pos.X, (int)pos.Y, width, height);
             shootX = isX;
+            shootY = isY;
+            bulletSpeed = new Vector2(speed, speedY);
+            this.angle = angle;
         }
 
         public void Update()
         {
-            if (shootX)
+            if(shootX && shootY)
             {
-                velocity.X += moveSpeed;
+                if(angle != 0)
+                {
+                    velocity += bulletSpeed * angle;
+                }
+                else
+                {
+                    velocity += bulletSpeed;
+                }
+                
             }
-            else
+            else if (shootX)
             {
-                velocity.Y += moveSpeed;
+                velocity.X += bulletSpeed.X;
+            }
+            else if(shootY)
+            {
+                velocity.Y += bulletSpeed.Y;
             }
            
             position += velocity;

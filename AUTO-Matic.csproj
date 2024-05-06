@@ -65,9 +65,11 @@
     <Compile Include="Scripts\SideScroll\Enemy\GAJump.cs" />
     <Compile Include="Scripts\SideScroll\SideRectangleHelper.cs" />
     <Compile Include="Scripts\SideScroll\Enemy\SSEnemy.cs" />
+    <Compile Include="Scripts\SideScroll\SSCamera.cs" />
     <Compile Include="Scripts\SideScroll\SSPlayer.cs" />
     <Compile Include="Scripts\SideScroll\Tile.cs" />
     <Compile Include="Scripts\SideScroll\SideTileMap.cs" />
+    <Compile Include="Scripts\TopDown\ShotGunBoss.cs" />
     <Compile Include="Scripts\TopDown\TDEnemy.cs" />
     <Compile Include="Scripts\TopDown\TDPlayer.cs" />
     <Compile Include="Scripts\TopDown\TDRectangleHelper.cs" />
@@ -93,6 +95,18 @@
     <Content Include="Content\SideScroll\Animations\PlayerJump.png" />
     <Content Include="Content\SideScroll\Animations\PlayerShoot.png" />
     <Content Include="Content\SideScroll\Animations\PlayerWalk.png" />
+    <Content Include="Content\SideScroll\HealthBar\PilotHealthBar0.png" />
+    <Content Include="Content\SideScroll\HealthBar\PilotHealthBar1.png" />
+    <Content Include="Content\SideScroll\HealthBar\PilotHealthBar2.png" />
+    <Content Include="Content\SideScroll\HealthBar\PilotHealthBar3.png" />
+    <Content Include="Content\SideScroll\HealthBar\PilotHealthBar4.png" />
+    <Content Include="Content\SideScroll\HealthBar\PilotHealthBar5.png" />
+    <Content Include="Content\SideScroll\HealthBar\RoboHealthBar0.png" />
+    <Content Include="Content\SideScroll\HealthBar\RoboHealthBar1.png" />
+    <Content Include="Content\SideScroll\HealthBar\RoboHealthBar2.png" />
+    <Content Include="Content\SideScroll\HealthBar\RoboHealthBar3.png" />
+    <Content Include="Content\SideScroll\HealthBar\RoboHealthBar4.png" />
+    <Content Include="Content\SideScroll\HealthBar\RoboHealthBar5.png" />
     <Content Include="Content\SideScroll\Maps\Map0.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

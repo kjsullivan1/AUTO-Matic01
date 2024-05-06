@@ -6,7 +6,11 @@ using AUTO_Matic.SideScroll;
 using AUTO_Matic.TopDown;
 using System;
 using AUTO_Matic.Scripts.TopDown;
+using AUTO_Matic.Scripts.SideScroll;
 using System.Threading;
+using AUTO_Matic.SideScroll.Enemy;
+using AUTO_Matic.Scripts;
+
 
 namespace AUTO_Matic
 {
@@ -23,7 +27,7 @@ namespace AUTO_Matic
         UIManager UIManager = new UIManager();
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.TitleScreen;
+        public Scenes currScene = Scenes.InGame;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -73,19 +77,20 @@ namespace AUTO_Matic
         int pixelBits = 64;
         List<TDEnemy> tdEnemies = new List<TDEnemy>();
         public int levelCount = 0;
-
-        public Rectangle Boss;
-        float shootRate = .5f;
-        float maxShootRate;
-        bool canShoot = false;
-        List<Bullet> bossBullets = new List<Bullet>();
-        float bulletSpeed = 6.25f;
-        float maxBulletSpeed = 20;
-        float bulletDmg = .5f;
-        float bossHealth = 8.65f;
+        bool startBoss = false;
+        ShotGunBoss shotGunBoss;
+        //float shootRate = .5f;
+        //float maxShootRate;
+        //bool canShoot = false;
+        //List<Bullet> bossBullets = new List<Bullet>();
+        //float bulletSpeed = 6.25f;
+        //float maxBulletSpeed = 20;
+        //float bulletDmg = .5f;
+        //float bossHealth = 8.65f;
+        //int[,] currTDMap;
         #endregion
         //SSEnemy enemy;
-
+        SSCamera ssCamera;
         class Door
         {
             BottomDoorTile bottomDoor;
@@ -115,7 +120,7 @@ namespace AUTO_Matic
             //graphics.HardwareModeSwitch = false;
             //graphics.IsFullScreen = true;
             graphics.ApplyChanges();
-            maxShootRate = shootRate;
+            //maxShootRate = shootRate;
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth/2, graphics.PreferredBackBufferHeight/2));
 
             
@@ -134,6 +139,13 @@ namespace AUTO_Matic
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            List<Texture2D> healthbars = new List<Texture2D>();
+            for (int i = 0; i < 6; i++)
+            {
+                healthbars.Add(Content.Load<Texture2D>(@"SideScroll\HealthBar\RoboHealthBar" + i));
+            }
+
+            UIHelper.HealthBar = healthbars;
 
             #region UI Menus
             UIHelper.TitleFont = Content.Load<SpriteFont>(@"Fonts\TitleFont");
@@ -141,6 +153,7 @@ namespace AUTO_Matic
             UIHelper.ButtonTexture = Content.Load<Texture2D>(@"Textures\Button");
             UIHelper.ButtonFont = Content.Load<SpriteFont>(@"Fonts\CrawlFont");
             UIHelper.CrawlBgTxture = Content.Load<Texture2D>(@"Textures\TitleCrawlBG");
+          
             UIHelper.Bounds = new Rectangle(new Point((int)camera.Position.X, (int)camera.Position.Y), new Point(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
             UIHelper.CrawlFont = Content.Load<SpriteFont>(@"Fonts\CrawlFont");
             UIManager.CreateUIElements(new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), this);
@@ -148,8 +161,10 @@ namespace AUTO_Matic
             UIHelper.SetElementVisibility("MainMenuTitle", true, UIManager.uiElements);
 
             UIHelper.SetElementVisibility("SettingsMenuTitle", true, UIManager.uiElements);
+
             #endregion
 
+          
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if(currScene == Scenes.InGame)
                 StartNewGame();
@@ -172,6 +187,7 @@ namespace AUTO_Matic
         {
             if(!isBoss)
             {
+                levelCount++;
                 Random rand = new Random();
                 int num = rand.Next(1, 11);
 
@@ -184,22 +200,29 @@ namespace AUTO_Matic
                 if (dLevel)
                     tdPlayer.DiagLevels.dLevels.Add(tdMap.GenerateMap(filePath));
 
-                tdEnemies.Clear();
-
+                //tdEnemies.Clear();
+                currMap = tdMap.GenerateMap(filePath);
+                tdPlayer.changeLevel = true;
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
                     tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                //Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                //                    (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                //                    new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                //foreach (Vector2 enemySpawn in tdMap.EnemySpawns)
+                //{
+                //    if (currBounds.Contains(enemySpawn))
+                //        tdEnemies.Add(new TDEnemy(Content, enemySpawn, tdMap, currMap));
+                //}
 
-                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
-                    (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
-                    new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-                foreach (Vector2 enemySpawn in tdMap.EnemySpawns)
-                {
-                    if (currBounds.Contains(enemySpawn))
-                        tdEnemies.Add(new TDEnemy(Content, enemySpawn, tdMap, tdMap.GenerateMap(filePath)));
-                }
             }
             if(isBoss)
             {
+                //graphics.PreferredBackBufferWidth = 64 * 15; //1600  // pixelBits * col
+                //graphics.PreferredBackBufferHeight = 64 * 15; //960  // pixelBits * row
+                //graphics.IsFullScreen = false;
+                //graphics.ApplyChanges();
+                //camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)), graphics.PreferredBackBufferHeight - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
+                //camera.Zoom = .5f;
                 string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 0 + ".txt";
 
                 if (xLevel)
@@ -217,24 +240,22 @@ namespace AUTO_Matic
                 Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
                     (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
                     new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-                foreach (Vector2 enemySpawn in tdMap.EnemySpawns)
-                {
-                    if (currBounds.Contains(enemySpawn))
-                        Boss = new Rectangle((int)enemySpawn.X, (int)enemySpawn.Y, 320, 320);
-                }
 
-                canShoot = true;
+                shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content);
+                startBoss = true;
+                //tdPlayer.rectangle.X -= 200;
+                //canShoot = true;
             }
         }
 
 
         public void StartDungeon()
         {
-            tdPlayer = new TDPlayer(this, 64, 12, 12);
+            tdPlayer = new TDPlayer(this, 64, 500, 500);
             tdMap = new TopDownMap();
-            Boss = new Rectangle();
+            //Boss = new Rectangle();
             levelCount = 0;
-
+            startBoss = false;
             graphics.PreferredBackBufferWidth = 64 * 25; //1600  // pixelBits * col
             graphics.PreferredBackBufferHeight = 64 * 15; //960  // pixelBits * row
             graphics.IsFullScreen = false;
@@ -263,11 +284,26 @@ namespace AUTO_Matic
             BoundIndexes.Add(camera.Position);
             tdPlayer.Load(Content, camera.viewport.Bounds);
             tdPlayer.position = new Vector2((graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) + (64 * 2), -(graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) + (64 * 2));
+
+            List<Texture2D> healthbars = new List<Texture2D>();
+            for (int i = 0; i < 6; i++)
+            {
+                healthbars.Add(Content.Load<Texture2D>(@"SideScroll\HealthBar\PilotHealthBar" + i));
+            }
+
+            UIHelper.HealthBar = healthbars;
+            UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)tdPlayer.Health);
         }
 
         public void StartNewGame()
         {
-            camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2 - (64*3.5f), graphics.PreferredBackBufferHeight / 2));
+            UIHelper.SetElementVisibility("MainMenu", false, UIManager.uiElements);
+            UIHelper.SetElementVisibility("Settings", false, UIManager.uiElements);
+            UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
+
+            //camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2 - (64*3.5f), graphics.PreferredBackBufferHeight / 2));
+           
+
             this.IsMouseVisible = false;
             Tile.Content = Content;
 
@@ -279,15 +315,15 @@ namespace AUTO_Matic
                 enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
             }
 
-            camera.Zoom = 1.35f;
+            //camera.Zoom = 1.35f;
 
             ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
-            healthBar.Clear();
-            for (int i = 0; i < 3; i++)
-            {
-                healthBar.Add(new Rectangle(25 + (i * 96), 136, 96, 64));
-            }
-            
+            ssPlayer.Health = 5;
+            UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
+            UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
+            ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0,0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
+         
+           // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
         }
 
@@ -357,70 +393,37 @@ namespace AUTO_Matic
                     Menus(kb);
                     break;
                 case Scenes.InGame:
-                    camera.Update(new Vector2(camera.X, camera.Y));
+                    
                     switch(GameState)
                     {
                         
                         case GameStates.SideScroll: //Default
-                            if(kb.IsKeyDown(Keys.P))//Reset Pos
+                            ssCamera.Update(ssPlayer.Position);
+                            if (!ssCamera.onBorder)
+                            {
+                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)((ssCamera.viewport.X + ssCamera.Position.X) - 64 * 8.5f), 
+                                    (int)(ssCamera.viewport.Y + (ssCamera.Position.Y - ssCamera.viewport.Height/2)) + 250), new Point(0, 0)));
+                            }
+                            else
+                            {
+                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)(ssCamera.viewport.X + (ssCamera.Position.X - ssCamera.viewport.Width/1.75f)), 
+                                    (int)(ssCamera.viewport.Y + (ssCamera.Position.Y - ssCamera.viewport.Height/2) + 250)), new Point(0, 0)));
+                            }
+                            if(kb.IsKeyDown(Keys.P) || ssPlayer.Health <= 0)//Reset Pos
                             {
                                 StartNewGame();
 
                             }
-                            if(updateDoor)
+                            if (ssPlayer.damaged)
+                            {
+                                UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
+                            }
+                            if (updateDoor)
                             {
                                 UpdateDoor(topIndex, bottomIndex);
                             }
                             ssPlayer.Update(gameTime, Gravity, enemies);
-                            if(ssPlayer.Position.X > 1430)
-                            {
-                                if(camera.X <= graphics.PreferredBackBufferWidth)
-                                {
-                                    camera.X += 64;
-                                }
-                                //camera.X = graphics.PreferredBackBufferWidth;
-                                //if(healthBar[0].X == ssPlayer.X && ssPlayer.X > 1435)
-                                //{
-
-                                //}
-                                //else
-                                //{
-                                //    if(healthBar.Count != 0)
-                                //    {
-                                //        for (int i = 0; i < healthBar.Count - 1; i++)
-                                //        {
-                                //            healthBar[i] = new Rectangle(1430, 120, 96, 64);
-                                //        }
-                                //    }
-                                   
-                                //}
-                               
-                            }
-                            if(ssPlayer.Position.X > 2610)
-                            {
-                                if(camera.X <= 2610)
-                                {
-                                    camera.X += 64;
-                                }
-                                //camera.X = graphics.PreferredBackBufferWidth + 64 * 7;
-                                //if (healthBar[0].X == ssPlayer.X && ssPlayer.X > 2615)
-                                //{
-
-                                //}
-                                //else
-                                //{
-                                //    if (healthBar.Count != 0)
-                                //    {
-                                //        for (int i = 0; i < healthBar.Count - 1; i++)
-                                //        {
-                                //            healthBar[i] = new Rectangle(2610, 120, 96, 64);
-                                //        }
-                                //    }
-
-                                //}
-
-                            }
-
+                        
                             for(int i = 0; i < enemies.Count; i++)
                             {
                                 enemies[i].Update(gameTime, Gravity, ssPlayer, this);
@@ -484,9 +487,19 @@ namespace AUTO_Matic
                                 StartDungeon();
                                 GameState = GameStates.TopDown;
                             }
+
+                            //SSCamera.Move(ssPlayer.Position);
                             break;
                         case GameStates.TopDown:
-                            tdPlayer.Update(gameTime, tdMap);
+                            if(tdPlayer.Health <= 0)
+                            {
+                                StartDungeon();
+                            }
+
+                            UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)(camera.Position.X - GraphicsDevice.Viewport.Width/2) + 20,
+                                   (int)(camera.Position.Y - GraphicsDevice.Viewport.Height/2) + 20), new Point(0, 0)));
+                            camera.Update(new Vector2(camera.X, camera.Y));
+                            tdPlayer.Update(gameTime, tdMap, shotGunBoss);
                             camera.Update(CameraPos());
                             if(kb.IsKeyDown(Keys.L))//Switching back to sidescroll
                             {
@@ -495,15 +508,31 @@ namespace AUTO_Matic
                             }
                             if(tdPlayer.changeLevel)
                             {
+
                                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
                                     tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                                tdEnemies.Clear();
+                                currMap = tdPlayer.DiagLevels.dLevels[tdPlayer.DiagLevels.diagIndex];
+                                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                                    (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                                    new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                                if(!startBoss)
+                                {
+                                    foreach (Vector2 enemySpawn in tdMap.EnemySpawns)
+                                    {
+                                        if (currBounds.Contains(enemySpawn))
+                                            if (tdEnemies.Count <= 6)
+                                                tdEnemies.Add(new TDEnemy(Content, enemySpawn, tdMap, currMap));
+                                    }
+                                }
+                               
                                 tdPlayer.changeLevel = false;
-                                levelCount++;
+                               
                             }
                             
                             for(int i = tdEnemies.Count - 1; i >= 0; i--)
                             {
-                                tdEnemies[i].Upate(gameTime, tdPlayer.rectangle);
+                                tdEnemies[i].Upate(gameTime, tdPlayer, tdMap);
                             }
 
                             if(tdPlayer.bullets.Count != 0)
@@ -530,6 +559,7 @@ namespace AUTO_Matic
 
                             if(tdEnemies.Count != 0)
                             {
+                                bool hardBreak = false;
                                 for (int j = tdEnemies.Count - 1; j >= 0; j--)
                                 {
                                     if (tdPlayer.bullets.Count != 0)
@@ -542,84 +572,94 @@ namespace AUTO_Matic
                                                 if(tdEnemies[j].Health <= 0)
                                                 {
                                                     tdEnemies.RemoveAt(j);
-                                                    break;
+                                                    hardBreak = true;
                                                 }
                                                 tdPlayer.bullets.RemoveAt(i);
+                                                break;
+
                                             }
                                         }
-                                    }
-                                }
-                            }
-                            if(!canShoot)
-                            {
-                                shootRate -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                                if(shootRate < 0)
-                                {
-                                    shootRate = maxShootRate;
-                                    canShoot = true;
-                                }
-                            }
-
-                            if(canShoot)
-                            {
-                                if(tdPlayer.position.X < Boss.X + Boss.Width/2)
-                                {
-                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed, maxBulletSpeed), Content, true, 64 * 6));
-                                }
-                                if(tdPlayer.position.X > Boss.X + Boss.Width/2)
-                                {
-                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, true, 64 * 6));
-                                }
-                                if(tdPlayer.position.Y < Boss.Y + Boss.Height/2)
-                                {
-                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(maxBulletSpeed, -maxBulletSpeed), Content, false, 64 * 6));
-                                }
-                                if (tdPlayer.position.Y > Boss.Y + Boss.Height / 2)
-                                {
-                                    bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, false, 64 * 6));
-                                }
-
-                                canShoot = false;
-                            }
-
-                            foreach(Bullet bullet in bossBullets)
-                            {
-                                bullet.Update();
-                            }
-
-
-                            for(int i = bossBullets.Count - 1; i >= 0; i--)
-                            {
-                                if(bossBullets[i].rect.Intersects(tdPlayer.rectangle))
-                                {
-                                    tdPlayer.Health -= bulletDmg;
-
-                                    if(tdPlayer.Health <= 0)
-                                    {
-                                        StartDungeon();
-                                    }
-
-                                    bossBullets.RemoveAt(i);
-                                }
-                            }
-                           
-                            if(levelCount >= tdPlayer.bossRoom)
-                            {
-                                for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
-                                {
-                                    if (tdPlayer.bullets[i].rect.Intersects(Boss))
-                                    {
-                                         bossHealth -= tdPlayer.bulletDmg;
-                                        if (bossHealth <= 0)
-                                        {
-                                            Boss = new Rectangle();
+                                        if (hardBreak)
                                             break;
-                                        }
-                                        tdPlayer.bullets.RemoveAt(i);
                                     }
                                 }
                             }
-                            
+                            //if(!canShoot)
+                            //{
+                            //    shootRate -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                            //    if(shootRate < 0)
+                            //    {
+                            //        shootRate = maxShootRate;
+                            //        canShoot = true;
+                            //    }
+                            //}
+
+                            //if(canShoot)
+                            //{
+                            //    if(tdPlayer.position.X < Boss.X + Boss.Width/2)
+                            //    {
+                            //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed, maxBulletSpeed), Content, true, 64 * 6));
+                            //    }
+                            //    if(tdPlayer.position.X > Boss.X + Boss.Width/2)
+                            //    {
+                            //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, true, 64 * 6));
+                            //    }
+                            //    if(tdPlayer.position.Y < Boss.Y + Boss.Height/2)
+                            //    {
+                            //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(maxBulletSpeed, -maxBulletSpeed), Content, false, 64 * 6));
+                            //    }
+                            //    if (tdPlayer.position.Y > Boss.Y + Boss.Height / 2)
+                            //    {
+                            //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, false, 64 * 6));
+                            //    }
+
+                            //    canShoot = false;
+                            //}
+
+                            //foreach(Bullet bullet in bossBullets)
+                            //{
+                            //    bullet.Update();
+                            //}
+
+
+                            //for(int i = bossBullets.Count - 1; i >= 0; i--)
+                            //{
+                            //    if(bossBullets[i].rect.Intersects(tdPlayer.rectangle))
+                            //    {
+                            //        tdPlayer.Health -= bulletDmg;
+
+                            //        if(tdPlayer.Health <= 0)
+                            //        {
+                            //            StartDungeon();
+                            //        }
+
+                            //        bossBullets.RemoveAt(i);
+                            //    }
+                            //}
+                            if (startBoss)
+                            {
+                                shotGunBoss.Update(gameTime, tdPlayer, tdMap);
+                            }
+                            //if(levelCount >= tdPlayer.bossRoom)
+                            //{
+                            //    for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                            //    {
+                            //        if (tdPlayer.bullets[i].rect.Intersects(Boss))
+                            //        {
+                            //             bossHealth -= tdPlayer.bulletDmg;
+                            //            if (bossHealth <= 0)
+                            //            {
+                            //                Boss = new Rectangle();
+                            //                break;
+                            //            }
+                            //            tdPlayer.bullets.RemoveAt(i);
+                            //        }
+                            //    }
+                            //}
+                            if(tdPlayer.damaged)
+                            {
+                                UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)tdPlayer.Health);
+                            }
                             break;
                     }
 
@@ -691,10 +731,10 @@ namespace AUTO_Matic
                 case Scenes.InGame:
                     if(GameState == GameStates.SideScroll)
                     {
-                        Window.Title = camera.Position.ToString() + " PlayerPos: " + ssPlayer.Position.ToString() + "  EnemyState0: " + enemies[0].enemyState.ToString() + "    EnemeyState1: " + enemies[1].enemyState.ToString();
+                        Window.Title = camera.Position.ToString() + " PlayerPos: " + ssPlayer.Position.ToString() + "  EnemyState0: " + enemies[0].enemyState.ToString() + "    EnemeyState1: " + enemies[1].enemyState.ToString() + " Player blockBottom: " + ssPlayer.blockBottom;
                         //Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
-                        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
-
+                        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null,ssCamera.transform);
+                       
                         SideTileMap.Draw(spriteBatch);
                         ssPlayer.Draw(spriteBatch);
                         foreach(SSEnemy enemy in enemies)
@@ -705,8 +745,10 @@ namespace AUTO_Matic
                         //{
                         //    spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), new Vector2(healthBar[i].X, healthBar[i].Y), healthBar[i], Color.Red);
                         //}
-                       
+
                         //enemy.Draw(spriteBatch);
+                        UIManager.Draw(spriteBatch);
+                        spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), ssCamera.FollowBox, Color.White);
                         spriteBatch.End();
                     }
                     else if(GameState == GameStates.TopDown)
@@ -714,15 +756,21 @@ namespace AUTO_Matic
                         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
                         tdMap.Draw(spriteBatch);
                         tdPlayer.Draw(spriteBatch);
-                        foreach(TDEnemy enemy in tdEnemies)
+                       
+                        foreach (TDEnemy enemy in tdEnemies)
                         {
                             enemy.Draw(spriteBatch);
                         }
-                        foreach(Bullet bullet in bossBullets)
+                        if(startBoss)
                         {
-                            bullet.Draw(spriteBatch);
+                            shotGunBoss.Draw(spriteBatch);
                         }
-                        spriteBatch.Draw(Content.Load<Texture2D>("TopDown/MapTiles/Tile11"), Boss, Color.White);
+                        UIManager.Draw(spriteBatch);
+                        //foreach(Bullet bullet in bossBullets)
+                        //{
+                        //    bullet.Draw(spriteBatch);
+                        //}
+                        //spriteBatch.Draw(Content.Load<Texture2D>("TopDown/MapTiles/Tile11"), Boss, Color.White);
                         spriteBatch.End();
 
                         //if (changeLevel)

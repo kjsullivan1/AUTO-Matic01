@@ -13,15 +13,20 @@ namespace AUTO_Matic.Scripts.TopDown
 {
     class TDEnemy
     {
+
+        enum EnemyStates { Movement, Shoot}
+        EnemyStates enemyState = EnemyStates.Movement;
+
         private Texture2D texture;
         private Vector2 position;
         private Vector2 velocity;
         private Rectangle rectangle;
-        public float moveSpeed = 2f;
+        public float moveSpeed = 2.75f;
         private bool hasJumped = false;
         public bool isColliding = false;
         int visionLength = 7;
         float health = 3.5f;
+        int pixelSize = 64;
         public float Health
         {
             get { return health; }
@@ -76,6 +81,22 @@ namespace AUTO_Matic.Scripts.TopDown
 
         bool fixer = true;
         bool stopper = false;
+        ContentManager content;
+
+        #region Shooting
+        Texture2D gunTexture;
+        public List<Bullet> bullets = new List<Bullet>();
+        float bulletSpeed = 2f;
+        float bulletMaxX = 10f;
+        float bulletMaxY = 10f;
+        bool isShootDelay = false;
+        float shootDelay = .8f;//In seconds
+        float iShootDelay;
+        bool startShoot = false;
+        public float bulletDmg = .25f;
+        public float bulletTravelDist = 64 *5;
+        Texture2D visionTxture;
+        #endregion
         public Vector2 Position
         {
             get { return position; }
@@ -99,10 +120,13 @@ namespace AUTO_Matic.Scripts.TopDown
 
         public TDEnemy(ContentManager Content, Vector2 spawnPos, TopDownMap map, int[,] mapDims)
         {
+            content = Content;
             texture = Content.Load<Texture2D>("TopDown/MapTiles/Tile11");
             this.map = map;
             this.mapDims = mapDims;
             position = spawnPos;
+            iShootDelay = shootDelay;
+            visionTxture = content.Load<Texture2D>(@"Textures\Red");
 
         }
 
@@ -191,1164 +215,1268 @@ namespace AUTO_Matic.Scripts.TopDown
         {
             target = playerPos;
         }
-        public void Upate(GameTime gameTime, Rectangle playerRect)
+        public void Upate(GameTime gameTime, TDPlayer playerRect, TopDownMap tdMap)
         {
 
             rectangle = new Rectangle((int)position.X, (int)position.Y, tileSize, tileSize);
 
-            SetVision();
-
-            blockedRight = false;
-            blockedLeft = false;
-            blockedTop = false;
-            blockedBottom = false;
-
-            for (int i = vision.Count - 1; i >= 0; i--)
-            {
-                bool removed = true;
-                foreach (WallTiles tile in map.WallTiles)
-                {
-                    if (vision[i].Contains(tile.Rectangle))//If touching the right side
-                    {
-                        vision.Remove(vision[i]);
-                        break;
-                    }
-                }
-
-
-            }
-
-            bool inSight = false;
-            foreach(Rectangle rect in vision)
-            {
-                if(rect.Intersects(playerRect))
-                {
-                    inSight = true;
-                }
-                
-            }
             if(inSight)
             {
-                target = new Vector2(playerRect.X, playerRect.Y);
-            }
-            else
-            {
-                target = new Vector2(position.X, position.Y);
-            }
-            //for (int i = vision.Count - 1; i >= 0; i--)
-            //{
-            //    Vector2 temp = target;
-            //    if (vision[i].Intersects(new Rectangle((int)target.X, (int)target.Y, 28, 28)))
-            //    {
-            //        target = temp;
-            //        inSight = true;
-            //        break;
-            //    }
-            //    else
-            //    {
-            //        inSight = false;
-            //    }
-            //}
-            //if(!inSight)
-            //{
-
-            //}
-            foreach (WallTiles tile in map.WallTiles)
-            {
-
-                if (rectangle.TouchLeftOf(tile.Rectangle)) //Right
-                {
-                    collidingTileX = tile;
-                    blockedRight = true;
-                    pauseY = 0;
-                    if ((!strafeUp && !strafeDown))
-                        strafeRight = false;
-
-                    //position.X -= moveSpeed;
-                }
-
-                if (rectangle.TouchRightOf(tile.Rectangle)) //Left
-                {
-                    collidingTileX = tile;
-                    blockedLeft = true;
-                    if ((!strafeUp && !strafeDown))
-                        strafeLeft = false;
-                    //position.X += moveSpeed;
-                    pauseY = 0;
-                }
-
-
-                if (Rectangle.TouchBottomOf(tile.Rectangle)) //Bottom
-                {
-                    collidingTileY = tile;
-                    blockedTop = true;
-                    if (!strafeLeft && !strafeRight)
-                        strafeUp = false;
-
-                    //position.Y -= moveSpeed;
-                }
-
-
-                if (rectangle.TouchTopOf(tile.Rectangle)) //Top
-                {
-                    collidingTileY = tile;
-                    blockedBottom = true;
-                    if (!strafeLeft && !strafeRight)
-                        strafeDown = false;
-                    //position.Y += moveSpeed;
-                }
-
-                //if (vision[8].Contains(tile.Rectangle)) //Bottom right
-                //{
-                //    if (!blockedRight && (!blockedBottom || !blockedTop) && ((int)position.X < (int)target.X) && (!strafeDown && !strafeUp))
-                //    {
-                //        pauseY = tileSize;
-
-                //    }
-                //}
-                //if (vision[10].Contains(tile.Rectangle)) //Bottom left
-                //{
-                //    if (!blockedLeft && (!blockedBottom || !blockedTop) && (position.X > target.X) && (!strafeDown && !strafeUp))
-                //    {
-                //        pauseY = tileSize;
-                //    }
-                //}
-                //if (vision[12].Contains(tile.Rectangle)) //Top right
-                //{
-                //    if (!blockedRight && (!blockedBottom || !blockedTop) && (position.X < target.X) && (!strafeDown && !strafeUp))
-                //    {
-                //        pauseY = tileSize;
-                //    }
-                //}
-                //if (vision[14].Contains(tile.Rectangle))//Top left
-                //{
-                //    if (!blockedLeft && (!blockedBottom || !blockedTop) && (position.X > target.X) && (!strafeDown && !strafeUp))
-                //    {
-                //        pauseY = tileSize;
-                //    }
-                //}
-
-
-
+                shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
 
-            if (((distToTravel.X >= 0 && blockedRight) || (distToTravel.X <= 0 && blockedLeft)) || !prioXStrafe || strafeUp || strafeDown || pauseY <= 0 || pauseX <= 0)
+            switch (enemyState)
             {
-                if (strafeUp && !prioXStrafe)
-                {
-                    stopper = false;
-                    if (distToTravel.Y < 0 && !blockedTop)
+                #region Movement
+                case EnemyStates.Movement:
+                    SetVision();
+
+                    blockedRight = false;
+                    blockedLeft = false;
+                    blockedTop = false;
+                    blockedBottom = false;
+
+                    for (int i = vision.Count - 1; i >= 0; i--)
                     {
-                        distToTravel.Y += moveSpeed;
-                        position.Y -= moveSpeed;
-                        blockedBottom = false;
-                        stopper = true;
-                    }
-                    else if (distToTravel.Y >= 0)
-                    {
-                        strafeUp = false;
-                        distToTravel.Y = 0;
-                        stopper = false;
-                        fixer = true;
-                        //pauseY = 32;
-                    }
-
-                    if (blockedTop)
-                    {
-                        stopper = false;
-                        if (distToTravel.X != 0)
+                        bool removed = true;
+                        foreach (WallTiles tile in map.WallTiles)
                         {
-
-                        }
-                        else
-                        {
-                            strafeUp = false;
-
-                        }
-                    }
-
-                }
-                else if (strafeDown && !prioXStrafe)
-                {
-                    stopper = false;
-                    if (distToTravel.Y > 0 && !blockedBottom)
-                    {
-                        distToTravel.Y -= moveSpeed;
-                        position.Y += moveSpeed;
-                        blockedTop = false;
-                        stopper = true;
-                    }
-                    else if (distToTravel.Y <= 0)
-                    {
-                        strafeDown = false;
-                        distToTravel.Y = 0;
-                        stopper = false;
-                        fixer = true;
-                        //pauseY = 32;
-                    }
-
-                    if (blockedBottom)
-                    {
-                        stopper = false;
-                        if (distToTravel.X != 0)
-                        {
-
-                        }
-                        else
-                        {
-                            strafeDown = false;
-                        }
-                    }
-                }
-                else
-                {
-                    stopper = false;
-                    if (!prioXStrafe)
-                    {
-                        stopper = false;
-                        if (strafeUp)
-                        {
-                            strafeUp = false;
-                        }
-                        if (strafeDown)
-                        {
-                            strafeDown = false;
-                        }
-                    }
-                    if (!strafeLeft && !strafeRight)
-                    {
-                        fixer = true;
-                    }
-                }
-            }
-            if (((distToTravel.Y >= 0 && blockedBottom) || (distToTravel.Y <= 0 && blockedTop)) || prioXStrafe || strafeLeft || strafeRight)
-            {
-                fixer = false;
-                if (strafeLeft)
-                {
-                    if (distToTravel.X < 0 && !blockedLeft)
-                    {
-                        distToTravel.X += moveSpeed;
-                        position.X -= moveSpeed;
-                        blockedRight = false;
-                    }
-                    else if (distToTravel.X >= 0)
-                    {
-                        strafeLeft = false;
-                        if (!stopper)
-                        {
-                            fixer = true;
-                        }
-                        else if (!prioXStrafe)//Check the logic for this. Could be reason why pauses would happen with fixer = false
-                        {
-                            fixer = true;
-                        }
-                        prioXStrafe = false;
-                        distToTravel.X = 0;
-                        //fixer = true;
-                        stopper = false;
-                        //pauseX = 32;
-                    }
-
-                    if (blockedLeft)
-                    {
-                        prioXStrafe = false;
-                        if (distToTravel.Y > 0 && blockedBottom)
-                        {
-                            fixer = true;
-
-                        }
-                        if (distToTravel.Y < 0 && blockedTop)
-                        {
-                            fixer = true;
-                        }
-                    }
-
-                }
-                else if (strafeRight)
-                {
-                    fixer = false;
-                    if (distToTravel.X > 0 && !blockedRight)
-                    {
-                        distToTravel.X -= moveSpeed;
-                        position.X += moveSpeed;
-                        blockedLeft = false;
-                    }
-                    else if (distToTravel.X <= 0)
-                    {
-                        strafeRight = false;
-                        if (!stopper)
-                        {
-                            fixer = true;
-                        }
-                        else if (!prioXStrafe)
-                        {
-                            fixer = true;
-                        }
-                        prioXStrafe = false;
-                        distToTravel.X = 0;
-
-                        //stopper = false;
-                        //pauseX = 32;
-                    }
-
-                    if (blockedRight)
-                    {
-                        prioXStrafe = false;
-
-                        if (distToTravel.Y > 0 && blockedBottom)
-                        {
-                            fixer = true;
-                        }
-                        if (distToTravel.Y < 0 && blockedTop)
-                        {
-                            fixer = true;
-                        }
-
-                    }
-                }
-                else
-                {
-                    fixer = true;
-                    if (strafeRight)
-                    {
-                        strafeRight = false;
-                    }
-                    if (strafeLeft)
-                    {
-                        strafeLeft = false;
-                    }
-                }
-            }
-
-
-            if (fixer && !stopper)
-            {
-                if (pauseX > 0)
-                    pauseX -= moveSpeed;
-                else if (pauseY > 0)
-                    pauseY -= moveSpeed;
-
-                //Handle Right Vision
-                else if ((int)position.X < (int)target.X)
-                {
-                    if (blockedLeft && blockedBottom && blockedRight)
-                    {
-                        distToTravel.Y = -WallUntilOpening(GetRow(0), GetCol(0), "up", "right", GetRow(0), 0) * (tileSize * 2);
-                        strafeUp = true;
-                    }
-                    else if (blockedLeft && blockedTop && blockedRight)
-                    {
-                        distToTravel.Y = WallUntilOpening(GetRow(32), GetCol(0), "down", "right", 15 - GetRow(0), 0) * (tileSize * 2);
-                        strafeDown = true;
-                    }
-                    else if (blockedTop && blockedRight && blockedBottom)
-                    {
-                        distToTravel.X = -WallUntilOpening(GetRow(0), GetCol(0), "left", "up", GetCol(0), 0) * (tileSize);
-                        strafeLeft = true;
-                    }
-                    else if (blockedRight && blockedTop && ((int)position.Y == (int)target.Y))
-                    {
-
-                        if (map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims))
-                             || map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
-                        {
-                            ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "right");
-
-                            //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "right");
-                        }
-                        else
-                        {
-                            //ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", );
-                            //if(distToTravel.Y > 0) //Wants to go down
-                            //{
-
-                            //}
-                            //if(distToTravel.Y < 0) //Wants to go up
-                            //{ 
-                            //    prioXStrafe = true;
-                            //}
-                            distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "up", collidingTileY.mapPoint[0] - 1, 0) * (tileSize * 2);
-                            strafeLeft = true;
-
-                            ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), "", "right");
-
-                        }
-
-                        //distToTravel.Y = (-tileSize * 2) - 1;
-                        //strafeUp = true;
-
-
-                    }
-                    else if (blockedRight && blockedTop)
-                    {
-                        if ((int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims))
-                            || (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
-                        {
-                            xDiag = true;
-                            //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "right");
-
-                        }
-                        else if ((int)position.Y > (int)target.Y)
-                        {
-                            distToTravel.Y = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "right", (collidingTileY.mapPoint[0]), 0) * tileSize;
-                            strafeUp = true;
-                            prioXStrafe = true;
-                        }
-                        if ((int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims))
-                             || (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0] + 1, collidingTileY.mapPoint[1], mapDims)))
-                        {
-                            xDiag = true;
-                            //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "right");
-                        }
-                        else if ((int)position.Y < (int)target.Y)
-                        {
-                            distToTravel.Y = WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right", 15 - (collidingTileX.mapPoint[0]), 0) * (tileSize * 2);
-                            strafeDown = true;
-                        }
-                    }
-                    else if (blockedRight && blockedBottom && ((int)position.Y == (int)target.Y))
-                    {
-
-                        if (map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims))
-                             || map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))
-                        {
-                            ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "right");
-                        }
-                        else
-                        {
-                            distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "down", collidingTileY.mapPoint[1] + 1, 0) * (tileSize * 2);
-                            strafeLeft = true;
-
-                            ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), "", "right");
-                            //distToTravel.Y = (tileSize * 2) + 1;
-                            //strafeDown = true;
-                            prioXStrafe = true;
-                        }
-
-
-                    }
-                    else if (blockedRight && blockedBottom)
-                    {
-                        if ((int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], mapDims) - 1)
-                             || (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims))) // 
-                        {
-                            xDiag = true;
-                            //ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "right");
-                        }
-                        else if ((int)position.Y > (int)target.Y)
-                        {
-                            //distToTravel.Y = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "right", 15 - collidingTileY.mapPoint[0], 0) * (tileSize);
-                            //strafeDown = true;
-                            //prioXStrafe = true;
-                        }
-                        if ((int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], mapDims) - 1)
-                             || (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))// 
-                        {
-                            xDiag = true;
-                            //ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right");
-                        }
-                        else if ((int)position.Y < (int)target.Y)
-                        {
-                            distToTravel.Y = -WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "right", collidingTileX.mapPoint[0], 0) * (tileSize * 2);
-                            strafeUp = true;
-                        }
-
-                    }
-                    else if (blockedRight && ((int)position.Y == (int)target.Y))
-                    {
-                        ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", "left");
-                    }
-                    else if (blockedRight && (!blockedTop && !blockedBottom))
-                    {
-                        //ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", "left");
-                    }
-                    else if (!blockedRight)
-                    {
-                        position.X += moveSpeed;
-                        if (distToTravel.X < 0)
-                        {
-                            distToTravel.X = 0;
-                        }
-                        //blockedLeft = false;
-                    }
-
-
-                }
-
-                //Handle Left Vision
-                else if ((int)position.X > (int)target.X)
-                {
-
-                    if (blockedLeft && blockedBottom && blockedRight)
-                    {
-                        distToTravel.Y = -WallUntilOpening(GetRow(0), GetCol(0), "up", "left", GetRow(0), 0) * (tileSize * 2);
-                        strafeUp = true;
-                    }
-                    else if (blockedLeft && blockedTop && blockedRight)
-                    {
-                        distToTravel.Y = WallUntilOpening(GetRow(32), GetCol(0), "down", "right", 15 - GetRow(0), 0) * (tileSize * 2);
-                        strafeDown = true;
-                    }
-                    else if (blockedTop && blockedLeft && blockedBottom)
-                    {
-                        distToTravel.X = WallUntilOpening(GetRow(0), GetCol(32), "right", "up", 25 - GetCol(0), 0) * (tileSize * 2);
-                        strafeRight = true;
-                    }
-                    else if (blockedLeft && blockedTop && ((int)position.Y == (int)target.Y))
-                    {
-                        if (map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], mapDims) + 1)
-                             || map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
-                        {
-                            ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "left");
-                        }
-                        else
-                        {
-                            distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right", "up", 25 - collidingTileY.mapPoint[1], 0) * (tileSize * 2);
-                            strafeRight = true;
-
-                            ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), "", "left");
-                            prioXStrafe = true;
-                        }
-
-                        //distToTravel.Y = (-tileSize * 2) - 1;
-                        //strafeUp = true;
-
-                    }
-                    else if (blockedLeft && blockedTop)
-                    {
-                        if ((int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims))
-                             || (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
-                        {
-                            xDiag = true;
-                            //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "left");
-                        }
-                        else if ((int)position.Y > (int)target.Y)
-                        {
-                            distToTravel.Y = -WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left", collidingTileX.mapPoint[0], 0) * (tileSize * 2);
-                            strafeUp = true;
-                            prioXStrafe = true;
-                        }
-                        if ((int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims))
-                             || (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
-                        {
-                            xDiag = true;
-                            //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "left");
-                        }
-                        else if ((int)position.Y < (int)target.Y)
-                        {
-                            distToTravel.Y = WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "left", 15 - collidingTileX.mapPoint[0], 0) * (tileSize * 2);
-                            strafeDown = true;
-                        }
-                    }
-                    else if (blockedLeft && blockedBottom && ((int)position.Y == (int)target.Y))
-                    {
-                        if (map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], mapDims) + 1)
-                             || map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))
-                        {
-                            ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "left");
-                        }
-                        else
-                        {
-                            distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right", "down", 25 - collidingTileY.mapPoint[1], 0) * (tileSize * 2);
-                            strafeRight = true;
-
-                            ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), "", "left");
-                            prioXStrafe = true;
-                        }
-                        //distToTravel.Y = (tileSize * 2) + 1;
-                        //strafeDown = true;
-
-
-                    }
-                    else if (blockedLeft && blockedBottom)
-                    {
-                        if ((int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims))
-                             && (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))
-                        {
-                            xDiag = true;
-                            //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "left");
-                        }
-                        else if ((int)position.Y > (int)target.Y)
-                        {
-                            distToTravel.Y = -WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left", collidingTileX.mapPoint[0], 0) * (tileSize);
-                            strafeUp = true;
-                        }
-                        if ((int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims))
-                             && (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))
-                        {
-                            xDiag = true;
-                            //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "left");
-                        }
-                        else if ((int)position.Y < (int)target.Y)
-                        {
-
-                            distToTravel.Y = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "left", 15 - collidingTileY.mapPoint[0], 0) * (tileSize * 2);
-                            strafeDown = true;
-                            prioXStrafe = true;
-                        }
-
-
-                    }
-                    else if (blockedLeft && ((int)position.Y == (int)target.Y))
-                    {
-                        ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", "right");
-                    }
-                    else if (blockedLeft && (!blockedTop && !blockedBottom))
-                    {
-                        //ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", "right");
-                    }
-                    else if (!blockedLeft)
-                    {
-                        position.X -= moveSpeed;
-                        if (distToTravel.X > 0)
-                        {
-                            distToTravel.X = 0;
-                        }
-                        //blockedRight = false;
-                    }
-
-
-                }
-
-                //Handle Up vision
-                if ((int)position.Y > (int)target.Y)
-                {
-                    if (blockedTop && blockedRight && blockedLeft)
-                    {
-                        distToTravel.Y = WallUntilOpening(GetRow(32), GetCol(0), "down", "left", 15 - GetRow(0), 0) * (tileSize * 2);
-                        strafeDown = true;
-                    }
-                    else if (blockedTop && blockedRight && blockedBottom)
-                    {
-                        distToTravel.X = -WallUntilOpening(GetRow(0), GetCol(0), "left", "down", GetCol(0), 0) * (tileSize * 2);
-                        strafeLeft = true;
-                    }
-                    else if (blockedTop && blockedLeft && blockedBottom)
-                    {
-                        distToTravel.X = WallUntilOpening(GetRow(0), GetCol(32), "right", "down", 25 - GetCol(0), 0) * (tileSize * 2);
-                        strafeRight = true;
-                    }
-                    else if (blockedTop && blockedRight && ((int)position.X == (int)target.X))
-                    {
-                        if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims))
-                             || map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims)))
-                        {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "right");
-                        }
-                        else
-                        {
-                            distToTravel.Y = WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right", 15 - collidingTileX.mapPoint[0], 0) * (tileSize * 2);
-                            strafeDown = true;
-                            ChooseXStrafe(collidingTileY.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileY.mapPoint[1], "");
-                        }
-
-
-                        //distToTravel.X = tileSize + 1;
-                        //strafeRight = true;
-                    }
-                    else if (blockedTop && blockedRight)
-                    {
-                        if ((int)position.X < (int)target.X && xDiag)
-                        {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "right");
-                            xDiag = false;
-                        }
-                        else if ((int)position.X < (int)target.X)
-                        {
-                            distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "up", collidingTileY.mapPoint[1], 0) * (tileSize * 2);
-                            strafeLeft = true;
-                        }
-                        if ((int)position.X > (int)target.X && xDiag)
-                        {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left");
-                            xDiag = false;
-                        }
-                        else if ((int)position.X > (int)target.X)
-                        {
-                            //distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right", "up", 25 - collidingTileY.mapPoint[1], 0) * (tileSize);
-                            //strafeRight = true;
-                        }
-                    }
-                    else if (blockedTop && blockedLeft && ((int)position.X == (int)target.X))
-                    {
-                        if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims))
-                             || map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims)))
-                        {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left");
-                        }
-                        else
-                        {
-                            distToTravel.Y = WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right", 15 - collidingTileX.mapPoint[0], 0) * (tileSize * 2);
-                            strafeDown = true;
-                            ChooseXStrafe(collidingTileY.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileY.mapPoint[1], "");
-                        }
-
-                        //distToTravel.X = -tileSize - 1;
-                        //strafeLeft = true;
-
-                    }
-                    else if (blockedTop && blockedLeft)
-                    {
-                        if ((int)position.X > (int)target.X && xDiag)
-                        {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left");
-                            xDiag = false;
-                        }
-                        else if ((int)position.X > (int)target.X)
-                        {
-                            distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right", "up", 25 - collidingTileY.mapPoint[1], 0) * (tileSize * 2);
-                            strafeRight = true;
-                        }
-                        if ((int)position.X < (int)target.X && xDiag)
-                        {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "right");
-                            xDiag = false;
-                        }
-                        else if ((int)position.X < (int)target.X)
-                        {
-
-                            //distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "up", collidingTileY.mapPoint[1], 0) * tileSize;
-                            //strafeLeft = true;
-                        }
-                        xDiag = false;
-
-                    }
-                    else if (blockedTop && ((int)position.X == (int)target.X))
-                    {
-                        ChooseXStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up");
-                    }
-                    else if (blockedTop && (!blockedLeft && !blockedRight))
-                    {
-                        //ChooseXStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up");
-                    }
-                    else if (!blockedTop)
-                    {
-                        position.Y -= moveSpeed;
-                        if (distToTravel.Y > 0)
-                        {
-                            distToTravel.Y = 0;
-                        }
-                        //blockedTop = false;
-                    }
-                }
-
-                //Handle down vision
-                else if ((int)position.Y < (int)target.Y)
-                {
-                    if (blockedBottom && blockedLeft && blockedRight)
-                    {
-                        distToTravel.Y = -WallUntilOpening(GetRow(0), GetCol(0), "up", "left", GetRow(0), 0) * tileSize;
-                        strafeUp = true;
-                    }
-                    else if (blockedBottom && blockedLeft && blockedTop)
-                    {
-                        distToTravel.X = WallUntilOpening(GetRow(0), GetCol(32), "right", "down", 25 - GetCol(0), 0) * tileSize;
-                        strafeRight = true;
-                    }
-                    else if (blockedBottom && blockedRight && blockedTop)
-                    {
-                        distToTravel.X = -WallUntilOpening(GetRow(0), GetCol(0), "left", "down", GetCol(0), 0) * tileSize;
-                        strafeLeft = true;
-                    }
-                    else if (blockedBottom && blockedRight && ((int)position.X == (int)target.X))
-                    {
-                        if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims))
-                             || map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims)))
-                        {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right");
-                        }
-                        else
-                        {
-                            distToTravel.Y = -WallUntilOpening(collidingTileX.mapPoint[1], collidingTileX.mapPoint[1], "up", "right", collidingTileX.mapPoint[0], 0) * (tileSize * 2);
-                            strafeUp = true;
-                            ChooseXStrafe(collidingTileY.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileY.mapPoint[1], "");
-                        }
-
-                        //distToTravel.X = tileSize;
-                        //strafeRight=true;
-
-                    }
-                    else if (blockedBottom && blockedRight)
-                    {
-                        if ((int)position.X < (int)target.X && xDiag)
-                        {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right");
-                            xDiag = false;
-                        }
-                        else if ((int)position.X < (int)target.X)
-                        {
-                            distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "down", collidingTileY.mapPoint[1], 0) * (tileSize * 2);
-                            strafeLeft = true;
-                        }
-                        if ((int)position.X > (int)target.X && xDiag)
-                        {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "left");
-                            xDiag = false;
-                        }
-                        else if ((int)position.X > (int)target.X)
-                        {
-                            //distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right","down", 25 - collidingTileY.mapPoint[1], 0) * tileSize;
-                            //strafeRight = true;
-                        }
-
-
-                    }
-                    else if (blockedBottom && blockedLeft && ((int)position.X == (int)target.X))
-                    {
-
-                        if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims))
-                             || map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims)))
-                        {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "left");
-                            //if it is one or the other need to set a condition to check if the enemy needs to strafe X if still blocked bottom to the left or the right 
-                            if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims))
-                                && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims)) == false)
+                            if (vision[i].Contains(tile.Rectangle))//If touching the right side
                             {
-                                //strafe left
-                                if (map.WallIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), mapDims)))
+                                vision.Remove(vision[i]);
+                                break;
+                            }
+                        }
+
+
+                    }
+
+                    this.inSight = false;
+                    foreach (Rectangle rect in vision)
+                    {
+                        if (rect.Intersects(playerRect.rectangle))
+                        {
+                            inSight = true;
+                        }
+
+                    }
+                    if (inSight)
+                    {
+                        target = new Vector2(playerRect.rectangle.X, playerRect.rectangle.Y);
+                        enemyState = EnemyStates.Shoot;
+                    }
+                    else
+                    {
+                        target = new Vector2(position.X, position.Y);
+                    }
+                    //for (int i = vision.Count - 1; i >= 0; i--)
+                    //{
+                    //    Vector2 temp = target;
+                    //    if (vision[i].Intersects(new Rectangle((int)target.X, (int)target.Y, 28, 28)))
+                    //    {
+                    //        target = temp;
+                    //        inSight = true;
+                    //        break;
+                    //    }
+                    //    else
+                    //    {
+                    //        inSight = false;
+                    //    }
+                    //}
+                    //if(!inSight)
+                    //{
+
+                    //}
+                    foreach (WallTiles tile in map.WallTiles)
+                    {
+
+                        if (rectangle.TouchLeftOf(tile.Rectangle)) //Right
+                        {
+                            collidingTileX = tile;
+                            blockedRight = true;
+                            pauseY = 0;
+                            if ((!strafeUp && !strafeDown))
+                                strafeRight = false;
+
+                            //position.X -= moveSpeed;
+                        }
+
+                        if (rectangle.TouchRightOf(tile.Rectangle)) //Left
+                        {
+                            collidingTileX = tile;
+                            blockedLeft = true;
+                            if ((!strafeUp && !strafeDown))
+                                strafeLeft = false;
+                            //position.X += moveSpeed;
+                            pauseY = 0;
+                        }
+
+
+                        if (Rectangle.TouchBottomOf(tile.Rectangle)) //Bottom
+                        {
+                            collidingTileY = tile;
+                            blockedTop = true;
+                            if (!strafeLeft && !strafeRight)
+                                strafeUp = false;
+
+                            //position.Y -= moveSpeed;
+                        }
+
+
+                        if (rectangle.TouchTopOf(tile.Rectangle)) //Top
+                        {
+                            collidingTileY = tile;
+                            blockedBottom = true;
+                            if (!strafeLeft && !strafeRight)
+                                strafeDown = false;
+                            //position.Y += moveSpeed;
+                        }
+
+                        //if (vision[8].Contains(tile.Rectangle)) //Bottom right
+                        //{
+                        //    if (!blockedRight && (!blockedBottom || !blockedTop) && ((int)position.X < (int)target.X) && (!strafeDown && !strafeUp))
+                        //    {
+                        //        pauseY = tileSize;
+
+                        //    }
+                        //}
+                        //if (vision[10].Contains(tile.Rectangle)) //Bottom left
+                        //{
+                        //    if (!blockedLeft && (!blockedBottom || !blockedTop) && (position.X > target.X) && (!strafeDown && !strafeUp))
+                        //    {
+                        //        pauseY = tileSize;
+                        //    }
+                        //}
+                        //if (vision[12].Contains(tile.Rectangle)) //Top right
+                        //{
+                        //    if (!blockedRight && (!blockedBottom || !blockedTop) && (position.X < target.X) && (!strafeDown && !strafeUp))
+                        //    {
+                        //        pauseY = tileSize;
+                        //    }
+                        //}
+                        //if (vision[14].Contains(tile.Rectangle))//Top left
+                        //{
+                        //    if (!blockedLeft && (!blockedBottom || !blockedTop) && (position.X > target.X) && (!strafeDown && !strafeUp))
+                        //    {
+                        //        pauseY = tileSize;
+                        //    }
+                        //}
+
+
+
+                    }
+
+                    if (((distToTravel.X >= 0 && blockedRight) || (distToTravel.X <= 0 && blockedLeft)) || !prioXStrafe || strafeUp || strafeDown || pauseY <= 0 || pauseX <= 0)
+                    {
+                        if (strafeUp && !prioXStrafe)
+                        {
+                            stopper = false;
+                            if (distToTravel.Y < 0 && !blockedTop)
+                            {
+                                distToTravel.Y += moveSpeed;
+                                position.Y -= moveSpeed;
+                                blockedBottom = false;
+                                stopper = true;
+                            }
+                            else if (distToTravel.Y >= 0)
+                            {
+                                strafeUp = false;
+                                distToTravel.Y = 0;
+                                stopper = false;
+                                fixer = true;
+                                //pauseY = 32;
+                            }
+
+                            if (blockedTop)
+                            {
+                                stopper = false;
+                                if (distToTravel.X != 0)
                                 {
 
                                 }
-                            }
-                            if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)) == false
-                                && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims)))
-                            {
-                                //strafe right 
+                                else
+                                {
+                                    strafeUp = false;
+
+                                }
                             }
 
+                        }
+                        else if (strafeDown && !prioXStrafe)
+                        {
+                            stopper = false;
+                            if (distToTravel.Y > 0 && !blockedBottom)
+                            {
+                                distToTravel.Y -= moveSpeed;
+                                position.Y += moveSpeed;
+                                blockedTop = false;
+                                stopper = true;
+                            }
+                            else if (distToTravel.Y <= 0)
+                            {
+                                strafeDown = false;
+                                distToTravel.Y = 0;
+                                stopper = false;
+                                fixer = true;
+                                //pauseY = 32;
+                            }
+
+                            if (blockedBottom)
+                            {
+                                stopper = false;
+                                if (distToTravel.X != 0)
+                                {
+
+                                }
+                                else
+                                {
+                                    strafeDown = false;
+                                }
+                            }
                         }
                         else
                         {
-                            distToTravel.Y = -WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left", collidingTileX.mapPoint[0], 0) * (tileSize * 2);
-                            strafeUp = true;
-                            ChooseXStrafe(collidingTileY.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileY.mapPoint[1], "");
+                            stopper = false;
+                            if (!prioXStrafe)
+                            {
+                                stopper = false;
+                                if (strafeUp)
+                                {
+                                    strafeUp = false;
+                                }
+                                if (strafeDown)
+                                {
+                                    strafeDown = false;
+                                }
+                            }
+                            if (!strafeLeft && !strafeRight)
+                            {
+                                fixer = true;
+                            }
                         }
-                        //distToTravel.X = -tileSize;
-                        //strafeLeft = true;
-
                     }
-                    else if (blockedBottom && blockedLeft)
+                    if (((distToTravel.Y >= 0 && blockedBottom) || (distToTravel.Y <= 0 && blockedTop)) || prioXStrafe || strafeLeft || strafeRight)
                     {
-                        if ((int)position.X < (int)target.X && xDiag)
+                        fixer = false;
+                        if (strafeLeft)
                         {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right"); //Needs to check Down + Right and Up + Left ONLY
-                            xDiag = false;
+                            if (distToTravel.X < 0 && !blockedLeft)
+                            {
+                                distToTravel.X += moveSpeed;
+                                position.X -= moveSpeed;
+                                blockedRight = false;
+                            }
+                            else if (distToTravel.X >= 0)
+                            {
+                                strafeLeft = false;
+                                if (!stopper)
+                                {
+                                    fixer = true;
+                                }
+                                else if (!prioXStrafe)//Check the logic for this. Could be reason why pauses would happen with fixer = false
+                                {
+                                    fixer = true;
+                                }
+                                prioXStrafe = false;
+                                distToTravel.X = 0;
+                                //fixer = true;
+                                stopper = false;
+                                //pauseX = 32;
+                            }
+
+                            if (blockedLeft)
+                            {
+                                prioXStrafe = false;
+                                if (distToTravel.Y > 0 && blockedBottom)
+                                {
+                                    fixer = true;
+
+                                }
+                                if (distToTravel.Y < 0 && blockedTop)
+                                {
+                                    fixer = true;
+                                }
+                            }
+
                         }
+                        else if (strafeRight)
+                        {
+                            fixer = false;
+                            if (distToTravel.X > 0 && !blockedRight)
+                            {
+                                distToTravel.X -= moveSpeed;
+                                position.X += moveSpeed;
+                                blockedLeft = false;
+                            }
+                            else if (distToTravel.X <= 0)
+                            {
+                                strafeRight = false;
+                                if (!stopper)
+                                {
+                                    fixer = true;
+                                }
+                                else if (!prioXStrafe)
+                                {
+                                    fixer = true;
+                                }
+                                prioXStrafe = false;
+                                distToTravel.X = 0;
+
+                                //stopper = false;
+                                //pauseX = 32;
+                            }
+
+                            if (blockedRight)
+                            {
+                                prioXStrafe = false;
+
+                                if (distToTravel.Y > 0 && blockedBottom)
+                                {
+                                    fixer = true;
+                                }
+                                if (distToTravel.Y < 0 && blockedTop)
+                                {
+                                    fixer = true;
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            fixer = true;
+                            if (strafeRight)
+                            {
+                                strafeRight = false;
+                            }
+                            if (strafeLeft)
+                            {
+                                strafeLeft = false;
+                            }
+                        }
+                    }
+
+
+                    if (fixer && !stopper)
+                    {
+                        if (pauseX > 0)
+                            pauseX -= moveSpeed;
+                        else if (pauseY > 0)
+                            pauseY -= moveSpeed;
+
+                        //Handle Right Vision
                         else if ((int)position.X < (int)target.X)
                         {
-                            //distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "down", collidingTileY.mapPoint[1], 0) * tileSize;
-                            //strafeLeft = true;
+                            if (blockedLeft && blockedBottom && blockedRight)
+                            {
+                                distToTravel.Y = -WallUntilOpening(GetRow(0), GetCol(0), "up", "right", GetRow(0), 0) * (tileSize * 2);
+                                strafeUp = true;
+                            }
+                            else if (blockedLeft && blockedTop && blockedRight)
+                            {
+                                distToTravel.Y = WallUntilOpening(GetRow(32), GetCol(0), "down", "right", 15 - GetRow(0), 0) * (tileSize * 2);
+                                strafeDown = true;
+                            }
+                            else if (blockedTop && blockedRight && blockedBottom)
+                            {
+                                distToTravel.X = -WallUntilOpening(GetRow(0), GetCol(0), "left", "up", GetCol(0), 0) * (tileSize);
+                                strafeLeft = true;
+                            }
+                            else if (blockedRight && blockedTop && ((int)position.Y == (int)target.Y))
+                            {
+
+                                if (map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims))
+                                     || map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
+                                {
+                                    ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "right");
+
+                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "right");
+                                }
+                                else
+                                {
+                                    //ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", );
+                                    //if(distToTravel.Y > 0) //Wants to go down
+                                    //{
+
+                                    //}
+                                    //if(distToTravel.Y < 0) //Wants to go up
+                                    //{ 
+                                    //    prioXStrafe = true;
+                                    //}
+                                    distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "up", collidingTileY.mapPoint[0] - 1, 0) * (tileSize * 2);
+                                    strafeLeft = true;
+
+                                    ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), "", "right");
+
+                                }
+
+                                //distToTravel.Y = (-tileSize * 2) - 1;
+                                //strafeUp = true;
+
+
+                            }
+                            else if (blockedRight && blockedTop)
+                            {
+                                if ((int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims))
+                                    || (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
+                                {
+                                    xDiag = true;
+                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "right");
+
+                                }
+                                else if ((int)position.Y > (int)target.Y)
+                                {
+                                    distToTravel.Y = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "right", (collidingTileY.mapPoint[0]), 0) * tileSize;
+                                    strafeUp = true;
+                                    prioXStrafe = true;
+                                }
+                                if ((int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims))
+                                     || (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0] + 1, collidingTileY.mapPoint[1], mapDims)))
+                                {
+                                    xDiag = true;
+                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "right");
+                                }
+                                else if ((int)position.Y < (int)target.Y)
+                                {
+                                    distToTravel.Y = WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right", 15 - (collidingTileX.mapPoint[0]), 0) * (tileSize * 2);
+                                    strafeDown = true;
+                                }
+                            }
+                            else if (blockedRight && blockedBottom && ((int)position.Y == (int)target.Y))
+                            {
+
+                                if (map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims))
+                                     || map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))
+                                {
+                                    ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "right");
+                                }
+                                else
+                                {
+                                    distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "down", collidingTileY.mapPoint[1] + 1, 0) * (tileSize * 2);
+                                    strafeLeft = true;
+
+                                    ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), "", "right");
+                                    //distToTravel.Y = (tileSize * 2) + 1;
+                                    //strafeDown = true;
+                                    prioXStrafe = true;
+                                }
+
+
+                            }
+                            else if (blockedRight && blockedBottom)
+                            {
+                                if ((int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], mapDims) - 1)
+                                     || (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims))) // 
+                                {
+                                    xDiag = true;
+                                    //ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "right");
+                                }
+                                else if ((int)position.Y > (int)target.Y)
+                                {
+                                    //distToTravel.Y = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "right", 15 - collidingTileY.mapPoint[0], 0) * (tileSize);
+                                    //strafeDown = true;
+                                    //prioXStrafe = true;
+                                }
+                                if ((int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], mapDims) - 1)
+                                     || (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))// 
+                                {
+                                    xDiag = true;
+                                    //ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right");
+                                }
+                                else if ((int)position.Y < (int)target.Y)
+                                {
+                                    distToTravel.Y = -WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "right", collidingTileX.mapPoint[0], 0) * (tileSize * 2);
+                                    strafeUp = true;
+                                }
+
+                            }
+                            else if (blockedRight && ((int)position.Y == (int)target.Y))
+                            {
+                                ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", "left");
+                            }
+                            else if (blockedRight && (!blockedTop && !blockedBottom))
+                            {
+                                //ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", "left");
+                            }
+                            else if (!blockedRight)
+                            {
+                                position.X += moveSpeed;
+                                if (distToTravel.X < 0)
+                                {
+                                    distToTravel.X = 0;
+                                }
+                                //blockedLeft = false;
+                            }
+
+
                         }
-                        if ((int)position.X > (int)target.X && xDiag)
-                        {
-                            ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "left");
-                            xDiag = false;
-                        }
+
+                        //Handle Left Vision
                         else if ((int)position.X > (int)target.X)
                         {
-                            distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right", "down", 25 - collidingTileY.mapPoint[1], 0) * (tileSize * 2);
-                            strafeRight = true;
+
+                            if (blockedLeft && blockedBottom && blockedRight)
+                            {
+                                distToTravel.Y = -WallUntilOpening(GetRow(0), GetCol(0), "up", "left", GetRow(0), 0) * (tileSize * 2);
+                                strafeUp = true;
+                            }
+                            else if (blockedLeft && blockedTop && blockedRight)
+                            {
+                                distToTravel.Y = WallUntilOpening(GetRow(32), GetCol(0), "down", "right", 15 - GetRow(0), 0) * (tileSize * 2);
+                                strafeDown = true;
+                            }
+                            else if (blockedTop && blockedLeft && blockedBottom)
+                            {
+                                distToTravel.X = WallUntilOpening(GetRow(0), GetCol(32), "right", "up", 25 - GetCol(0), 0) * (tileSize * 2);
+                                strafeRight = true;
+                            }
+                            else if (blockedLeft && blockedTop && ((int)position.Y == (int)target.Y))
+                            {
+                                if (map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], mapDims) + 1)
+                                     || map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
+                                {
+                                    ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "left");
+                                }
+                                else
+                                {
+                                    distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right", "up", 25 - collidingTileY.mapPoint[1], 0) * (tileSize * 2);
+                                    strafeRight = true;
+
+                                    ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), "", "left");
+                                    prioXStrafe = true;
+                                }
+
+                                //distToTravel.Y = (-tileSize * 2) - 1;
+                                //strafeUp = true;
+
+                            }
+                            else if (blockedLeft && blockedTop)
+                            {
+                                if ((int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims))
+                                     || (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
+                                {
+                                    xDiag = true;
+                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "left");
+                                }
+                                else if ((int)position.Y > (int)target.Y)
+                                {
+                                    distToTravel.Y = -WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left", collidingTileX.mapPoint[0], 0) * (tileSize * 2);
+                                    strafeUp = true;
+                                    prioXStrafe = true;
+                                }
+                                if ((int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims))
+                                     || (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
+                                {
+                                    xDiag = true;
+                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "left");
+                                }
+                                else if ((int)position.Y < (int)target.Y)
+                                {
+                                    distToTravel.Y = WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "left", 15 - collidingTileX.mapPoint[0], 0) * (tileSize * 2);
+                                    strafeDown = true;
+                                }
+                            }
+                            else if (blockedLeft && blockedBottom && ((int)position.Y == (int)target.Y))
+                            {
+                                if (map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], mapDims) + 1)
+                                     || map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))
+                                {
+                                    ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "left");
+                                }
+                                else
+                                {
+                                    distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right", "down", 25 - collidingTileY.mapPoint[1], 0) * (tileSize * 2);
+                                    strafeRight = true;
+
+                                    ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), "", "left");
+                                    prioXStrafe = true;
+                                }
+                                //distToTravel.Y = (tileSize * 2) + 1;
+                                //strafeDown = true;
+
+
+                            }
+                            else if (blockedLeft && blockedBottom)
+                            {
+                                if ((int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims))
+                                     && (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))
+                                {
+                                    xDiag = true;
+                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "left");
+                                }
+                                else if ((int)position.Y > (int)target.Y)
+                                {
+                                    distToTravel.Y = -WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left", collidingTileX.mapPoint[0], 0) * (tileSize);
+                                    strafeUp = true;
+                                }
+                                if ((int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims))
+                                     && (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))
+                                {
+                                    xDiag = true;
+                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "left");
+                                }
+                                else if ((int)position.Y < (int)target.Y)
+                                {
+
+                                    distToTravel.Y = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "left", 15 - collidingTileY.mapPoint[0], 0) * (tileSize * 2);
+                                    strafeDown = true;
+                                    prioXStrafe = true;
+                                }
+
+
+                            }
+                            else if (blockedLeft && ((int)position.Y == (int)target.Y))
+                            {
+                                ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", "right");
+                            }
+                            else if (blockedLeft && (!blockedTop && !blockedBottom))
+                            {
+                                //ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", "right");
+                            }
+                            else if (!blockedLeft)
+                            {
+                                position.X -= moveSpeed;
+                                if (distToTravel.X > 0)
+                                {
+                                    distToTravel.X = 0;
+                                }
+                                //blockedRight = false;
+                            }
+
+
                         }
 
-                    }
-                    else if (blockedBottom && ((int)position.X == (int)target.X))
-                    {
-                        ChooseXStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down");
-                    }
-                    else if (blockedBottom && (!blockedLeft && !blockedRight))
-                    {
-
-                        //ChooseXStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down");
-                        //check if going to the right or left. if ChooseXStrafe didnt result in desired outcome. Restart
-                    }
-                    else if (!blockedBottom)
-                    {
-                        position.Y += moveSpeed;
-                        if (distToTravel.Y < 0)
+                        //Handle Up vision
+                        if ((int)position.Y > (int)target.Y)
                         {
-                            distToTravel.Y = 0;
+                            if (blockedTop && blockedRight && blockedLeft)
+                            {
+                                distToTravel.Y = WallUntilOpening(GetRow(32), GetCol(0), "down", "left", 15 - GetRow(0), 0) * (tileSize * 2);
+                                strafeDown = true;
+                            }
+                            else if (blockedTop && blockedRight && blockedBottom)
+                            {
+                                distToTravel.X = -WallUntilOpening(GetRow(0), GetCol(0), "left", "down", GetCol(0), 0) * (tileSize * 2);
+                                strafeLeft = true;
+                            }
+                            else if (blockedTop && blockedLeft && blockedBottom)
+                            {
+                                distToTravel.X = WallUntilOpening(GetRow(0), GetCol(32), "right", "down", 25 - GetCol(0), 0) * (tileSize * 2);
+                                strafeRight = true;
+                            }
+                            else if (blockedTop && blockedRight && ((int)position.X == (int)target.X))
+                            {
+                                if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims))
+                                     || map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims)))
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "right");
+                                }
+                                else
+                                {
+                                    distToTravel.Y = WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right", 15 - collidingTileX.mapPoint[0], 0) * (tileSize * 2);
+                                    strafeDown = true;
+                                    ChooseXStrafe(collidingTileY.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileY.mapPoint[1], "");
+                                }
+
+
+                                //distToTravel.X = tileSize + 1;
+                                //strafeRight = true;
+                            }
+                            else if (blockedTop && blockedRight)
+                            {
+                                if ((int)position.X < (int)target.X && xDiag)
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "right");
+                                    xDiag = false;
+                                }
+                                else if ((int)position.X < (int)target.X)
+                                {
+                                    distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "up", collidingTileY.mapPoint[1], 0) * (tileSize * 2);
+                                    strafeLeft = true;
+                                }
+                                if ((int)position.X > (int)target.X && xDiag)
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left");
+                                    xDiag = false;
+                                }
+                                else if ((int)position.X > (int)target.X)
+                                {
+                                    //distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right", "up", 25 - collidingTileY.mapPoint[1], 0) * (tileSize);
+                                    //strafeRight = true;
+                                }
+                            }
+                            else if (blockedTop && blockedLeft && ((int)position.X == (int)target.X))
+                            {
+                                if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims))
+                                     || map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims)))
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left");
+                                }
+                                else
+                                {
+                                    distToTravel.Y = WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right", 15 - collidingTileX.mapPoint[0], 0) * (tileSize * 2);
+                                    strafeDown = true;
+                                    ChooseXStrafe(collidingTileY.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileY.mapPoint[1], "");
+                                }
+
+                                //distToTravel.X = -tileSize - 1;
+                                //strafeLeft = true;
+
+                            }
+                            else if (blockedTop && blockedLeft)
+                            {
+                                if ((int)position.X > (int)target.X && xDiag)
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left");
+                                    xDiag = false;
+                                }
+                                else if ((int)position.X > (int)target.X)
+                                {
+                                    distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right", "up", 25 - collidingTileY.mapPoint[1], 0) * (tileSize * 2);
+                                    strafeRight = true;
+                                }
+                                if ((int)position.X < (int)target.X && xDiag)
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "right");
+                                    xDiag = false;
+                                }
+                                else if ((int)position.X < (int)target.X)
+                                {
+
+                                    //distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "up", collidingTileY.mapPoint[1], 0) * tileSize;
+                                    //strafeLeft = true;
+                                }
+                                xDiag = false;
+
+                            }
+                            else if (blockedTop && ((int)position.X == (int)target.X))
+                            {
+                                ChooseXStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up");
+                            }
+                            else if (blockedTop && (!blockedLeft && !blockedRight))
+                            {
+                                //ChooseXStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up");
+                            }
+                            else if (!blockedTop)
+                            {
+                                position.Y -= moveSpeed;
+                                if (distToTravel.Y > 0)
+                                {
+                                    distToTravel.Y = 0;
+                                }
+                                //blockedTop = false;
+                            }
                         }
-                        //blockedBottom = false;
+
+                        //Handle down vision
+                        else if ((int)position.Y < (int)target.Y)
+                        {
+                            if (blockedBottom && blockedLeft && blockedRight)
+                            {
+                                distToTravel.Y = -WallUntilOpening(GetRow(0), GetCol(0), "up", "left", GetRow(0), 0) * tileSize;
+                                strafeUp = true;
+                            }
+                            else if (blockedBottom && blockedLeft && blockedTop)
+                            {
+                                distToTravel.X = WallUntilOpening(GetRow(0), GetCol(32), "right", "down", 25 - GetCol(0), 0) * tileSize;
+                                strafeRight = true;
+                            }
+                            else if (blockedBottom && blockedRight && blockedTop)
+                            {
+                                distToTravel.X = -WallUntilOpening(GetRow(0), GetCol(0), "left", "down", GetCol(0), 0) * tileSize;
+                                strafeLeft = true;
+                            }
+                            else if (blockedBottom && blockedRight && ((int)position.X == (int)target.X))
+                            {
+                                if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims))
+                                     || map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] - 1, mapDims)))
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right");
+                                }
+                                else
+                                {
+                                    distToTravel.Y = -WallUntilOpening(collidingTileX.mapPoint[1], collidingTileX.mapPoint[1], "up", "right", collidingTileX.mapPoint[0], 0) * (tileSize * 2);
+                                    strafeUp = true;
+                                    ChooseXStrafe(collidingTileY.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileY.mapPoint[1], "");
+                                }
+
+                                //distToTravel.X = tileSize;
+                                //strafeRight=true;
+
+                            }
+                            else if (blockedBottom && blockedRight)
+                            {
+                                if ((int)position.X < (int)target.X && xDiag)
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right");
+                                    xDiag = false;
+                                }
+                                else if ((int)position.X < (int)target.X)
+                                {
+                                    distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "down", collidingTileY.mapPoint[1], 0) * (tileSize * 2);
+                                    strafeLeft = true;
+                                }
+                                if ((int)position.X > (int)target.X && xDiag)
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "left");
+                                    xDiag = false;
+                                }
+                                else if ((int)position.X > (int)target.X)
+                                {
+                                    //distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right","down", 25 - collidingTileY.mapPoint[1], 0) * tileSize;
+                                    //strafeRight = true;
+                                }
+
+
+                            }
+                            else if (blockedBottom && blockedLeft && ((int)position.X == (int)target.X))
+                            {
+
+                                if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims))
+                                     || map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims)))
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "left");
+                                    //if it is one or the other need to set a condition to check if the enemy needs to strafe X if still blocked bottom to the left or the right 
+                                    if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims))
+                                        && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims)) == false)
+                                    {
+                                        //strafe left
+                                        if (map.WallIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), mapDims)))
+                                        {
+
+                                        }
+                                    }
+                                    if (map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)) == false
+                                        && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1] + 1, mapDims)))
+                                    {
+                                        //strafe right 
+                                    }
+
+                                }
+                                else
+                                {
+                                    distToTravel.Y = -WallUntilOpening(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "left", collidingTileX.mapPoint[0], 0) * (tileSize * 2);
+                                    strafeUp = true;
+                                    ChooseXStrafe(collidingTileY.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileY.mapPoint[1], "");
+                                }
+                                //distToTravel.X = -tileSize;
+                                //strafeLeft = true;
+
+                            }
+                            else if (blockedBottom && blockedLeft)
+                            {
+                                if ((int)position.X < (int)target.X && xDiag)
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right"); //Needs to check Down + Right and Up + Left ONLY
+                                    xDiag = false;
+                                }
+                                else if ((int)position.X < (int)target.X)
+                                {
+                                    //distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "down", collidingTileY.mapPoint[1], 0) * tileSize;
+                                    //strafeLeft = true;
+                                }
+                                if ((int)position.X > (int)target.X && xDiag)
+                                {
+                                    ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "left");
+                                    xDiag = false;
+                                }
+                                else if ((int)position.X > (int)target.X)
+                                {
+                                    distToTravel.X = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "right", "down", 25 - collidingTileY.mapPoint[1], 0) * (tileSize * 2);
+                                    strafeRight = true;
+                                }
+
+                            }
+                            else if (blockedBottom && ((int)position.X == (int)target.X))
+                            {
+                                ChooseXStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down");
+                            }
+                            else if (blockedBottom && (!blockedLeft && !blockedRight))
+                            {
+
+                                //ChooseXStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down");
+                                //check if going to the right or left. if ChooseXStrafe didnt result in desired outcome. Restart
+                            }
+                            else if (!blockedBottom)
+                            {
+                                position.Y += moveSpeed;
+                                if (distToTravel.Y < 0)
+                                {
+                                    distToTravel.Y = 0;
+                                }
+                                //blockedBottom = false;
+                            }
+
+                        }
                     }
+
+
+
+
+                    #region OLD MOVEMENT (POSITION BASED)
+                    //if (strafeRight)
+                    //{
+                    //    if (distToTravel.X > 0)
+                    //    {
+                    //        position.X += moveSpeed;
+                    //        distToTravel.X -= moveSpeed;
+                    //    }
+                    //    else if (distToTravel.X <= 0)
+                    //    {
+                    //        strafeRight = false;
+                    //    }
+                    //    else if (isStuck)
+                    //    {
+                    //        strafeRight = false;
+                    //        strafeLeft = false;
+                    //        distToTravel.X = -tileSize;
+                    //        isStuck = false;
+                    //    }
+
+                    //}
+                    //else if ((position.X < target.X && !strafeLeft)
+                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) < 1) //right
+                    //{
+                    //    position.X += moveSpeed;
+                    //    blockedRight = false;
+                    //}
+                    //else if ((position.X < target.X && (int)position.Y == (int)target.Y)
+                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) >= 1)
+                    //{
+                    //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), tilesOut);
+                    //}
+                    //else if (position.X < target.X && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) >= 1 && !strafeDown && !strafeUp)
+                    //{
+                    //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), tilesOut);
+                    //}
+                    //else if (WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) >= 1 && !strafeLeft && !strafeRight)
+                    //{
+                    //    position.X -= moveSpeed;
+                    //    blockedRight = true;
+                    //}
+
+                    ////else if(WallsFromCenter(2, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)) ) > 4)
+                    ////{
+                    ////    tempTarget = target;
+
+                    ////    target = 
+
+                    ////}
+
+                    //if (strafeLeft)
+                    //{
+                    //    if (distToTravel.X < 0)
+                    //    {
+                    //        position.X -= moveSpeed;
+                    //        distToTravel.X += moveSpeed;
+                    //    }
+                    //    else if (distToTravel.X >= 0)
+                    //    {
+                    //        strafeLeft = false;
+                    //    }
+                    //    else if (isStuck)
+                    //    {
+                    //        strafeLeft = false;
+                    //        strafeRight = true;
+                    //        distToTravel.X = tileSize;
+                    //        isStuck = false;
+                    //    }
+                    //}
+                    //else if ((position.X > target.X && !strafeRight)
+                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), 1) < 1) //left
+                    //{
+                    //    position.X -= moveSpeed;
+                    //    blockedLeft = false;
+                    //}
+                    //else if ((position.X > target.X && (int)position.Y == (int)target.Y)
+                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)(position.X) / tileSize), 1) >= 1)
+                    //{
+                    //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), -tilesOut);
+                    //}
+                    //else if (position.X > target.X && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), 1) >= 1 && !strafeDown && !strafeUp)
+                    //{
+                    //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), -tilesOut);
+                    //}
+                    //else if (WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), 1) >= 1 && !strafeRight && !strafeLeft)
+                    //{
+                    //    position.X += moveSpeed;
+                    //    blockedLeft = true;
+                    //}
+
+
+
+
+                    //if (strafeDown)
+                    //{
+                    //    if (distToTravel.Y > 0)
+                    //    {
+                    //        position.Y += moveSpeed;
+                    //        distToTravel.Y -= moveSpeed;
+                    //    }
+                    //    else if (distToTravel.Y <= 0)
+                    //    {
+                    //        strafeDown = false;
+                    //    }
+                    //    else if (isStuck)
+                    //    {
+                    //        strafeUp = true;
+                    //        strafeDown = false;
+                    //        distToTravel.Y = -tileSize;
+                    //        isStuck = false;
+                    //    }
+
+                    //}
+                    //else if ((position.Y < target.Y && !strafeUp
+                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y)) / tileSize), Math.Abs((int)((position.X) / tileSize)), 2) < 1)) //down
+                    //{
+                    //    position.Y += moveSpeed;
+                    //    blockedBottom = false;
+                    //}
+                    //else if ((position.Y < target.Y && position.X == target.X)
+                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 2) >= 1)
+                    //{
+                    //    ChooseXStrafe(Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), tilesOut);
+                    //}
+                    //else if (position.Y < target.Y && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 2) >= 1 && !strafeLeft && !strafeRight)
+                    //{
+                    //    ChooseXStrafe(Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), tilesOut);
+                    //}
+                    //else if (WallsFromPoint(tilesOut, Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X) / tileSize)), 2) >= 1 && (!strafeUp && !strafeDown))
+                    //{
+                    //    position.Y -= moveSpeed;
+                    //    blockedBottom = true;
+                    //}
+
+
+
+
+
+                    //if (strafeUp)
+                    //{
+                    //    if (distToTravel.Y < 0)
+                    //    {
+                    //        position.Y -= moveSpeed;
+                    //        distToTravel.Y += moveSpeed;
+                    //    }
+                    //    else if (distToTravel.Y >= 0)
+                    //    {
+                    //        strafeUp = false;
+                    //    }
+                    //    else if (isStuck)
+                    //    {
+                    //        strafeDown = true;
+                    //        strafeUp = false;
+                    //        distToTravel.Y = tileSize;
+                    //        isStuck = false;
+                    //    }
+
+                    //}
+                    //else if ((position.Y > target.Y && !strafeDown
+                    //    && WallsFromPoint(tilesOut, Math.Abs((int)(position.Y) / tileSize), Math.Abs((int)((position.X) / tileSize)), 3) < 1)) //up
+                    //{
+                    //    position.Y -= moveSpeed;
+                    //    blockedTop = false;
+                    //}
+                    //else if ((position.Y > target.Y && position.X == target.X)
+                    //    && WallsFromPoint(tilesOut, Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 3) >= 1)
+                    //{
+                    //    ChooseXStrafe(Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), -tilesOut);
+                    //}
+                    //else if (position.Y > target.Y && WallsFromPoint(tilesOut, Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 3) >= 1 && !strafeLeft && !strafeRight)
+                    //{
+                    //    ChooseXStrafe(Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), -tilesOut);
+                    //}
+                    //else if (WallsFromPoint(tilesOut, Math.Abs((int)(position.Y) / tileSize), Math.Abs((int)((position.X) / tileSize)), 3) >= 1 && !strafeDown && !strafeUp)
+                    //{
+                    //    position.Y += moveSpeed;
+                    //    blockedTop = true;
+                    //}
+                    #endregion
+
+
+
+
+
+                    break;
+                #endregion
+                #region Shoot
+                case EnemyStates.Shoot:
+                    Vector2 targetDir = new Vector2(playerRect.rectangle.X, playerRect.rectangle.Y) - position;
+                    
+                    if(shootDelay <= 0)
+                    {
+                        float angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X))); //sub by 90 if problems occur
+                        if (angle <= 205 && angle >= 165) //Fire left
+                        {
+                            bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height / 2 - 15 / 2), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                        }
+                        else if (angle >= 345 || angle <= 15) //Fire right
+                        {
+                            bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y + rectangle.Height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                        }
+                        else if (angle > 15 && angle < 75) // upRight
+                        {
+                            if (position.Y < playerRect.rectangle.Y)
+                            {
+                                bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y + rectangle.Height), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+                            }
+                            else
+                            {
+                                bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y), bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+                            }
+
+                        }
+                        else if (angle >= 75 && angle <= 105)//Up
+                        {
+                            if (position.Y < playerRect.rectangle.Y)
+                            {
+                                bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width / 2, position.Y + rectangle.Height), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
+                            }
+                            else
+                            {
+                                bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width / 2 - 15 / 2, position.Y), 0, new Vector2(0, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
+                            }
+
+                        }
+                        else if (angle > 105 && angle < 165)//Up and left
+                        {
+                            if (position.Y < playerRect.rectangle.Y)
+                            {
+                                bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+                            }
+                            else
+                            {
+                                bullets.Add(new Bullet(new Vector2(position.X, position.Y), -bulletSpeed, new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+                            }
+
+                        }
+                        shootDelay = iShootDelay;
+                    }
+
+
+
+                    enemyState = EnemyStates.Movement;
+                    break;
+                    #endregion
+            }
+
+            if (bullets.Count != 0)
+            {
+                for (int i = bullets.Count - 1; i >= 0; i--)
+                {
+                    
+                    bullets[i].Update();
+                    bool doBreak = false;
+                    foreach (WallTiles tile in tdMap.WallTiles)
+                    {
+
+                        if (bullets[i].rect.Intersects(tile.Rectangle))
+                        {
+                            bullets.RemoveAt(i);
+                            doBreak = true;
+                            break;
+                        }
+                    }
+                    if (doBreak)
+                        break;
+                    if (bullets[i].delete)
+                    {
+                        bullets.RemoveAt(i);
+                        break;
+                    }
+                    if (bullets[i].rect.Intersects(playerRect.rectangle))
+                    {
+                        playerRect.Health -= bulletDmg;
+                        bullets.RemoveAt(i);
+                        break;
+                    }
+                    
+                    //foreach (SSEnemy enemy in enemies)
+                    //{
+                    //    if (bullets[i].rect.TouchBottomOf(enemy.enemyRect) || bullets[i].rect.TouchTopOf(enemy.enemyRect)
+                    //    || bullets[i].rect.TouchLeftOf(enemy.enemyRect) || bullets[i].rect.TouchRightOf(enemy.enemyRect))
+                    //    {
+                    //        enemy.Health -= bulletDmg;
+                    //        bullets.RemoveAt(i);
+                    //        break;
+                    //    }
+                    //}
 
                 }
             }
 
-
-
-
-            #region OLD MOVEMENT (POSITION BASED)
-            //if (strafeRight)
-            //{
-            //    if (distToTravel.X > 0)
-            //    {
-            //        position.X += moveSpeed;
-            //        distToTravel.X -= moveSpeed;
-            //    }
-            //    else if (distToTravel.X <= 0)
-            //    {
-            //        strafeRight = false;
-            //    }
-            //    else if (isStuck)
-            //    {
-            //        strafeRight = false;
-            //        strafeLeft = false;
-            //        distToTravel.X = -tileSize;
-            //        isStuck = false;
-            //    }
-
-            //}
-            //else if ((position.X < target.X && !strafeLeft)
-            //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) < 1) //right
-            //{
-            //    position.X += moveSpeed;
-            //    blockedRight = false;
-            //}
-            //else if ((position.X < target.X && (int)position.Y == (int)target.Y)
-            //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) >= 1)
-            //{
-            //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), tilesOut);
-            //}
-            //else if (position.X < target.X && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) >= 1 && !strafeDown && !strafeUp)
-            //{
-            //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), tilesOut);
-            //}
-            //else if (WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) >= 1 && !strafeLeft && !strafeRight)
-            //{
-            //    position.X -= moveSpeed;
-            //    blockedRight = true;
-            //}
-
-            ////else if(WallsFromCenter(2, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)) ) > 4)
-            ////{
-            ////    tempTarget = target;
-
-            ////    target = 
-
-            ////}
-
-            //if (strafeLeft)
-            //{
-            //    if (distToTravel.X < 0)
-            //    {
-            //        position.X -= moveSpeed;
-            //        distToTravel.X += moveSpeed;
-            //    }
-            //    else if (distToTravel.X >= 0)
-            //    {
-            //        strafeLeft = false;
-            //    }
-            //    else if (isStuck)
-            //    {
-            //        strafeLeft = false;
-            //        strafeRight = true;
-            //        distToTravel.X = tileSize;
-            //        isStuck = false;
-            //    }
-            //}
-            //else if ((position.X > target.X && !strafeRight)
-            //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), 1) < 1) //left
-            //{
-            //    position.X -= moveSpeed;
-            //    blockedLeft = false;
-            //}
-            //else if ((position.X > target.X && (int)position.Y == (int)target.Y)
-            //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)(position.X) / tileSize), 1) >= 1)
-            //{
-            //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), -tilesOut);
-            //}
-            //else if (position.X > target.X && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), 1) >= 1 && !strafeDown && !strafeUp)
-            //{
-            //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), -tilesOut);
-            //}
-            //else if (WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), 1) >= 1 && !strafeRight && !strafeLeft)
-            //{
-            //    position.X += moveSpeed;
-            //    blockedLeft = true;
-            //}
-
-
-
-
-            //if (strafeDown)
-            //{
-            //    if (distToTravel.Y > 0)
-            //    {
-            //        position.Y += moveSpeed;
-            //        distToTravel.Y -= moveSpeed;
-            //    }
-            //    else if (distToTravel.Y <= 0)
-            //    {
-            //        strafeDown = false;
-            //    }
-            //    else if (isStuck)
-            //    {
-            //        strafeUp = true;
-            //        strafeDown = false;
-            //        distToTravel.Y = -tileSize;
-            //        isStuck = false;
-            //    }
-
-            //}
-            //else if ((position.Y < target.Y && !strafeUp
-            //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y)) / tileSize), Math.Abs((int)((position.X) / tileSize)), 2) < 1)) //down
-            //{
-            //    position.Y += moveSpeed;
-            //    blockedBottom = false;
-            //}
-            //else if ((position.Y < target.Y && position.X == target.X)
-            //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 2) >= 1)
-            //{
-            //    ChooseXStrafe(Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), tilesOut);
-            //}
-            //else if (position.Y < target.Y && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 2) >= 1 && !strafeLeft && !strafeRight)
-            //{
-            //    ChooseXStrafe(Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), tilesOut);
-            //}
-            //else if (WallsFromPoint(tilesOut, Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X) / tileSize)), 2) >= 1 && (!strafeUp && !strafeDown))
-            //{
-            //    position.Y -= moveSpeed;
-            //    blockedBottom = true;
-            //}
-
-
-
-
-
-            //if (strafeUp)
-            //{
-            //    if (distToTravel.Y < 0)
-            //    {
-            //        position.Y -= moveSpeed;
-            //        distToTravel.Y += moveSpeed;
-            //    }
-            //    else if (distToTravel.Y >= 0)
-            //    {
-            //        strafeUp = false;
-            //    }
-            //    else if (isStuck)
-            //    {
-            //        strafeDown = true;
-            //        strafeUp = false;
-            //        distToTravel.Y = tileSize;
-            //        isStuck = false;
-            //    }
-
-            //}
-            //else if ((position.Y > target.Y && !strafeDown
-            //    && WallsFromPoint(tilesOut, Math.Abs((int)(position.Y) / tileSize), Math.Abs((int)((position.X) / tileSize)), 3) < 1)) //up
-            //{
-            //    position.Y -= moveSpeed;
-            //    blockedTop = false;
-            //}
-            //else if ((position.Y > target.Y && position.X == target.X)
-            //    && WallsFromPoint(tilesOut, Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 3) >= 1)
-            //{
-            //    ChooseXStrafe(Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), -tilesOut);
-            //}
-            //else if (position.Y > target.Y && WallsFromPoint(tilesOut, Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 3) >= 1 && !strafeLeft && !strafeRight)
-            //{
-            //    ChooseXStrafe(Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), -tilesOut);
-            //}
-            //else if (WallsFromPoint(tilesOut, Math.Abs((int)(position.Y) / tileSize), Math.Abs((int)((position.X) / tileSize)), 3) >= 1 && !strafeDown && !strafeUp)
-            //{
-            //    position.Y += moveSpeed;
-            //    blockedTop = true;
-            //}
-            #endregion
-
-
-
-
         }
-
         private void SetVision()
         {
             vision.Clear();
-            //Right
-            for (int i = 1; i < visionLength; i++)
+            Vector2 pos = new Vector2((int)rectangle.X, (int)(rectangle.Y / pixelSize) * 64);
+
+            for (int i = 1; i < visionLength + 1; i++)
             {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * i), rectangle.Y, tileSize, tileSize));// 0 1
+                vision.Add(new Rectangle((int)pos.X, (int)pos.Y - (pixelSize * i), pixelSize, pixelSize));//Up
+                vision.Add(new Rectangle((int)pos.X, (int)pos.Y + (pixelSize * i), pixelSize, pixelSize));//Down
             }
-            //left
-            for (int i = 1; i < visionLength; i++)
+            
+            //vision.Add(new Rectangle((int)pos.X, (int)pos.Y - (pixelSize * 1), pixelSize, pixelSize));//Up
+            for (int i = 1; i < visionLength + 1; i++)//Right
             {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * -i), rectangle.Y, tileSize, tileSize)); // 2 3
+                vision.Add(new Rectangle((int)pos.X + (pixelSize * i), (int)pos.Y, pixelSize, pixelSize));
+                for (int j = i + 1; j < visionLength + 1; j++) //Right and Up
+                {
+                    vision.Add(new Rectangle((int)pos.X + (pixelSize * i), (int)pos.Y - (pixelSize * j), pixelSize, pixelSize));
+                }
+                for (int k = i + 1; k < visionLength + 1; k++)//Right and down
+                {
+                    vision.Add(new Rectangle((int)pos.X + (pixelSize * i), (int)pos.Y + (pixelSize * k), pixelSize, pixelSize));
+                }
             }
 
-            //Down
-            for (int i = 1; i < visionLength; i++)
+            for (int i = 1; i < visionLength + 1; i++)//Left
             {
-                vision.Add(new Rectangle(rectangle.X, rectangle.Y + (tileSize * i), tileSize, tileSize)); // 4 5
-            }
-            //Up
-            for (int i = -1; i > -visionLength; i--)
-            {
-                vision.Add(new Rectangle(rectangle.X, rectangle.Y + (tileSize * i), tileSize, tileSize)); // 6 7 
-            }
-
-            //Diag
-            for (int i = 1; i < visionLength; i++) //Down to right
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * i), rectangle.Y + (tileSize * i), tileSize, tileSize)); // 8 9
-
-            }
-            for (int i = 2; i < visionLength; i++) //Fill in DownRight
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * i), (rectangle.Y + (tileSize * i)) - tileSize, tileSize, tileSize));
-                vision.Add(new Rectangle((rectangle.X + (tileSize * i)) - tileSize, (rectangle.Y + (tileSize * i)), tileSize, tileSize));
-            }
-            for (int i = 3; i < visionLength; i++)
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * i), (rectangle.Y + (tileSize * i)) - (tileSize * (i - 1)), tileSize, tileSize));
-                vision.Add(new Rectangle((rectangle.X + (tileSize * i)) - (tileSize * (i - 1)), (rectangle.Y + (tileSize * i)), tileSize, tileSize));
+                vision.Add(new Rectangle((int)pos.X - (pixelSize * i), (int)pos.Y, pixelSize, pixelSize));
+                for (int j = i + 1; j < visionLength + 1; j++) //Left and Up
+                {
+                    vision.Add(new Rectangle((int)pos.X - (pixelSize * i), (int)pos.Y - (pixelSize * j), pixelSize, pixelSize));
+                }
+                for (int k = i + 1; k < visionLength + 1; k++)//Left and down
+                {
+                    vision.Add(new Rectangle((int)pos.X - (pixelSize * i), (int)pos.Y + (pixelSize * k), pixelSize, pixelSize));
+                }
             }
 
+            for (int i = 1; i < visionLength + 1; i++) //Up and down
+            {
+                //vision.Add(new Rectangle(pos.X + (int)(rectangle.Width / 3.5f), enemyRect.Top + (enemyRect.Height * 1), enemyRect.Width / 2, pixelSize / 4));
+                for (int j = i; j < visionLength + 1; j++) //Left and up 
+                {
+                    vision.Add(new Rectangle((int)pos.X - (pixelSize * j), (int)pos.Y - (pixelSize * i), pixelSize, pixelSize));
+                }
+                for (int j = i; j < visionLength + 1; j++) //Right and Up
+                {
+                    vision.Add(new Rectangle((int)pos.X + (pixelSize * j), (int)pos.Y - (pixelSize * i), pixelSize, pixelSize));
+                }
+                //vision.Add(new Rectangle((int)pos.X, (int)pos.Y + (pixelSize * i), pixelSize, pixelSize));//Down
+                for (int k = i; k < visionLength + 1; k++)//Left and down
+                {
+                    vision.Add(new Rectangle((int)pos.X - (pixelSize * k), (int)pos.Y + (pixelSize * i), pixelSize, pixelSize));
+                }
+                for (int k = i; k < visionLength + 1; k++)//Right and down
+                {
+                    vision.Add(new Rectangle((int)pos.X + (pixelSize * k), (int)pos.Y + (pixelSize * i), pixelSize, pixelSize));
+                }
 
-            for (int i = 1; i < visionLength; i++) // Down to Left
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * -i), rectangle.Y + (tileSize * i), tileSize, tileSize)); // 10 11 
-            }
-            for (int i = 2; i < visionLength; i++) //Fill in DownLeft
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * -i), (rectangle.Y + (tileSize * i)) - tileSize, tileSize, tileSize));
-                vision.Add(new Rectangle((rectangle.X + (tileSize * -i)) + tileSize, (rectangle.Y + (tileSize * i)), tileSize, tileSize));
-            }
-            for (int i = 3; i < visionLength; i++)
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * -i), (rectangle.Y + (tileSize * i)) - (tileSize * (i - 1)), tileSize, tileSize));
-                vision.Add(new Rectangle((rectangle.X + (tileSize * -i)) + (tileSize * (i - 1)), (rectangle.Y + (tileSize * i)), tileSize, tileSize));
-            }
+                //if (enemyState != EnemyStates.Jumping && prevState != EnemyStates.Jumping)
+                //{
+                //    for (int k = i; k < visionLength + 1; k++)//Left and down
+                //    {
+                //        vision.Add(new Rectangle((int)pos.X - (pixelSize * k), (int)pos.Y + (pixelSize * i), pixelSize, pixelSize));
+                //    }
+                //    for (int k = i; k < visionLength + 1; k++)//Right and down
+                //    {
+                //        vision.Add(new Rectangle((int)pos.X + (pixelSize * k), (int)pos.Y + (pixelSize * i), pixelSize, pixelSize));
+                //    }
+                //}
 
-            for (int i = 1; i < visionLength; i++) // Up to Right
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * i), rectangle.Y + (tileSize * -i), tileSize, tileSize)); // 12 13 
-            }
-            for (int i = 2; i < visionLength; i++) //Fill in UpRight
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * i), (rectangle.Y + (tileSize * -i)) + tileSize, tileSize, tileSize));
-                vision.Add(new Rectangle((rectangle.X + (tileSize * i)) - tileSize, (rectangle.Y + (tileSize * -i)), tileSize, tileSize));
-            }
-            for (int i = 3; i < visionLength; i++)
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * i), (rectangle.Y + (tileSize * -i)) + (tileSize * (i - 1)), tileSize, tileSize));
-                vision.Add(new Rectangle((rectangle.X + (tileSize * i)) - (tileSize * (i - 1)), (rectangle.Y + (tileSize * -i)), tileSize, tileSize));
-            }
 
-            for (int i = 1; i < visionLength; i++) //Up to Left
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * -i), rectangle.Y + (tileSize * -i), tileSize, tileSize)); // 14 15
-            }
-            for (int i = 2; i < visionLength; i++) //Fill in UpLeft
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * -i), (rectangle.Y + (tileSize * -i)) + tileSize, tileSize, tileSize));
-                vision.Add(new Rectangle((rectangle.X + (tileSize * -i)) + tileSize, (rectangle.Y + (tileSize * -i)), tileSize, tileSize));
-            }
-            for (int i = 3; i < visionLength; i++)
-            {
-                vision.Add(new Rectangle(rectangle.X + (tileSize * -i), (rectangle.Y + (tileSize * -i)) + (tileSize * (i - 1)), tileSize, tileSize));
-                vision.Add(new Rectangle((rectangle.X + (tileSize * -i)) + (tileSize * (i - 1)), (rectangle.Y + (tileSize * -i)), tileSize, tileSize));
             }
 
         }
@@ -3333,7 +3461,16 @@ namespace AUTO_Matic.Scripts.TopDown
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, rectangle, Color.White);
+            foreach(Bullet bullet in bullets)
+            {
+                bullet.Draw(spriteBatch);
+            }
+            //foreach (Rectangle rect in vision)
+            //{
+            //    spriteBatch.Draw(visionTxture, rect, Color.White * .25f);
 
+
+            //}
             //if (vision.Count > 5)
             //{
             //    spriteBatch.Draw(texture, vision[4], Color.White * .5f);

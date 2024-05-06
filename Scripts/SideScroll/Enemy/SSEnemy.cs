@@ -196,7 +196,7 @@ namespace AUTO_Matic.SideScroll
         #region Attack Helpers
         public List<Bullet> bullets = new List<Bullet>();
         float bulletSpeed = 5;
-        float bulletDmg = .25f;
+        float bulletDmg = 1f;
         float shootDelay = .8f;
         float maxShootDelay;
         float bulletTravelDist = 64 * 4;
@@ -213,7 +213,7 @@ namespace AUTO_Matic.SideScroll
         float attackDelayMax;
         bool attackLeft = false, attackRight = false;
         int attackBoxWidth = 40, attackBoxHeight = 40;
-        float meleeDmg = .5f;
+        float meleeDmg = 1.5f;
         bool outOfRange = false;
         Rectangle HitBox
         {
@@ -560,7 +560,7 @@ namespace AUTO_Matic.SideScroll
                         //    leftOnX = player.playerRect.X; //where the playere was last to set direction priority if jump fails
                         //}
 
-                        if (player.blockBottom)
+                        if (player.blockBottom || blockLeft && !blockBottom|| blockRight && !blockBottom)
                         {
                             enemyState = EnemyStates.Jumping;
                         }

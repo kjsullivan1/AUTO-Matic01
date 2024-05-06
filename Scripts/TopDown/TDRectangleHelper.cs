@@ -28,7 +28,7 @@ namespace AUTO_Matic.TopDown
         {
             return (r1.Right <= r2.Right &&
                 r1.Right >= r2.Left &&
-                r1.Top <= r2.Bottom - (r2.Width / 2) &&
+                r1.Top <= r2.Bottom - (r2.Width / 4) &&
                 r1.Bottom >= r2.Top + 1);
         }
 
@@ -36,7 +36,7 @@ namespace AUTO_Matic.TopDown
         {
             return (r1.Left >= r2.Left &&
                 r1.Left <= r2.Right &&
-                r1.Top <= r2.Bottom - (r2.Width / 2) &&
+                r1.Top <= r2.Bottom - (r2.Width / 4) &&
                 r1.Bottom >= r2.Top + 1);
         }
     }

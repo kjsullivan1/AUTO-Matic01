@@ -277,7 +277,9 @@ namespace AUTO_Matic
             uiElements.Add("StartGameReturn", UIHelper.CreateButton("StartGameReturn", "", (int)uiElements["MainMenuSetting"].Position.X, (int)uiElements["MainMenuSetting"].Position.Y));
             UIHelper.SetRectangle(uiElements["StartGameReturn"], 50, 50);
 
-
+            uiElements.Add("HealthBar", UIHelper.CreateTextblock("HealthBar", "", 64, 64));
+            UIHelper.SetElementRect(uiElements["HealthBar"], new Rectangle(uiElements["HealthBar"].Position.ToPoint(), new Point(1280, 512)));
+            UIHelper.SetElementBGRect(uiElements["HealthBar"], new Rectangle(uiElements["HealthBar"].Position.ToPoint(), new Point(1280/6, 512/6)));
 
             //uiElements.Add("p2Rotation", UIHelper.CreateTextblock("p2Rotation", "x", 580, 120));
             //uiElements.Add("p2Elevation", UIHelper.CreateTextblock("p2Elevation", "x", 580, 135));

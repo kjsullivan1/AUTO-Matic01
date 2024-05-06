@@ -18,7 +18,7 @@ namespace AUTO_Matic
         public Rectangle Rect { get; set; }
         public float Scale { get; set; }
 
-        public Texture2D BackGroundText { get; set; }
+        public Texture2D BackGroundTexture { get; set; }
         public Rectangle TextureRect { get; set; }
         public UITextBlock(string id, Vector2 position, Vector2 textOffset, SpriteFont font, string text, Color textTint)
             : base(id, position)
@@ -37,7 +37,7 @@ namespace AUTO_Matic
             Text = text;
             TextTint = textTint;
 
-            BackGroundText = bgTxture;
+            BackGroundTexture = bgTxture;
             Scale = 1;
             
         }
@@ -79,7 +79,7 @@ namespace AUTO_Matic
                     Text = temp2;
                 }
                 
-                spriteBatch.Draw(BackGroundText,TextureRect, color: Color.White);
+                spriteBatch.Draw(BackGroundTexture,TextureRect, color: Color.White);
                 spriteBatch.DrawString(spriteFont: Font, text: Text, position: new Vector2(Rect.X, Rect.Y) + TextOffset, color: TextTint,rotation: 0,origin: new Vector2(0,0), scale: Scale,SpriteEffects.None,layerDepth:0);
                
                 //Draw texture one layer back
