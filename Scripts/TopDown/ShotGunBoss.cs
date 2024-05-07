@@ -163,10 +163,14 @@ namespace AUTO_Matic.Scripts.TopDown
                     if(tdPlayer.position.Y < bossRect.Y + 64/2)
                     {
                         bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
+                        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), bulletSpeed /2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+                        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
                     }
                     else
                     {
                         bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
+                        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+                        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
                     }
                 }
                 if(angle >= 105 && angle < 135)

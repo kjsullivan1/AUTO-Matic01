@@ -25,7 +25,7 @@ namespace AUTO_Matic.Scripts.TopDown
         private bool hasJumped = false;
         public bool isColliding = false;
         int visionLength = 7;
-        float health = 3.5f;
+        float health = 3.25f;
         int pixelSize = 64;
         public float Health
         {

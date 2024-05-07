@@ -322,7 +322,7 @@ namespace AUTO_Matic
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
             UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
             ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0,0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
-         
+            
            // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
         }
@@ -399,17 +399,45 @@ namespace AUTO_Matic
                         
                         case GameStates.SideScroll: //Default
                             ssCamera.Update(ssPlayer.Position);
-                            if (!ssCamera.onBorder)
+                            if(ssCamera.onBorderLeft && ssCamera.onBorderTop)
                             {
-                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)((ssCamera.viewport.X + ssCamera.Position.X) - 64 * 8.5f), 
-                                    (int)(ssCamera.viewport.Y + (ssCamera.Position.Y - ssCamera.viewport.Height/2)) + 250), new Point(0, 0)));
+                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point(64,
+                               (int)(64 * 4.5f)), new Point(0, 0)));
+                            }
+                            else if (ssCamera.onBorderTop && ssCamera.onBorderRight)
+                            {
+                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)SideTileMap.GetWorldDims().X - 64 * 17,
+                              (int)SideTileMap.GetWorldDims().Y - 64 * 15), new Point(0, 0)));
+                            }
+                            else if (ssCamera.onBorderBottom && ssCamera.onBorderRight)
+                            {
+                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)SideTileMap.GetWorldDims().X - 64 * 17,
+                              (int)(SideTileMap.GetWorldDims().Y - 64 * 9.5f)), new Point(0, 0)));
+                            }
+                            else if(ssCamera.onBorderTop)
+                            {
+                                UIHelper.UpdateHealthBarX(UIManager.uiElements["HealthBar"], (int)((ssPlayer.X) - 64 * 8));
+                            }
+                            else if(ssCamera.onBorderLeft)
+                            {
+                                UIHelper.UpdateHealthBarY(UIManager.uiElements["HealthBar"], (int)((ssPlayer.Y) - 64 * 4.5f));
+                            }
+                            else if(ssCamera.onBorderBottom)
+                            {
+                                UIHelper.UpdateHealthBarX(UIManager.uiElements["HealthBar"], (int)((ssPlayer.X) - 64 * 8));
+                            }
+                            else if(ssCamera.onBorderRight)
+                            {
+                                UIHelper.UpdateHealthBarY(UIManager.uiElements["HealthBar"], (int)((ssPlayer.Y) - 64 * 4.5f));
                             }
                             else
                             {
-                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)(ssCamera.viewport.X + (ssCamera.Position.X - ssCamera.viewport.Width/1.75f)), 
-                                    (int)(ssCamera.viewport.Y + (ssCamera.Position.Y - ssCamera.viewport.Height/2) + 250)), new Point(0, 0)));
+                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)((ssPlayer.X) - 64 * 8),
+                                (int)((ssPlayer.Y) - 64 * 4.5f)), new Point(0, 0)));
                             }
-                            if(kb.IsKeyDown(Keys.P) || ssPlayer.Health <= 0)//Reset Pos
+                           
+
+                            if (kb.IsKeyDown(Keys.P) || ssPlayer.Health <= 0 || ssPlayer.playerRect.Y > SideTileMap.GetWorldDims().Y)//Reset Pos
                             {
                                 StartNewGame();
 
@@ -491,7 +519,7 @@ namespace AUTO_Matic
                             //SSCamera.Move(ssPlayer.Position);
                             break;
                         case GameStates.TopDown:
-                            if(tdPlayer.Health <= 0)
+                            if (tdPlayer.Health <= 0)
                             {
                                 StartDungeon();
                             }
@@ -731,7 +759,7 @@ namespace AUTO_Matic
                 case Scenes.InGame:
                     if(GameState == GameStates.SideScroll)
                     {
-                        Window.Title = camera.Position.ToString() + " PlayerPos: " + ssPlayer.Position.ToString() + "  EnemyState0: " + enemies[0].enemyState.ToString() + "    EnemeyState1: " + enemies[1].enemyState.ToString() + " Player blockBottom: " + ssPlayer.blockBottom;
+                        Window.Title = camera.Position.ToString() + " PlayerPos: " + ssPlayer.Position.ToString() + "    Player blockBottom: " + ssPlayer.blockBottom + "    SSCamerPos: " + ssCamera.position;
                         //Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
                         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null,ssCamera.transform);
                        

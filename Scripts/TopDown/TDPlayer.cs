@@ -21,7 +21,7 @@ namespace AUTO_Matic.TopDown
         public enum PlayerState {Movement, Shooting, Death, Hit}
         public PlayerState playerState = PlayerState.Movement;
 
-        public int bossRoom = 5;
+        public int bossRoom = 2;
 
         #region Animations
         AnimationManager animManager;
@@ -176,7 +176,7 @@ namespace AUTO_Matic.TopDown
         float shootDelay = .8f;//In seconds
         float iShootDelay;
         bool startShoot = false;
-        public float bulletDmg = .65f;
+        public float bulletDmg = 1.2f;
         public float bulletTravelDist = 64 * 4;
         #endregion
 
@@ -604,6 +604,7 @@ namespace AUTO_Matic.TopDown
                         if(game.levelCount >= bossRoom)
                         {
                             game.GenerateNewMap(true, false, false, true);
+                            position.X += 64;
                         }
                         else
                         {
@@ -635,6 +636,7 @@ namespace AUTO_Matic.TopDown
                         if(game.levelCount >= bossRoom)
                         {
                             game.GenerateNewMap(false, false, true, true);
+                            position.X += 64;
                         }
                         else
                         {
@@ -706,6 +708,7 @@ namespace AUTO_Matic.TopDown
                         if(levelCount >= bossRoom)
                         {
                             game.GenerateNewMap(true, false, false, true);
+                            position.X -= 64;
                         }
                         else
                         {
@@ -742,6 +745,7 @@ namespace AUTO_Matic.TopDown
                         if(game.levelCount >= bossRoom)
                         {
                             game.GenerateNewMap(false, true, false, true);
+                            position.X -= 64;
                         }
                         else
                         {
@@ -773,6 +777,7 @@ namespace AUTO_Matic.TopDown
                         if(game.levelCount >= bossRoom)
                         {
                             game.GenerateNewMap(false, false, true, true);
+                            position.X -= 64;
                         }
                         else
                         {
@@ -815,6 +820,7 @@ namespace AUTO_Matic.TopDown
                         if (game.levelCount >= 0)
                         {
                             game.GenerateNewMap(false, true, false, true);
+                            position.Y -= 64;
                         }
                         else
                         {
@@ -854,6 +860,7 @@ namespace AUTO_Matic.TopDown
                         if(game.levelCount >= bossRoom)
                         {
                             game.GenerateNewMap(false, false, true, true);
+                            position.Y -= 64;
                         }
                         else
                         {
@@ -895,6 +902,7 @@ namespace AUTO_Matic.TopDown
                         if(game.levelCount >= bossRoom)
                         {
                             game.GenerateNewMap(false, true, false, true);
+                            position.Y += 64;
                         }
                         else
                         {
@@ -938,6 +946,7 @@ namespace AUTO_Matic.TopDown
                         if(game.levelCount >= bossRoom)
                         {
                             game.GenerateNewMap(true, false, false, true);
+                            position.Y += 64;
                         }
                         else
                         {
@@ -973,6 +982,7 @@ namespace AUTO_Matic.TopDown
                         if(game.levelCount >= bossRoom)
                         {
                             game.GenerateNewMap(false, false, true, true);
+                            position.Y += 64;
                         }
                         else
                         {

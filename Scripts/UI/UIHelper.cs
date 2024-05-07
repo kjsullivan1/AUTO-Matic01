@@ -110,6 +110,18 @@ namespace AUTO_Matic
                 ((UITextBlock)uiElement).TextureRect = new Rectangle(bounds.X, bounds.Y, ((UITextBlock)uiElement).TextureRect.Width, ((UITextBlock)uiElement).TextureRect.Height);
         }
 
+        public static void UpdateHealthBarX(UIWidget uiElement, int xPos)
+        {
+            if (uiElement is UITextBlock)
+                ((UITextBlock)uiElement).TextureRect = new Rectangle(xPos, ((UITextBlock)uiElement).TextureRect.Y, ((UITextBlock)uiElement).TextureRect.Width, ((UITextBlock)uiElement).TextureRect.Height);
+        }
+
+        public static void UpdateHealthBarY(UIWidget uiElement, int yPos)
+        {
+            if (uiElement is UITextBlock)
+                ((UITextBlock)uiElement).TextureRect = new Rectangle(((UITextBlock)uiElement).TextureRect.X, yPos, ((UITextBlock)uiElement).TextureRect.Width, ((UITextBlock)uiElement).TextureRect.Height);
+        }
+
         public static Rectangle GetElementBGRect(UIWidget uiElement)
         {
             if (uiElement is UITextBlock)
