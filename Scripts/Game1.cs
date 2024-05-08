@@ -484,26 +484,51 @@ namespace AUTO_Matic
                             //enemy.Update(gameTime, Gravity, ssPlayer);
 
                             ssPlayer.blockBottom = false;
-
-                          
+                            
+                            //ssPlayer.isColliding = false;
+                           
                             foreach (GroundTile tile in SideTileMap.GroundTiles)
                             {
                                 ssPlayer.Collision(tile.Rectangle);
+                                if(ssPlayer.isCollidingRight == true &&
+                                ssPlayer.isCollidingLeft == true)
+                                {
+                                    ssPlayer.isCollidingRight = false;
+                                    ssPlayer.isCollidingLeft = false;
+                                }
                                 
                             }
+                            
+                            
                             foreach (TopDoorTile tile in SideTileMap.TopDoorTiles)
                             {
                                 ssPlayer.Collision(tile.Rectangle);
+                                if (ssPlayer.isCollidingRight == true &&
+                               ssPlayer.isCollidingLeft == true)
+                                {
+                                    ssPlayer.isCollidingRight = false;
+                                    ssPlayer.isCollidingLeft = false;
+                                }
 
                             }
                             foreach (BottomDoorTile tile in SideTileMap.BottomDoorTiles)
                             {
                                 ssPlayer.Collision(tile.Rectangle);
+                                if (ssPlayer.isCollidingRight == true &&
+                               ssPlayer.isCollidingLeft == true)
+                                {
+                                    ssPlayer.isCollidingRight = false;
+                                    ssPlayer.isCollidingLeft = false;
+                                }
 
                             }
                             foreach (PlatformTile tile1 in SideTileMap.PlatformTiles)
                             {
                                 ssPlayer.Collision(tile1.Rectangle);
+                            }
+                            foreach (WallTile tile2 in SideTileMap.WallTiles)
+                            {
+                                ssPlayer.Collision(tile2.Rectangle);
                             }
                             if (ssPlayer.blockBottom == false && ssPlayer.playerState != SSPlayer.PlayerStates.Jumping)
                             {
@@ -521,7 +546,7 @@ namespace AUTO_Matic
                         case GameStates.TopDown:
                             if (tdPlayer.Health <= 0)
                             {
-                                StartDungeon();
+                                //StartDungeon();
                             }
 
                             UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)(camera.Position.X - GraphicsDevice.Viewport.Width/2) + 20,
@@ -550,7 +575,7 @@ namespace AUTO_Matic
                                     {
                                         if (currBounds.Contains(enemySpawn))
                                             if (tdEnemies.Count <= 6)
-                                                tdEnemies.Add(new TDEnemy(Content, enemySpawn, tdMap, currMap));
+                                                tdEnemies.Add(new TDEnemy(Content, enemySpawn, tdMap, currMap, GraphicsDevice));
                                     }
                                 }
                                
@@ -759,7 +784,7 @@ namespace AUTO_Matic
                 case Scenes.InGame:
                     if(GameState == GameStates.SideScroll)
                     {
-                        Window.Title = camera.Position.ToString() + " PlayerPos: " + ssPlayer.Position.ToString() + "    Player blockBottom: " + ssPlayer.blockBottom + "    SSCamerPos: " + ssCamera.position;
+                        Window.Title = camera.Position.ToString() + " Player.isColliding: " + ssPlayer.isCollidingRight + "    Player blockBottom: " + ssPlayer.blockBottom + "    SSPlayerX: " + ssPlayer.velocity.X;
                         //Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
                         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null,ssCamera.transform);
                        

@@ -31,7 +31,8 @@ namespace AUTO_Matic.SideScroll
         public Vector2 velocity = Vector2.Zero;
         public Rectangle playerRect;
         public bool isFalling = false;
-        bool isColliding = false;
+        public bool isCollidingRight = false;
+        public bool isCollidingLeft = false;
         Game1 game;
         KeyboardState prevKb;
         public bool blockBottom = false;
@@ -350,12 +351,27 @@ namespace AUTO_Matic.SideScroll
             iMaxRunSpeed = maxRunSpeed;
             position = pos;
 
+            isCollidingRight = false;
+            isCollidingLeft = false;
         }
 
         public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies)
         {
 
-       
+            foreach(BackgroundTile tile in SideTileMap.BackgroundTiles)
+            {
+                if(tile.Rectangle.Contains(InteractionBox))
+                {
+                    if(tile.Rectangle.Right < playerRect.X)
+                    {
+                        isCollidingLeft = false;
+                    }
+                    if((tile.Rectangle.Left > playerRect.Right))
+                    {
+                        isCollidingRight = false;
+                    }
+                }
+            }
 
             Input();
             if (Velocity == Vector2.Zero && !isFalling && playerState != PlayerStates.Shooting)
@@ -565,7 +581,8 @@ namespace AUTO_Matic.SideScroll
             KeyboardState kb = Keyboard.GetState();
             MouseState ms = Mouse.GetState();
 
-            if(kb.IsKeyDown(Keys.D) && kb.IsKeyDown(Keys.A))
+           
+            if(kb.IsKeyDown(Keys.D) && kb.IsKeyDown(Keys.A) /*&& !isColliding*/)
             {
                 if (playerState == PlayerStates.Shooting)
                 {
@@ -667,8 +684,9 @@ namespace AUTO_Matic.SideScroll
                         break;
                 }
             }
-            else if(kb.IsKeyDown(Keys.D))
+            else if(kb.IsKeyDown(Keys.D) && !isCollidingRight)
             {
+                isCollidingLeft = false;
                 if (playerState == PlayerStates.Shooting)
                 {
                     playerState = PlayerStates.Movement;
@@ -766,8 +784,9 @@ namespace AUTO_Matic.SideScroll
                     #endregion
                 }
             }
-            else if(kb.IsKeyDown(Keys.A))
+            else if(kb.IsKeyDown(Keys.A) && !isCollidingLeft/*&& !isColliding*/)
             {
+                isCollidingRight = false;
                 if (playerState == PlayerStates.Shooting)
                 {
                     playerState = PlayerStates.Movement;
@@ -863,7 +882,7 @@ namespace AUTO_Matic.SideScroll
                         #endregion
                 }
             }
-            else
+            else if(kb.IsKeyUp(Keys.D) && kb.IsKeyUp(Keys.A))
             {
                 switch(playerState)
                 {
@@ -1014,6 +1033,8 @@ namespace AUTO_Matic.SideScroll
                     if (InteractionBox.Intersects(doorTile.Rectangle))
                     {
                         game.OpenDoor(doorTile.Rectangle);
+                        isCollidingLeft = false;
+                        isCollidingRight = false;
                     }
                 }
               
@@ -1067,10 +1088,106 @@ namespace AUTO_Matic.SideScroll
             prevKb = kb;
         }
 
-        public void Collision(Rectangle newRect /*int xOffset, int yOffset, int levelInX, int levelInY, Rectangle bounds*/)
+        public void Collision(Rectangle newRect /*int xOffset, int yOffset, int levelInX, int levelInY, Rectangle bounds*/, bool useTop = true)
         {
-            isColliding = false;
+            //isColliding = false;
             //blockBottom = false;
+
+            if (useTop)
+            {
+                if (playerRect.TouchTopOf(newRect))
+                {
+
+
+                    if (velocity.Y > 0 && playerState != PlayerStates.Dashing)
+                    {
+                        while (playerRect.Bottom > newRect.Top)
+                        {
+                            velocity.Y += -(Velocity.Y);
+                            position.Y -= .1f;
+                            playerRect.Y = (int)position.Y;
+                        }
+                        //if (velocity.X > 0)
+                        //{
+                        //    velocity.X = 0;
+                        //    position.X += -moveSpeed;
+                        //}
+                        //else if (velocity.X < 0)
+                        //{
+                        //    velocity.X = 0;
+                        //    position.X += moveSpeed;
+                        //}
+                        jumpDelay = 0;
+                        //velocity.X += (float)Math.Cos(velocity.X);
+                        isFalling = false;
+
+                        //isDashing = false;
+
+                        //animState = AnimationStates.Idle;
+                        //ChangeAnimation();
+                        //maxVelocity.X = 6;
+                        prevKb = Keyboard.GetState();
+                        //isColliding = false;
+                        blockBottom = true;
+                    }
+                    else if (playerState == PlayerStates.Jumping)
+                    {
+                        //if (velocity.X > 0)
+                        //{
+                        //    velocity.X = 0;
+                        //    position.X += -moveSpeed;
+                        //}
+                        //else if (velocity.X < 0)
+                        //{
+                        //    velocity.X = 0;
+                        //    position.X += moveSpeed;
+                        //}
+
+                    }
+                    else if (playerState == PlayerStates.Dashing)
+                    {
+
+                    }
+                    else
+                    {
+                        while (playerRect.Bottom > newRect.Top)
+                        {
+                            velocity.Y += -(Velocity.Y);
+                            position.Y -= 1f;
+                            playerRect.Y = (int)position.Y;
+                        }
+                        jumpDelay++;
+                        if (jumpDelay >= maxJumpDelay)
+                        {
+                            canJump = true;
+                        }
+                        blockBottom = true;
+                    }
+
+
+
+                    //position.Y += -(velocity.Y);
+
+
+                    //isColliding = true;
+
+
+
+                }
+
+                //if (playerRect.TouchTopOf(newRect) && playerRect.TouchLeftOf(newRect) || playerRect.TouchTopOf(newRect) && playerRect.TouchLeftOf(newRect))
+                //{
+                //    velocity.X = 0;
+                //}
+            }
+            else
+            {
+                //if (playerRect.TouchTopOf(newRect))
+                //{
+                //    velocity.X = 0;
+                //}
+            }
+
             if (playerRect.TouchLeftOf(newRect))
             {
                 while (playerRect.Right > newRect.Left)
@@ -1094,12 +1211,13 @@ namespace AUTO_Matic.SideScroll
 
                         }
                         velocity.X = 0;
-                        isColliding = true;
+                        //velocity.X += -Velocity.X * (moveSpeed * 2);
+                        isCollidingRight = true;
                         break;
                     case PlayerStates.Jumping:
                         if (velocity.X > 0)
                         {
-                            position.X += -velocity.X;
+                            //position.X += -velocity.X;
                             //velocity.X = 0;
 
                         }
@@ -1111,12 +1229,14 @@ namespace AUTO_Matic.SideScroll
                            
 
                         }
-                        velocity.X = 0;
-                        isColliding = true;
+                        //velocity.X = 0;
+                        //velocity.X += -Velocity.X * (moveSpeed * 2);
+                        isCollidingRight = true;
                         playerState = PlayerStates.Movement;
                         break;
                 }
-
+                //animManager.isLeft = true;
+                //animManager.isRight = false;
                 #region Comments
                 //playerState = PlayerStates.Movement;
                 //if (isFalling || playerState == PlayerStates.Jumping)
@@ -1187,12 +1307,13 @@ namespace AUTO_Matic.SideScroll
 
                         }
                         velocity.X = 0;
-                        isColliding = true;
+                        //velocity.X += -Velocity.X * (moveSpeed * 2);
+                        isCollidingLeft = true;
                         break;
                     case PlayerStates.Jumping:
                         if (velocity.X < 0)
                         {
-                            position.X += -velocity.X;
+                            //position.X += -velocity.X;
 
                         }
                         break;
@@ -1204,91 +1325,22 @@ namespace AUTO_Matic.SideScroll
 
                         }
                         velocity.X = 0;
-                        isColliding = true;
+                        //velocity.X += -Velocity.X * (moveSpeed * 2);
+                        isCollidingLeft = true;
                         playerState = PlayerStates.Movement;
                         break;
                 }
+                //animManager.isLeft = false;
+                //animManager.isRight = true;
+                if(!useTop)
+                {
+                    velocity.X = 0;
+                }
             }
 
-            if (playerRect.TouchTopOf(newRect))
-            {
+          
 
-
-                if (velocity.Y > 0 && playerState != PlayerStates.Dashing)
-                {
-                    while (playerRect.Bottom > newRect.Top)
-                    {
-                        velocity.Y += -(Velocity.Y);
-                        position.Y -= .1f;
-                        playerRect.Y = (int)position.Y;
-                    }
-                    //if (velocity.X > 0)
-                    //{
-                    //    velocity.X = 0;
-                    //    position.X += -moveSpeed;
-                    //}
-                    //else if (velocity.X < 0)
-                    //{
-                    //    velocity.X = 0;
-                    //    position.X += moveSpeed;
-                    //}
-                    jumpDelay = 0;
-                    //velocity.X += (float)Math.Cos(velocity.X);
-                    isFalling = false;
-                    
-                    //isDashing = false;
-
-                    //animState = AnimationStates.Idle;
-                    //ChangeAnimation();
-                    //maxVelocity.X = 6;
-                    prevKb = Keyboard.GetState();
-                    isColliding = false;
-                    blockBottom = true;
-                }
-                else if (playerState == PlayerStates.Jumping)
-                {
-                    //if (velocity.X > 0)
-                    //{
-                    //    velocity.X = 0;
-                    //    position.X += -moveSpeed;
-                    //}
-                    //else if (velocity.X < 0)
-                    //{
-                    //    velocity.X = 0;
-                    //    position.X += moveSpeed;
-                    //}
-
-                }
-                else if(playerState == PlayerStates.Dashing)
-                {
-
-                }
-                else
-                {
-                    while (playerRect.Bottom > newRect.Top)
-                    {
-                        velocity.Y += -(Velocity.Y);
-                        position.Y -= 1f;
-                        playerRect.Y = (int)position.Y;
-                    }
-                    jumpDelay++;
-                    if (jumpDelay >= maxJumpDelay)
-                    {
-                        canJump = true;
-                    }
-                    blockBottom = true;
-                }
-
-
-
-                //position.Y += -(velocity.Y);
-
-
-                //isColliding = true;
-                
-
-
-            }
+           
 
            
             if (playerRect.TouchBottomOf(newRect))
@@ -1319,17 +1371,17 @@ namespace AUTO_Matic.SideScroll
 
                 //position.Y += -(velocity.Y);
 
-
-                isColliding = true;
+                //blockBottom = false;
+                isCollidingRight = true;
             }
 
             if (animManager.isLeft)
             {
-                playerRect = new Rectangle((int)(position.X + (collisionOffsetX - 6)), (int)position.Y, pixelSize / 2, pixelSize);
+                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, pixelSize / 2, pixelSize);
             }
             else if (animManager.isRight)
             {
-                playerRect = new Rectangle((int)(position.X + collisionOffsetX), (int)position.Y, pixelSize / 2, pixelSize);
+                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, pixelSize / 2, pixelSize);
             }
 
 
@@ -1347,7 +1399,7 @@ namespace AUTO_Matic.SideScroll
             //    spriteBatch.Draw(texture, playerRect, Color.White);
             //}
            
-            //spriteBatch.Draw(texture, playerRect, Color.White);
+            spriteBatch.Draw(texture, playerRect, Color.White);
 
             if(damaged)
             {

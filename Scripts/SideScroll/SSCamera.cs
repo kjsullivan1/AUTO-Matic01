@@ -128,20 +128,20 @@ namespace AUTO_Matic.Scripts.SideScroll
             {
                 onBorderTop = true;
                 onBorderRight = true;
-                center = new Vector2(viewport.Width * 1.375f, viewport.Height / 1.75f);
+                center = new Vector2(viewport.Width * 1.365f, viewport.Height / 1.75f);
                 transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
             }
 
 
 
-            if (this.position.Y + 400 >= height && position.X + viewport.Width / 2 > width)
+            if (this.position.Y + height/2 >= height && position.X + viewport.Width / 2 > width)
             {
                     onBorderBottom = true;
                     onBorderRight = true;
-                center = new Vector2(viewport.Width * 1.375f, 64 * 10);
+                center = new Vector2(viewport.Width * 1.365f, 64 * 10);
                 transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width/2, viewport.Height / 2, 0));
             }
-            else if(this.position.Y + 400 >= height)
+            else if(this.position.Y + height/2 >= height)
             {
                     onBorderBottom = true;
                 center = new Vector2(center.X, 64 * 10);

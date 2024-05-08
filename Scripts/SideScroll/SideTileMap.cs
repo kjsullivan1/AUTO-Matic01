@@ -19,6 +19,7 @@ namespace AUTO_Matic
         public int worldHeight;
         public static SideTileMap tileMap = new SideTileMap();
         private static List<GroundTile> groundTiles = new List<GroundTile>();
+        private static List<WallTile> wallTiles = new List<WallTile>();
         private static List<PlatformTile> platformTiles = new List<PlatformTile>();
         private static List<BackgroundTile> backgroundTiles = new List<BackgroundTile>();
         private static List<TopDoorTile> topDoorTiles = new List<TopDoorTile>();
@@ -27,6 +28,7 @@ namespace AUTO_Matic
         public static List<Vector2> playerSpawns = new List<Vector2>();
         private static List<DungeonEntrance> dungeonEntrances = new List<DungeonEntrance>();
         public static List<int> GroundIndexes = new List<int>();
+        public static List<int> WallTilesIndexes = new List<int>();
         public static List<int> BackgroundIndexes = new List<int>();
         public static List<int> PlatformIndexes = new List<int>();
 
@@ -63,6 +65,11 @@ namespace AUTO_Matic
         public static List<GroundTile> GroundTiles
         {
             get { return groundTiles; }
+        }
+
+        public static List<WallTile> WallTiles
+        {
+            get { return wallTiles; }
         }
 
         public void SetWorldDims(int width, int height)
@@ -113,20 +120,51 @@ namespace AUTO_Matic
                 for (int x = 0; x < map.GetLength(1); x++)
                 {
                     int num = map[y, x];
+                    int num2 = 0;
+                    if (y != 0)
+                        num2 = map[y - 1, x];
 
                     if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19 || num == 20|| num ==21 || num ==22 || num ==23)
                     {
-                        groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
-                        if (GroundIndexes.Contains(num) == false)
-                            GroundIndexes.Add(num);
+                        if(y==0)
+                        {
+                            groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if (GroundIndexes.Contains(num) == false)
+                                GroundIndexes.Add(num);
+                        }
+                        else if(y > 0 && GroundIndexes.Contains(num2))
+                        {
+                            wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
+                            //Add indexes?
+                        }
+                        else
+                        {
+                            groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if (GroundIndexes.Contains(num) == false)
+                                GroundIndexes.Add(num);
+                        }
+                      
 
                     }
                     if (num == 3 || num == 4)
                     {
-                   
-                        platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
-                        if (PlatformIndexes.Contains(num) == false)
-                            PlatformIndexes.Add(num);
+                        if(y == 0)
+                        {
+                            platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if (PlatformIndexes.Contains(num) == false)
+                                PlatformIndexes.Add(num);
+                        }
+                        else if(y > 0 && PlatformIndexes.Contains(num2))
+                        {
+                            wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
+                        }
+                        else
+                        {
+                            platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if (PlatformIndexes.Contains(num) == false)
+                                PlatformIndexes.Add(num);
+                        }
+                       
                     }
                     if(num == 1)
                     {
@@ -262,6 +300,10 @@ namespace AUTO_Matic
             {
                 tile.Draw(spriteBatch);
             }
+            foreach (WallTile tile in wallTiles)
+            {
+                tile.Draw(spriteBatch);
+            }
             foreach (GroundTile tile in groundTiles)
             {
                 tile.Draw(spriteBatch); 
@@ -274,6 +316,7 @@ namespace AUTO_Matic
             {
                 tile.Draw(spriteBatch);
             }
+          
            
             
             // spriteBatch.End();

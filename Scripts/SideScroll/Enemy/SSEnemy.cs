@@ -1047,7 +1047,7 @@ namespace AUTO_Matic.SideScroll
             
             //tRect.X += tRect.Width/5;
             spriteBatch.Draw(texture, enemyRect, Color.White);
-            spriteBatch.Draw(texture, HitBox, Color.BlueViolet);
+            //spriteBatch.Draw(texture, HitBox, Color.BlueViolet);
             foreach (Bullet bullet in bullets)
             {
                 bullet.Draw(spriteBatch);
