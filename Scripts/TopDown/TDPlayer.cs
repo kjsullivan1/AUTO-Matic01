@@ -486,17 +486,17 @@ namespace AUTO_Matic.TopDown
                 position.X += moveSpeed;
                 shootDir = "right";
             }
-            else if (kb.IsKeyDown(Keys.A))
+            if (kb.IsKeyDown(Keys.A))
             {
                 position.X += -moveSpeed;
                 shootDir = "left";
             }
-            else if (kb.IsKeyDown(Keys.W))
+            if (kb.IsKeyDown(Keys.W))
             {
                 position.Y += -moveSpeed;
                 shootDir = "up";
             }
-            else if (kb.IsKeyDown(Keys.S))
+            if (kb.IsKeyDown(Keys.S))
             {
                 position.Y += moveSpeed;
                 shootDir = "down";

@@ -1399,7 +1399,7 @@ namespace AUTO_Matic.SideScroll
             //    spriteBatch.Draw(texture, playerRect, Color.White);
             //}
            
-            spriteBatch.Draw(texture, playerRect, Color.White);
+           // spriteBatch.Draw(texture, playerRect, Color.White);
 
             if(damaged)
             {
