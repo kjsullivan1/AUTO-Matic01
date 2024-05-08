@@ -249,12 +249,12 @@ namespace AUTO_Matic
             ///Settings Menu elements
             //Title
             string titleTxt = "Settings";
-            uiElements.Add("SettingsMenuTitle", UIHelper.CreateTextblock("SettingsMenuTitle", titleTxt, (int)(((dims.X * 2)) - (titleTxt.Length * 11.0f)), // dividing the txt * 11 / 2 makes in longer?
+            uiElements.Add("SettingsMenuTitle", UIHelper.CreateTextblock("SettingsMenuTitle", titleTxt, (int)(((dims.X * 1.5f)) - (titleTxt.Length * 11.0f)), // dividing the txt * 11 / 2 makes in longer?
                 UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Top - 30 ));
             UIHelper.SetElementRect(uiElements["SettingsMenuTitle"], new Rectangle(uiElements["SettingsMenuTitle"].Position.ToPoint(), new Point(titleTxt.Length, 20)));
 
             //Settings Box
-            uiElements.Add("SettingsButtonBox", UIHelper.CreateTextblock("SettingsButtonBox", "The options for settings will go here", (int)(((dims.X * 2))) - (525 / 2),
+            uiElements.Add("SettingsButtonBox", UIHelper.CreateTextblock("SettingsButtonBox", "The options for settings will go here", (int)(((dims.X * 1.5f))) - (525 / 2),
                 (int)uiElements["SettingsMenuTitle"].Position.Y + 50));
             UIHelper.SetElementRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(100, 10)));
             UIHelper.SetElementBGRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(525, 350)));

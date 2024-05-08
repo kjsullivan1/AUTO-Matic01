@@ -21,6 +21,9 @@ namespace AUTO_Matic.TopDown
         public enum PlayerState {Movement, Shooting, Death, Hit}
         public PlayerState playerState = PlayerState.Movement;
 
+        Vector2 controllerMoveDir;
+        GamePadButtons currButtons;
+        GamePadButtons prevButtons;
         public int bossRoom = 2;
 
         #region Animations
@@ -309,6 +312,9 @@ namespace AUTO_Matic.TopDown
 
         public void Update(GameTime gameTime, TopDownMap map, ShotGunBoss boss)
         {
+
+            controllerMoveDir = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left;
+            currButtons = GamePad.GetState(PlayerIndex.One).Buttons;
             this.map = map;
             kb = Keyboard.GetState();
             rectangle = new Rectangle((int)position.X, (int)position.Y, pixelSize, pixelSize);
@@ -481,28 +487,28 @@ namespace AUTO_Matic.TopDown
         private void Input()
         {
             //Else ifs for cardinal
-            if (kb.IsKeyDown(Keys.D))
+            if (kb.IsKeyDown(Keys.D) || controllerMoveDir.X > 0 /*&& controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
             {
                 position.X += moveSpeed;
                 shootDir = "right";
             }
-            if (kb.IsKeyDown(Keys.A))
+            if (kb.IsKeyDown(Keys.A) || controllerMoveDir.X  < 0/* && controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
             {
                 position.X += -moveSpeed;
                 shootDir = "left";
             }
-            if (kb.IsKeyDown(Keys.W))
+            if (kb.IsKeyDown(Keys.W) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y > 0 /*&& controllerMoveDir.X > -.6*/)
             {
                 position.Y += -moveSpeed;
                 shootDir = "up";
             }
-            if (kb.IsKeyDown(Keys.S))
+            if (kb.IsKeyDown(Keys.S) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y < 0 /*&& controllerMoveDir.X > -.6*/ )
             {
                 position.Y += moveSpeed;
                 shootDir = "down";
             }
 
-            if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter))
+            if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
             {
                 switch(shootDir)
                 {
@@ -522,6 +528,7 @@ namespace AUTO_Matic.TopDown
                 
             }
             prevKb = kb;
+            prevButtons = currButtons;
         }
 
         public void Collision(Rectangle newRect, int xOffset, int yOffset, Rectangle bounds)

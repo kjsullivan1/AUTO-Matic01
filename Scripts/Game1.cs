@@ -27,7 +27,7 @@ namespace AUTO_Matic
         UIManager UIManager = new UIManager();
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -39,6 +39,7 @@ namespace AUTO_Matic
         Vector2 mainMenuPos;
 
         KeyboardState prevKB;
+        GamePadButtons prevButtons;
 
         Point screenCenter;
         Point saveMousePoint;
@@ -69,7 +70,7 @@ namespace AUTO_Matic
         List<Rectangle> healthBar = new List<Rectangle>();
 
         List<SSEnemy> enemies = new List<SSEnemy>();
-
+        Vector2 moveDir;
         #region TopDown
         TopDownMap tdMap;
         TDPlayer tdPlayer;
@@ -251,6 +252,7 @@ namespace AUTO_Matic
 
         public void StartDungeon()
         {
+            GameState = GameStates.TopDown;
             tdPlayer = new TDPlayer(this, 64, 500, 500);
             tdMap = new TopDownMap();
             //Boss = new Rectangle();
@@ -386,7 +388,7 @@ namespace AUTO_Matic
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             KeyboardState kb = Keyboard.GetState();
-
+            moveDir = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left;
             switch(currScene)
             {
                 case Scenes.TitleScreen:
@@ -720,9 +722,10 @@ namespace AUTO_Matic
 
             }
 
-           
+
 
             // TODO: Add your update logic here
+            prevButtons = GamePad.GetState(PlayerIndex.One).Buttons;
             base.Update(gameTime);
         }
 
@@ -784,7 +787,7 @@ namespace AUTO_Matic
                 case Scenes.InGame:
                     if(GameState == GameStates.SideScroll)
                     {
-                        Window.Title = camera.Position.ToString() + " Player.isColliding: " + ssPlayer.isCollidingRight + "    Player blockBottom: " + ssPlayer.blockBottom + "    SSPlayerX: " + ssPlayer.velocity.X;
+                        Window.Title = camera.Position.ToString() + " Player.isColliding: " + ssPlayer.isCollidingRight + "    Player blockBottom: " + ssPlayer.blockBottom + "    AnalogStickDir: " + moveDir.ToString();
                         //Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
                         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null,ssCamera.transform);
                        
@@ -806,6 +809,7 @@ namespace AUTO_Matic
                     }
                     else if(GameState == GameStates.TopDown)
                     {
+                        Window.Title = "AnalogStickDir: " + moveDir.ToString();
                         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
                         tdMap.Draw(spriteBatch);
                         tdPlayer.Draw(spriteBatch);
@@ -841,13 +845,13 @@ namespace AUTO_Matic
         }
         private void Menus(KeyboardState kb)
         {
-            float crawlSpeed = 3f;
-
+            float crawlSpeed = 10f;
+            GamePadButtons currButtons = GamePad.GetState(PlayerIndex.One).Buttons;
 
             switch (MenuState)
             {
                 case MenuStates.TitleCrawl:
-                    if (kb.IsKeyDown(Keys.Enter) && prevKB.IsKeyUp(Keys.Enter) && !startCrawl)
+                    if (kb.IsKeyDown(Keys.Enter) && prevKB.IsKeyUp(Keys.Enter) && !startCrawl || currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released)
                     {
                         prevKB = kb;
                         startCrawl = true;
@@ -855,8 +859,9 @@ namespace AUTO_Matic
                     UIManager.UpdateTextBlock("TitleCrawl");
                     if (startCrawl)
                     {
-                        TitleCrawl(crawlSpeed);
-                        if (kb.IsKeyDown(Keys.G) && prevKB.IsKeyUp(Keys.G))
+                        TitleCrawl(3);
+                        if (kb.IsKeyDown(Keys.G) && prevKB.IsKeyUp(Keys.G) || currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released 
+                            || currButtons.Y == ButtonState.Pressed && prevButtons.Y == ButtonState.Released || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
                         {
                             camera.Update(new Vector2(camera.X, (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2))));
                             UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
@@ -887,21 +892,22 @@ namespace AUTO_Matic
                     }
                     UIHelper.SetElementVisibility("MainMenu", true, UIManager.uiElements);
                     UseMouse(kb, crawlSpeed);
-                    UpdateCamera(mainMenuPos, 6);
-                    UIManager.UpdateButton("MainMenu", 6);
+                    UpdateCamera(mainMenuPos, 10);
+                    UIManager.UpdateButton("MainMenu", crawlSpeed);
                     break;
                 case MenuStates.StartGame:
 
-                    UIManager.UpdateButton("StartGame", 5f);
+                    UIManager.UpdateButton("StartGame", crawlSpeed);
                     UseMouse(kb, crawlSpeed);
-                    UpdateCamera(mainMenuPos, 6);
+                    UpdateCamera(mainMenuPos, 28);
                     break;
                 case MenuStates.Settings:
                     UseMouse(kb, crawlSpeed);
-                    UpdateCamera(new Vector2(graphics.PreferredBackBufferWidth * 2, camera.Y), 6);
+                    UpdateCamera(new Vector2(graphics.PreferredBackBufferWidth * 1.5f, camera.Y), crawlSpeed);
                     UIHelper.SetElementVisibility("Settings", true, UIManager.uiElements);
                     break;
             }
+           
         }
 
         private void UseMouse(KeyboardState kb, float crawlSpeed)

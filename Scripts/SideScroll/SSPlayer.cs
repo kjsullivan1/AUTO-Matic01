@@ -40,8 +40,11 @@ namespace AUTO_Matic.SideScroll
         float moveSpeed = 2.15f;
         float iMoveSpeed;
         float iMaxRunSpeed;
+        //Controler input helpers
+        Vector2 controllerMoveDir;
+        GamePadButtons currControllerBtn;
+        GamePadButtons prevControllerBtn;
 
-       
         float health = 5f;
         public int redFrames = 4;
         public int redCount = 0;
@@ -357,7 +360,8 @@ namespace AUTO_Matic.SideScroll
 
         public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies)
         {
-
+            controllerMoveDir = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left;
+            currControllerBtn = GamePad.GetState(PlayerIndex.One).Buttons;
             foreach(BackgroundTile tile in SideTileMap.BackgroundTiles)
             {
                 if(tile.Rectangle.Contains(InteractionBox))
@@ -631,7 +635,7 @@ namespace AUTO_Matic.SideScroll
                             accel = 0;
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash)
+                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && prevControllerBtn.B == ButtonState.Released && canDash)
                         {
                             playerState = PlayerStates.Dashing;
 
@@ -655,7 +659,7 @@ namespace AUTO_Matic.SideScroll
                             startDashPos = Position;
                         }
 
-                        if(kb.IsKeyDown(Keys.Space) && canJump && !isFalling)
+                        if(kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && prevControllerBtn.A == ButtonState.Released && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -684,7 +688,7 @@ namespace AUTO_Matic.SideScroll
                         break;
                 }
             }
-            else if(kb.IsKeyDown(Keys.D) && !isCollidingRight)
+            else if(kb.IsKeyDown(Keys.D) && !isCollidingRight || controllerMoveDir.X > 0  && !isCollidingRight && controllerMoveDir.Y > -.9)
             {
                 isCollidingLeft = false;
                 if (playerState == PlayerStates.Shooting)
@@ -733,7 +737,7 @@ namespace AUTO_Matic.SideScroll
                             //accel = force / mass;
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash)
+                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && prevControllerBtn.B == ButtonState.Released && canDash)
                         {
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
@@ -744,7 +748,7 @@ namespace AUTO_Matic.SideScroll
                             startDashPos = Position;
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling)
+                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && prevControllerBtn.A == ButtonState.Released && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -784,7 +788,7 @@ namespace AUTO_Matic.SideScroll
                     #endregion
                 }
             }
-            else if(kb.IsKeyDown(Keys.A) && !isCollidingLeft/*&& !isColliding*/)
+            else if(kb.IsKeyDown(Keys.A) && !isCollidingLeft/*&& !isColliding*/ || controllerMoveDir.X < 0 && !isCollidingLeft && controllerMoveDir.Y > -.9)
             {
                 isCollidingRight = false;
                 if (playerState == PlayerStates.Shooting)
@@ -830,7 +834,7 @@ namespace AUTO_Matic.SideScroll
                             //accel = force / (mass);
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash)
+                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && prevControllerBtn.B == ButtonState.Released && canDash)
                         {
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
@@ -842,7 +846,7 @@ namespace AUTO_Matic.SideScroll
                             startDashPos = Position;
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling)
+                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && prevControllerBtn.A == ButtonState.Released && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -882,7 +886,7 @@ namespace AUTO_Matic.SideScroll
                         #endregion
                 }
             }
-            else if(kb.IsKeyUp(Keys.D) && kb.IsKeyUp(Keys.A))
+            else if(kb.IsKeyUp(Keys.D) && kb.IsKeyUp(Keys.A) || controllerMoveDir == Vector2.Zero)
             {
                 switch(playerState)
                 {
@@ -975,7 +979,7 @@ namespace AUTO_Matic.SideScroll
 
                         }
 
-                        if ((kb.IsKeyDown(Keys.LeftShift)) && canDash)
+                        if ((kb.IsKeyDown(Keys.LeftShift)) && canDash || currControllerBtn.B == ButtonState.Pressed && prevControllerBtn.B == ButtonState.Released && canDash)
                         {
 
                             playerState = PlayerStates.Dashing;
@@ -999,7 +1003,7 @@ namespace AUTO_Matic.SideScroll
 
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling)
+                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && prevControllerBtn.A == ButtonState.Released && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -1026,7 +1030,7 @@ namespace AUTO_Matic.SideScroll
                 }
             }
 
-            if(kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyUp(Keys.E))
+            if(kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyUp(Keys.E) || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Released)
             {
                 foreach(BottomDoorTile doorTile in SideTileMap.BottomDoorTiles)
                 {
@@ -1037,10 +1041,16 @@ namespace AUTO_Matic.SideScroll
                         isCollidingRight = false;
                     }
                 }
-              
+                foreach(DungeonEntrance dungeonEntrance in SideTileMap.DungeonEntrances)
+                {
+                    if(InteractionBox.Intersects(dungeonEntrance.Rectangle))
+                    {
+                        game.StartDungeon();
+                    }
+                }
             }
 
-            if (kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && blockBottom)
+            if (kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && blockBottom || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && blockBottom)
             {
                 playerState = PlayerStates.Shooting;
 
@@ -1058,7 +1068,7 @@ namespace AUTO_Matic.SideScroll
                 animManager.StartLoop();
             }
 
-            if (kb.IsKeyDown(Keys.S) && playerState == PlayerStates.Shooting && prevKb.IsKeyDown(Keys.S) && blockBottom)
+            if (kb.IsKeyDown(Keys.S) && playerState == PlayerStates.Shooting && prevKb.IsKeyDown(Keys.S) && blockBottom || controllerMoveDir.Y < -.9 && playerState == PlayerStates.Shooting && blockBottom)
             {
                 playerState = PlayerStates.Shooting;
                 float fallSpeed = 2;
@@ -1067,7 +1077,7 @@ namespace AUTO_Matic.SideScroll
                     velocity.Y += fallSpeed;
                 }
 
-                if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter))
+                if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) || currControllerBtn.X == ButtonState.Pressed && prevControllerBtn.X == ButtonState.Released)
                 {
                     if(animManager.isRight)
                     {
@@ -1086,6 +1096,7 @@ namespace AUTO_Matic.SideScroll
             }
 
             prevKb = kb;
+            prevControllerBtn = currControllerBtn;
         }
 
         public void Collision(Rectangle newRect /*int xOffset, int yOffset, int levelInX, int levelInY, Rectangle bounds*/, bool useTop = true)
