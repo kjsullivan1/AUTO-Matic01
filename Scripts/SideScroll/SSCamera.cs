@@ -105,7 +105,7 @@ namespace AUTO_Matic.Scripts.SideScroll
                 center = new Vector2(viewport.Width / 1.75f, position.Y);
                 transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height / 2, 0));
             }
-            else if(position.X + viewport.Width / 2f > width)
+            else if((position.X + 32) + viewport.Width / 2f > width)
             {
                 onBorderRight = true;
                 center = new Vector2(viewport.Width * 1.365f, position.Y);

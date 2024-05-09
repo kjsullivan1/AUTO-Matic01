@@ -25,6 +25,13 @@ namespace AUTO_Matic
         Camera camera;
 
         UIManager UIManager = new UIManager();
+        List<HealthDrop> healthDrops = new List<HealthDrop>();
+        Random rand = new Random();
+        int dropRateSS = 30;
+        int dropRateTD = 40;
+        float healAmount = 1.5f;
+
+        Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
         public Scenes currScene = Scenes.TitleScreen;
@@ -165,7 +172,7 @@ namespace AUTO_Matic
 
             #endregion
 
-          
+            HealthDrop.texture = Content.Load<Texture2D>(@"Textures\Health");
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if(currScene == Scenes.InGame)
                 StartNewGame();
@@ -186,6 +193,7 @@ namespace AUTO_Matic
 
         public void GenerateNewMap(bool xLevel, bool yLevel, bool dLevel, bool isBoss)
         {
+            healthDrops.Clear();
             if(!isBoss)
             {
                 levelCount++;
@@ -242,6 +250,8 @@ namespace AUTO_Matic
                     (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
                     new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
 
+
+                LeaveDungeon = new Rectangle(currBounds.X + currBounds.Width/2, currBounds.Y + currBounds.Height/2, 64, 64);
                 shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content);
                 startBoss = true;
                 //tdPlayer.rectangle.X -= 200;
@@ -252,6 +262,7 @@ namespace AUTO_Matic
 
         public void StartDungeon()
         {
+            healthDrops.Clear();
             GameState = GameStates.TopDown;
             tdPlayer = new TDPlayer(this, 64, 500, 500);
             tdMap = new TopDownMap();
@@ -299,6 +310,7 @@ namespace AUTO_Matic
 
         public void StartNewGame()
         {
+            healthDrops.Clear();
             UIHelper.SetElementVisibility("MainMenu", false, UIManager.uiElements);
             UIHelper.SetElementVisibility("Settings", false, UIManager.uiElements);
             UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
@@ -454,7 +466,7 @@ namespace AUTO_Matic
                             }
                             ssPlayer.Update(gameTime, Gravity, enemies);
                         
-                            for(int i = 0; i < enemies.Count; i++)
+                            for(int i = enemies.Count - 1; i >= 0; i--)
                             {
                                 enemies[i].Update(gameTime, Gravity, ssPlayer, this);
                                 for (int j = i + 1; j < enemies.Count; j++)
@@ -477,6 +489,25 @@ namespace AUTO_Matic
                                             
                                     }
                                    
+                                }
+
+                                if(enemies[i].dead)
+                                {
+                                    if(rand.Next(0,101) < dropRateSS)
+                                    {
+                                        healthDrops.Add(new HealthDrop(enemies[i].enemyRect));
+                                    }
+                                    enemies.RemoveAt(i);
+                                }
+                            }
+
+                            for(int i = healthDrops.Count - 1; i >= 0; i--)
+                            {
+                                if (healthDrops[i].rect.Intersects(ssPlayer.playerRect))
+                                {
+                                    ssPlayer.Health += healAmount;
+                                    healthDrops.RemoveAt(i);
+
                                 }
                             }
                             //foreach(SSEnemy enemy in enemies)
@@ -548,7 +579,7 @@ namespace AUTO_Matic
                         case GameStates.TopDown:
                             if (tdPlayer.Health <= 0)
                             {
-                                //StartDungeon();
+                                StartDungeon();
                             }
 
                             UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)(camera.Position.X - GraphicsDevice.Viewport.Width/2) + 20,
@@ -556,9 +587,25 @@ namespace AUTO_Matic
                             camera.Update(new Vector2(camera.X, camera.Y));
                             tdPlayer.Update(gameTime, tdMap, shotGunBoss);
                             camera.Update(CameraPos());
-                            if(kb.IsKeyDown(Keys.L))//Switching back to sidescroll
+                            if(kb.IsKeyDown(Keys.L) || tdPlayer.rectangle.Intersects(LeaveDungeon))//Switching back to sidescroll
                             {
                                 GameState = GameStates.SideScroll;
+                                //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
+                                graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
+                                graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
+
+                                //graphics.HardwareModeSwitch = false;
+                                //graphics.IsFullScreen = true;
+                                graphics.ApplyChanges();
+
+                                List<Texture2D> healthbars = new List<Texture2D>();
+                                for (int i = 0; i < 6; i++)
+                                {
+                                    healthbars.Add(Content.Load<Texture2D>(@"SideScroll\HealthBar\RoboHealthBar" + i));
+                                }
+
+                                UIHelper.HealthBar = healthbars;
+                                UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
                                 //Camera position not updated
                             }
                             if(tdPlayer.changeLevel)
@@ -576,7 +623,7 @@ namespace AUTO_Matic
                                     foreach (Vector2 enemySpawn in tdMap.EnemySpawns)
                                     {
                                         if (currBounds.Contains(enemySpawn))
-                                            if (tdEnemies.Count <= 6)
+                                            if (tdEnemies.Contains(new TDEnemy(Content, enemySpawn, tdMap, currMap, GraphicsDevice)) == false)
                                                 tdEnemies.Add(new TDEnemy(Content, enemySpawn, tdMap, currMap, GraphicsDevice));
                                     }
                                 }
@@ -584,19 +631,67 @@ namespace AUTO_Matic
                                 tdPlayer.changeLevel = false;
                                
                             }
-                            
-                            for(int i = tdEnemies.Count - 1; i >= 0; i--)
+                            if (tdEnemies.Count != 0)
                             {
-                                tdEnemies[i].Upate(gameTime, tdPlayer, tdMap);
+                                bool hardBreak = false;
+                                for (int j = tdEnemies.Count - 1; j >= 0; j--)
+                                {
+                                    if (tdPlayer.bullets.Count != 0)
+                                    {
+                                        for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                        {
+                                            if (tdPlayer.bullets[i].rect.Intersects(tdEnemies[j].Rectangle))
+                                            {
+                                                tdEnemies[j].Health -= tdPlayer.bulletDmg;
+                                                //if(tdEnemies[j].Health <= 0)
+                                                //{
+                                                //    tdEnemies.RemoveAt(j);
+                                                //    hardBreak = true;
+                                                //}
+                                                tdPlayer.bullets.RemoveAt(i);
+                                                break;
+
+                                            }
+                                        }
+                                        if (hardBreak)
+                                            break;
+                                    }
+                                }
                             }
 
-                            if(tdPlayer.bullets.Count != 0)
+                            for (int i = tdEnemies.Count - 1; i >= 0; i--)
+                            {
+                                tdEnemies[i].Upate(gameTime, tdPlayer, tdMap);
+                                if(tdEnemies[i].Health<= 0)
+                                {
+                                    if(rand.Next(0,101) < dropRateTD)
+                                    {
+                                        healthDrops.Add(new HealthDrop(tdEnemies[i].Rectangle));
+                                     
+                                    }
+                                    tdEnemies.RemoveAt(i);
+                                }
+                            }
+
+                            for (int i = healthDrops.Count - 1; i >= 0; i--)
+                            {
+                                if (healthDrops[i].rect.Intersects(tdPlayer.rectangle))
+                                {
+                                    tdPlayer.Health += healAmount;
+                                    healthDrops.RemoveAt(i);
+
+                                }
+                            }
+
+                            if (tdPlayer.bullets.Count != 0)
                             {
                                 for(int i = tdPlayer.bullets.Count - 1; i >=0; i--)
                                 {
                                     tdPlayer.bullets[i].Update();
                                 }
                             }
+
+
 
                             foreach(WallTiles tile in tdMap.WallTiles)
                             {
@@ -612,33 +707,7 @@ namespace AUTO_Matic
                                 }
                             }
 
-                            if(tdEnemies.Count != 0)
-                            {
-                                bool hardBreak = false;
-                                for (int j = tdEnemies.Count - 1; j >= 0; j--)
-                                {
-                                    if (tdPlayer.bullets.Count != 0)
-                                    {
-                                        for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
-                                        {
-                                            if (tdPlayer.bullets[i].rect.Intersects(tdEnemies[j].Rectangle))
-                                            {
-                                                tdEnemies[j].Health -= tdPlayer.bulletDmg;
-                                                if(tdEnemies[j].Health <= 0)
-                                                {
-                                                    tdEnemies.RemoveAt(j);
-                                                    hardBreak = true;
-                                                }
-                                                tdPlayer.bullets.RemoveAt(i);
-                                                break;
-
-                                            }
-                                        }
-                                        if (hardBreak)
-                                            break;
-                                    }
-                                }
-                            }
+                           
                             //if(!canShoot)
                             //{
                             //    shootRate -= (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -695,6 +764,21 @@ namespace AUTO_Matic
                             {
                                 shotGunBoss.Update(gameTime, tdPlayer, tdMap);
                             }
+
+                            if(levelCount >= tdPlayer.bossRoom)
+                            {
+                                for(int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                {
+                                    if(tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
+                                    {
+                                        shotGunBoss.Health -= tdPlayer.bulletDmg;
+                                        tdPlayer.bullets.RemoveAt(i);
+                                    }
+                                }
+                              
+                            }
+
+                          
                             //if(levelCount >= tdPlayer.bossRoom)
                             //{
                             //    for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
@@ -797,6 +881,10 @@ namespace AUTO_Matic
                         {
                             enemy.Draw(spriteBatch);
                         }
+                        foreach(HealthDrop health in healthDrops)
+                        {
+                            health.Draw(spriteBatch);
+                        }
                         //for(int i = 0; i < healthBar.Count; i++)
                         //{
                         //    spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), new Vector2(healthBar[i].X, healthBar[i].Y), healthBar[i], Color.Red);
@@ -817,6 +905,10 @@ namespace AUTO_Matic
                         foreach (TDEnemy enemy in tdEnemies)
                         {
                             enemy.Draw(spriteBatch);
+                        }
+                        foreach(HealthDrop health in healthDrops)
+                        {
+                            health.Draw(spriteBatch);
                         }
                         if(startBoss)
                         {
@@ -894,6 +986,15 @@ namespace AUTO_Matic
                     UseMouse(kb, crawlSpeed);
                     UpdateCamera(mainMenuPos, 10);
                     UIManager.UpdateButton("MainMenu", crawlSpeed);
+
+                    if(currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released)
+                    {
+                        currScene = Scenes.InGame;
+                    }
+                    if(prevButtons.Back == ButtonState.Pressed && currButtons.Back == ButtonState.Released)
+                    {
+                        MenuState = MenuStates.Settings;
+                    }
                     break;
                 case MenuStates.StartGame:
 
@@ -905,6 +1006,10 @@ namespace AUTO_Matic
                     UseMouse(kb, crawlSpeed);
                     UpdateCamera(new Vector2(graphics.PreferredBackBufferWidth * 1.5f, camera.Y), crawlSpeed);
                     UIHelper.SetElementVisibility("Settings", true, UIManager.uiElements);
+                    if (prevButtons.Back == ButtonState.Pressed && currButtons.Back == ButtonState.Released)
+                    {
+                        MenuState = MenuStates.Settings;
+                    }
                     break;
             }
            

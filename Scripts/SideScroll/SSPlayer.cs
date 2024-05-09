@@ -25,6 +25,7 @@ namespace AUTO_Matic.SideScroll
         #region Fields
         float dashHelperBuffer = 10f;
         float collisionOffsetX = 20f;
+        float collisionInputCooldown = .25f;
         int pixelSize = 64;
         Vector2 position = Vector2.Zero;
         Vector2 prevVel = Vector2.Zero;
@@ -63,6 +64,10 @@ namespace AUTO_Matic.SideScroll
                 health = value;
                 if (health <= 0)
                     health = 0;
+                if(health >= 5)
+                {
+                    health = 5;
+                }
             }
         }
 
@@ -374,6 +379,44 @@ namespace AUTO_Matic.SideScroll
                     {
                         isCollidingRight = false;
                     }
+                }
+            }
+
+            if(isCollidingLeft && isCollidingRight)
+            {
+                if (collisionInputCooldown <= 0)
+                {
+                    isCollidingLeft = false;
+                    isCollidingRight = false;
+                    collisionInputCooldown = .15f;
+                }
+                else
+                {
+                    collisionInputCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                }
+            }
+            else if(isCollidingLeft)
+            {
+                if (collisionInputCooldown <= 0)
+                {
+                    isCollidingLeft = false;
+                    collisionInputCooldown = .15f;
+                }
+                else
+                {
+                    collisionInputCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                }
+            }
+            else if(isCollidingRight)
+            {
+                if (collisionInputCooldown <= 0)
+                {
+                    isCollidingRight = false;
+                    collisionInputCooldown = .15f;
+                }
+                else
+                {
+                    collisionInputCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                 }
             }
 

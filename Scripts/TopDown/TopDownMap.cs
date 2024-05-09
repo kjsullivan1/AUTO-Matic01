@@ -42,6 +42,7 @@ namespace AUTO_Matic.TopDown
         public List<int> cols = new List<int>();
         public List<int> WallIndexes = new List<int>();
         public List<int> FloorIndexes = new List<int>();
+        public Rectangle ExitDoor = new Rectangle();
 
         public int Width
         {
@@ -105,7 +106,11 @@ namespace AUTO_Matic.TopDown
                         }
                         if (num == 11) //enemy
                         {
-                            enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), y * size));
+                            if(enemySpawns.Contains(new Vector2((levelInX * screenWidth) + (x * size), y * size)) == false)
+                            {
+                                enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), y * size));
+                            }
+                           
                             floorTiles.Add(new FloorTiles(9, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
                             floorCount++;
@@ -161,7 +166,11 @@ namespace AUTO_Matic.TopDown
                         }
                         if (num == 11) //enemy
                         {
-                            enemySpawns.Add(new Vector2(x * size, (y * size) - (levelInY * screenHeight)));
+                            if(enemySpawns.Contains(new Vector2(x * size, (y * size) - (levelInY * screenHeight))) == false)
+                            {
+                                enemySpawns.Add(new Vector2(x * size, (y * size) - (levelInY * screenHeight)));
+                            }
+                           
                             floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
                             //floorTiles[floorCount].mapPoint = num;
@@ -217,7 +226,11 @@ namespace AUTO_Matic.TopDown
                         }
                         if (num == 11) //enemy
                         {
-                            enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight)));
+                            if(enemySpawns.Contains(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight))) == false)
+                            {
+                                enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight)));
+                            }
+                          
                             floorTiles.Add(new FloorTiles(9, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
                             //floorTiles[floorCount].mapPoint = num;
@@ -304,7 +317,11 @@ namespace AUTO_Matic.TopDown
                         }
                         if (num == 11) //enemy
                         {
-                            enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), y * size));
+                            if(enemySpawns.Contains(new Vector2((levelInX * screenWidth) + (x * size), y * size)) == false)
+                            {
+                                enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), y * size));
+                            }
+                         
                             floorTiles.Add(new FloorTiles(9, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] {y, x};
                             floorCount++;
@@ -321,6 +338,11 @@ namespace AUTO_Matic.TopDown
                             floorCount++;
                             if (FloorIndexes.Contains(num) == false)
                                 FloorIndexes.Add(num);
+
+                            if(num == 12)
+                            {
+                                ExitDoor = new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size);
+                            }
                         }
 
                         width = (x + 1) * size;
@@ -356,7 +378,11 @@ namespace AUTO_Matic.TopDown
                         }
                         if (num == 11) //enemy
                         {
-                            enemySpawns.Add(new Vector2(x * size, (y * size) - (levelInY * screenHeight)));
+                            if(enemySpawns.Contains(new Vector2(x * size, (y * size) - (levelInY * screenHeight))) == false)
+                            {
+                                enemySpawns.Add(new Vector2(x * size, (y * size) - (levelInY * screenHeight)));
+                            }
+                           
                             floorTiles.Add(new FloorTiles(9, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
                             //floorTiles[floorCount].mapPoint = num;
@@ -375,6 +401,11 @@ namespace AUTO_Matic.TopDown
                             floorCount++;
                             if (FloorIndexes.Contains(num) == false)
                                 FloorIndexes.Add(num);
+
+                            if(num == 12)
+                            {
+                                ExitDoor = new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size);
+                            }
                         }
 
                         width = (x + 1) * size;
@@ -412,7 +443,11 @@ namespace AUTO_Matic.TopDown
                         }
                         if (num == 11) //enemy
                         {
-                            enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight)));
+                            if(enemySpawns.Contains(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight))) == false)
+                            {
+                                enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight)));
+                            }
+                           
                             floorTiles.Add(new FloorTiles(9, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
                             //floorTiles[floorCount].mapPoint = num;
@@ -431,6 +466,8 @@ namespace AUTO_Matic.TopDown
                             floorCount++;
                             if (FloorIndexes.Contains(num) == false)
                                 FloorIndexes.Add(num);
+
+                            ExitDoor = new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size);
                         }
 
                         width = (x + 1) * size;

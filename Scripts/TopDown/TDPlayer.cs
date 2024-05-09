@@ -107,6 +107,11 @@ namespace AUTO_Matic.TopDown
                     
                     health = 0;
                 }
+
+                if(health >= 5)
+                {
+                    health = 5;
+                }
             }
         }
         #endregion

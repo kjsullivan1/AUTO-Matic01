@@ -25,8 +25,9 @@ namespace AUTO_Matic.Scripts.TopDown
         private bool hasJumped = false;
         public bool isColliding = false;
         int visionLength = 7;
-        float health = 3.25f;
+        float health = 5f;
         int pixelSize = 64;
+        public bool dead;
         public float Health
         {
             get { return health; }
@@ -34,6 +35,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 if(health <= 0)
                 {
                     health = 0;
+                    dead = true;
                 }
             }
         }
@@ -3565,7 +3567,7 @@ namespace AUTO_Matic.Scripts.TopDown
         public void Draw(SpriteBatch spriteBatch)
         {
 
-            spriteBatch.Draw(line, destinationRectangle: destRect, color: Color.White,rotation: angleOfLine);
+           // spriteBatch.Draw(line, destinationRectangle: destRect, color: Color.White,rotation: angleOfLine);
             spriteBatch.Draw(texture, rectangle, Color.White);
             foreach(Bullet bullet in bullets)
             {

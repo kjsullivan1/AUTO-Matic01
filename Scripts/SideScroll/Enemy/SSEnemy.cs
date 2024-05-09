@@ -426,10 +426,10 @@ namespace AUTO_Matic.SideScroll
             blockRight = false;
             outOfRange = false;
 
-            if(dead)
-            {
-                position = new Vector2(-100, 10000);
-            }
+            //if(dead)
+            //{
+            //    position = new Vector2(-100, 10000);
+            //}
 
             foreach(GroundTile tile in SideTileMap.GroundTiles)
             {
