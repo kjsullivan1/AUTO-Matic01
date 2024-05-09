@@ -678,7 +678,7 @@ namespace AUTO_Matic.SideScroll
                             accel = 0;
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash)
+                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
                         {
                             playerState = PlayerStates.Dashing;
 
@@ -780,7 +780,7 @@ namespace AUTO_Matic.SideScroll
                             //accel = force / mass;
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash)
+                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
                         {
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
@@ -877,7 +877,7 @@ namespace AUTO_Matic.SideScroll
                             //accel = force / (mass);
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash)
+                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
                         {
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
@@ -1022,7 +1022,7 @@ namespace AUTO_Matic.SideScroll
 
                         }
 
-                        if ((kb.IsKeyDown(Keys.LeftShift)) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash)
+                        if ((kb.IsKeyDown(Keys.LeftShift)) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
                         {
 
                             playerState = PlayerStates.Dashing;
