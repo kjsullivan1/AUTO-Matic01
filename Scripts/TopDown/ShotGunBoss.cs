@@ -77,7 +77,7 @@ namespace AUTO_Matic.Scripts.TopDown
         float shootDelay = 1.45f;//In seconds
         float iShootDelay;
         bool startShoot = false;
-        public float bulletDmg = 1.2f;
+        public float bulletDmg = .7f;
         public float bulletTravelDist = 64 * 8;
         Texture2D visionTxture;
         int width;

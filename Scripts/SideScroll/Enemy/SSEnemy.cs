@@ -31,7 +31,7 @@ namespace AUTO_Matic.SideScroll
         bool isFalling = true;
         bool isColliding = false;
         Vector2 TargetPos;
-        public float health = 3;
+        public float health = 5;
         public bool dead = false;
         public float Health
         {

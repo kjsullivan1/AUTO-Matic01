@@ -28,7 +28,7 @@ namespace AUTO_Matic
         List<HealthDrop> healthDrops = new List<HealthDrop>();
         Random rand = new Random();
         int dropRateSS = 30;
-        int dropRateTD = 40;
+        int dropRateTD = 55;
         float healAmount = 1.5f;
 
         Rectangle LeaveDungeon;
@@ -324,9 +324,15 @@ namespace AUTO_Matic
             string filePath = Content.RootDirectory + "/SideScroll/Maps/Map0.txt";
             SideTileMap.LoadMap(filePath);
             enemies.Clear();
+            int j = 0;
             for(int i = 0; i < SideTileMap.enemySpawns.Count - 1; i++)
             {
-                enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
+                if(j == 1)
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
+                else
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], false));
+                j++;
+
             }
 
             //camera.Zoom = 1.35f;
@@ -769,7 +775,7 @@ namespace AUTO_Matic
                             {
                                 for(int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
                                 {
-                                    if(tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
+                                    if(shotGunBoss != null && tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
                                     {
                                         shotGunBoss.Health -= tdPlayer.bulletDmg;
                                         tdPlayer.bullets.RemoveAt(i);
@@ -989,9 +995,9 @@ namespace AUTO_Matic
 
                     if(currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released)
                     {
-                        currScene = Scenes.InGame;
+                        MenuState = MenuStates.StartGame;
                     }
-                    if(prevButtons.Back == ButtonState.Pressed && currButtons.Back == ButtonState.Released)
+                    if(prevButtons.B == ButtonState.Pressed && currButtons.B == ButtonState.Released)
                     {
                         MenuState = MenuStates.Settings;
                     }
@@ -1001,14 +1007,19 @@ namespace AUTO_Matic
                     UIManager.UpdateButton("StartGame", crawlSpeed);
                     UseMouse(kb, crawlSpeed);
                     UpdateCamera(mainMenuPos, 28);
+                    if(prevButtons.Start == ButtonState.Pressed && currButtons.Start == ButtonState.Released)
+                    {
+                        currScene = Scenes.InGame;
+                        StartNewGame();
+                    }
                     break;
                 case MenuStates.Settings:
                     UseMouse(kb, crawlSpeed);
                     UpdateCamera(new Vector2(graphics.PreferredBackBufferWidth * 1.5f, camera.Y), crawlSpeed);
                     UIHelper.SetElementVisibility("Settings", true, UIManager.uiElements);
-                    if (prevButtons.Back == ButtonState.Pressed && currButtons.Back == ButtonState.Released)
+                    if (prevButtons.B == ButtonState.Pressed && currButtons.B == ButtonState.Released)
                     {
-                        MenuState = MenuStates.Settings;
+                        MenuState = MenuStates.MainMenu;
                     }
                     break;
             }

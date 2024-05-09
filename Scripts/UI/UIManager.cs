@@ -248,15 +248,15 @@ namespace AUTO_Matic
 
             ///Settings Menu elements
             //Title
-            string titleTxt = "Settings";
+            string titleTxt = "How To Play";
             uiElements.Add("SettingsMenuTitle", UIHelper.CreateTextblock("SettingsMenuTitle", titleTxt, (int)(((dims.X * 1.5f)) - (titleTxt.Length * 11.0f)), // dividing the txt * 11 / 2 makes in longer?
                 UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Top - 30 ));
             UIHelper.SetElementRect(uiElements["SettingsMenuTitle"], new Rectangle(uiElements["SettingsMenuTitle"].Position.ToPoint(), new Point(titleTxt.Length, 20)));
 
             //Settings Box
-            uiElements.Add("SettingsButtonBox", UIHelper.CreateTextblock("SettingsButtonBox", "The options for settings will go here", (int)(((dims.X * 1.5f))) - (525 / 2),
+            uiElements.Add("SettingsButtonBox", UIHelper.CreateTextblock("\n\tSettingsButtonBox", "To play this game do the follwing:\n\nUse WASD or left analog stick to move\n\nPress space bar or A button to jump\n\nHold down to get into shooting stance and press Enter key or X button to fire\n\nPress LShift key or B button to dash forwards\n\nThe E key and Y button allows you to open doors and go into the dungeon", (int)(((dims.X * 1.5f))) - (525 / 2),
                 (int)uiElements["SettingsMenuTitle"].Position.Y + 50));
-            UIHelper.SetElementRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(100, 10)));
+            UIHelper.SetElementRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(350, 100)));
             UIHelper.SetElementBGRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(525, 350)));
 
             //Return Button
