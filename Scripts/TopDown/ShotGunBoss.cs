@@ -223,7 +223,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     bossRect = tempRect;
                     while (shootDelay < 0.7f)
                     {
-                        shootDelay = RandFloat(0, 4);
+                        shootDelay = RandFloat(0, 2);
                     }
 
                 }
