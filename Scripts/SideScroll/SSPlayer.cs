@@ -635,7 +635,7 @@ namespace AUTO_Matic.SideScroll
                             accel = 0;
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && prevControllerBtn.B == ButtonState.Released && canDash)
+                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash)
                         {
                             playerState = PlayerStates.Dashing;
 
@@ -659,7 +659,7 @@ namespace AUTO_Matic.SideScroll
                             startDashPos = Position;
                         }
 
-                        if(kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && prevControllerBtn.A == ButtonState.Released && canJump && !isFalling)
+                        if(kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -737,7 +737,7 @@ namespace AUTO_Matic.SideScroll
                             //accel = force / mass;
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && prevControllerBtn.B == ButtonState.Released && canDash)
+                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash)
                         {
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
@@ -748,7 +748,7 @@ namespace AUTO_Matic.SideScroll
                             startDashPos = Position;
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && prevControllerBtn.A == ButtonState.Released && canJump && !isFalling)
+                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -834,7 +834,7 @@ namespace AUTO_Matic.SideScroll
                             //accel = force / (mass);
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && prevControllerBtn.B == ButtonState.Released && canDash)
+                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash)
                         {
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
@@ -846,7 +846,7 @@ namespace AUTO_Matic.SideScroll
                             startDashPos = Position;
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && prevControllerBtn.A == ButtonState.Released && canJump && !isFalling)
+                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -979,7 +979,7 @@ namespace AUTO_Matic.SideScroll
 
                         }
 
-                        if ((kb.IsKeyDown(Keys.LeftShift)) && canDash || currControllerBtn.B == ButtonState.Pressed && prevControllerBtn.B == ButtonState.Released && canDash)
+                        if ((kb.IsKeyDown(Keys.LeftShift)) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash)
                         {
 
                             playerState = PlayerStates.Dashing;
@@ -1003,7 +1003,7 @@ namespace AUTO_Matic.SideScroll
 
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && prevControllerBtn.A == ButtonState.Released && canJump && !isFalling)
+                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
