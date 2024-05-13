@@ -34,7 +34,7 @@ namespace AUTO_Matic
         Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.TitleScreen;
+        public Scenes currScene = Scenes.InGame;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -452,8 +452,8 @@ namespace AUTO_Matic
                             }
                             else
                             {
-                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)((ssPlayer.X) - 64 * 8),
-                                (int)((ssPlayer.Y) - 64 * 4.5f)), new Point(0, 0)));
+                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)((ssPlayer.playerRect.X) - 64 * 8),
+                                (int)((ssPlayer.playerRect.Y) - 64 * 4.5f)), new Point(0, 0)));
                             }
                            
 
@@ -877,7 +877,7 @@ namespace AUTO_Matic
                 case Scenes.InGame:
                     if(GameState == GameStates.SideScroll)
                     {
-                        Window.Title = camera.Position.ToString() + " Player.isColliding: " + ssPlayer.isCollidingRight + "    Player blockBottom: " + ssPlayer.blockBottom + "    AnalogStickDir: " + moveDir.ToString();
+                        Window.Title = camera.Position.ToString() + " Player.playrRect " + new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y).ToString() + "    Player blockBottom: " + ssPlayer.blockBottom + "    AnalogStickDir: " + moveDir.ToString();
                         //Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
                         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null,ssCamera.transform);
                        

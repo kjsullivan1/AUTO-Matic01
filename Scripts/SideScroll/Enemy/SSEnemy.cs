@@ -23,14 +23,14 @@ namespace AUTO_Matic.SideScroll
         EnemyStates prevState;
 
         #region Fields
-        Vector2 bounds;
+        Vector2 bounds;//The bounds of how much the AI can move left and right
         int pixelSize = 64;
         Vector2 position = new Vector2(64 * 15 + 5, 0);
         public Rectangle enemyRect;
-        bool blockBottom = false;
+        bool blockBottom = false; 
         bool isFalling = true;
         bool isColliding = false;
-        Vector2 TargetPos;
+        Vector2 TargetPos; //Position of where the GOTO targets 
         public float health = 5;
         public bool dead = false;
         public float Health
@@ -54,7 +54,7 @@ namespace AUTO_Matic.SideScroll
         //bool canJump;
         int jumpDelay = 5;
         int maxJumpDelay = 0;
-        Vector2 gravity;
+        Vector2 gravity;//Stored version of gravity 
 
         public float maxRunSpeed = 4f;
         float terminalVel = 12f;
@@ -68,7 +68,7 @@ namespace AUTO_Matic.SideScroll
         #region Velocity
         public Vector2 velocity = Vector2.Zero;
         Vector2 positionOffset = new Vector2(0, 0);
-        public Vector2 Velocity
+        public Vector2 Velocity  //Used to keep velocity within limits depedning on the state
         {
             get
             {
@@ -170,8 +170,8 @@ namespace AUTO_Matic.SideScroll
         #endregion
 
         #region AI Helpers
-        public List<Rectangle> vision = new List<Rectangle>();
-        public List<Rectangle> possibleJumpLocations = new List<Rectangle>();
+        public List<Rectangle> vision = new List<Rectangle>(); //The trigger rectangles for vision
+        public List<Rectangle> possibleJumpLocations = new List<Rectangle>(); 
         int visionLength = 1;
         Texture2D visionTxture;
         GAJump gaJump = new GAJump();
@@ -188,7 +188,7 @@ namespace AUTO_Matic.SideScroll
         bool goTo = false; //A hard setting goTo that forces to go towards TargetPos regardless of checks
         Vector2 landingPos;
         bool canWalk = true;
-        List<int> leftOnX = new List<int>();
+        List<int> leftOnX = new List<int>(); //This is used for when the player jump/falls from current platform
         bool forceRun = false;
         bool atBounds = false;
         #endregion
@@ -304,7 +304,7 @@ namespace AUTO_Matic.SideScroll
             switch(enemyState)
             {
                 case EnemyStates.GoTo:
-                    if (position.X < TargetPos.X)
+                    if (position.X < TargetPos.X) //Going Right
                     {
                         if ((int)position.X + (int)velocity.X > (int)TargetPos.X)
                         {
@@ -319,7 +319,7 @@ namespace AUTO_Matic.SideScroll
 
                             //Change enemyState
                         }
-                        else if (MathHelper.Distance(position.X, landingPos.X) >= bounds.Y && prevState != EnemyStates.Jumping && goTo )
+                        else if (MathHelper.Distance(position.X, landingPos.X) >= bounds.Y && prevState != EnemyStates.Jumping && goTo )//checking border
                         {
                             velocity.X = 0;
                             position.X += 1;
@@ -334,9 +334,9 @@ namespace AUTO_Matic.SideScroll
                             velocity.X += moveSpeed;
                         }
                     }
-                    if (position.X > TargetPos.X)
+                    if (position.X > TargetPos.X) //Going left
                     {
-                        if ((int)position.X - (int)velocity.X < (int)TargetPos.X)
+                        if ((int)position.X - (int)velocity.X < (int)TargetPos.X) //Normal
                         {
                             velocity.X = 0;
                             if(prevState == EnemyStates.Jumping)
@@ -349,7 +349,7 @@ namespace AUTO_Matic.SideScroll
                      
                             //change enemyState
                         }
-                        else if (MathHelper.Distance(position.X, landingPos.X) >= bounds.X && prevState != EnemyStates.Jumping && goTo)
+                        else if (MathHelper.Distance(position.X, landingPos.X) >= bounds.X && prevState != EnemyStates.Jumping && goTo) //Border check
                         {
                             velocity.X = 0;
                             position.X -= 1;
@@ -364,7 +364,7 @@ namespace AUTO_Matic.SideScroll
                             velocity.X -= moveSpeed;
                         }
                     }
-                    if(position.ToPoint() == TargetPos.ToPoint())
+                    if(position.ToPoint() == TargetPos.ToPoint())//Reached target
                     {
                         goTo = false;
                     }
@@ -415,6 +415,7 @@ namespace AUTO_Matic.SideScroll
 
         public void Update(GameTime gameTime, Vector2 gravity, SSPlayer player, Game1 game)
         {
+            //Reset and clear 
             this.gravity = gravity;
             CreateVision();
             possibleJumpLocations.Clear();
@@ -438,7 +439,7 @@ namespace AUTO_Matic.SideScroll
                 Collision(tile.Rectangle);
             }
 
-            if(onPlatform || velocity.Y != 0)
+            if(onPlatform || velocity.Y != 0) //If already on platform or moving vertically
             {
                 foreach(PlatformTile tile in SideTileMap.PlatformTiles)
                 {
@@ -448,7 +449,7 @@ namespace AUTO_Matic.SideScroll
             
 
             //Collision
-            if(blockBottom)
+            if(blockBottom) //If colliding bottom, def not falling
             {
                 isFalling = false;
             }
@@ -457,7 +458,7 @@ namespace AUTO_Matic.SideScroll
                 isFalling = true;
             }
 
-            if(prevState == EnemyStates.Attacking)
+            if(prevState == EnemyStates.Attacking)//Cooldowns for attacks
             {
                 if(isShoot)
                 {
@@ -474,6 +475,7 @@ namespace AUTO_Matic.SideScroll
             switch(enemyState)
             {
                 case EnemyStates.Idle:
+                    //Waits for player to enter vision
                     foreach (Rectangle rect in vision)
                     {
 
@@ -483,7 +485,7 @@ namespace AUTO_Matic.SideScroll
                             {
                                 if (enemyRect.Right < player.playerRect.X /*&& MathHelper.Distance(enemyRect.Right, player.playerRect.Left) > attackOffsetFromPlayer*/)
                                 {
-                                    TargetPos = new Vector2(player.playerRect.X, enemyRect.Y); //Keep Y to only set the X coordinate...Y handled seperately
+                                    TargetPos = new Vector2(player.playerRect.X, enemyRect.Y); 
                                 }
                                 else if (enemyRect.Left > player.playerRect.X + player.playerRect.Width /*&& MathHelper.Distance(enemyRect.Left, player.playerRect.Right) > attackOffsetFromPlayer*/)
                                 {
@@ -494,7 +496,7 @@ namespace AUTO_Matic.SideScroll
                             {
                                 if (enemyRect.Right < player.playerRect.X && MathHelper.Distance(enemyRect.Right, player.playerRect.Left) > attackOffsetFromPlayer)
                                 {
-                                    TargetPos = new Vector2(player.playerRect.X, enemyRect.Y); //Keep Y to only set the X coordinate...Y handled seperately
+                                    TargetPos = new Vector2(player.playerRect.X, enemyRect.Y); 
                                 }
                                 else if (enemyRect.Left > player.playerRect.X + player.playerRect.Width && MathHelper.Distance(enemyRect.Left, player.playerRect.Right) > attackOffsetFromPlayer)
                                 {
@@ -508,9 +510,9 @@ namespace AUTO_Matic.SideScroll
                     break;
                 case EnemyStates.GoTo:
 
-                    if (!goTo)
+                    if (!goTo) //If not forced to into goTo
                     {
-                        foreach (Rectangle rect in vision)
+                        foreach (Rectangle rect in vision)//Update TargetPos if player is in vision
                         {
     
                             if (rect.Intersects(player.playerRect))
@@ -544,15 +546,16 @@ namespace AUTO_Matic.SideScroll
                         }
                     }
 
-                    if (player.velocity.Y < 0 && leftOnX.Count == 0)
+                    if (player.velocity.Y < 0 && leftOnX.Count == 0) //If the player starts jumping 
                     {
-                        leftOnX.Add(player.playerRect.X);
+                        leftOnX.Add(player.playerRect.X); //Store first coordinate taken
                     }
                     if (player.velocity.Y == 0 && player.playerRect.Bottom >= enemyRect.Bottom && player.isFalling == false)
                     {
-                        leftOnX.Clear();
+                        leftOnX.Clear();//Clears if player touches the ground,but should account for when the player jumps multi tiles high 
                     }
 
+                    //Player is above the enemy, isnt't forced into goTo and the enemy is on the ground
                     if (player.playerRect.Bottom < enemyRect.Top && player.velocity.Y >= 0 && blockBottom && !goTo/*&& player.blockBottom*/ || blockLeft || blockRight)
                     {
                         //if (player.velocity.Y >= -5)
@@ -562,7 +565,7 @@ namespace AUTO_Matic.SideScroll
 
                         if (player.blockBottom || blockLeft && !blockBottom|| blockRight && !blockBottom)
                         {
-                            enemyState = EnemyStates.Jumping;
+                            enemyState = EnemyStates.Jumping;  //Calculate and determine possible jumps
                         }
                         else
                         {
@@ -572,7 +575,8 @@ namespace AUTO_Matic.SideScroll
                         break;
                     }
 
-                    
+                    //Attack conditions Makes sure the enemy isnt jumping and that they are on the same level
+                    //left
                     if (enemyRect.Left > player.playerRect.Right && player.playerRect.Bottom < enemyRect.Top == false && player.blockBottom && player.playerRect.Top > enemyRect.Bottom == false && prevState != EnemyStates.Jumping)
                     {
                         if(isShoot && !outOfRange)
@@ -596,7 +600,7 @@ namespace AUTO_Matic.SideScroll
                             }
                         }
                        
-                    }
+                    }//right
                     else if(enemyRect.Right < player.playerRect.Left && player.playerRect.Bottom < enemyRect.Top == false && player.blockBottom && player.playerRect.Top > enemyRect.Bottom == false && prevState != EnemyStates.Jumping)
                     {
                         if(isShoot && !outOfRange)
@@ -621,7 +625,7 @@ namespace AUTO_Matic.SideScroll
                         }
                         
                     }
-                    else
+                    else //Adjust enemy to stop colliding with player
                     {
                         if(enemyRect.Intersects(player.playerRect))
                         {
@@ -652,10 +656,11 @@ namespace AUTO_Matic.SideScroll
 
                     break;
                 #region Jump
-                case EnemyStates.Jumping:
+                case EnemyStates.Jumping: //This is just a caculation to determine if they can jump from current position
                     if(prevState != EnemyStates.Jumping /*|| player.playerRect.Bottom < enemyRect.Top && player.velocity.Y >= 0 && onPlatform*/)
                     {
                         possibleJumpLocations.Clear();
+                        //Grab platform tiles
                         foreach(PlatformTile tile in SideTileMap.PlatformTiles)
                         {
                             for(int i = vision.Count - 1; i >= 0; i--)
@@ -681,7 +686,7 @@ namespace AUTO_Matic.SideScroll
                         }
                         else
                         {
-                            if(possibleJumpLocations.Count != 0)
+                            if(possibleJumpLocations.Count != 0) //Determine which of the possible locations is best
                             {
                                 goalRect = possibleJumpLocations[0];
                                 //Rectangle closestToPlayer = possibleJumpLocations[0]; in the code using this it grabs the wrong tile?
@@ -693,10 +698,11 @@ namespace AUTO_Matic.SideScroll
                                 {
                                     if (MathHelper.Distance(goalRect.Y, position.Y) > MathHelper.Distance(rect.Y, position.Y))
                                     {
-                                        goalRect = rect;
+                                        goalRect = rect; //If the location is the closest on the Y, prioritize as the best
                                     }
                                     else if (MathHelper.Distance(goalRect.Y, position.Y) == MathHelper.Distance(rect.Y, position.Y))
                                     {
+                                        //If the locations are even of the same Y 
                                        
                                         //if (MathHelper.Distance(goalRect.X, position.X) > MathHelper.Distance(rect.X, position.X))
                                         //{
@@ -709,6 +715,8 @@ namespace AUTO_Matic.SideScroll
                                         //    //    }
                                         //    //}
                                         //}
+
+                                        //This is closest to player, it gets weird
                                         //if (MathHelper.Distance(goalRect.X, player.Position.X) > MathHelper.Distance(rect.X, player.Position.X)) //If closest to player 
                                         //{
                                         //    goalRect = rect;
@@ -729,11 +737,11 @@ namespace AUTO_Matic.SideScroll
                                     }
                                     else if (Distance(new Vector2(goalRect.X, goalRect.Y), position) > Distance(new Vector2(rect.X, rect.Y), position))
                                     {
-                                        goalRect = rect;
+                                        goalRect = rect; //If all else fails, whichever is the closest in general
                                     }
                                 }
 
-                                Vector2 tempVel = Velocity;
+                                Vector2 tempVel = Velocity; //Correct velocity to go in direction of the goalRect
                                 if (position.X < goalRect.X)
                                 {
                                     tempVel.X = (int)maxRunSpeed;
@@ -744,8 +752,8 @@ namespace AUTO_Matic.SideScroll
                                     tempVel.X = (int)-maxRunSpeed;
                                 }
                                 float randForce = maxJumpForce;
-                                int i = TestJump(goalRect, randForce, position, tempVel.X, false);
-
+                                int i = TestJump(goalRect, randForce, position, tempVel.X, false); //Test jump at max values
+                                //Success would == 1
                                 int jumpMin = 10;
                                 int speedMin = 1;
 
@@ -792,15 +800,16 @@ namespace AUTO_Matic.SideScroll
                                     }
                                 }
 
-                                if (i == 2)
+                                if (i == 2) //Cant jump conditions
                                 {
-                                    if(leftOnX.Count != 0)
+                                    if(leftOnX.Count != 0) //If there is a leftOnX
                                     {
+                                        //Set to target and foce it to goTo 
                                         TargetPos = new Vector2(leftOnX[0], position.Y);
                                         leftOnX.Clear();
                                         goTo = true;
                                         maxRunSpeed *= 1.75f;
-                                        bounds = SideTileMap.GetNumTilesOfGround((int)(position.Y/64) + 1, (int)position.X/64);
+                                        bounds = SideTileMap.GetNumTilesOfGround((int)(position.Y/64) + 1, (int)position.X/64); //Recalc bounds 
                                         if(bounds != Vector2.Zero)
                                         {
                                             bounds *= 64;
@@ -872,10 +881,10 @@ namespace AUTO_Matic.SideScroll
 
 
                                 }
-                                if (i == 1)
+                                if (i == 1)  //Success
                                 {
-                                    velocity = new Vector2(tempVel.X, -randForce);
-                                    TargetPos = new Vector2((goalRect.X + goalRect.Width / 2) - (enemyRect.Width / 2), goalRect.Top - enemyRect.Height);
+                                    velocity = new Vector2(tempVel.X, -randForce); //Set velocity to the success values 
+                                    TargetPos = new Vector2((goalRect.X + goalRect.Width / 2) - (enemyRect.Width / 2), goalRect.Top - enemyRect.Height); //Target pos is the center of the goalRect
                                     prevState = EnemyStates.Jumping;
                                     goTo = true;
                                     isFalling = true;
@@ -883,7 +892,7 @@ namespace AUTO_Matic.SideScroll
                             }
                             else
                             {
-                                if(leftOnX.Count != 0)
+                                if(leftOnX.Count != 0)//Set the target to where the player left the y Axis
                                 {
                                     TargetPos = new Vector2(leftOnX[0], position.Y);
                                     leftOnX.Clear();
@@ -894,16 +903,16 @@ namespace AUTO_Matic.SideScroll
                            
                         }
                     }
-                    else if(prevState == EnemyStates.Jumping)
+                    else if(prevState == EnemyStates.Jumping) //If the player is currently jumping
                     {
                         foreach (PlatformTile tile in SideTileMap.PlatformTiles)
                         {
                             Collision(tile.Rectangle);
                         }
-                        enemyState = EnemyStates.GoTo;
+                        enemyState = EnemyStates.GoTo; //Keep jumpinh
                         if (velocity.Y == 0 && blockBottom)
                         {
-                            prevState = EnemyStates.Idle;
+                            prevState = EnemyStates.Idle; //Reset prevState to allow to jump again
                         }
 
                     }
@@ -911,22 +920,22 @@ namespace AUTO_Matic.SideScroll
                 #endregion
                 #region Attacking
                 case EnemyStates.Attacking:
-                    if(isShoot)
+                    if(isShoot) //Is a shooting type enemy
                     {
                         if(attackLeft)
                         {
-                            if(shootDelay <= 0)
+                            if(shootDelay <= 0)  //If can shooot shoot to the left
                             {
-                                bullets.Add(new Bullet(new Vector2(HitBox.Right, HitBox.Y + HitBox.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed.X, maxBulletSpeed.Y), content, true, bulletTravelDist));
+                                bullets.Add(new Bullet(new Vector2(enemyRect.Left, enemyRect.Y + enemyRect.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed.X, maxBulletSpeed.Y), content, true, bulletTravelDist));
                                 shootDelay = maxShootDelay;
                             }
                                 
                         }
-                        if(attackRight)
+                        if(attackRight) 
                         {
-                            if(shootDelay <= 0)
+                            if(shootDelay <= 0)//If delay is over, shoot right
                             {
-                                bullets.Add(new Bullet(new Vector2(HitBox.Right, HitBox.Y + HitBox.Height / 2), bulletSpeed, maxBulletSpeed, content, true, bulletTravelDist));
+                                bullets.Add(new Bullet(new Vector2(enemyRect.Right, enemyRect.Y + enemyRect.Height / 2), bulletSpeed, maxBulletSpeed, content, true, bulletTravelDist));
                                 shootDelay = maxShootDelay;
                             }
                             
@@ -935,9 +944,9 @@ namespace AUTO_Matic.SideScroll
                     }
                     else
                     {
-                        if (attackDelay <= 0)
+                        if (attackDelay <= 0)//Melee attack
                         {
-                            //Attack
+                            //Attack if in hitbox or touching the enemy itself
                             if (player.playerRect.Intersects(HitBox) || player.playerRect.Intersects(enemyRect))
                             {
                                 player.Health -= meleeDmg;
@@ -953,20 +962,20 @@ namespace AUTO_Matic.SideScroll
                 #endregion
             }
 
-            if (isFalling)
+            if (isFalling) //Only add gravity if falling
             {
                 velocity.Y += gravity.Y;
             }
             
-            if(velocity.X > 0 && velocity.X > maxRunSpeed)
+            if(velocity.X > 0 && velocity.X > maxRunSpeed)//Going right and velocity checks
             {
                 velocity.X = maxRunSpeed;
             }
-            if(velocity.X < 0 && velocity.X < -maxRunSpeed)
+            if(velocity.X < 0 && velocity.X < -maxRunSpeed)//Going left and velocity checks
             {
                 velocity.X = -maxRunSpeed;
             }
-            if (velocity.Y > terminalVel)
+            if (velocity.Y > terminalVel) //max fallSpeed check
                 velocity.Y = terminalVel;
 
             if(MathHelper.Distance(enemyRect.X, player.Position.X) < player.playerRect.Width)
@@ -985,11 +994,11 @@ namespace AUTO_Matic.SideScroll
                 
             }
 
-            position += velocity;
+            position += velocity; //Move
 
             enemyRect = new Rectangle((int)position.X, (int)position.Y, 48, 48);
 
-            if(isShoot)
+            if(isShoot) //Update bullets
             {
                 if(bullets.Count != 0)
                 {
@@ -1064,7 +1073,7 @@ namespace AUTO_Matic.SideScroll
         public void Collision(Rectangle newRect)
         {
            
-            if(enemyRect.TouchTopOf(newRect))
+            if(enemyRect.TouchTopOf(newRect)) //Touch Ground
             {
                 blockBottom = true;
 
@@ -1077,7 +1086,7 @@ namespace AUTO_Matic.SideScroll
                     }
                     velocity.Y = 0;
                     isFalling = false;
-                    bounds = SideTileMap.GetNumTilesOfGround(newRect.Y / 64, newRect.X / 64);
+                    bounds = SideTileMap.GetNumTilesOfGround(newRect.Y / 64, newRect.X / 64); //How many tiles are available left and right
                     jumpDelay = 0;
                     maxRunSpeed = 3.75f;
                     // if(bounds = new Vector2(0,0))
@@ -1094,11 +1103,11 @@ namespace AUTO_Matic.SideScroll
                 }
                 if(enemyState == EnemyStates.Jumping)
                 {
-
+                    //Dont check if jumping
                 }
                 else
                 {
-                    while (enemyRect.Bottom > newRect.Top)
+                    while (enemyRect.Bottom > newRect.Top)//Keep enemyRect on the ground
                     {
                         position.Y -= 1f;
                         enemyRect.Y = (int)position.Y;
@@ -1150,7 +1159,7 @@ namespace AUTO_Matic.SideScroll
                 enemyRect.X = (int)position.X;
             }
 
-            if(enemyRect.TouchBottomOf(newRect))
+            if(enemyRect.TouchBottomOf(newRect)) //Colliding Top or touching bottom of tile
             {
                 while(enemyRect.Top < newRect.Bottom)
                 {
@@ -1169,12 +1178,12 @@ namespace AUTO_Matic.SideScroll
             }
         }
 
-        Vector2 TestCollision(Vector2 startPos, Rectangle tile, Vector2 goalPos, Vector2 tempVel, bool isPlatforms)
+        Vector2 TestCollision(Vector2 startPos, Rectangle tile, Vector2 goalPos, Vector2 tempVel, bool isPlatforms) //Same as collisions but restructured for the TestJump()
         {
             Rectangle eRect = new Rectangle((int)startPos.X, (int)startPos.Y, enemyRect.Width, enemyRect.Height);
             if(eRect.TouchTopOf(tile))
             {
-
+                //If touching the top of a tile, check if it is the goalRect
                 if(tempVel.Y > 0)
                 {
                     if (startPos.X == goalPos.X && isPlatforms || goalRect == tile)
@@ -1231,49 +1240,22 @@ namespace AUTO_Matic.SideScroll
                 }
             }
 
-            return startPos = new Vector2(eRect.X, eRect.Y);
-        }
-
-        void PlatformCollision(PlatformTile tile)
-        {
-            //onPlatform = false;
-
-            Collision(tile.Rectangle);
-
-            for (int i = vision.Count - 1; i >= 0; i--)
-            {
-                if (vision[i].Intersects(tile.Rectangle))
-                {
-                    if (i == 0)
-                    {
-                        blockTop = true;
-                    }
-                    if (vision[i].Bottom > enemyRect.Bottom && !onPlatform)
-                    {
-                        currPlatform = tile.Rectangle;
-                        onPlatform = true;
-                    }
-                    vision.RemoveAt(i);
-                    //j++;
-                    //bool test1 = possibleJumpLocations.Contains(tile.Rectangle);
-                    //bool test2 = player.playerRect.TouchTopOf(tile.Rectangle);
-                    if (!possibleJumpLocations.Contains(tile.Rectangle) && enemyRect.TouchTopOf(tile.Rectangle) == false)
-                        possibleJumpLocations.Add(tile.Rectangle);
-
-                }
-            }
+            return new Vector2(eRect.X, eRect.Y);
         }
 
         public int TestJump(Rectangle goalRect, float jumpForce, Vector2 startPos, float moveSpeedX, bool failTop)
         {
             jumpFail = false;
             jumpSuccess = false;
-            Vector2 goalPos = new Vector2((goalRect.X + goalRect.Width / 2) - (enemyRect.Width/2), goalRect.Top - enemyRect.Height);
+            Vector2 goalPos = new Vector2((goalRect.X + goalRect.Width / 2) - (enemyRect.Width/2), goalRect.Top - enemyRect.Height);//Set to the center of the goalRect
             startPos.Y -= 1;
             int num = 0;
             Vector2 velocity = new Vector2(moveSpeedX, -jumpForce);
-            while (num == 0)
+            while (num == 0) //Simulation of Update, but breaks when results occur
             {
+
+                //Determine if going left or right
+                //If the jump will go past the x, it will stop 
                 if (startPos.X < goalPos.X)
                 {
                     velocity.X += moveSpeed;
@@ -1282,7 +1264,7 @@ namespace AUTO_Matic.SideScroll
                         velocity.X = maxRunSpeed;
                     }
 
-                    if (startPos.X + velocity.X > goalPos.X)
+                    if (startPos.X + velocity.X > goalPos.X) //Reached x
                     {
                         startPos.X = goalPos.X;
                         velocity.X = 0;
@@ -1297,20 +1279,20 @@ namespace AUTO_Matic.SideScroll
                         velocity.X = -maxRunSpeed;
                     }
 
-                    if (startPos.X + velocity.X < goalPos.X)
+                    if (startPos.X + velocity.X < goalPos.X)//Reached x
                     {
                         startPos.X = goalPos.X;
                         velocity.X = 0;
                     }
                 }
 
-                velocity.Y += gravity.Y;
+                velocity.Y += gravity.Y; //Gravity
                 if(velocity.Y > terminalVel)
                 {
                     velocity.Y = terminalVel;
                 }
 
-                if(velocity.Y == terminalVel && startPos.Y > goalRect.Bottom)
+                if(velocity.Y == terminalVel && startPos.Y > goalRect.Bottom) //If going down and is below the goalRect 
                 {
                     num = 2;
                 }
@@ -1319,7 +1301,7 @@ namespace AUTO_Matic.SideScroll
                 foreach(GroundTile tile in SideTileMap.GroundTiles)
                 {
                     startPos = TestCollision(startPos, tile.Rectangle, goalPos, velocity, false);
-                    if(jumpFail)
+                    if(jumpFail)//Touched the ground and wasnt the goalRect
                     {
                         num = 2;
                     }
@@ -1327,9 +1309,9 @@ namespace AUTO_Matic.SideScroll
                 foreach(PlatformTile tile1 in SideTileMap.PlatformTiles)
                 {
                     startPos = TestCollision(startPos, tile1.Rectangle, goalPos, velocity, true);
-                    if (jumpSuccess)
+                    if (jumpSuccess)//Success
                         num = 1;
-                    if (jumpFail)
+                    if (jumpFail)//Missed goal
                         num = 2;
                 }
             }

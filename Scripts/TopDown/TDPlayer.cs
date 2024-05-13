@@ -557,7 +557,7 @@ namespace AUTO_Matic.TopDown
             }
             if(rectangle.TouchLeftOf(newRect))
             {
-                while(rectangle.Right > newRect.Left)
+                while(rectangle.Right > newRect.Left - 5)
                 {
                     rectangle.X -= 1;
                 }
@@ -565,7 +565,7 @@ namespace AUTO_Matic.TopDown
             }
             if(rectangle.TouchRightOf(newRect))
             {
-                while(rectangle.Left < newRect.Right)
+                while(rectangle.Left < newRect.Right + 5)
                 {
                     rectangle.X += 1;
                 }

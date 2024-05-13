@@ -12,7 +12,7 @@ namespace AUTO_Matic
     class SideTileMap
     {
         public static int pixelSize = 64;
-        public int[,] Map;
+        public int[,] Map;//local version of the created map
         public int mapWidth;
         public int mapHeight;
         public int worldWidth;
@@ -24,18 +24,20 @@ namespace AUTO_Matic
         private static List<BackgroundTile> backgroundTiles = new List<BackgroundTile>();
         private static List<TopDoorTile> topDoorTiles = new List<TopDoorTile>();
         private static List<BottomDoorTile> bottomDoorTiles = new List<BottomDoorTile>();
-        public static List<Vector2> enemySpawns = new List<Vector2>();
-        public static List<Vector2> playerSpawns = new List<Vector2>();
+        public static List<Vector2> enemySpawns = new List<Vector2>(); //List of enemySpawn locations
+        public static List<Vector2> playerSpawns = new List<Vector2>();//List of playerSpawn locations 
         private static List<DungeonEntrance> dungeonEntrances = new List<DungeonEntrance>();
-        public static List<int> GroundIndexes = new List<int>();
-        public static List<int> WallTilesIndexes = new List<int>();
-        public static List<int> BackgroundIndexes = new List<int>();
-        public static List<int> PlatformIndexes = new List<int>();
+        public static List<int> GroundIndexes = new List<int>(); //List of the indexes that contain a Ground tile
+        public static List<int> WallTilesIndexes = new List<int>(); //List of indexes that contain the wall tiles
+        public static List<int> BackgroundIndexes = new List<int>();//List of indexes that contain the background tiles
+        public static List<int> PlatformIndexes = new List<int>();//List of the indexes of the platform tiles
 
         //public static List<EmptyTile> EmptyTiles
         //{
         //    get { return emptyTiles; }
         //}
+
+        //Public gets of the private lists above
 
         public static List<PlatformTile> PlatformTiles
         {
@@ -72,11 +74,14 @@ namespace AUTO_Matic
             get { return wallTiles; }
         }
 
+        //World dim in pixels
         public void SetWorldDims(int width, int height)
         {
             worldWidth = width;
             worldHeight = height;
         }
+
+        //Length of the 2D array
         public void SetDims(int width, int height)
         {
             mapWidth = width;
@@ -126,18 +131,19 @@ namespace AUTO_Matic
 
                     if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19 || num == 20|| num ==21 || num ==22 || num ==23)
                     {
+                        //If at the top of the map
                         if(y==0)
                         {
                             groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (GroundIndexes.Contains(num) == false)
                                 GroundIndexes.Add(num);
                         }
-                        else if(y > 0 && GroundIndexes.Contains(num2))
+                        else if(y > 0 && GroundIndexes.Contains(num2))//If there is a tile above this one
                         {
                             wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
                             //Add indexes?
                         }
-                        else
+                        else //Make it a ground tile
                         {
                             groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (GroundIndexes.Contains(num) == false)
@@ -146,19 +152,19 @@ namespace AUTO_Matic
                       
 
                     }
-                    if (num == 3 || num == 4)
+                    if (num == 3 || num == 4) //Platforms
                     {
-                        if(y == 0)
+                        if(y == 0)//If at the top of the map
                         {
                             platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (PlatformIndexes.Contains(num) == false)
                                 PlatformIndexes.Add(num);
                         }
-                        else if(y > 0 && PlatformIndexes.Contains(num2))
+                        else if(y > 0 && PlatformIndexes.Contains(num2)) //If there is one above it 
                         {
                             wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
                         }
-                        else
+                        else //Regular platform
                         {
                             platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (PlatformIndexes.Contains(num) == false)
@@ -166,33 +172,33 @@ namespace AUTO_Matic
                         }
                        
                     }
-                    if(num == 1)
+                    if(num == 1) //Background
                     {
                         backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
                         if (BackgroundIndexes.Contains(num) == false)
                             BackgroundIndexes.Add(num);
                     }
-                    if(num == 9 || num == 12)
+                    if(num == 9 || num == 12)//Top of doors
                     {
-                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
                         topDoorTiles.Add(new TopDoorTile(num, new Rectangle(x * size, y * size, size, size)));
                     }
-                    if(num == 8 || num == 11)
+                    if(num == 8 || num == 11)//Bottom doors
                     {
                         backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         bottomDoorTiles.Add(new BottomDoorTile(num, new Rectangle(x * size, y * size, size, size)));
                     }
-                    if(num == 25)
+                    if(num == 25) //Enemy spawns
                     {
                         enemySpawns.Add(new Vector2(x * size, y * size));
                         backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                     }
-                    if(num == 7)
+                    if(num == 7)//Dungeon entrance
                     {
                         backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         dungeonEntrances.Add(new DungeonEntrance(num, new Rectangle(x * size, y * size, size, size)));
                     }
-                    if(num == 24)
+                    if(num == 24)//Player spawn
                     {
                         playerSpawns.Add(new Vector2(x * size, y * size));
                         backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
@@ -212,7 +218,7 @@ namespace AUTO_Matic
         {
             int numTilesRight = 0; //Landed on 1 tile
             int numTilesLeft = 0;
-            for(int i = col + 1; i < tileMap.mapWidth - 1; i++)
+            for(int i = col + 1; i < tileMap.mapWidth - 1; i++) //check if there is a tile to the right 
             {
                 if (GroundIndexes.Contains(tileMap.getPoint(row, i)) || PlatformIndexes.Contains(tileMap.getPoint(row, i)))
                 {
@@ -224,7 +230,7 @@ namespace AUTO_Matic
                 }
 
             }
-            for (int i = col - 1; i >= 0; i--)
+            for (int i = col - 1; i >= 0; i--)//Check if there is a tile to the left
             {
                 //if (tileMap.getPoint(row - 1, i) == 3 || tileMap.getPoint(row - 1, i) == 2 || tileMap.getPoint(row - 1, i) == 0)
                 //{
@@ -272,7 +278,7 @@ namespace AUTO_Matic
             return tileMap.getPoint(row, col);
         }
 
-        public int getPoint(int row, int col)
+        public int getPoint(int row, int col)//Returns the index
         {
             if (row >= mapHeight)
                 row = mapHeight - 1;

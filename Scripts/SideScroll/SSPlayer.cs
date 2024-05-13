@@ -18,9 +18,10 @@ namespace AUTO_Matic.SideScroll
         enum AnimationStates { Walking, Death, Idle, Jump, Shoot, Dash}
         AnimationStates animState = AnimationStates.Idle;
 
-        public enum PlayerStates { Movement, Shooting, Jumping, Dashing}
+        public enum PlayerStates { Movement, Shooting, Jumping, Dashing, Pilot}
         public PlayerStates playerState = PlayerStates.Movement;
         PlayerStates prevPlayerState;
+        bool groundPound = false;
 
         #region Fields
         float dashHelperBuffer = 10f;
@@ -31,6 +32,9 @@ namespace AUTO_Matic.SideScroll
         Vector2 prevVel = Vector2.Zero;
         public Vector2 velocity = Vector2.Zero;
         public Rectangle playerRect;
+        public Rectangle RoboRect;
+        bool isPilot = false;
+        float jumpOutDelay = .75f;
         public bool isFalling = false;
         public bool isCollidingRight = false;
         public bool isCollidingLeft = false;
@@ -81,6 +85,7 @@ namespace AUTO_Matic.SideScroll
         public float maxRunSpeed = 5.5f;
         float maxAirSpeed = 3.5f;
         float terminalVel = 12f;
+        float groundPoundVel = 20f;
         float maxJumpSpeed = 8f;
         float maxDashSpeed = 22.5f;
         float maxDashAirSpeed = 15f;
@@ -195,9 +200,13 @@ namespace AUTO_Matic.SideScroll
        
 
 
-                if (pos.Y > terminalVel && isFalling)
+                if (pos.Y > terminalVel && isFalling && !groundPound)
                 {
                     pos = new Vector2(pos.X, terminalVel);
+                }
+                else if(pos.Y > groundPoundVel && isFalling && groundPound)
+                {
+                    pos = new Vector2(pos.X, groundPoundVel);
                 }
                 if (pos.Y < -maxJumpSpeed && isFalling)
                 {
@@ -366,21 +375,9 @@ namespace AUTO_Matic.SideScroll
         public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies)
         {
             controllerMoveDir = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left;
+
             currControllerBtn = GamePad.GetState(PlayerIndex.One).Buttons;
-            foreach(BackgroundTile tile in SideTileMap.BackgroundTiles)
-            {
-                if(tile.Rectangle.Contains(InteractionBox))
-                {
-                    if(tile.Rectangle.Right < playerRect.X)
-                    {
-                        isCollidingLeft = false;
-                    }
-                    if((tile.Rectangle.Left > playerRect.Right))
-                    {
-                        isCollidingRight = false;
-                    }
-                }
-            }
+           
 
             if(isCollidingLeft && isCollidingRight)
             {
@@ -420,7 +417,7 @@ namespace AUTO_Matic.SideScroll
                 }
             }
 
-            Input();
+            Input(gameTime);
             if (Velocity == Vector2.Zero && !isFalling && playerState != PlayerStates.Shooting)
             {
                 if (animState != AnimationStates.Idle)
@@ -578,10 +575,28 @@ namespace AUTO_Matic.SideScroll
 
                     if(startShoot)
                     {
-                        Input();
+                        Input(gameTime);
                     }
                     break;
                 #endregion
+                #region Pilot
+                case PlayerStates.Pilot:
+                    if(prevPlayerState != PlayerStates.Pilot)//If becoming the pilot
+                    {
+                        RoboRect = playerRect;
+                        if(animManager.isLeft)
+                            playerRect = new Rectangle(RoboRect.Left - 32, RoboRect.Y + RoboRect.Height/2, 20,20);
+                        if(animManager.isRight)
+                            playerRect = new Rectangle(RoboRect.Right + 32, RoboRect.Y + RoboRect.Height / 2, 20, 20);
+                        prevPlayerState = PlayerStates.Pilot;
+                    }
+                    else if(prevPlayerState == PlayerStates.Pilot) //Is playing as pilot
+                    {
+                        BecomePilot();
+                        playerState = PlayerStates.Movement;
+                    }
+                    break;
+                    #endregion
             }
 
 
@@ -589,7 +604,20 @@ namespace AUTO_Matic.SideScroll
             position += Velocity;
             //playerRect = new Rectangle((int)(position.X + (collisionOffsetX - 6)), (int)position.Y, pixelSize / 2, pixelSize);
             // playerRect = new Rectangle()
-            animManager.Update(gameTime, position);
+            if(!isPilot)
+            {
+                animManager.Update(gameTime, position);
+              
+            }
+            else
+            {  
+                animState = AnimationStates.Idle;
+                ChangeAnimation();
+                animManager.isRight = true;
+                animManager.isLeft = false;
+                animManager.Update(gameTime, new Vector2(RoboRect.X, RoboRect.Y));
+            }
+           
             if(bullets.Count != 0)
             {
                 for (int i = bullets.Count - 1; i >= 0; i--)
@@ -622,13 +650,44 @@ namespace AUTO_Matic.SideScroll
             //}
         }
 
+        private void BecomePilot()
+        {
+            isPilot = true;
+            maxAirSpeed /= 2;
+            moveSpeed /= 2;
+            maxDashAirSpeed /= 1.5f;
+            maxJumpSpeed /= 2f;
+            maxRunSpeed /= 2f;
+            bulletTravelDist /= 2f;
 
-        private void Input()
+            //jumpForce /= 1.5f;
+            dashDistance /= 2;
+            RoboRect = playerRect;
+        }
+        private void BecomeRobo()
+        {
+            isPilot = false;
+            maxAirSpeed *= 2;
+            moveSpeed *= 2;
+            maxDashAirSpeed *= 1.5f;
+            maxJumpSpeed *= 2f;
+            maxRunSpeed *= 2f;
+            bulletTravelDist *= 2f;
+
+            //jumpForce /= 1.5f;
+            dashDistance = 3 * pixelSize;
+
+            playerRect = RoboRect;
+        }
+
+        private void Input(GameTime gameTime)
         {
             KeyboardState kb = Keyboard.GetState();
             MouseState ms = Mouse.GetState();
 
            
+            //if(playerState == PlayerStates.Pilot)
+
             if(kb.IsKeyDown(Keys.D) && kb.IsKeyDown(Keys.A) /*&& !isColliding*/)
             {
                 if (playerState == PlayerStates.Shooting)
@@ -1073,7 +1132,7 @@ namespace AUTO_Matic.SideScroll
                 }
             }
 
-            if(kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyUp(Keys.E) || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Released)
+            if(kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyUp(Keys.E) || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Released && blockBottom)
             {
                 foreach(BottomDoorTile doorTile in SideTileMap.BottomDoorTiles)
                 {
@@ -1091,7 +1150,37 @@ namespace AUTO_Matic.SideScroll
                         game.StartDungeon();
                     }
                 }
+               // jumpOutDelay = .75f;
             }
+
+            //Holding a button to become pilot
+            if (kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyDown(Keys.E) && !isPilot
+                || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Pressed && blockBottom && !isPilot)
+            {
+                jumpOutDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if(jumpOutDelay <= 0)
+                {
+                    jumpOutDelay = .75f;
+                    playerState = PlayerStates.Pilot;
+                }
+            }
+            else if(kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyDown(Keys.E) && isPilot && playerRect.Intersects(RoboRect) //Holding button to go back to robo
+                || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Pressed && blockBottom && isPilot &&playerRect.Intersects(RoboRect))
+            {
+                jumpOutDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if(jumpOutDelay <= 0)
+                {
+                    BecomeRobo();
+                    jumpOutDelay = .75f;
+                }
+            }
+            else
+            {
+                jumpOutDelay = .75f;
+            }
+
 
             if (kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && blockBottom || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && blockBottom)
             {
@@ -1106,6 +1195,19 @@ namespace AUTO_Matic.SideScroll
                 }
                 velocity.X = 0;
 
+                animState = AnimationStates.Shoot;
+                ChangeAnimation();
+                animManager.StartLoop();
+            }
+            else if(kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting)
+            {
+                playerState = PlayerStates.Shooting;
+                groundPound = true;
+                if(velocity.Y != 0)
+                {
+                    velocity.Y = groundPoundVel;
+                }
+                velocity.X = 0;
                 animState = AnimationStates.Shoot;
                 ChangeAnimation();
                 animManager.StartLoop();
@@ -1174,7 +1276,7 @@ namespace AUTO_Matic.SideScroll
                         jumpDelay = 0;
                         //velocity.X += (float)Math.Cos(velocity.X);
                         isFalling = false;
-
+                        groundPound = false;
                         //isDashing = false;
 
                         //animState = AnimationStates.Idle;
@@ -1429,13 +1531,21 @@ namespace AUTO_Matic.SideScroll
                 isCollidingRight = true;
             }
 
-            if (animManager.isLeft)
+            if (animManager.isLeft && !isPilot)
             {
                 playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, pixelSize / 2, pixelSize);
             }
-            else if (animManager.isRight)
+            else if(animManager.isLeft && isPilot)
+            {
+                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, playerRect.Width, playerRect.Height);
+            }
+            if (animManager.isRight && !isPilot)
             {
                 playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, pixelSize / 2, pixelSize);
+            }
+            else if(animManager.isRight && isPilot)
+            {
+                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, playerRect.Width, playerRect.Height);
             }
 
 
@@ -1453,7 +1563,7 @@ namespace AUTO_Matic.SideScroll
             //    spriteBatch.Draw(texture, playerRect, Color.White);
             //}
            
-           // spriteBatch.Draw(texture, playerRect, Color.White);
+           spriteBatch.Draw(texture, playerRect, Color.White);
 
             if(damaged)
             {

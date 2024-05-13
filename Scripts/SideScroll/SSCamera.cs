@@ -90,6 +90,8 @@ namespace AUTO_Matic.Scripts.SideScroll
             onBorderTop = false;
             onBorderRight = false;
             onBorderBottom = false;
+
+            //If bordering the top and left
             if (this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && this.position.X <= 0 && position.X - viewport.Width / 5f <= 0)
             {
                 //center = new Vector2(viewport.Width / 1.75f, position.Y);
@@ -99,32 +101,32 @@ namespace AUTO_Matic.Scripts.SideScroll
                 center = new Vector2(viewport.Width / 1.75f, viewport.Height / 1.75f);
                 transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height, 0));
             }
-            else if (this.position.X <= 0 && position.X - viewport.Width / 2f <= 0)
+            else if (this.position.X <= 0 && position.X - viewport.Width / 2f <= 0)//Just bordering the left
             {
                 onBorderLeft = true;
                 center = new Vector2(viewport.Width / 1.75f, position.Y);
                 transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height / 2, 0));
             }
-            else if((position.X + 32) + viewport.Width / 2f > width)
+            else if((position.X + 32) + viewport.Width / 2f > width)//Bordering the right
             {
                 onBorderRight = true;
                 center = new Vector2(viewport.Width * 1.365f, position.Y);
                 transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width/2, viewport.Height / 2, 0));
             }
-            if(this.position.Y <= 0 && position.Y - viewport.Height/2f <= 0 && this.position.X > 0)
+            if(this.position.Y <= 0 && position.Y - viewport.Height/2f <= 0 && this.position.X > 0) //Bordering the top
             {
                 onBorderTop = true;
                 center = new Vector2(center.X, viewport.Height / 1.75f);
                 transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width/2, viewport.Height, 0));
             }
-            else if(this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && this.position.X <= 0)
+            else if(this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && this.position.X <= 0) //Bordering the Left and top
             {
                 onBorderLeft = true;
                 onBorderTop = true;
                 center = new Vector2(center.X, viewport.Height / 1.75f);
                 transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height, 0));
             }
-            else if(this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && position.X + viewport.Width / 2 > width)
+            else if(this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && position.X + viewport.Width / 2 > width)//Bordering top and right
             {
                 onBorderTop = true;
                 onBorderRight = true;
@@ -134,14 +136,14 @@ namespace AUTO_Matic.Scripts.SideScroll
 
 
 
-            if (this.position.Y + height/2 >= height && position.X + viewport.Width / 2 > width)
+            if (this.position.Y + height/2 >= height && position.X + viewport.Width / 2 > width) //Bordering the bottom and right
             {
                     onBorderBottom = true;
                     onBorderRight = true;
                 center = new Vector2(viewport.Width * 1.365f, 64 * 10);
                 transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width/2, viewport.Height / 2, 0));
             }
-            else if(this.position.Y + height/2 >= height)
+            else if(this.position.Y + height/2 >= height)//Bordering the bottom
             {
                     onBorderBottom = true;
                 center = new Vector2(center.X, 64 * 10);
