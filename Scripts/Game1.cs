@@ -10,6 +10,7 @@ using AUTO_Matic.Scripts.SideScroll;
 using System.Threading;
 using AUTO_Matic.SideScroll.Enemy;
 using AUTO_Matic.Scripts;
+using Microsoft.Xna.Framework.Media;
 
 
 namespace AUTO_Matic
@@ -33,8 +34,11 @@ namespace AUTO_Matic
 
         Rectangle LeaveDungeon;
 
+        VideoPlayer videoPlayer;
+        Video MainMenuBackground;
+
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -172,6 +176,9 @@ namespace AUTO_Matic
 
             #endregion
 
+
+            videoPlayer = new VideoPlayer();
+            MainMenuBackground = Content.Load<Video>(@"TitleScreen");
             HealthDrop.texture = Content.Load<Texture2D>(@"Textures\Health");
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if(currScene == Scenes.InGame)
@@ -310,6 +317,7 @@ namespace AUTO_Matic
 
         public void StartNewGame()
         {
+          
             healthDrops.Clear();
             UIHelper.SetElementVisibility("MainMenu", false, UIManager.uiElements);
             UIHelper.SetElementVisibility("Settings", false, UIManager.uiElements);
@@ -943,6 +951,9 @@ namespace AUTO_Matic
         }
         private void Menus(KeyboardState kb)
         {
+
+            
+            //videoPlayer.Play(MainMenuBackground);
             float crawlSpeed = 10f;
             GamePadButtons currButtons = GamePad.GetState(PlayerIndex.One).Buttons;
 

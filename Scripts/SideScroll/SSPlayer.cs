@@ -1199,7 +1199,7 @@ namespace AUTO_Matic.SideScroll
                 ChangeAnimation();
                 animManager.StartLoop();
             }
-            else if(kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting)
+            if(kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting && velocity.Y > -1|| controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting)
             {
                 playerState = PlayerStates.Shooting;
                 groundPound = true;

@@ -225,6 +225,9 @@ namespace AUTO_Matic
             uiElements.Clear();
             this.dims = dims;
             this.game = game;
+
+            
+
             uiElements.Add("TitleCrawl", UIHelper.CreateTextblock("TitleCrawl", "This is the title crawl", ((int)dims.X / 2) - (550/2), 20)); //Replace 550 with UIHelper.ScrollBG.Width
             UIHelper.SetElementRect(uiElements["TitleCrawl"], new Rectangle(new Point((int)uiElements["TitleCrawl"].Position.X, (int)uiElements["TitleCrawl"].Position.Y), new Point(80, 40)));
             UIHelper.SetElementBGRect(uiElements["TitleCrawl"], new Rectangle((int)uiElements["TitleCrawl"].Position.X, (int)uiElements["TitleCrawl"].Position.Y, 550, (int)(dims.Y + (dims.Y/4))));

@@ -591,6 +591,11 @@
 /processorParam:TextureFormat=Color
 /build:Textures/TitleCrawlBG.png
 
+#begin TitleScreen.avi
+/importer:H264Importer
+/processor:VideoProcessor
+/build:TitleScreen.avi
+
 #begin TopDown/MapTiles/Tile0.png
 /importer:TextureImporter
 /processor:TextureProcessor
