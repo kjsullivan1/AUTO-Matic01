@@ -595,7 +595,7 @@ namespace AUTO_Matic
                             camera.Update(new Vector2(camera.X, camera.Y));
                             tdPlayer.Update(gameTime, tdMap, shotGunBoss);
                             camera.Update(CameraPos());
-                            if(kb.IsKeyDown(Keys.L) || tdPlayer.rectangle.Intersects(LeaveDungeon))//Switching back to sidescroll
+                            if(kb.IsKeyDown(Keys.J) || tdPlayer.rectangle.Intersects(LeaveDungeon))//Switching back to sidescroll
                             {
                                 GameState = GameStates.SideScroll;
                                 //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);

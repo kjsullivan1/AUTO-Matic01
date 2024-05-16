@@ -25,6 +25,7 @@ namespace AUTO_Matic.TopDown
         GamePadButtons currButtons;
         GamePadButtons prevButtons;
         public int bossRoom = 2;
+        bool lockDir = false;
 
         #region Animations
         AnimationManager animManager;
@@ -92,7 +93,7 @@ namespace AUTO_Matic.TopDown
         int pixelSize = 32;
         TopDownMap map;
         Rectangle bounds;
-        string shootDir = "";
+        string shootDir = "right";
         float health = 5;
         public bool damaged = false;
         public float Health
@@ -342,7 +343,7 @@ namespace AUTO_Matic.TopDown
                                         position.X -= 1;
                                     }
                                 }
-                                else if (rectangle.TouchRightOf(boss.worldRect))
+                                if (rectangle.TouchRightOf(boss.worldRect))
                                 {
                                     while (rectangle.Left < boss.worldRect.Right)
                                     {
@@ -350,7 +351,7 @@ namespace AUTO_Matic.TopDown
                                         position.X += 1;
                                     }
                                 }
-                                else if(rectangle.TouchBottomOf(boss.worldRect))
+                                if(rectangle.TouchBottomOf(boss.worldRect))
                                 {
                                     while(rectangle.Top < boss.worldRect.Bottom)
                                     {
@@ -358,7 +359,7 @@ namespace AUTO_Matic.TopDown
                                         position.Y += 1;
                                     }
                                 }
-                                else if(rectangle.TouchTopOf(boss.worldRect))
+                                if(rectangle.TouchTopOf(boss.worldRect))
                                 {
                                     while(rectangle.Bottom > boss.worldRect.Top)
                                     {
@@ -491,26 +492,38 @@ namespace AUTO_Matic.TopDown
 
         private void Input()
         {
+            if(kb.IsKeyDown(Keys.LeftShift) && prevKb.IsKeyDown(Keys.LeftShift))
+            {
+                lockDir = true;//!lockDir
+            }
+            else
+            {
+                lockDir = false;
+            }
             //Else ifs for cardinal
             if (kb.IsKeyDown(Keys.D) || controllerMoveDir.X > 0 /*&& controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
             {
                 position.X += moveSpeed;
-                shootDir = "right";
+                if(!lockDir)
+                    shootDir = "right";
             }
             if (kb.IsKeyDown(Keys.A) || controllerMoveDir.X  < 0/* && controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
             {
                 position.X += -moveSpeed;
-                shootDir = "left";
+                if (!lockDir)
+                    shootDir = "left";
             }
             if (kb.IsKeyDown(Keys.W) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y > 0 /*&& controllerMoveDir.X > -.6*/)
             {
                 position.Y += -moveSpeed;
-                shootDir = "up";
+                if (!lockDir)
+                    shootDir = "up";
             }
             if (kb.IsKeyDown(Keys.S) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y < 0 /*&& controllerMoveDir.X > -.6*/ )
             {
                 position.Y += moveSpeed;
-                shootDir = "down";
+                if (!lockDir)
+                    shootDir = "down";
             }
 
             if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
@@ -543,7 +556,8 @@ namespace AUTO_Matic.TopDown
             {
                 while(rectangle.Bottom > newRect.Top)
                 {
-                    rectangle.Y -= 1;
+                    position.Y -= 1;
+                    rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
                 }
                 position.Y -= moveSpeed;
             }
@@ -551,27 +565,30 @@ namespace AUTO_Matic.TopDown
             {
                 while(rectangle.Top < newRect.Bottom)
                 {
-                    rectangle.Y += 1;
+                    position.Y += 1;
+                    rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
                 }
                 position.Y += moveSpeed;
             }
             if(rectangle.TouchLeftOf(newRect))
             {
-                while(rectangle.Right > newRect.Left - 5)
+                while(rectangle.Right > newRect.Left)
                 {
-                    rectangle.X -= 1;
+                    position.X -= 1;
+                    rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
                 }
                 position.X -= moveSpeed;
             }
             if(rectangle.TouchRightOf(newRect))
             {
-                while(rectangle.Left < newRect.Right + 5)
+                while(rectangle.Left < newRect.Right)
                 {
-                    rectangle.X += 1;
+                    position.X += 1;
+                    rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
                 }
                 position.X += moveSpeed;
             }
-
+          
             //Border collisions
             if ((position.X + (rectangle.Width / 8f) < (xOffset - (xOffset / (levelInX)))))
                 CheckBorderCollisionLeft(xOffset, newRect, xOffset - (xOffset / (levelInX)) + pixelSize);

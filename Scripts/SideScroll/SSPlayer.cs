@@ -585,9 +585,9 @@ namespace AUTO_Matic.SideScroll
                     {
                         RoboRect = playerRect;
                         if(animManager.isLeft)
-                            playerRect = new Rectangle(RoboRect.Left - 32, RoboRect.Y + RoboRect.Height/2, 20,20);
+                            playerRect = new Rectangle(RoboRect.Left - 32, RoboRect.Y - RoboRect.Height/2, 20,20);
                         if(animManager.isRight)
-                            playerRect = new Rectangle(RoboRect.Right + 32, RoboRect.Y + RoboRect.Height / 2, 20, 20);
+                            playerRect = new Rectangle(RoboRect.Right + 32, RoboRect.Y - RoboRect.Height / 2, 20, 20);
                         prevPlayerState = PlayerStates.Pilot;
                     }
                     else if(prevPlayerState == PlayerStates.Pilot) //Is playing as pilot
@@ -659,10 +659,11 @@ namespace AUTO_Matic.SideScroll
             maxJumpSpeed /= 2f;
             maxRunSpeed /= 2f;
             bulletTravelDist /= 2f;
-
+            //position.Y -= 128;
             //jumpForce /= 1.5f;
             dashDistance /= 2;
             RoboRect = playerRect;
+            
         }
         private void BecomeRobo()
         {
@@ -1166,7 +1167,7 @@ namespace AUTO_Matic.SideScroll
                 }
             }
             else if(kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyDown(Keys.E) && isPilot && playerRect.Intersects(RoboRect) //Holding button to go back to robo
-                || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Pressed && blockBottom && isPilot &&playerRect.Intersects(RoboRect))
+                || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Pressed && blockBottom && isPilot && playerRect.Intersects(RoboRect))
             {
                 jumpOutDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -1199,11 +1200,12 @@ namespace AUTO_Matic.SideScroll
                 ChangeAnimation();
                 animManager.StartLoop();
             }
-            else if(kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting)
+            else if(kb.IsKeyDown(Keys.S) && prevKb.IsKeyUp(Keys.S) && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting && velocity.Y >= 0 && velocity.Y < 5 
+                || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting && velocity.Y >= 0 && velocity.Y < 5)
             {
                 playerState = PlayerStates.Shooting;
                 groundPound = true;
-                if(velocity.Y != 0)
+                if(velocity.Y >= 0)
                 {
                     velocity.Y = groundPoundVel;
                 }
@@ -1222,7 +1224,7 @@ namespace AUTO_Matic.SideScroll
                     velocity.Y += fallSpeed;
                 }
 
-                if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) || currControllerBtn.X == ButtonState.Pressed && prevControllerBtn.X == ButtonState.Released)
+                if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter)|| currControllerBtn.X == ButtonState.Pressed && prevControllerBtn.X == ButtonState.Released)
                 {
                     if(animManager.isRight)
                     {
@@ -1373,7 +1375,7 @@ namespace AUTO_Matic.SideScroll
                     case PlayerStates.Jumping:
                         if (velocity.X > 0)
                         {
-                            //position.X += -velocity.X;
+                            position.X += -velocity.X;
                             //velocity.X = 0;
 
                         }
@@ -1469,7 +1471,7 @@ namespace AUTO_Matic.SideScroll
                     case PlayerStates.Jumping:
                         if (velocity.X < 0)
                         {
-                            //position.X += -velocity.X;
+                            position.X += -velocity.X;
 
                         }
                         break;
