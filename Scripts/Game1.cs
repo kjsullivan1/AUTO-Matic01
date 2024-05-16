@@ -34,7 +34,7 @@ namespace AUTO_Matic
         Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -161,6 +161,7 @@ namespace AUTO_Matic
             UIHelper.ButtonTexture = Content.Load<Texture2D>(@"Textures\Button");
             UIHelper.ButtonFont = Content.Load<SpriteFont>(@"Fonts\CrawlFont");
             UIHelper.CrawlBgTxture = Content.Load<Texture2D>(@"Textures\TitleCrawlBG");
+            UIHelper.MainMenuBG = Content.Load<Texture2D>(@"Textures\TitleScreen");
           
             UIHelper.Bounds = new Rectangle(new Point((int)camera.Position.X, (int)camera.Position.Y), new Point(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
             UIHelper.CrawlFont = Content.Load<SpriteFont>(@"Fonts\CrawlFont");
@@ -169,6 +170,7 @@ namespace AUTO_Matic
             UIHelper.SetElementVisibility("MainMenuTitle", true, UIManager.uiElements);
 
             UIHelper.SetElementVisibility("SettingsMenuTitle", true, UIManager.uiElements);
+            UIHelper.SetElementVisibility("MainMenuBackground", true, UIManager.uiElements);
 
             #endregion
 

@@ -17,6 +17,7 @@ namespace AUTO_Matic
         public static SpriteFont TitleFont;
         public static Texture2D CrawlBgTxture;
         public static List<Texture2D> HealthBar;
+        public static Texture2D MainMenuBG;
         public static Rectangle Bounds;
 
         public static UIButton CreateButton(string id, string text, int x, int y)//ButtonTexture Width and Height need to change
@@ -38,6 +39,9 @@ namespace AUTO_Matic
                 case "HealthBar":
                     UITextBlock d = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, HealthBar[HealthBar.Count - 1]);
                     return d;
+                case "MainMenuBackground":
+                    UITextBlock e = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, MainMenuBG);
+                    return e;
                 default:
                     UITextBlock b = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, CrawlFont, text, Color.White, CrawlBgTxture);
                     return b;

@@ -225,14 +225,19 @@ namespace AUTO_Matic
             uiElements.Clear();
             this.dims = dims;
             this.game = game;
-            uiElements.Add("TitleCrawl", UIHelper.CreateTextblock("TitleCrawl", "This is the title crawl", ((int)dims.X / 2) - (550/2), 20)); //Replace 550 with UIHelper.ScrollBG.Width
+            //Background
+            uiElements.Add("MainMenuBackground", UIHelper.CreateTextblock("MainMenuBackground", "", 0, 0));
+            UIHelper.SetElementBGRect(uiElements["MainMenuBackground"], new Rectangle(new Point((int)uiElements["MainMenuBackground"].Position.X, (int)uiElements["MainMenuBackground"].Position.Y), 
+                new Point((int)(dims.X * 2), (int)(dims.Y * 2.75f))));
+
+            uiElements.Add("TitleCrawl", UIHelper.CreateTextblock("TitleCrawl", "This is the title crawl", ((int)dims.X / 2) - (550/2), (int)(dims.Y /2))); //Replace 550 with UIHelper.ScrollBG.Width
             UIHelper.SetElementRect(uiElements["TitleCrawl"], new Rectangle(new Point((int)uiElements["TitleCrawl"].Position.X, (int)uiElements["TitleCrawl"].Position.Y), new Point(80, 40)));
             UIHelper.SetElementBGRect(uiElements["TitleCrawl"], new Rectangle((int)uiElements["TitleCrawl"].Position.X, (int)uiElements["TitleCrawl"].Position.Y, 550, (int)(dims.Y + (dims.Y/4))));
 
             ///Main Menu elements
             //Title
             uiElements.Add("MainMenuTitle", UIHelper.CreateTextblock("MainMenuTitle", "AUTO-Matic", ((int)dims.X / 2) - (450 / 2), //450 with UIHelper.MenuTitle.Width
-                UIHelper.GetElementBGRect(uiElements["TitleCrawl"]).Height + 100));
+                UIHelper.GetElementBGRect(uiElements["TitleCrawl"]).Height + 800));
             UIHelper.SetElementRect(uiElements["MainMenuTitle"], new Rectangle(new Point((int)(uiElements["MainMenuTitle"].Position.X + 180), (int)uiElements["MainMenuTitle"].Position.Y + 90), new Point(80, 40)));
             UIHelper.SetElementBGRect(uiElements["MainMenuTitle"], new Rectangle((int)uiElements["MainMenuTitle"].Position.X, (int)uiElements["MainMenuTitle"].Position.Y, 450, 200));
             //Play

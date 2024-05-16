@@ -137,6 +137,11 @@
     <Content Include="Content\SideScroll\MapTiles\Tile7.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile8.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile9.png" />
+    <Content Include="Content\Textures\Button.png" />
+    <Content Include="Content\Textures\Health.png" />
+    <Content Include="Content\Textures\Red.png" />
+    <Content Include="Content\Textures\TitleCrawlBG.png" />
+    <Content Include="Content\Textures\TitleScreen.png" />
     <Content Include="Content\TopDown\Maps\Map0.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
