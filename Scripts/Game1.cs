@@ -548,6 +548,16 @@ namespace AUTO_Matic
                                 
                             }
                             
+                            foreach(SSEnemy enemy in enemies)
+                            {
+                                ssPlayer.Collision(enemy.enemyRect, true);
+                                if(ssPlayer.killEnemy)
+                                {
+                                    enemies.Remove(enemy);
+                                    ssPlayer.killEnemy = false;
+                                    break;
+                                }
+                            }
                             
                             foreach (TopDoorTile tile in SideTileMap.TopDoorTiles)
                             {

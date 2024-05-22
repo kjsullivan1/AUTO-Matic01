@@ -17,11 +17,14 @@ namespace AUTO_Matic.SideScroll
         //Player States
         enum AnimationStates { Walking, Death, Idle, Jump, Shoot, Dash}
         AnimationStates animState = AnimationStates.Idle;
+        enum PilotAnimStates { Walking, Idle}
+        PilotAnimStates pilotAnimState = PilotAnimStates.Idle;
 
         public enum PlayerStates { Movement, Shooting, Jumping, Dashing, Pilot}
         public PlayerStates playerState = PlayerStates.Movement;
         PlayerStates prevPlayerState;
         bool groundPound = false;
+        public bool killEnemy = false;
 
         #region Fields
         float dashHelperBuffer = 10f;
@@ -306,39 +309,104 @@ namespace AUTO_Matic.SideScroll
         Point CurrFrame;//Location of currFram on the sheet
         Point SheetSize;//num of frames.xy
         int fpms;
+        public AnimationManager animManagerRobo;
+        Texture2D textureRobo;
+        Point FrameSizeRobo;//Size of frame
+        Point CurrFrameRobo;//Location of currFram on the sheet
+        Point SheetSizeRobo;//num of frames.xy
+        int fpmsRobo;
+
         public void ChangeAnimation()
         {
-            switch (animState)
+            if(!isPilot)
             {
-                case AnimationStates.Idle:
-                    texture = content.Load<Texture2D>("SideScroll/Animations/PlayerIdle");
-                    FrameSize = new Point(64, 64);
-                    CurrFrame = new Point(0, 0);
-                    SheetSize = new Point(6, 1);
-                    fpms = 120;
-                    break;
-                case AnimationStates.Walking:
-                    texture = content.Load<Texture2D>("SideScroll/Animations/PlayerWalk");
-                    FrameSize = new Point(64, 64);
-                    CurrFrame = new Point(0, 0);
-                    SheetSize = new Point(8, 1);
-                    fpms = 120;
-                    break;
-                case AnimationStates.Jump:
-                    texture = content.Load<Texture2D>("SideScroll/Animations/PlayerJump");
-                    FrameSize = new Point(64, 64);
-                    CurrFrame = new Point(0, 0);
-                    SheetSize = new Point(4, 1);
-                    fpms = 95;
-                    break;
-                case AnimationStates.Shoot:
-                    texture = content.Load<Texture2D>("SideScroll/Animations/PlayerShoot");
-                    FrameSize = new Point(64, 64);
-                    CurrFrame = new Point(0, 0);
-                    SheetSize = new Point(3, 1);
-                    fpms = 120;
-                    break;
+                switch (animState)
+                {
+                    case AnimationStates.Idle:
+                        texture = content.Load<Texture2D>("SideScroll/Animations/PlayerIdle");
+                        FrameSize = new Point(64, 64);
+                        CurrFrame = new Point(0, 0);
+                        SheetSize = new Point(6, 1);
+                        fpms = 120;
+                        break;
+                    case AnimationStates.Walking:
+                        texture = content.Load<Texture2D>("SideScroll/Animations/PlayerWalk");
+                        FrameSize = new Point(64, 64);
+                        CurrFrame = new Point(0, 0);
+                        SheetSize = new Point(8, 1);
+                        fpms = 120;
+                        break;
+                    case AnimationStates.Jump:
+                        texture = content.Load<Texture2D>("SideScroll/Animations/PlayerJump");
+                        FrameSize = new Point(64, 64);
+                        CurrFrame = new Point(0, 0);
+                        SheetSize = new Point(4, 1);
+                        fpms = 95;
+                        break;
+                    case AnimationStates.Shoot:
+                        texture = content.Load<Texture2D>("SideScroll/Animations/PlayerShoot");
+                        FrameSize = new Point(64, 64);
+                        CurrFrame = new Point(0, 0);
+                        SheetSize = new Point(3, 1);
+                        fpms = 120;
+                        break;
+                }
             }
+            else if(isPilot)
+            {
+                switch(animState)
+                {
+                    case AnimationStates.Idle:
+                        texture = content.Load<Texture2D>("SideScroll/Animations/PilotIdle");
+                        FrameSize = new Point(64, 64);
+                        CurrFrame = new Point(0, 0);
+                        SheetSize = new Point(8, 1);
+                        fpms = 120;
+                        break;
+                    case AnimationStates.Walking:
+                        texture = content.Load<Texture2D>("SideScroll/Animations/PilotRun");
+                        FrameSize = new Point(64, 64);
+                        CurrFrame = new Point(0, 0);
+                        SheetSize = new Point(6, 1);
+                        fpms = 120;
+                        break;
+                    default:
+                        texture = content.Load<Texture2D>("SideScroll/Animations/PilotRun");
+                        FrameSize = new Point(64, 64);
+                        CurrFrame = new Point(0, 0);
+                        SheetSize = new Point(6, 1);
+                        fpms = 120;
+                        break;
+
+                }
+                if(textureRobo != content.Load<Texture2D>("SideScroll/Animations/PlayerIdle"))
+                {
+                    textureRobo = content.Load<Texture2D>("SideScroll/Animations/PlayerIdle");
+                    FrameSizeRobo = new Point(64, 64);
+                    CurrFrameRobo = new Point(0, 0);
+                    SheetSizeRobo = new Point(6, 1);
+                    fpmsRobo = 120;
+
+                    bool Right = true, Left = false, Up = false, Down = false;
+                    if (animManager != null)
+                    {
+                        Right = animManager.isRight;
+                        Left = animManager.isLeft;
+                        Up = animManager.isUp;
+                        Down = animManager.isDown;
+                    }
+
+                    animManagerRobo = new AnimationManager(textureRobo, FrameSizeRobo, CurrFrameRobo, SheetSizeRobo, fpmsRobo, new Vector2(RoboRect.X, RoboRect.Y));
+
+                    animManagerRobo.isRight = Right;
+                    animManagerRobo.isLeft = Left;
+                    animManagerRobo.isUp = Up;
+                    animManagerRobo.isDown = Down;
+                }
+                
+
+            }
+      
 
             bool isRight = true, isLeft = false, isUp = false, isDown = false;
             if (animManager != null)
@@ -357,6 +425,8 @@ namespace AUTO_Matic.SideScroll
             animManager.isDown = isDown;
         }
         #endregion
+
+
 
         public void Load(ContentManager Content, Rectangle bounds, float friction, Vector2 pos)
         {
@@ -599,18 +669,23 @@ namespace AUTO_Matic.SideScroll
             position += Velocity;
             //playerRect = new Rectangle((int)(position.X + (collisionOffsetX - 6)), (int)position.Y, pixelSize / 2, pixelSize);
             // playerRect = new Rectangle()
-            if(!isPilot)
+            //if(!isPilot)
+            //{
+            //    animManager.Update(gameTime, position);
+
+            //}
+            //else
+            //{  
+            //    animState = AnimationStates.Idle;
+            //    ChangeAnimation();
+            //    animManager.isRight = true;
+            //    animManager.isLeft = false;
+            //    animManager.Update(gameTime, new Vector2(RoboRect.X, RoboRect.Y));
+            //}
+            animManager.Update(gameTime, position);
+            if(isPilot && animManagerRobo != null)
             {
-                animManager.Update(gameTime, position);
-              
-            }
-            else
-            {  
-                animState = AnimationStates.Idle;
-                ChangeAnimation();
-                animManager.isRight = true;
-                animManager.isLeft = false;
-                animManager.Update(gameTime, new Vector2(RoboRect.X, RoboRect.Y));
+                animManagerRobo.Update(gameTime, new Vector2(RoboRect.X, RoboRect.Y));
             }
            
             if(bullets.Count != 0)
@@ -1195,7 +1270,7 @@ namespace AUTO_Matic.SideScroll
                 ChangeAnimation();
                 animManager.StartLoop();
             }
-            else if(kb.IsKeyDown(Keys.S) && prevKb.IsKeyUp(Keys.S) && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting && velocity.Y >= 0 && velocity.Y < 5 
+            else if(kb.IsKeyDown(Keys.S) && prevKb.IsKeyUp(Keys.S) && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting && velocity.Y >= 0 && velocity.Y < 7 
                 || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting && velocity.Y >= 0 && velocity.Y < 5)
             {
                 playerState = PlayerStates.Shooting;
@@ -1241,13 +1316,13 @@ namespace AUTO_Matic.SideScroll
             prevControllerBtn = currControllerBtn;
         }
 
-        public void Collision(Rectangle newRect /*int xOffset, int yOffset, int levelInX, int levelInY, Rectangle bounds*/, bool useTop = true)
+        public void Collision(Rectangle newRect /*int xOffset, int yOffset, int levelInX, int levelInY, Rectangle bounds*/, bool isEnemy = false)
         {
             //isColliding = false;
             //blockBottom = false;
-           
 
-            if (useTop)
+
+            if (!isEnemy)
             {
                 if (playerRect.TouchTopOf(newRect))
                 {
@@ -1334,15 +1409,36 @@ namespace AUTO_Matic.SideScroll
                 //    velocity.X = 0;
                 //}
             }
-            else
+            else if(isEnemy)
             {
                 //if (playerRect.TouchTopOf(newRect))
                 //{
                 //    velocity.X = 0;
                 //}
+                if (playerRect.TouchTopOf(newRect))
+                {
+
+
+                    if (velocity.Y > 0 && playerState != PlayerStates.Dashing)
+                    {
+                        while (playerRect.Bottom > newRect.Top - 1)
+                        {
+                            velocity.Y += -(Velocity.Y);
+                            position.Y -= .1f;
+                            playerRect.Y = (int)position.Y;
+                        }
+                    }
+
+                    if(groundPound)
+                    {
+                        killEnemy = true;
+                    }
+                }
+
+
             }
-           
-            if (playerRect.TouchLeftOf(newRect, isPilot))
+
+                if (playerRect.TouchLeftOf(newRect, isPilot))
             {
                 while (playerRect.Right > newRect.Left)
                 {
@@ -1486,7 +1582,7 @@ namespace AUTO_Matic.SideScroll
                 }
                 //animManager.isLeft = false;
                 //animManager.isRight = true;
-                if(!useTop)
+                if(isEnemy)
                 {
                     velocity.X = 0;
                 }
@@ -1535,7 +1631,7 @@ namespace AUTO_Matic.SideScroll
             }
             else if(animManager.isLeft && isPilot)
             {
-                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, 20, 30);
+                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, 20, pixelSize);
             }
             if (animManager.isRight && !isPilot)
             {
@@ -1543,7 +1639,7 @@ namespace AUTO_Matic.SideScroll
             }
             else if(animManager.isRight && isPilot)
             {
-                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, 20, 30);
+                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, 20, pixelSize);
             }
 
 
@@ -1562,8 +1658,9 @@ namespace AUTO_Matic.SideScroll
             //}
 
            //spriteBatch.Draw(texture, RoboRect, Color.White);
-           spriteBatch.Draw(texture, playerRect, Color.White);
-
+           //spriteBatch.Draw(texture, playerRect, Color.White);
+           //if(groundPound)
+           //     spriteBatch.Draw(texture, GroundPoundRect, Color.White);
             if(damaged)
             {
                 if(redCount <= whiteCount || redCount == 0 && whiteCount == 0)
@@ -1587,8 +1684,9 @@ namespace AUTO_Matic.SideScroll
             {
                 animManager.Draw(spriteBatch, Color.White);
             }
-           
-            spriteBatch.Draw(texture, InteractionBox, Color.White);
+            if (isPilot && animManagerRobo != null)
+                animManagerRobo.Draw(spriteBatch, Color.White);
+            //spriteBatch.Draw(texture, InteractionBox, Color.White);
             foreach (Bullet bullet in bullets)
             {
                 bullet.Draw(spriteBatch);
