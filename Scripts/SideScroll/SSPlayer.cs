@@ -33,7 +33,7 @@ namespace AUTO_Matic.SideScroll
         public Vector2 velocity = Vector2.Zero;
         public Rectangle playerRect;
         public Rectangle RoboRect;
-        bool isPilot = false;
+        public bool isPilot = false;
         float jumpOutDelay = .75f;
         public bool isFalling = false;
         public bool isCollidingRight = false;
@@ -64,7 +64,12 @@ namespace AUTO_Matic.SideScroll
             }
             set
             {
+                if(value < health)
+                {
+                    damaged = true;
+                }
                 damaged = true;
+               
                 health = value;
                 if (health <= 0)
                     health = 0;
@@ -581,20 +586,10 @@ namespace AUTO_Matic.SideScroll
                 #endregion
                 #region Pilot
                 case PlayerStates.Pilot:
-                    if(prevPlayerState != PlayerStates.Pilot)//If becoming the pilot
-                    {
-                        RoboRect = playerRect;
-                        if(animManager.isLeft)
-                            playerRect = new Rectangle(RoboRect.Left - 32, RoboRect.Y - RoboRect.Height/2, 20,20);
-                        if(animManager.isRight)
-                            playerRect = new Rectangle(RoboRect.Right + 32, RoboRect.Y - RoboRect.Height / 2, 20, 20);
-                        prevPlayerState = PlayerStates.Pilot;
-                    }
-                    else if(prevPlayerState == PlayerStates.Pilot) //Is playing as pilot
-                    {
+                  
                         BecomePilot();
                         playerState = PlayerStates.Movement;
-                    }
+                    
                     break;
                     #endregion
             }
@@ -662,8 +657,8 @@ namespace AUTO_Matic.SideScroll
             //position.Y -= 128;
             //jumpForce /= 1.5f;
             dashDistance /= 2;
-            RoboRect = playerRect;
-            
+            RoboRect = new Rectangle(playerRect.X, playerRect.Y, 30, 60);
+
         }
         private void BecomeRobo()
         {
@@ -1250,6 +1245,7 @@ namespace AUTO_Matic.SideScroll
         {
             //isColliding = false;
             //blockBottom = false;
+           
 
             if (useTop)
             {
@@ -1259,7 +1255,7 @@ namespace AUTO_Matic.SideScroll
 
                     if (velocity.Y > 0 && playerState != PlayerStates.Dashing)
                     {
-                        while (playerRect.Bottom > newRect.Top)
+                        while (playerRect.Bottom > newRect.Top - 1)
                         {
                             velocity.Y += -(Velocity.Y);
                             position.Y -= .1f;
@@ -1345,8 +1341,8 @@ namespace AUTO_Matic.SideScroll
                 //    velocity.X = 0;
                 //}
             }
-
-            if (playerRect.TouchLeftOf(newRect))
+           
+            if (playerRect.TouchLeftOf(newRect, isPilot))
             {
                 while (playerRect.Right > newRect.Left)
                 {
@@ -1442,7 +1438,7 @@ namespace AUTO_Matic.SideScroll
 
 
             }
-            if (playerRect.TouchRightOf(newRect))
+            if (playerRect.TouchRightOf(newRect, isPilot))
             {
                 while (playerRect.Left < newRect.Right)
                 {
@@ -1539,7 +1535,7 @@ namespace AUTO_Matic.SideScroll
             }
             else if(animManager.isLeft && isPilot)
             {
-                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, playerRect.Width, playerRect.Height);
+                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, 20, 30);
             }
             if (animManager.isRight && !isPilot)
             {
@@ -1547,7 +1543,7 @@ namespace AUTO_Matic.SideScroll
             }
             else if(animManager.isRight && isPilot)
             {
-                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, playerRect.Width, playerRect.Height);
+                playerRect = new Rectangle((int)(position.X + (collisionOffsetX)), (int)position.Y, 20, 30);
             }
 
 
@@ -1564,7 +1560,8 @@ namespace AUTO_Matic.SideScroll
             //{
             //    spriteBatch.Draw(texture, playerRect, Color.White);
             //}
-           
+
+           //spriteBatch.Draw(texture, RoboRect, Color.White);
            spriteBatch.Draw(texture, playerRect, Color.White);
 
             if(damaged)
@@ -1591,7 +1588,7 @@ namespace AUTO_Matic.SideScroll
                 animManager.Draw(spriteBatch, Color.White);
             }
            
-            //spriteBatch.Draw(texture, InteractionBox, Color.White);
+            spriteBatch.Draw(texture, InteractionBox, Color.White);
             foreach (Bullet bullet in bullets)
             {
                 bullet.Draw(spriteBatch);

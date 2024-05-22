@@ -1010,6 +1010,10 @@ namespace AUTO_Matic.SideScroll
                             player.Health -= bulletDmg;
                             bullets.RemoveAt(i);
                         }
+                        else if(bullets[i].delete)
+                        {
+                            bullets.RemoveAt(i);
+                        }
                     }
                 }
                 

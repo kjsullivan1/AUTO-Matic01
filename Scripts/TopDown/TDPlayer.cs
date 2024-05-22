@@ -27,6 +27,34 @@ namespace AUTO_Matic.TopDown
         public int bossRoom = 2;
         bool lockDir = false;
 
+        
+        Rectangle MeleeHitbox
+        {
+            get
+            {
+                int meleeHeight = rectangle.Height + (64 - rectangle.Height);//makes = to 64 or one Tile length
+                int widthMod = 2;
+                Rectangle rect = new Rectangle();
+                switch(shootDir)
+                {
+                    case "up":
+                        rect = new Rectangle(rectangle.X - Math.Abs((rectangle.Width - meleeHeight)/2), rectangle.Y - (meleeHeight / widthMod), meleeHeight, meleeHeight / widthMod);
+                        break;
+                    case "down":
+                        rect = new Rectangle(rectangle.X - Math.Abs((rectangle.Width - meleeHeight)/2), rectangle.Y + Math.Abs((rectangle.Height)), meleeHeight, meleeHeight/widthMod);
+                        break;
+                    case "left":
+                        rect = new Rectangle(rectangle.X - ((meleeHeight/widthMod)), rectangle.Y - Math.Abs((rectangle.Height - meleeHeight)/2), meleeHeight / widthMod, meleeHeight);
+                        break;
+                    case "right":
+                        rect = new Rectangle(rectangle.Right, rectangle.Y - Math.Abs((rectangle.Height - meleeHeight)/2), meleeHeight/widthMod, meleeHeight);
+                        break;
+                        
+                }
+                return rect;
+            }
+        }
+
         #region Animations
         AnimationManager animManager;
         Texture2D texture;
@@ -1084,6 +1112,7 @@ namespace AUTO_Matic.TopDown
             //    animManager.Draw(spriteBatch, Color.White);
             //}
 
+            spriteBatch.Draw(texture, MeleeHitbox, Color.White);
             spriteBatch.Draw(texture, rectangle, Color.White);
 
             foreach(Bullet bullet in bullets)

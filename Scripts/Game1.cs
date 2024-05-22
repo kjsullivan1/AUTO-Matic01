@@ -34,7 +34,7 @@ namespace AUTO_Matic
         Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.TitleScreen;
+        public Scenes currScene = Scenes.InGame;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -420,7 +420,15 @@ namespace AUTO_Matic
                     {
                         
                         case GameStates.SideScroll: //Default
-                            ssCamera.Update(ssPlayer.Position);
+                            if(ssPlayer.isPilot)
+                            {
+                                ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y - (60 - ssPlayer.playerRect.Height)));
+                            }
+                            else
+                            {
+                                ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y));
+                            }
+                           
                             if(ssCamera.onBorderLeft && ssCamera.onBorderTop)
                             {
                                 UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point(64,
