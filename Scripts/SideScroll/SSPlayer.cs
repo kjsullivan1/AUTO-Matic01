@@ -387,23 +387,24 @@ namespace AUTO_Matic.SideScroll
                     SheetSizeRobo = new Point(6, 1);
                     fpmsRobo = 120;
 
-                    bool Right = true, Left = false, Up = false, Down = false;
-                    if (animManager != null)
-                    {
-                        Right = animManager.isRight;
-                        Left = animManager.isLeft;
-                        Up = animManager.isUp;
-                        Down = animManager.isDown;
-                    }
-
-                    animManagerRobo = new AnimationManager(textureRobo, FrameSizeRobo, CurrFrameRobo, SheetSizeRobo, fpmsRobo, new Vector2(RoboRect.X, RoboRect.Y));
-
-                    animManagerRobo.isRight = Right;
-                    animManagerRobo.isLeft = Left;
-                    animManagerRobo.isUp = Up;
-                    animManagerRobo.isDown = Down;
+                    
                 }
-                
+                bool Right = true, Left = false, Up = false, Down = false;
+                if (animManagerRobo != null)
+                {
+                    Right = animManagerRobo.isRight;
+                    Left = animManagerRobo.isLeft;
+                    Up = animManagerRobo.isUp;
+                    Down = animManagerRobo.isDown;
+                }
+
+                animManagerRobo = new AnimationManager(textureRobo, FrameSizeRobo, CurrFrameRobo, SheetSizeRobo, fpmsRobo, new Vector2(RoboRect.X, RoboRect.Y));
+
+                animManagerRobo.isRight = Right;
+                animManagerRobo.isLeft = Left;
+                animManagerRobo.isUp = Up;
+                animManagerRobo.isDown = Down;
+
 
             }
       

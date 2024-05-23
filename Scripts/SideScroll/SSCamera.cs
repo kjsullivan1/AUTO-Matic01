@@ -26,6 +26,9 @@ namespace AUTO_Matic.Scripts.SideScroll
             get { return center; }
         }
 
+        public Rectangle CameraBounds;
+       
+
         public Vector2 position
         {
             get
@@ -60,7 +63,7 @@ namespace AUTO_Matic.Scripts.SideScroll
             this.height = height;
         }
 
-        public void Update(Vector2 position)
+        public void Update(Vector2 position, bool dont)
         {
             //if (position.Y - viewport.Height / 2 <= 0)
             //{
@@ -83,14 +86,28 @@ namespace AUTO_Matic.Scripts.SideScroll
             //    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(position.X + viewport.Width, viewport.Height / 2, 0));
             //}
             //else
-            center = new Vector2(position.X, position.Y);
-            transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
 
-            onBorderLeft = false;
-            onBorderTop = false;
-            onBorderRight = false;
-            onBorderBottom = false;
+           
+            if(dont)
+            {
+                //center = new Vector2(position.X, position.Y);
+                //transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
 
+                onBorderLeft = false;
+                onBorderTop = false;
+                onBorderRight = false;
+                onBorderBottom = false;
+            }
+            else
+            {
+                center = new Vector2(position.X, position.Y);
+                transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
+
+                onBorderLeft = false;
+                onBorderTop = false;
+                onBorderRight = false;
+                onBorderBottom = false;
+            }
             //If bordering the top and left
             if (this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && this.position.X <= 0 && position.X - viewport.Width / 5f <= 0)
             {
@@ -173,7 +190,7 @@ namespace AUTO_Matic.Scripts.SideScroll
 
 
 
-
+            CameraBounds = new Rectangle(new Point((int)(center.X - 1000 / 2), (int)(center.Y - 600 / 2)), new Point(1000, 600));
             //else if(position.Y + viewport.Height/2 >= height)
             //{
 

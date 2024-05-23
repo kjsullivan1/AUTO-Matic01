@@ -54,7 +54,7 @@ namespace AUTO_Matic
         MouseState prevMs;
         Vector2 mousePos = Vector2.Zero;
         int count = 0;
-
+        bool dont = false;
         #region Side-Scroll
         SSPlayer ssPlayer;
         float gravityX = 0f;
@@ -344,8 +344,8 @@ namespace AUTO_Matic
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
             UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
             ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0,0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
-            
-           // ssCamera.Position = ssPlayer.Position;
+            ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont);
+            // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
         }
 
@@ -420,16 +420,31 @@ namespace AUTO_Matic
                     {
                         
                         case GameStates.SideScroll: //Default
-                            if(ssPlayer.isPilot)
+
+
+                            //dont = false;
+                            foreach (BottomDoorTile door in SideTileMap.BottomDoorTiles)
                             {
-                                ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y - (60 - ssPlayer.playerRect.Height)));
+                                if (ssCamera.CameraBounds.Contains(door.Rectangle)/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
+                                {
+                                    dont = true;
+                                }
                             }
-                            else
-                            {
-                                ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y));
-                            }
-                           
-                            if(ssCamera.onBorderLeft && ssCamera.onBorderTop)
+
+                                if (ssPlayer.isPilot)
+                                {
+                                    ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y - (60 - ssPlayer.playerRect.Height)), dont);
+                                }
+                                else
+                                {
+                                    ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont);
+                                }
+                            
+
+
+
+
+                            if (ssCamera.onBorderLeft && ssCamera.onBorderTop)
                             {
                                 UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point(64,
                                (int)(64 * 4.5f)), new Point(0, 0)));
@@ -874,6 +889,10 @@ namespace AUTO_Matic
             if (MathHelper.Distance(SideTileMap.TopDoorTiles[topTile].Rectangle.Bottom, SideTileMap.BottomDoorTiles[bottomTile].Rectangle.Top) > pixelBits * 2)
             {
                 updateDoor = false;
+
+                SideTileMap.TopDoorTiles.Remove(SideTileMap.TopDoorTiles[topTile]);
+                SideTileMap.BottomDoorTiles.Remove(SideTileMap.BottomDoorTiles[bottomTile]);
+                dont = false;   
             }
         }
         /// <summary>
@@ -918,7 +937,7 @@ namespace AUTO_Matic
 
                         //enemy.Draw(spriteBatch);
                         UIManager.Draw(spriteBatch);
-                        spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), ssCamera.FollowBox, Color.White);
+                        spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), ssCamera.CameraBounds, Color.White * .5f);
                         spriteBatch.End();
                     }
                     else if(GameState == GameStates.TopDown)
