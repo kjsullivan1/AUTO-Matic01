@@ -118,6 +118,7 @@ namespace AUTO_Matic
         List<PlatformTile> destroyedPlatfroms = new List<PlatformTile>();
         float respawnDelay = 0;
         float respawnDelaySet = .75f;
+        bool tdCameraReached = false;
         class Door
         {
             BottomDoorTile bottomDoor;
@@ -287,7 +288,8 @@ namespace AUTO_Matic
                 shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls);
 
 
-               
+               if(GameState == GameStates.Paused)
+                    GameState = GameStates.Paused;
                 startBoss = true;
                 //tdPlayer.rectangle.X -= 200;
                 //canShoot = true;
@@ -400,22 +402,27 @@ namespace AUTO_Matic
         Vector2 CameraPos()
         {
             Vector2 pos = camera.Position;
+            tdCameraReached = true;
             //pos = new Vector2(Window.ClientBounds.Width / 2 + (Window.ClientBounds.Width * (levelInX - 1)), graphics.PreferredBackBufferHeight / 2 + (graphics.PreferredBackBufferHeight * (levelInY - 1)));
             if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) > pos.X))
             {
                 pos.X += graphics.PreferredBackBufferWidth / pixelBits;
+                tdCameraReached = false;
             }
             else if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) < pos.X))
             {
                 pos.X -= graphics.PreferredBackBufferWidth / pixelBits;
+                tdCameraReached = false;
             }
             if (((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))) < pos.Y))
             {
                 pos.Y -= graphics.PreferredBackBufferHeight / pixelBits;
+                tdCameraReached = false;
             }
             else if ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) > pos.Y))
             {
                 pos.Y += graphics.PreferredBackBufferHeight / pixelBits;
+                tdCameraReached = false;
             }
 
             if (BoundIndexes.Contains(new Vector2((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1))), 
@@ -687,8 +694,9 @@ namespace AUTO_Matic
                                 }
                                 if (kb.IsKeyDown(Keys.RightShift))
                                 {
-                                    StartDungeon();
                                     GameState = GameStates.TopDown;
+                                    StartDungeon();
+                                   
                                 }
 
                             }
@@ -698,228 +706,236 @@ namespace AUTO_Matic
 #endregion
                         #region TopDown
                         case GameStates.TopDown:
-                            if (tdPlayer.Health <= 0)
+                            if(fade)
                             {
-                                StartDungeon();
+                                camera.Update(CameraPos());
                             }
-
-                            UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)(camera.Position.X - GraphicsDevice.Viewport.Width/2) + 20,
-                                   (int)(camera.Position.Y - GraphicsDevice.Viewport.Height/2) + 20), new Point(0, 0)));
-                            camera.Update(new Vector2(camera.X, camera.Y));
-                            tdPlayer.Update(gameTime, tdMap, shotGunBoss);
-                            camera.Update(CameraPos());
-                            if(kb.IsKeyDown(Keys.J) || tdPlayer.rectangle.Intersects(LeaveDungeon))//Switching back to sidescroll
+                            else
                             {
-                                GameState = GameStates.SideScroll;
-                                //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
-                                graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
-                                graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
-
-                                //graphics.HardwareModeSwitch = false;
-                                //graphics.IsFullScreen = true;
-                                graphics.ApplyChanges();
-
-                                List<Texture2D> healthbars = new List<Texture2D>();
-                                for (int i = 0; i < 6; i++)
+                                if (tdPlayer.Health <= 0)
                                 {
-                                    healthbars.Add(Content.Load<Texture2D>(@"SideScroll\HealthBar\RoboHealthBar" + i));
+                                    StartDungeon();
                                 }
 
-                                UIHelper.HealthBar = healthbars;
-                                UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
-                                //Camera position not updated
-                            }
-                            if(tdPlayer.changeLevel)
-                            {
-
-                                tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
-                                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
-                                tdEnemies.Clear();
-                                currMap = tdPlayer.DiagLevels.dLevels[tdPlayer.DiagLevels.diagIndex];
-                                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
-                                    (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
-                                    new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-                                if(!startBoss)
+                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)(camera.Position.X - GraphicsDevice.Viewport.Width / 2) + 20,
+                                       (int)(camera.Position.Y - GraphicsDevice.Viewport.Height / 2) + 20), new Point(0, 0)));
+                                camera.Update(new Vector2(camera.X, camera.Y));
+                                tdPlayer.Update(gameTime, tdMap, shotGunBoss);
+                                camera.Update(CameraPos());
+                                if (kb.IsKeyDown(Keys.J) || tdPlayer.rectangle.Intersects(LeaveDungeon))//Switching back to sidescroll
                                 {
-                                    foreach (Vector2 enemySpawn in tdMap.EnemySpawns)
+                                    GameState = GameStates.SideScroll;
+                                    //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
+                                    graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
+                                    graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
+
+                                    //graphics.HardwareModeSwitch = false;
+                                    //graphics.IsFullScreen = true;
+                                    graphics.ApplyChanges();
+
+                                    List<Texture2D> healthbars = new List<Texture2D>();
+                                    for (int i = 0; i < 6; i++)
                                     {
-                                        if (currBounds.Contains(enemySpawn))
-                                            if (tdEnemies.Contains(new TDEnemy(Content, enemySpawn, tdMap, currMap, GraphicsDevice)) == false)
-                                                tdEnemies.Add(new TDEnemy(Content, enemySpawn, tdMap, currMap, GraphicsDevice));
+                                        healthbars.Add(Content.Load<Texture2D>(@"SideScroll\HealthBar\RoboHealthBar" + i));
+                                    }
+
+                                    UIHelper.HealthBar = healthbars;
+                                    UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
+                                    //Camera position not updated
+                                }
+                                if (tdPlayer.changeLevel)
+                                {
+
+                                    tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                                        tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                                    tdEnemies.Clear();
+                                    currMap = tdPlayer.DiagLevels.dLevels[tdPlayer.DiagLevels.diagIndex];
+                                    Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                                        (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                                        new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                                    if (!startBoss)
+                                    {
+                                        foreach (Vector2 enemySpawn in tdMap.EnemySpawns)
+                                        {
+                                            if (currBounds.Contains(enemySpawn))
+                                                if (tdEnemies.Contains(new TDEnemy(Content, enemySpawn, tdMap, currMap, GraphicsDevice)) == false)
+                                                    tdEnemies.Add(new TDEnemy(Content, enemySpawn, tdMap, currMap, GraphicsDevice));
+                                        }
+                                    }
+
+                                    tdPlayer.changeLevel = false;
+
+                                }
+                                if (tdEnemies.Count != 0)
+                                {
+                                    bool hardBreak = false;
+                                    for (int j = tdEnemies.Count - 1; j >= 0; j--)
+                                    {
+                                        if (tdPlayer.bullets.Count != 0)
+                                        {
+                                            for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                            {
+                                                if (tdPlayer.bullets[i].rect.Intersects(tdEnemies[j].Rectangle))
+                                                {
+                                                    tdEnemies[j].Health -= tdPlayer.bulletDmg;
+                                                    //if(tdEnemies[j].Health <= 0)
+                                                    //{
+                                                    //    tdEnemies.RemoveAt(j);
+                                                    //    hardBreak = true;
+                                                    //}
+                                                    tdPlayer.bullets.RemoveAt(i);
+                                                    break;
+
+                                                }
+                                            }
+                                            if (hardBreak)
+                                                break;
+                                        }
                                     }
                                 }
-                               
-                                tdPlayer.changeLevel = false;
-                               
-                            }
-                            if (tdEnemies.Count != 0)
-                            {
-                                bool hardBreak = false;
-                                for (int j = tdEnemies.Count - 1; j >= 0; j--)
+
+                                for (int i = tdEnemies.Count - 1; i >= 0; i--)
+                                {
+                                    tdEnemies[i].Upate(gameTime, tdPlayer, tdMap);
+                                    if (tdEnemies[i].Health <= 0)
+                                    {
+                                        if (rand.Next(0, 101) < dropRateTD)
+                                        {
+                                            healthDrops.Add(new HealthDrop(tdEnemies[i].Rectangle));
+
+                                        }
+                                        tdEnemies.RemoveAt(i);
+                                    }
+                                }
+
+                                for (int i = healthDrops.Count - 1; i >= 0; i--)
+                                {
+                                    if (healthDrops[i].rect.Intersects(tdPlayer.rectangle))
+                                    {
+                                        tdPlayer.Health += healAmount;
+                                        healthDrops.RemoveAt(i);
+
+                                    }
+                                }
+
+                                if (tdPlayer.bullets.Count != 0)
+                                {
+                                    for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                    {
+                                        tdPlayer.bullets[i].Update();
+                                    }
+                                }
+
+
+
+                                foreach (WallTiles tile in tdMap.WallTiles)
                                 {
                                     if (tdPlayer.bullets.Count != 0)
                                     {
                                         for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
                                         {
-                                            if (tdPlayer.bullets[i].rect.Intersects(tdEnemies[j].Rectangle))
+                                            if (tdPlayer.bullets[i].rect.Intersects(tile.Rectangle))
                                             {
-                                                tdEnemies[j].Health -= tdPlayer.bulletDmg;
-                                                //if(tdEnemies[j].Health <= 0)
-                                                //{
-                                                //    tdEnemies.RemoveAt(j);
-                                                //    hardBreak = true;
-                                                //}
                                                 tdPlayer.bullets.RemoveAt(i);
-                                                break;
-
                                             }
                                         }
-                                        if (hardBreak)
-                                            break;
                                     }
                                 }
-                            }
 
-                            for (int i = tdEnemies.Count - 1; i >= 0; i--)
-                            {
-                                tdEnemies[i].Upate(gameTime, tdPlayer, tdMap);
-                                if(tdEnemies[i].Health<= 0)
+
+                                //if(!canShoot)
+                                //{
+                                //    shootRate -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                                //    if(shootRate < 0)
+                                //    {
+                                //        shootRate = maxShootRate;
+                                //        canShoot = true;
+                                //    }
+                                //}
+
+                                //if(canShoot)
+                                //{
+                                //    if(tdPlayer.position.X < Boss.X + Boss.Width/2)
+                                //    {
+                                //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed, maxBulletSpeed), Content, true, 64 * 6));
+                                //    }
+                                //    if(tdPlayer.position.X > Boss.X + Boss.Width/2)
+                                //    {
+                                //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, true, 64 * 6));
+                                //    }
+                                //    if(tdPlayer.position.Y < Boss.Y + Boss.Height/2)
+                                //    {
+                                //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(maxBulletSpeed, -maxBulletSpeed), Content, false, 64 * 6));
+                                //    }
+                                //    if (tdPlayer.position.Y > Boss.Y + Boss.Height / 2)
+                                //    {
+                                //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, false, 64 * 6));
+                                //    }
+
+                                //    canShoot = false;
+                                //}
+
+                                //foreach(Bullet bullet in bossBullets)
+                                //{
+                                //    bullet.Update();
+                                //}
+
+
+                                //for(int i = bossBullets.Count - 1; i >= 0; i--)
+                                //{
+                                //    if(bossBullets[i].rect.Intersects(tdPlayer.rectangle))
+                                //    {
+                                //        tdPlayer.Health -= bulletDmg;
+
+                                //        if(tdPlayer.Health <= 0)
+                                //        {
+                                //            StartDungeon();
+                                //        }
+
+                                //        bossBullets.RemoveAt(i);
+                                //    }
+                                //}
+                                if (startBoss)
                                 {
-                                    if(rand.Next(0,101) < dropRateTD)
-                                    {
-                                        healthDrops.Add(new HealthDrop(tdEnemies[i].Rectangle));
-                                     
-                                    }
-                                    tdEnemies.RemoveAt(i);
+                                    shotGunBoss.Update(gameTime, tdPlayer, tdMap);
                                 }
-                            }
 
-                            for (int i = healthDrops.Count - 1; i >= 0; i--)
-                            {
-                                if (healthDrops[i].rect.Intersects(tdPlayer.rectangle))
-                                {
-                                    tdPlayer.Health += healAmount;
-                                    healthDrops.RemoveAt(i);
-
-                                }
-                            }
-
-                            if (tdPlayer.bullets.Count != 0)
-                            {
-                                for(int i = tdPlayer.bullets.Count - 1; i >=0; i--)
-                                {
-                                    tdPlayer.bullets[i].Update();
-                                }
-                            }
-
-
-
-                            foreach(WallTiles tile in tdMap.WallTiles)
-                            {
-                                if (tdPlayer.bullets.Count != 0)
+                                if (levelCount >= tdPlayer.bossRoom)
                                 {
                                     for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
                                     {
-                                        if(tdPlayer.bullets[i].rect.Intersects(tile.Rectangle))
+                                        if (shotGunBoss != null && tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
                                         {
+                                            shotGunBoss.Health -= tdPlayer.bulletDmg;
                                             tdPlayer.bullets.RemoveAt(i);
                                         }
                                     }
+
                                 }
-                            }
-
-                           
-                            //if(!canShoot)
-                            //{
-                            //    shootRate -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                            //    if(shootRate < 0)
-                            //    {
-                            //        shootRate = maxShootRate;
-                            //        canShoot = true;
-                            //    }
-                            //}
-
-                            //if(canShoot)
-                            //{
-                            //    if(tdPlayer.position.X < Boss.X + Boss.Width/2)
-                            //    {
-                            //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed, maxBulletSpeed), Content, true, 64 * 6));
-                            //    }
-                            //    if(tdPlayer.position.X > Boss.X + Boss.Width/2)
-                            //    {
-                            //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, true, 64 * 6));
-                            //    }
-                            //    if(tdPlayer.position.Y < Boss.Y + Boss.Height/2)
-                            //    {
-                            //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), -bulletSpeed, new Vector2(maxBulletSpeed, -maxBulletSpeed), Content, false, 64 * 6));
-                            //    }
-                            //    if (tdPlayer.position.Y > Boss.Y + Boss.Height / 2)
-                            //    {
-                            //        bossBullets.Add(new Bullet(new Vector2(Boss.X + Boss.Width / 2, Boss.Y + Boss.Height / 2), bulletSpeed, new Vector2(maxBulletSpeed, maxBulletSpeed), Content, false, 64 * 6));
-                            //    }
-
-                            //    canShoot = false;
-                            //}
-
-                            //foreach(Bullet bullet in bossBullets)
-                            //{
-                            //    bullet.Update();
-                            //}
 
 
-                            //for(int i = bossBullets.Count - 1; i >= 0; i--)
-                            //{
-                            //    if(bossBullets[i].rect.Intersects(tdPlayer.rectangle))
-                            //    {
-                            //        tdPlayer.Health -= bulletDmg;
-
-                            //        if(tdPlayer.Health <= 0)
-                            //        {
-                            //            StartDungeon();
-                            //        }
-
-                            //        bossBullets.RemoveAt(i);
-                            //    }
-                            //}
-                            if (startBoss)
-                            {
-                                shotGunBoss.Update(gameTime, tdPlayer, tdMap);
-                            }
-
-                            if(levelCount >= tdPlayer.bossRoom)
-                            {
-                                for(int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                //if(levelCount >= tdPlayer.bossRoom)
+                                //{
+                                //    for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                //    {
+                                //        if (tdPlayer.bullets[i].rect.Intersects(Boss))
+                                //        {
+                                //             bossHealth -= tdPlayer.bulletDmg;
+                                //            if (bossHealth <= 0)
+                                //            {
+                                //                Boss = new Rectangle();
+                                //                break;
+                                //            }
+                                //            tdPlayer.bullets.RemoveAt(i);
+                                //        }
+                                //    }
+                                //}
+                                if (tdPlayer.damaged)
                                 {
-                                    if(shotGunBoss != null && tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
-                                    {
-                                        shotGunBoss.Health -= tdPlayer.bulletDmg;
-                                        tdPlayer.bullets.RemoveAt(i);
-                                    }
+                                    UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)tdPlayer.Health);
                                 }
-                              
                             }
-
-                          
-                            //if(levelCount >= tdPlayer.bossRoom)
-                            //{
-                            //    for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
-                            //    {
-                            //        if (tdPlayer.bullets[i].rect.Intersects(Boss))
-                            //        {
-                            //             bossHealth -= tdPlayer.bulletDmg;
-                            //            if (bossHealth <= 0)
-                            //            {
-                            //                Boss = new Rectangle();
-                            //                break;
-                            //            }
-                            //            tdPlayer.bullets.RemoveAt(i);
-                            //        }
-                            //    }
-                            //}
-                            if(tdPlayer.damaged)
-                            {
-                                UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)tdPlayer.Health);
-                            }
+                           
                             break;
                         #endregion
                         case GameStates.Paused:
@@ -943,7 +959,18 @@ namespace AUTO_Matic
                             }
                             else if(prevGameState == GameStates.TopDown)
                             {
-
+                                //camera.Update(new Vector2(camera.X, camera.Y));
+                                //tdPlayer.Update(gameTime, tdMap, shotGunBoss);
+                                camera.Update(CameraPos());
+                                if(tdCameraReached == false)
+                                {
+                                    black = true;
+                                }
+                                else if(tdCameraReached)
+                                {
+                                    GameState = prevGameState;
+                                    fade = true;
+                                }
                             }
                             break;
                     }
@@ -1122,33 +1149,53 @@ namespace AUTO_Matic
                     }
                     else if(GameState == GameStates.TopDown)
                     {
-                        Window.Title = "AnalogStickDir: " + moveDir.ToString();
-                        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
-                        tdMap.Draw(spriteBatch);
-                        tdPlayer.Draw(spriteBatch);
-                       
-                        foreach (TDEnemy enemy in tdEnemies)
+                        if (fade)
                         {
-                            enemy.Draw(spriteBatch);
-                        }
-                        foreach(HealthDrop health in healthDrops)
-                        {
-                            health.Draw(spriteBatch);
-                        }
-                        if(startBoss)
-                        {
-                            shotGunBoss.Draw(spriteBatch);
-                        }
-                        UIManager.Draw(spriteBatch);
-                        //foreach(Bullet bullet in bossBullets)
-                        //{
-                        //    bullet.Draw(spriteBatch);
-                        //}
-                        //spriteBatch.Draw(Content.Load<Texture2D>("TopDown/MapTiles/Tile11"), Boss, Color.White);
-                        spriteBatch.End();
+                            iRate -= rate;
+                            if (iRate < 0)
+                            {
+                                iRate = 1;
+                                fade = false;
+                            }
+                            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
 
-                        //if (changeLevel)
-                        //    map.Refresh(PosXLevel.xLevels, PosYLevel.yLevels, Diagonal.dLevels, pixelBits, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, PosXLevel.Points, PosYLevel.Points, Diagonal.Points);
+                            tdMap.Draw(spriteBatch);
+                            tdPlayer.Draw(spriteBatch);
+                            spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), new Rectangle(new Point((int)(camera.Position.X - camera.viewport.Width/2), (int)(camera.Position.Y - camera.viewport.Height/2)), 
+                                new Point(camera.viewport.Width, camera.viewport.Height)), Color.Black * iRate);
+                            spriteBatch.End();
+                        }
+                        else
+                        {
+                            Window.Title = "AnalogStickDir: " + moveDir.ToString();
+                            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
+                            tdMap.Draw(spriteBatch);
+                            tdPlayer.Draw(spriteBatch);
+
+                            foreach (TDEnemy enemy in tdEnemies)
+                            {
+                                enemy.Draw(spriteBatch);
+                            }
+                            foreach (HealthDrop health in healthDrops)
+                            {
+                                health.Draw(spriteBatch);
+                            }
+                            if (startBoss)
+                            {
+                                shotGunBoss.Draw(spriteBatch);
+                            }
+                            UIManager.Draw(spriteBatch);
+                            //foreach(Bullet bullet in bossBullets)
+                            //{
+                            //    bullet.Draw(spriteBatch);
+                            //}
+                            //spriteBatch.Draw(Content.Load<Texture2D>("TopDown/MapTiles/Tile11"), Boss, Color.White);
+                            spriteBatch.End();
+
+                            //if (changeLevel)
+                            //    map.Refresh(PosXLevel.xLevels, PosYLevel.yLevels, Diagonal.dLevels, pixelBits, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, PosXLevel.Points, PosYLevel.Points, Diagonal.Points);
+                        }
+
                     }
                     else if(GameState == GameStates.Paused)
                     {

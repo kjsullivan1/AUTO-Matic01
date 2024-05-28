@@ -645,13 +645,13 @@ namespace AUTO_Matic.SideScroll
 
                
                     //Player is above the enemy, isnt't forced into goTo and the enemy is on the ground
-                    if (player.playerRect.Bottom < enemyRect.Top && player.velocity.Y >= 0 && blockBottom && !goTo/*&& player.blockBottom*/ /*|| blockLeft || blockRight*/)
+                    if (player.playerRect.Bottom < enemyRect.Top && player.velocity.Y >= 0 && blockBottom && !goTo/*&& player.blockBottom*/ || blockLeft && goTo|| blockRight && goTo)
                     {
                         //if (player.velocity.Y >= -5)
                         //{
                         //    leftOnX = player.playerRect.X; //where the playere was last to set direction priority if jump fails
                         //}
-
+                        goTo = false;
                         if (player.blockBottom || blockLeft && !blockBottom|| blockRight && !blockBottom)
                         {
                             enemyState = EnemyStates.Jumping;  //Calculate and determine possible jumps
@@ -664,26 +664,26 @@ namespace AUTO_Matic.SideScroll
                         }
                        
                     }
-                    else if(velocity.X < 0 && bounds.X == 0 && blockBottom && player.velocity.Y <= 0 && !goTo && leftOnY != 0 && leftOnY > enemyRect.Bottom)
-                    {
-                        enemyState = EnemyStates.Falling;
-                        break;
-                    }
-                    else if(leftOnY == 0 && bounds.X == 0 && velocity.X < 0 && blockBottom && player.velocity.Y <= 0 && !goTo && player.playerRect.Top > enemyRect.Bottom)
-                    {
-                        enemyState = EnemyStates.Falling;
-                        break;
-                    }
-                    else if(velocity.X > 0 && bounds.Y == 0 && blockBottom && player.velocity.Y <=0 && !goTo && leftOnY != 0 && leftOnY > enemyRect.Bottom)
-                    {
-                        enemyState = EnemyStates.Falling;
-                        break;
-                    }
-                    else if(leftOnY == 0 && velocity.X > 0 && bounds.Y == 0 && blockBottom && player.velocity.Y <= 0 && !goTo && player.playerRect.Top > enemyRect.Bottom)
-                    {
-                        enemyState = EnemyStates.Falling;
-                        break;
-                    }
+                    //else if(velocity.X < 0 && bounds.X == 0 && blockBottom && player.velocity.Y <= 0 && !goTo && leftOnY != 0 && leftOnY > enemyRect.Bottom)
+                    //{
+                    //    enemyState = EnemyStates.Falling;
+                    //    break;
+                    //}
+                    //else if(leftOnY == 0 && bounds.X == 0 && velocity.X < 0 && blockBottom && player.velocity.Y <= 0 && !goTo && player.playerRect.Top > enemyRect.Bottom)
+                    //{
+                    //    enemyState = EnemyStates.Falling;
+                    //    break;
+                    //}
+                    //else if(velocity.X > 0 && bounds.Y == 0 && blockBottom && player.velocity.Y <=0 && !goTo && leftOnY != 0 && leftOnY > enemyRect.Bottom)
+                    //{
+                    //    enemyState = EnemyStates.Falling;
+                    //    break;
+                    //}
+                    //else if(leftOnY == 0 && velocity.X > 0 && bounds.Y == 0 && blockBottom && player.velocity.Y <= 0 && !goTo && player.playerRect.Top > enemyRect.Bottom)
+                    //{
+                    //    enemyState = EnemyStates.Falling;
+                    //    break;
+                    //}
                     //else if (leftOnY != 0 && leftOnY > enemyRect.Bottom && player.velocity.Y <= 0 && blockBottom && !goTo)//Player is below enemy and will check to see if can go down
                     //{
                     //    enemyState = EnemyStates.Falling;
@@ -810,11 +810,8 @@ namespace AUTO_Matic.SideScroll
                             }
                         }
 
-                        if (blockRight || blockLeft)
-                        {
-                            //int hello = 0;
-                        }
-                        else
+                       
+                        
                         {
                             if(possibleJumpLocations.Count != 0) //Determine which of the possible locations is best
                             {
@@ -884,7 +881,7 @@ namespace AUTO_Matic.SideScroll
                                 float randForce = maxJumpForce;
                                 int i = TestJump(goalRect, randForce, position, tempVel.X, false); //Test jump at max values
                                 //Success would == 1
-                                int jumpMin = 10;
+                                int jumpMin = 2;
                                 int speedMin = 1;
 
                                 while (i != 1)//Goes through every possible jump 
