@@ -85,6 +85,8 @@ namespace AUTO_Matic.Scripts.TopDown
         Rectangle bounds;
         Rectangle tempRect;
         public Rectangle worldRect;
+
+        List<Rectangle> BreakableWalls = new List<Rectangle>();
         #endregion
 
 
@@ -100,7 +102,7 @@ namespace AUTO_Matic.Scripts.TopDown
             }
         }
 
-        public ShotGunBoss(Rectangle rect, int width, int height, ContentManager content)
+        public ShotGunBoss(Rectangle rect, int width, int height, ContentManager content, List<Rectangle> walls)
         {
             bossRect = new Rectangle(((rect.X + rect.Width / 2) - 64 / 2), (((rect.Y + rect.Height / 2) - 64 / 2)), 64, 64);
             this.content = content;
@@ -110,10 +112,14 @@ namespace AUTO_Matic.Scripts.TopDown
             bounds = rect;
             tempRect = bossRect;
             worldRect = new Rectangle(((bounds.X + bounds.Width / 2) - width / 2), (((bounds.Y + bounds.Height / 2) - height / 2)), width, height);
+
+           BreakableWalls = walls;
         }
 
         public void Update(GameTime gameTime, TDPlayer tdPlayer, TopDownMap tdMap)
         {
+          
+
             if(health > 0)
             {
                 if (shootDelay >= 0)

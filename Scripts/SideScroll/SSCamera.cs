@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using AUTO_Matic.Scripts;
+using AUTO_Matic.SideScroll;
+using AUTO_Matic.Scripts.SideScroll;
 
 namespace AUTO_Matic.Scripts.SideScroll
 {
@@ -13,14 +16,22 @@ namespace AUTO_Matic.Scripts.SideScroll
         public Matrix transform;
         public int width = 0;
         public int height = 0;
-        Vector2 center;
+        public Vector2 center;
         public Viewport viewport;
         private float zoom = 1.75f;
         public bool onBorderLeft = false;
         public bool onBorderTop = false;
         public bool onBorderBottom = false;
         public bool onBorderRight = false;
-       
+        public bool reached = false;
+        float moveSpeed = 4.25f;
+        float moveSpeedY = 4.25f;
+        float maxMoveSpeedY = 12;
+        float maxMoveSpeed = 5.5f;
+        public int min = 0;
+        Vector2 prevPos = Vector2.One;
+        int count = 0;
+        bool stop = false;
         public Vector2 Position
         {
             get { return center; }
@@ -65,6 +76,7 @@ namespace AUTO_Matic.Scripts.SideScroll
 
         public void Update(Vector2 position, bool dont)
         {
+            count++;
             //if (position.Y - viewport.Height / 2 <= 0)
             //{
             //    //onBorder = true;
@@ -92,105 +104,264 @@ namespace AUTO_Matic.Scripts.SideScroll
             {
                 //center = new Vector2(position.X, position.Y);
                 //transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
-
+                
                 onBorderLeft = false;
                 onBorderTop = false;
                 onBorderRight = false;
                 onBorderBottom = false;
+
+                //if (center.X < position.X)
+                //{
+                //    center.X += moveSpeed;
+                //}
+                //if (center.X > position.X)
+                //{
+                //    center.X -= moveSpeed;
+                //}
+                if (center.Y < position.Y)
+                {
+                    center.Y += moveSpeed;
+                    reached = false;
+                }
+                if (center.Y > position.Y)
+                {
+                    center.Y -= moveSpeed;
+                    reached = false;
+                }
+
             }
             else
             {
-                center = new Vector2(position.X, position.Y);
-                transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
+
+                if (MathHelper.Distance(center.X, position.X) > 64 * 3)
+                {
+                    moveSpeed = maxMoveSpeed;
+                }
+                else if(MathHelper.Distance(center.X, position.X) > 64 * 4)
+                {
+                    moveSpeed = maxMoveSpeed * 1.5f;
+                }
+                else
+                {
+                    moveSpeed = 4.3f;
+                }
+
+                if (MathHelper.Distance(center.Y, position.Y) > 64 * 2)
+                {
+                    moveSpeedY = maxMoveSpeedY;
+                }
+                else if (MathHelper.Distance(center.Y, position.Y) > 64 * 3)
+                {
+                    moveSpeedY = maxMoveSpeedY * 1.5f;
+                }
+                else
+                {
+                    moveSpeedY = 4.3f;
+                }
+                if (center.X < position.X)
+                {
+                    center.X += moveSpeed;
+                    reached = false;
+                }
+                if (center.X > position.X)
+                {
+                    center.X -= moveSpeed;
+                    reached = false;
+                }
+                if (center.Y < position.Y)
+                {
+                    center.Y += moveSpeedY;
+                    reached = false;
+                }
+                if (center.Y > position.Y)
+                {
+                    center.Y -= moveSpeedY;
+                    reached = false;
+                }
+                // center = new Vector2(position - moveSpeed)
+                if(center == position)
+                {
+                    reached = true;
+                }
+
+              
 
                 onBorderLeft = false;
                 onBorderTop = false;
                 onBorderRight = false;
                 onBorderBottom = false;
             }
-            //If bordering the top and left
-            if (this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && this.position.X <= 0 && position.X - viewport.Width / 5f <= 0)
+
+            if (count > 1)
             {
-                //center = new Vector2(viewport.Width / 1.75f, position.Y);
-                //center = new Vector2(center.X, viewport.Height / 1.75f);
-                onBorderLeft = true;
-                onBorderTop = true;
-                center = new Vector2(viewport.Width / 1.75f, viewport.Height / 1.75f);
-                transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height, 0));
-            }
-            else if (this.position.X <= 0 && position.X - viewport.Width / 2f <= 0)//Just bordering the left
-            {
-                onBorderLeft = true;
-                center = new Vector2(viewport.Width / 1.75f, position.Y);
-                transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height / 2, 0));
-            }
-            else if((position.X + 32) + viewport.Width / 2f > width)//Bordering the right
-            {
-                onBorderRight = true;
-                center = new Vector2(viewport.Width * 1.365f, position.Y);
-                transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width/2, viewport.Height / 2, 0));
-            }
-            if(this.position.Y <= 0 && position.Y - viewport.Height/2f <= 0 && this.position.X > 0) //Bordering the top
-            {
-                onBorderTop = true;
-                center = new Vector2(center.X, viewport.Height / 1.75f);
-                transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width/2, viewport.Height, 0));
-            }
-            else if(this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && this.position.X <= 0) //Bordering the Left and top
-            {
-                onBorderLeft = true;
-                onBorderTop = true;
-                center = new Vector2(center.X, viewport.Height / 1.75f);
-                transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height, 0));
-            }
-            else if(this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && position.X + viewport.Width / 2 > width)//Bordering top and right
-            {
-                onBorderTop = true;
-                onBorderRight = true;
-                center = new Vector2(viewport.Width * 1.365f, viewport.Height / 1.75f);
-                transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
+                if (MathHelper.Distance(prevPos.X, center.X) == 0 && MathHelper.Distance(prevPos.Y, center.Y) == 0 )
+                {
+                    if(CameraBounds.X < 0)
+                    {
+                        CameraBounds.X = 0;
+                        center.X = 550.4f;
+                    }
+                    reached = true;
+                }
+                prevPos = center;
+                count = 0;
             }
 
-
-
-            if (this.position.Y + height/2 >= height && position.X + viewport.Width / 2 > width) //Bordering the bottom and right
+            if (CameraBounds.Left < min + 5 && !dont)
             {
-                    onBorderBottom = true;
-                    onBorderRight = true;
-                center = new Vector2(viewport.Width * 1.365f, 64 * 10);
-                transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width/2, viewport.Height / 2, 0));
+                center.X += moveSpeed;
+                //center.X = min + CameraBounds.Width / 2;
+
             }
-            else if(this.position.Y + height/2 >= height)//Bordering the bottom
+            else if (CameraBounds.Left < min && dont)
             {
-                    onBorderBottom = true;
-                center = new Vector2(center.X, 64 * 10);
-                transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
+                center.X += moveSpeed;
+                //center.X = min + CameraBounds.Width / 2;
+
             }
-            //if (position.Y + viewport.Height / 2f >= height && position.X + viewport.Width / 2 >= width)
+             
+            if (CameraBounds.Top < 0 + 5 && !dont)
+            {
+                 center.Y += moveSpeed;
+               
+            }   
+            else if (CameraBounds.Top < 0 && dont)
+            {
+                center.Y += moveSpeed;
+              
+            }
+              
+            if (CameraBounds.Right > width - 5 && !dont)
+            {
+                center.X -= moveSpeed;
+               
+            }
+            else if (CameraBounds.Right > width && dont)
+            {
+                center.X -= moveSpeed;
+               
+            }
+           
+            if (CameraBounds.Bottom > height - 5 && !dont)
+            {
+                center.Y -= moveSpeed;
+                center.Y = height - CameraBounds.Height / 2;
+                
+            }
+            else if (CameraBounds.Bottom > height && dont)
+            {
+                center.Y -= moveSpeed;
+                center.Y = height - CameraBounds.Height / 2;
+
+            }
+
+           
+         
+            #region comments
+            ////If bordering the top and left
+            //if (this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && this.position.X <= 0 && position.X - viewport.Width / 5f <= 0)
             //{
-            //    onBorderSide = true;
+            //    //center = new Vector2(viewport.Width / 1.75f, position.Y);
+            //    //center = new Vector2(center.X, viewport.Height / 1.75f);
+            //    onBorderLeft = true;
             //    onBorderTop = true;
-            //    center = new Vector2(center.X, height / 2);
-            //    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height/2, 0));
+            //    //center = new Vector2(viewport.Width / 1.75f, viewport.Height / 1.75f);
+            //    //transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height, 0));
             //}
-            //else if (position.Y + viewport.Height / 2f >= height && this.position.X > 0)
+            //else if (this.position.X <= 0 && position.X - viewport.Width / 2f <= 0)//Just bordering the left
+            //{
+            //    onBorderLeft = true;
+            //    //center = new Vector2(viewport.Width / 1.75f, position.Y);
+            //    //transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height / 2, 0));
+            //}
+            //else if((position.X + 32) + viewport.Width / 2f > width)//Bordering the right
+            //{
+            //    onBorderRight = true;
+            ////    center = new Vector2(viewport.Width * 1.365f, position.Y);
+            ////    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width/2, viewport.Height / 2, 0));
+            //}
+            //if(this.position.Y <= 0 && position.Y - viewport.Height/2f <= 0 && this.position.X > 0) //Bordering the top
             //{
             //    onBorderTop = true;
-            //    center = new Vector2(center.X, height/2);
-            //    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height/2, 0));
+            //    //center = new Vector2(center.X, viewport.Height / 1.75f);
+            //    //transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width/2, viewport.Height, 0));
             //}
-            //else if (position.Y + viewport.Height / 2f >= height && this.position.X <= 0)
+            //else if(this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && this.position.X <= 0) //Bordering the Left and top
             //{
-            //    onBorderSide = true;
+            //    onBorderLeft = true;
             //    onBorderTop = true;
-            //    center = new Vector2(center.X, height/2);
-            //    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height/2, 0));
+            //    //center = new Vector2(center.X, viewport.Height / 1.75f);
+            //    //transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height, 0));
+            //}
+            //else if(this.position.Y <= 0 && position.Y - viewport.Height / 2f <= 0 && position.X + viewport.Width / 2 > width)//Bordering top and right
+            //{
+            //    onBorderTop = true;
+            //    onBorderRight = true;
+            //    //center = new Vector2(viewport.Width * 1.365f, viewport.Height / 1.75f);
+            //    //transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
             //}
 
 
 
+            //if (this.position.Y + height/2 >= height && position.X + viewport.Width / 2 > width) //Bordering the bottom and right
+            //{
+            //        onBorderBottom = true;
+            //        onBorderRight = true;
+            //    //center = new Vector2(viewport.Width * 1.365f, 64 * 10);
+            //    //transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width/2, viewport.Height / 2, 0));
+            //}
+            //else if(this.position.Y + height/2 >= height)//Bordering the bottom
+            //{
+            //        onBorderBottom = true;
+            //    //center = new Vector2(center.X, 64 * 10);
+            //    //transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
+            //}
+            ////if (position.Y + viewport.Height / 2f >= height && position.X + viewport.Width / 2 >= width)
+            ////{
+            ////    onBorderSide = true;
+            ////    onBorderTop = true;
+            ////    center = new Vector2(center.X, height / 2);
+            ////    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height/2, 0));
+            ////}
+            ////else if (position.Y + viewport.Height / 2f >= height && this.position.X > 0)
+            ////{
+            ////    onBorderTop = true;
+            ////    center = new Vector2(center.X, height/2);
+            ////    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height/2, 0));
+            ////}
+            ////else if (position.Y + viewport.Height / 2f >= height && this.position.X <= 0)
+            ////{
+            ////    onBorderSide = true;
+            ////    onBorderTop = true;
+            ////    center = new Vector2(center.X, height/2);
+            ////    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width, viewport.Height/2, 0));
+            ////}
 
-            CameraBounds = new Rectangle(new Point((int)(center.X - 1000 / 2), (int)(center.Y - 600 / 2)), new Point(1000, 600));
+            //if (onBorderTop)
+            //{
+            //    center.Y += moveSpeed;
+            //    onBorderTop = false;
+            //}
+
+            //if (onBorderBottom)
+            //{
+            //    onBorderBottom = false; 
+            //    center.Y -= moveSpeed;
+            //}
+
+            //if(onBorderLeft)
+            //{
+            //    center.X += moveSpeed;
+            //    onBorderLeft = false;
+            //}
+            //if(onBorderRight)
+            //{
+            //    center.X -= moveSpeed;
+            //    onBorderRight = false;
+            //}
+            #endregion
+            transform = Matrix.CreateTranslation(new Vector3((int)-center.X, (int)-center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
+            CameraBounds = new Rectangle(new Point((int)(center.X - 1100 / 2), (int)(center.Y - 620 / 2)), new Point(1100, 620));
             //else if(position.Y + viewport.Height/2 >= height)
             //{
 
@@ -201,7 +372,7 @@ namespace AUTO_Matic.Scripts.SideScroll
             //    center = new Vector2(center.X, position.Y);
             //    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
             //}
-
+           
         }
         public Rectangle FollowBox
         {

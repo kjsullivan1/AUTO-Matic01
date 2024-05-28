@@ -129,10 +129,15 @@ namespace AUTO_Matic
                     if (y != 0)
                         num2 = map[y - 1, x];
 
-                    if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19 || num == 20|| num ==21 || num ==22 || num ==23)
+                    if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19 || num == 20|| num ==21 || num ==22 || num ==23 || num == 26)
                     {
                         //If at the top of the map
-                        if(y==0)
+                        if (num == 26)
+                        {
+                            backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        }
+
+                        if (y==0)
                         {
                             groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (GroundIndexes.Contains(num) == false)
@@ -142,6 +147,8 @@ namespace AUTO_Matic
                         {
                             wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
                             //Add indexes?
+                            if (GroundIndexes.Contains(num) == false)
+                                GroundIndexes.Add(num);
                         }
                         else //Make it a ground tile
                         {
@@ -150,7 +157,7 @@ namespace AUTO_Matic
                                 GroundIndexes.Add(num);
                         }
                       
-
+                       
                     }
                     if (num == 3 || num == 4) //Platforms
                     {
@@ -163,6 +170,8 @@ namespace AUTO_Matic
                         else if(y > 0 && PlatformIndexes.Contains(num2)) //If there is one above it 
                         {
                             wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if (PlatformIndexes.Contains(num) == false)
+                                PlatformIndexes.Add(num);
                         }
                         else //Regular platform
                         {

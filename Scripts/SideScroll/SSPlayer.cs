@@ -59,6 +59,8 @@ namespace AUTO_Matic.SideScroll
         int whiteFrames = 10;
         int whiteCount = 0;
         public bool damaged = false;
+
+        public List<Rectangle> breakTiles = new List<Rectangle>();
         public float Health
         {
             get
@@ -316,8 +318,9 @@ namespace AUTO_Matic.SideScroll
         Point SheetSizeRobo;//num of frames.xy
         int fpmsRobo;
 
-        public void ChangeAnimation()
+        public void ChangeAnimation(bool onlyPilot = false)
         {
+            
             if(!isPilot)
             {
                 switch (animState)
@@ -379,31 +382,35 @@ namespace AUTO_Matic.SideScroll
                         break;
 
                 }
-                if(textureRobo != content.Load<Texture2D>("SideScroll/Animations/PlayerIdle"))
+                if(onlyPilot == false)
                 {
-                    textureRobo = content.Load<Texture2D>("SideScroll/Animations/PlayerIdle");
-                    FrameSizeRobo = new Point(64, 64);
-                    CurrFrameRobo = new Point(0, 0);
-                    SheetSizeRobo = new Point(6, 1);
-                    fpmsRobo = 120;
+                    if (textureRobo != content.Load<Texture2D>("SideScroll/Animations/PlayerIdle"))
+                    {
+                        textureRobo = content.Load<Texture2D>("SideScroll/Animations/PlayerIdle");
+                        FrameSizeRobo = new Point(64, 64);
+                        CurrFrameRobo = new Point(0, 0);
+                        SheetSizeRobo = new Point(6, 1);
+                        fpmsRobo = 120;
 
-                    
+
+                    }
+                    bool Right = true, Left = false, Up = false, Down = false;
+                    if (animManagerRobo != null)
+                    {
+                        Right = animManagerRobo.isRight;
+                        Left = animManagerRobo.isLeft;
+                        Up = animManagerRobo.isUp;
+                        Down = animManagerRobo.isDown;
+                    }
+
+                    animManagerRobo = new AnimationManager(textureRobo, FrameSizeRobo, CurrFrameRobo, SheetSizeRobo, fpmsRobo, new Vector2(RoboRect.X, RoboRect.Y));
+
+                    animManagerRobo.isRight = Right;
+                    animManagerRobo.isLeft = Left;
+                    animManagerRobo.isUp = Up;
+                    animManagerRobo.isDown = Down;
                 }
-                bool Right = true, Left = false, Up = false, Down = false;
-                if (animManagerRobo != null)
-                {
-                    Right = animManagerRobo.isRight;
-                    Left = animManagerRobo.isLeft;
-                    Up = animManagerRobo.isUp;
-                    Down = animManagerRobo.isDown;
-                }
-
-                animManagerRobo = new AnimationManager(textureRobo, FrameSizeRobo, CurrFrameRobo, SheetSizeRobo, fpmsRobo, new Vector2(RoboRect.X, RoboRect.Y));
-
-                animManagerRobo.isRight = Right;
-                animManagerRobo.isLeft = Left;
-                animManagerRobo.isUp = Up;
-                animManagerRobo.isDown = Down;
+              
 
 
             }
@@ -448,277 +455,290 @@ namespace AUTO_Matic.SideScroll
             isCollidingLeft = false;
         }
 
-        public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies)
+        public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies, bool fade = false)
         {
-            controllerMoveDir = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left;
-
-            currControllerBtn = GamePad.GetState(PlayerIndex.One).Buttons;
-           
-
-            if(isCollidingLeft && isCollidingRight)
+            if(fade)
             {
-                if (collisionInputCooldown <= 0)
-                {
-                    isCollidingLeft = false;
-                    isCollidingRight = false;
-                    collisionInputCooldown = .15f;
-                }
-                else
-                {
-                    collisionInputCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                }
-            }
-            else if(isCollidingLeft)
-            {
-                if (collisionInputCooldown <= 0)
-                {
-                    isCollidingLeft = false;
-                    collisionInputCooldown = .15f;
-                }
-                else
-                {
-                    collisionInputCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                }
-            }
-            else if(isCollidingRight)
-            {
-                if (collisionInputCooldown <= 0)
-                {
-                    isCollidingRight = false;
-                    collisionInputCooldown = .15f;
-                }
-                else
-                {
-                    collisionInputCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                }
-            }
-
-            Input(gameTime);
-            if (Velocity == Vector2.Zero && !isFalling && playerState != PlayerStates.Shooting)
-            {
-                if (animState != AnimationStates.Idle)
+                if(animState != AnimationStates.Idle)
                 {
                     animState = AnimationStates.Idle;
                     ChangeAnimation();
                 }
+                animManager.Update(gameTime, position);
             }
-
-            if (!canDash)
+            else
             {
-                dashCoolDown += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            }
-            if (dashCoolDown >= dashCoolDownMax)
-            {
-                dashCoolDown = 0;
-                canDash = true;
-            }
+                controllerMoveDir = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left;
 
-            changeInTime = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-            if (prevVel != Velocity)
-            {
-                accel = Math.Abs((prevVel.Length() - Velocity.Length())) / changeInTime;
-            }
-            force = mass * Acceleration;
+                currControllerBtn = GamePad.GetState(PlayerIndex.One).Buttons;
 
-            switch (playerState)
-            {
-                #region Movement
-                case PlayerStates.Movement:
-                   
-                    //if (prevPlayerState == PlayerStates.Dashing)
-                    //{
-                    //    //Slow down over time instead of instant set to run speed
-                    //    maxRunSpeed -= moveSpeed * force;
-                    //    if(maxRunSpeed < iMaxRunSpeed)
-                    //    {
-                    //        maxRunSpeed = iMaxRunSpeed;
-                    //        prevPlayerState = PlayerStates.Movement;
-                    //    }
-                    //}
-                    //else
-                    //{
-                       
-                    //}
-                    maxRunSpeed = iMaxRunSpeed;
 
-                    if (isFalling)
+                if (isCollidingLeft && isCollidingRight)
+                {
+                    if (collisionInputCooldown <= 0)
                     {
-                        velocity.Y += gravity.Y;
-                        //moveSpeed = fallMoveSpeed;
+                        isCollidingLeft = false;
+                        isCollidingRight = false;
+                        collisionInputCooldown = .15f;
+                    }
+                    else
+                    {
+                        collisionInputCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    }
+                }
+                else if (isCollidingLeft)
+                {
+                    if (collisionInputCooldown <= 0)
+                    {
+                        isCollidingLeft = false;
+                        collisionInputCooldown = .15f;
+                    }
+                    else
+                    {
+                        collisionInputCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    }
+                }
+                else if (isCollidingRight)
+                {
+                    if (collisionInputCooldown <= 0)
+                    {
+                        isCollidingRight = false;
+                        collisionInputCooldown = .15f;
+                    }
+                    else
+                    {
+                        collisionInputCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    }
+                }
 
-                        if (Velocity.X > 0)
+                Input(gameTime);
+                if (Velocity == Vector2.Zero && !isFalling && playerState != PlayerStates.Shooting)
+                {
+                    if (animState != AnimationStates.Idle)
+                    {
+                        animState = AnimationStates.Idle;
+                        ChangeAnimation();
+                    }
+                }
+
+                if (!canDash)
+                {
+                    dashCoolDown += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                }
+                if (dashCoolDown >= dashCoolDownMax)
+                {
+                    dashCoolDown = 0;
+                    canDash = true;
+                }
+
+                changeInTime = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                if (prevVel != Velocity)
+                {
+                    accel = Math.Abs((prevVel.Length() - Velocity.Length())) / changeInTime;
+                }
+                force = mass * Acceleration;
+
+                switch (playerState)
+                {
+                    #region Movement
+                    case PlayerStates.Movement:
+
+                        //if (prevPlayerState == PlayerStates.Dashing)
+                        //{
+                        //    //Slow down over time instead of instant set to run speed
+                        //    maxRunSpeed -= moveSpeed * force;
+                        //    if(maxRunSpeed < iMaxRunSpeed)
+                        //    {
+                        //        maxRunSpeed = iMaxRunSpeed;
+                        //        prevPlayerState = PlayerStates.Movement;
+                        //    }
+                        //}
+                        //else
+                        //{
+
+                        //}
+                        maxRunSpeed = iMaxRunSpeed;
+
+                        if (isFalling)
                         {
-                            velocity.X -= gravity.X;
-                            if (Velocity.X < 0)
-                            {
-                                velocity.X = 0;
-                            }
-                        }
-                        else if (Velocity.X < 0)
-                        {
-                            velocity.X += gravity.X;
+                            velocity.Y += gravity.Y;
+                            //moveSpeed = fallMoveSpeed;
+
                             if (Velocity.X > 0)
                             {
-                                velocity.X = 0;
+                                velocity.X -= gravity.X;
+                                if (Velocity.X < 0)
+                                {
+                                    velocity.X = 0;
+                                }
                             }
+                            else if (Velocity.X < 0)
+                            {
+                                velocity.X += gravity.X;
+                                if (Velocity.X > 0)
+                                {
+                                    velocity.X = 0;
+                                }
+                            }
+                            else
+                            {
+                                moveSpeed = iMoveSpeed;
+                                //dashForceY = 0f;
+                            }
+                        }
+
+
+                        break;
+                    #endregion
+
+                    #region Dashing
+                    case PlayerStates.Dashing:
+                        gravity.Y = 0;
+                        canDash = false;
+                        if (isFalling)
+                        {
+                            maxRunSpeed = maxDashAirSpeed;
                         }
                         else
                         {
-                            moveSpeed = iMoveSpeed;
-                            //dashForceY = 0f;
+                            maxRunSpeed = maxDashSpeed;
                         }
-                    }
-
-                  
-                    break;
-                #endregion
-
-                #region Dashing
-                case PlayerStates.Dashing:
-                    gravity.Y = 0;
-                    canDash = false;
-                    if (isFalling)
-                    {
-                        maxRunSpeed = maxDashAirSpeed;
-                    }
-                    else
-                    {
-                        maxRunSpeed = maxDashSpeed;
-                    }
-                    if(MathHelper.Distance(startDashPos.X, Position.X) >= dashDistance)
-                    {
-                        //prevPlayerState = playerState; //uncomment for dash testing with force 
-                        playerState = PlayerStates.Movement;
-                    }
-                    //if (Velocity.X >= maxDashAirSpeed && isFalling && Velocity.X > 0)
-                    //{
-                    //    prevPlayerState = playerState;
-                    //    playerState = PlayerStates.Movement;
-                    //}
-                    //else if (Velocity.X <= -maxDashAirSpeed && isFalling && Velocity.X < 0)
-                    //{
-                    //    prevPlayerState = playerState;
-                    //    playerState = PlayerStates.Movement;
-                    //}
-                    //if (Velocity.X >= maxDashSpeed && !isFalling && Velocity.X > 0)
-                    //{
-                    //    prevPlayerState = playerState;
-                    //    playerState = PlayerStates.Movement;
-                    //}
-                    //else if (Velocity.X <= -maxDashSpeed && isFalling && Velocity.X < 0)
-                    //{
-                    //    prevPlayerState = playerState;
-                    //    playerState = PlayerStates.Movement;
-                    //}
-                    break;
-                #endregion
-
-                #region Jumping
-                case PlayerStates.Jumping:
-                    if(Velocity.Y <= 0)
-                    {
-                        if(Velocity.Y >= 0)
+                        if (MathHelper.Distance(startDashPos.X, Position.X) >= dashDistance)
                         {
+                            //prevPlayerState = playerState; //uncomment for dash testing with force 
                             playerState = PlayerStates.Movement;
-                            isFalling = true;
                         }
-                    }
+                        //if (Velocity.X >= maxDashAirSpeed && isFalling && Velocity.X > 0)
+                        //{
+                        //    prevPlayerState = playerState;
+                        //    playerState = PlayerStates.Movement;
+                        //}
+                        //else if (Velocity.X <= -maxDashAirSpeed && isFalling && Velocity.X < 0)
+                        //{
+                        //    prevPlayerState = playerState;
+                        //    playerState = PlayerStates.Movement;
+                        //}
+                        //if (Velocity.X >= maxDashSpeed && !isFalling && Velocity.X > 0)
+                        //{
+                        //    prevPlayerState = playerState;
+                        //    playerState = PlayerStates.Movement;
+                        //}
+                        //else if (Velocity.X <= -maxDashSpeed && isFalling && Velocity.X < 0)
+                        //{
+                        //    prevPlayerState = playerState;
+                        //    playerState = PlayerStates.Movement;
+                        //}
+                        break;
+                    #endregion
 
-                    velocity.Y += gravity.Y;
-                    if (animState == AnimationStates.Jump)
-                    {
+                    #region Jumping
+                    case PlayerStates.Jumping:
+                        if (Velocity.Y <= 0)
+                        {
+                            if (Velocity.Y >= 0)
+                            {
+                                playerState = PlayerStates.Movement;
+                                isFalling = true;
+                            }
+                        }
+
+                        velocity.Y += gravity.Y;
+                        if (animState == AnimationStates.Jump)
+                        {
+                            if (animManager.GetCurrFrame().X >= animManager.GetSheetSize().X - 1)
+                            {
+                                //animManager.SetFPMS(0);
+                                //animManager.SetFrameToEnd();
+                                animManager.StopLoop();
+                            }
+
+
+                        }
+                        break;
+                    #endregion
+
+                    #region Shooting
+                    case PlayerStates.Shooting:
                         if (animManager.GetCurrFrame().X >= animManager.GetSheetSize().X - 1)
                         {
-                            //animManager.SetFPMS(0);
-                            //animManager.SetFrameToEnd();
                             animManager.StopLoop();
+                            startShoot = true;
                         }
+                        else
+                            startShoot = false;
 
+                        if (startShoot)
+                        {
+                            Input(gameTime);
+                        }
+                        break;
+                    #endregion
+                    #region Pilot
+                    case PlayerStates.Pilot:
 
-                    }
-                    break;
-                #endregion
-
-                #region Shooting
-                case PlayerStates.Shooting:
-                    if (animManager.GetCurrFrame().X >= animManager.GetSheetSize().X - 1)
-                    {
-                        animManager.StopLoop();
-                        startShoot = true;
-                    }
-                    else
-                        startShoot = false;
-
-                    if(startShoot)
-                    {
-                        Input(gameTime);
-                    }
-                    break;
-                #endregion
-                #region Pilot
-                case PlayerStates.Pilot:
-                  
                         BecomePilot();
                         playerState = PlayerStates.Movement;
-                    
-                    break;
-                    #endregion
-            }
 
-
-
-            position += Velocity;
-            //playerRect = new Rectangle((int)(position.X + (collisionOffsetX - 6)), (int)position.Y, pixelSize / 2, pixelSize);
-            // playerRect = new Rectangle()
-            //if(!isPilot)
-            //{
-            //    animManager.Update(gameTime, position);
-
-            //}
-            //else
-            //{  
-            //    animState = AnimationStates.Idle;
-            //    ChangeAnimation();
-            //    animManager.isRight = true;
-            //    animManager.isLeft = false;
-            //    animManager.Update(gameTime, new Vector2(RoboRect.X, RoboRect.Y));
-            //}
-            animManager.Update(gameTime, position);
-            if(isPilot && animManagerRobo != null)
-            {
-                animManagerRobo.Update(gameTime, new Vector2(RoboRect.X, RoboRect.Y));
-            }
-           
-            if(bullets.Count != 0)
-            {
-                for (int i = bullets.Count - 1; i >= 0; i--)
-                {
-                    bullets[i].Update();
-                    if (bullets[i].delete)
-                    {
-                        bullets.RemoveAt(i);
                         break;
-                    }
-                    foreach (SSEnemy enemy in enemies)
+                        #endregion
+                }
+
+
+
+                position += Velocity;
+                //playerRect = new Rectangle((int)(position.X + (collisionOffsetX - 6)), (int)position.Y, pixelSize / 2, pixelSize);
+                // playerRect = new Rectangle()
+                //if(!isPilot)
+                //{
+                //    animManager.Update(gameTime, position);
+
+                //}
+                //else
+                //{  
+                //    animState = AnimationStates.Idle;
+                //    ChangeAnimation();
+                //    animManager.isRight = true;
+                //    animManager.isLeft = false;
+                //    animManager.Update(gameTime, new Vector2(RoboRect.X, RoboRect.Y));
+                //}
+                animManager.Update(gameTime, position);
+                if (isPilot && animManagerRobo != null)
+                {
+                    animManagerRobo.Update(gameTime, new Vector2(RoboRect.X, RoboRect.Y));
+                }
+
+                if (bullets.Count != 0)
+                {
+                    for (int i = bullets.Count - 1; i >= 0; i--)
                     {
-                        if (bullets[i].rect.TouchBottomOf(enemy.enemyRect) || bullets[i].rect.TouchTopOf(enemy.enemyRect)
-                        || bullets[i].rect.TouchLeftOf(enemy.enemyRect) || bullets[i].rect.TouchRightOf(enemy.enemyRect))
+                        bullets[i].Update();
+                        if (bullets[i].delete)
                         {
-                            enemy.Health -= bulletDmg;
                             bullets.RemoveAt(i);
                             break;
                         }
+                        foreach (SSEnemy enemy in enemies)
+                        {
+                            if (bullets[i].rect.TouchBottomOf(enemy.enemyRect) || bullets[i].rect.TouchTopOf(enemy.enemyRect)
+                            || bullets[i].rect.TouchLeftOf(enemy.enemyRect) || bullets[i].rect.TouchRightOf(enemy.enemyRect))
+                            {
+                                enemy.Health -= bulletDmg;
+                                bullets.RemoveAt(i);
+                                break;
+                            }
+                        }
+
                     }
-
                 }
-            }
-            
-            //switch (playerState)
-            //{
-            //    case PlayerStates.Movement:
 
-            //        break;
-            //}
+                //switch (playerState)
+                //{
+                //    case PlayerStates.Movement:
+
+                //        break;
+                //}
+            }
+
         }
 
         private void BecomePilot()
@@ -734,7 +754,7 @@ namespace AUTO_Matic.SideScroll
             //jumpForce /= 1.5f;
             dashDistance /= 2;
             RoboRect = new Rectangle(playerRect.X, playerRect.Y, 30, 60);
-
+            ChangeAnimation();
         }
         private void BecomeRobo()
         {
@@ -750,6 +770,7 @@ namespace AUTO_Matic.SideScroll
             dashDistance = 3 * pixelSize;
 
             playerRect = RoboRect;
+            ChangeAnimation();
         }
 
         private void Input(GameTime gameTime)
@@ -781,7 +802,15 @@ namespace AUTO_Matic.SideScroll
                             if(animState != AnimationStates.Walking && animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Walking;
-                                ChangeAnimation();
+                                if(isPilot)
+                                {
+                                    ChangeAnimation(true);
+                                }
+                                else
+                                {
+                                    ChangeAnimation();
+                                }
+                                
                             }
                         }
                         else
@@ -793,7 +822,14 @@ namespace AUTO_Matic.SideScroll
                             {
 
                                 animState = AnimationStates.Walking;
-                                ChangeAnimation();
+                                if (isPilot)
+                                {
+                                    ChangeAnimation(true);
+                                }
+                                else
+                                {
+                                    ChangeAnimation();
+                                }
                             }
                         }
 
@@ -840,7 +876,14 @@ namespace AUTO_Matic.SideScroll
                             if (animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Jump;
-                                ChangeAnimation();
+                                if (isPilot)
+                                {
+                                    ChangeAnimation(true);
+                                }
+                                else
+                                {
+                                    ChangeAnimation();
+                                }
                             }
                             prevKb = kb;
 
@@ -876,7 +919,14 @@ namespace AUTO_Matic.SideScroll
                         if (animState != AnimationStates.Walking && animState != AnimationStates.Jump || animState != AnimationStates.Walking && blockBottom)
                         {
                             animState = AnimationStates.Walking;
-                            ChangeAnimation();
+                            if (isPilot)
+                            {
+                                ChangeAnimation(true);
+                            }
+                            else
+                            {
+                                ChangeAnimation();
+                            }
                         }
                         animManager.isRight = true;
                         animManager.isLeft = false;
@@ -929,7 +979,14 @@ namespace AUTO_Matic.SideScroll
                             if (animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Jump;
-                                ChangeAnimation();
+                                if (isPilot)
+                                {
+                                    ChangeAnimation(true);
+                                }
+                                else
+                                {
+                                    ChangeAnimation();
+                                }
                             }
                             prevKb = kb;
 
@@ -979,7 +1036,14 @@ namespace AUTO_Matic.SideScroll
                         if (animState != AnimationStates.Walking && animState != AnimationStates.Jump || animState != AnimationStates.Walking && blockBottom)
                         {
                             animState = AnimationStates.Walking;
-                            ChangeAnimation();
+                            if (isPilot)
+                            {
+                                ChangeAnimation(true);
+                            }
+                            else
+                            {
+                                ChangeAnimation();
+                            }
                         }
 
                         if (Velocity.X > -.000001 && Velocity.X != 0 /*&& Velocity.X < 0*/)//Future test commented out
@@ -1027,7 +1091,14 @@ namespace AUTO_Matic.SideScroll
                             if (animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Jump;
-                                ChangeAnimation();
+                                if (isPilot)
+                                {
+                                    ChangeAnimation(true);
+                                }
+                                else
+                                {
+                                    ChangeAnimation();
+                                }
                             }
                             prevKb = kb;
 
@@ -1074,7 +1145,14 @@ namespace AUTO_Matic.SideScroll
                             if (animState != AnimationStates.Walking && animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Walking;
-                                ChangeAnimation();
+                                if (isPilot)
+                                {
+                                    ChangeAnimation(true);
+                                }
+                                else
+                                {
+                                    ChangeAnimation();
+                                }
                             }
 
                             if (Velocity.X + -friction < 0)
@@ -1104,7 +1182,14 @@ namespace AUTO_Matic.SideScroll
                             if (animState != AnimationStates.Walking && animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Walking;
-                                ChangeAnimation();
+                                if (isPilot)
+                                {
+                                    ChangeAnimation(true);
+                                }
+                                else
+                                {
+                                    ChangeAnimation();
+                                }
                             }
 
 
@@ -1128,7 +1213,15 @@ namespace AUTO_Matic.SideScroll
                         }
                         else if (velocity.X == 0)
                         {
-                            if(animState != AnimationStates.Idle || animState != AnimationStates.Shoot)
+                            if(animState != AnimationStates.Idle && isPilot)
+                            {
+                                if(animManagerRobo != null)
+                                {
+                                    animState = AnimationStates.Idle;
+                                    ChangeAnimation();
+                                }
+                            }
+                            else if(animState != AnimationStates.Idle && !isPilot)
                             {
                                 animState = AnimationStates.Idle;
                                 ChangeAnimation();
@@ -1184,7 +1277,14 @@ namespace AUTO_Matic.SideScroll
                             if (animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Jump;
-                                ChangeAnimation();
+                                if (isPilot)
+                                {
+                                    ChangeAnimation(true);
+                                }
+                                else
+                                {
+                                    ChangeAnimation();
+                                }
                             }
                             prevKb = kb;
 
@@ -1268,7 +1368,14 @@ namespace AUTO_Matic.SideScroll
                 velocity.X = 0;
 
                 animState = AnimationStates.Shoot;
-                ChangeAnimation();
+                if (isPilot)
+                {
+                    ChangeAnimation(true);
+                }
+                else
+                {
+                    ChangeAnimation();
+                }
                 animManager.StartLoop();
             }
             else if(kb.IsKeyDown(Keys.S) && prevKb.IsKeyUp(Keys.S) && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting && velocity.Y >= 0 && velocity.Y < 7 
@@ -1282,7 +1389,14 @@ namespace AUTO_Matic.SideScroll
                 }
                 velocity.X = 0;
                 animState = AnimationStates.Shoot;
-                ChangeAnimation();
+                if (isPilot)
+                {
+                    ChangeAnimation(true);
+                }
+                else
+                {
+                    ChangeAnimation();
+                }
                 animManager.StartLoop();
             }
 
@@ -1350,8 +1464,17 @@ namespace AUTO_Matic.SideScroll
                         jumpDelay = 0;
                         //velocity.X += (float)Math.Cos(velocity.X);
                         isFalling = false;
+                        if (groundPound)
+                        {
+                            if (SideTileMap.GetPoint((int)(newRect.Y / 64), (int)(newRect.X / 64)) == 26)
+                            {
+                                breakTiles.Add(newRect);
+                            }
+                        }
                         groundPound = false;
                         //isDashing = false;
+
+                      
 
                         //animState = AnimationStates.Idle;
                         //ChangeAnimation();
@@ -1433,6 +1556,7 @@ namespace AUTO_Matic.SideScroll
                     if(groundPound)
                     {
                         killEnemy = true;
+
                     }
                 }
 
