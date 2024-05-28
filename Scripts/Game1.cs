@@ -373,9 +373,9 @@ namespace AUTO_Matic
             for(int i = 0; i < SideTileMap.enemySpawns.Count - 1; i++)
             {
                 if(j == 1)
-                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 4, SideTileMap.enemySpawns[i], true));
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
                 else
-                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 4, SideTileMap.enemySpawns[i], false));
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], false));
                 j++;
 
             }
