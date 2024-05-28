@@ -511,7 +511,7 @@ namespace AUTO_Matic.SideScroll
                     }
                 }
 
-                Input(gameTime);
+                Input(gameTime, enemies);
                 if (Velocity == Vector2.Zero && !isFalling && playerState != PlayerStates.Shooting)
                 {
                     if (animState != AnimationStates.Idle)
@@ -669,7 +669,7 @@ namespace AUTO_Matic.SideScroll
 
                         if (startShoot)
                         {
-                            Input(gameTime);
+                            Input(gameTime, enemies);
                         }
                         break;
                     #endregion
@@ -773,7 +773,7 @@ namespace AUTO_Matic.SideScroll
             ChangeAnimation();
         }
 
-        private void Input(GameTime gameTime)
+        private void Input(GameTime gameTime, List<SSEnemy> enemies)
         {
             KeyboardState kb = Keyboard.GetState();
             MouseState ms = Mouse.GetState();
@@ -886,7 +886,10 @@ namespace AUTO_Matic.SideScroll
                                 }
                             }
                             prevKb = kb;
-
+                            foreach(SSEnemy enemy in enemies)
+                            {
+                                enemy.leftOnX.Add(playerRect.X);
+                            }
                             velocity.Y = -jumpForce;
 
                             if (JumpForce != 0)
@@ -991,7 +994,10 @@ namespace AUTO_Matic.SideScroll
                             prevKb = kb;
 
                             velocity.Y = -jumpForce;
-
+                            foreach (SSEnemy enemy in enemies)
+                            {
+                                enemy.leftOnX.Add(playerRect.X);
+                            }
                             position.Y -= 1f;
 
                             if (prevVel != Velocity)
@@ -1103,9 +1109,12 @@ namespace AUTO_Matic.SideScroll
                             prevKb = kb;
 
                             velocity.Y = -jumpForce;
+                            foreach (SSEnemy enemy in enemies)
+                            {
+                                enemy.leftOnX.Add(playerRect.X);
+                            }
 
-                            
-                                position.Y -= 1f;
+                            position.Y -= 1f;
 
                             if (prevVel != Velocity)
                             {
@@ -1289,9 +1298,12 @@ namespace AUTO_Matic.SideScroll
                             prevKb = kb;
 
                             velocity.Y = -jumpForce;
+                            foreach (SSEnemy enemy in enemies)
+                            {
+                                enemy.leftOnX.Add(playerRect.X);
+                            }
 
-                            
-                                position.Y -= 1f;
+                            position.Y -= 1f;
 
                             if (prevVel != Velocity)
                             {

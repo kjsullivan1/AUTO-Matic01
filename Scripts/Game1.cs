@@ -119,6 +119,11 @@ namespace AUTO_Matic
         float respawnDelay = 0;
         float respawnDelaySet = .75f;
         bool tdCameraReached = false;
+
+        List<GroundTile> offScreenGround = new List<GroundTile>();
+        List<PlatformTile> offScreenPlatform = new List<PlatformTile>();
+        List<BackgroundTile> offScreenBackground = new List<BackgroundTile>();
+        List<WallTile> offScreenWall = new List<WallTile>();
         class Door
         {
             BottomDoorTile bottomDoor;
@@ -368,9 +373,9 @@ namespace AUTO_Matic
             for(int i = 0; i < SideTileMap.enemySpawns.Count - 1; i++)
             {
                 if(j == 1)
-                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 6, SideTileMap.enemySpawns[i], true));
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 4, SideTileMap.enemySpawns[i], true));
                 else
-                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 6, SideTileMap.enemySpawns[i], false));
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 4, SideTileMap.enemySpawns[i], false));
                 j++;
 
             }
@@ -467,7 +472,46 @@ namespace AUTO_Matic
                         #region SideScroll
                         case GameStates.SideScroll: //Default
 
-                            if(fade || doorTrans)
+                            for (int i = 0; i < SideTileMap.GroundTiles.Count - 1; i++)
+                            {
+                                if (ssCamera.CameraBounds.Intersects(SideTileMap.GroundTiles[i].Rectangle) == false)
+                                {
+                                    offScreenGround.Add(SideTileMap.GroundTiles[i]);
+                                    SideTileMap.GroundTiles.Remove(SideTileMap.GroundTiles[i]);
+                                }
+
+
+
+                            }
+                            for(int i = offScreenGround.Count -1; i >= 0; i--)
+                            {
+                                if (ssCamera.CameraBounds.Intersects(offScreenGround[i].Rectangle))
+                                {
+                                    SideTileMap.GroundTiles.Add(offScreenGround[i]);
+                                    offScreenGround.RemoveAt(i);
+                                }
+                            }
+
+
+                            for(int i = 0; i < SideTileMap.PlatformTiles.Count - 1; i++)
+                            {
+                                if (ssCamera.CameraBounds.Intersects(SideTileMap.PlatformTiles[i].Rectangle) == false)
+                                {
+                                    offScreenPlatform.Add(SideTileMap.PlatformTiles[i]);
+                                    SideTileMap.PlatformTiles.Remove(SideTileMap.PlatformTiles[i]);
+                                }
+
+                            }
+                            for (int i = offScreenPlatform.Count - 1; i >= 0; i--)
+                            {
+                                if (ssCamera.CameraBounds.Intersects(offScreenPlatform[i].Rectangle))
+                                {
+                                    SideTileMap.PlatformTiles.Add(offScreenPlatform[i]);
+                                    offScreenPlatform.RemoveAt(i);
+                                }
+                            }
+                          
+                            if (fade || doorTrans)
                             {
                                 ssCamera.Update(fadePos, dont);
                                
@@ -552,39 +596,44 @@ namespace AUTO_Matic
                                 }
                                 ssPlayer.Update(gameTime, Gravity, enemies);
 
+                               
                                 for (int i = enemies.Count - 1; i >= 0; i--)
                                 {
-                                    enemies[i].Update(gameTime, Gravity, ssPlayer, this);
-                                    for (int j = i + 1; j < enemies.Count; j++)
+                                    if (ssCamera.CameraBounds.Intersects(enemies[i].enemyRect) || enemies[i].enemyState != SSEnemy.EnemyStates.Idle)
                                     {
-                                        if (enemies[i].enemyRect.Intersects(enemies[j].enemyRect))
+                                        enemies[i].Update(gameTime, Gravity, ssPlayer, this);
+                                        for (int j = i + 1; j < enemies.Count; j++)
                                         {
-                                            if (enemies[i].velocity.X == enemies[j].velocity.X)
-                                                enemies[i].velocity.X /= 2;
-                                            else
+                                            if (enemies[i].enemyRect.Intersects(enemies[j].enemyRect))
                                             {
-                                                if (enemies[i].velocity.X != enemies[i].maxRunSpeed || enemies[i].velocity.X != -enemies[i].maxRunSpeed)
+                                                if (enemies[i].velocity.X == enemies[j].velocity.X)
+                                                    enemies[i].velocity.X /= 2;
+                                                else
                                                 {
-                                                    if (enemies[i].velocity.X < 0)
-                                                        enemies[i].velocity.X = -enemies[i].maxRunSpeed;
-                                                    else if (enemies[i].velocity.X > 0)
-                                                        enemies[i].velocity.X = enemies[i].maxRunSpeed;
+                                                    if (enemies[i].velocity.X != enemies[i].maxRunSpeed || enemies[i].velocity.X != -enemies[i].maxRunSpeed)
+                                                    {
+                                                        if (enemies[i].velocity.X < 0)
+                                                            enemies[i].velocity.X = -enemies[i].maxRunSpeed;
+                                                        else if (enemies[i].velocity.X > 0)
+                                                            enemies[i].velocity.X = enemies[i].maxRunSpeed;
 
+                                                    }
                                                 }
+
                                             }
 
                                         }
 
-                                    }
-
-                                    if (enemies[i].dead)
-                                    {
-                                        if (rand.Next(0, 101) < dropRateSS)
+                                        if (enemies[i].dead)
                                         {
-                                            healthDrops.Add(new HealthDrop(enemies[i].enemyRect));
+                                            if (rand.Next(0, 101) < dropRateSS)
+                                            {
+                                                healthDrops.Add(new HealthDrop(enemies[i].enemyRect));
+                                            }
+                                            enemies.RemoveAt(i);
                                         }
-                                        enemies.RemoveAt(i);
                                     }
+                                   
                                 }
 
                                 for (int i = healthDrops.Count - 1; i >= 0; i--)
@@ -633,7 +682,27 @@ namespace AUTO_Matic
                                         break;
                                 }
 
-                                if(respawnDelay > 0 && destroyedGround.Count != 0)
+                                foreach (PlatformTile tile1 in SideTileMap.PlatformTiles)
+                                {
+                                    ssPlayer.Collision(tile1.Rectangle);
+                                    bool trueBreak = false;
+                                    foreach (Rectangle breakables in ssPlayer.breakTiles)
+                                    {
+                                        if (breakables == tile1.Rectangle)
+                                        {
+                                            destroyedPlatfroms.Add(tile1);
+                                            SideTileMap.PlatformTiles.Remove(tile1);
+                                            ssPlayer.breakTiles.Remove(breakables);
+                                            respawnDelay = respawnDelaySet;
+                                            trueBreak = true;
+                                            break;
+                                        }
+                                    }
+                                    if (trueBreak)
+                                        break;
+                                }
+
+                                if (respawnDelay > 0 && destroyedGround.Count != 0)
                                 {
                                     respawnDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                                     if (respawnDelay <= 0)
@@ -643,8 +712,19 @@ namespace AUTO_Matic
                                         respawnDelay = respawnDelaySet;
                                     }
                                 }
-                             
-                             
+
+                                if (respawnDelay > 0 && destroyedPlatfroms.Count != 0)
+                                {
+                                    respawnDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                                    if (respawnDelay <= 0)
+                                    {
+                                        SideTileMap.PlatformTiles.Add(destroyedPlatfroms[0]);
+                                        destroyedPlatfroms.Remove(destroyedPlatfroms[0]);
+                                        respawnDelay = respawnDelaySet;
+                                    }
+                                }
+
+
 
                                 foreach (SSEnemy enemy in enemies)
                                 {
@@ -679,10 +759,7 @@ namespace AUTO_Matic
                                     }
 
                                 }
-                                foreach (PlatformTile tile1 in SideTileMap.PlatformTiles)
-                                {
-                                    ssPlayer.Collision(tile1.Rectangle);
-                                }
+                               
                                 foreach (WallTile tile2 in SideTileMap.WallTiles)
                                 {
                                     ssPlayer.Collision(tile2.Rectangle);

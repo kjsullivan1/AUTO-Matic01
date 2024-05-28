@@ -16,6 +16,7 @@ namespace AUTO_Matic
         private Rectangle rectangle;
         public Vector2 position;
         public int[,] mapPoint;
+        public bool active = true;
         public Rectangle Rectangle
         {
             get { return rectangle; }
@@ -41,8 +42,12 @@ namespace AUTO_Matic
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
-            spriteBatch.Draw(texture, rectangle, Color.White);
+            if(active)
+            {
+                rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
+                spriteBatch.Draw(texture, rectangle, Color.White);
+            }
+         
         }
     }
 
