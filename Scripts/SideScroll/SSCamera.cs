@@ -146,7 +146,7 @@ namespace AUTO_Matic.Scripts.SideScroll
                     moveSpeed = 4.3f;
                 }
 
-                if (MathHelper.Distance(center.Y, position.Y) > 64 * 2)
+                if (MathHelper.Distance(center.Y, position.Y) > 64 * 2 && MathHelper.Distance(center.Y, position.Y) < 64 * 3)
                 {
                     moveSpeedY = maxMoveSpeedY;
                 }
@@ -223,11 +223,16 @@ namespace AUTO_Matic.Scripts.SideScroll
             if (CameraBounds.Top < 0 + 5 && !dont)
             {
                  center.Y += moveSpeed;
-               
+                //if (center.Y > 0 + CameraBounds.Height / 2)
+                //{
+                //    center.Y = 0 + CameraBounds.Height / 2;
+                //}
+
             }   
             else if (CameraBounds.Top < 0 && dont)
             {
                 center.Y += moveSpeed;
+
               
             }
               
@@ -245,7 +250,11 @@ namespace AUTO_Matic.Scripts.SideScroll
             if (CameraBounds.Bottom > height - 5 && !dont)
             {
                 center.Y -= moveSpeed;
-                center.Y = height - CameraBounds.Height / 2;
+                if(center.Y > height - CameraBounds.Height / 2)
+                {
+                    center.Y = height - CameraBounds.Height / 2;
+                }
+
                 
             }
             else if (CameraBounds.Bottom > height && dont)

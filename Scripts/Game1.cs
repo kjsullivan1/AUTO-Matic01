@@ -279,18 +279,18 @@ namespace AUTO_Matic
                 int[,] mapDims = (tdMap.GenerateMap(filePath));
 
                 LeaveDungeon = new Rectangle(currBounds.X + currBounds.Width/2, currBounds.Y + currBounds.Height/2, 64, 64);
-                List<Rectangle> walls = new List<Rectangle>();
+                List<WallTiles> walls = new List<WallTiles>();
                 for (int y = 0; y < mapDims.GetLength(0); y++)
                 {
                     for (int x = 0; x < mapDims.GetLength(1); x++)
                     {
                         if (tdMap.GetPoint(y, x, mapDims) == 10)
                         {
-                            walls.Add(new Rectangle((0 + (64 * x) + currBounds.X), (0 - (64 * y) - currBounds.Y), 64, 64));
+                            walls.Add(new WallTiles(tdMap. WallIndexes[0],new Rectangle((0 + (64 * x) + currBounds.X), (0 - (64 * y) - currBounds.Y), 64, 64)));
                         }
                     }
                 }
-                shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls);
+                shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
 
 
                if(GameState == GameStates.Paused)
@@ -471,10 +471,10 @@ namespace AUTO_Matic
                     {
                         #region SideScroll
                         case GameStates.SideScroll: //Default
-
+                            Rectangle worldRect = new Rectangle(ssCamera.CameraBounds.X - (750 / 2), ssCamera.CameraBounds.Y - (750 / 2), ssCamera.CameraBounds.Width + 750, ssCamera.CameraBounds.Height + 750);
                             for (int i = 0; i < SideTileMap.GroundTiles.Count - 1; i++)
                             {
-                                if (ssCamera.CameraBounds.Intersects(SideTileMap.GroundTiles[i].Rectangle) == false)
+                                if (worldRect.Intersects(SideTileMap.GroundTiles[i].Rectangle) == false)
                                 {
                                     offScreenGround.Add(SideTileMap.GroundTiles[i]);
                                     SideTileMap.GroundTiles.Remove(SideTileMap.GroundTiles[i]);
@@ -485,7 +485,7 @@ namespace AUTO_Matic
                             }
                             for(int i = offScreenGround.Count -1; i >= 0; i--)
                             {
-                                if (ssCamera.CameraBounds.Intersects(offScreenGround[i].Rectangle))
+                                if (worldRect.Intersects(offScreenGround[i].Rectangle))
                                 {
                                     SideTileMap.GroundTiles.Add(offScreenGround[i]);
                                     offScreenGround.RemoveAt(i);
@@ -495,7 +495,7 @@ namespace AUTO_Matic
 
                             for(int i = 0; i < SideTileMap.PlatformTiles.Count - 1; i++)
                             {
-                                if (ssCamera.CameraBounds.Intersects(SideTileMap.PlatformTiles[i].Rectangle) == false)
+                                if (worldRect.Intersects(SideTileMap.PlatformTiles[i].Rectangle) == false)
                                 {
                                     offScreenPlatform.Add(SideTileMap.PlatformTiles[i]);
                                     SideTileMap.PlatformTiles.Remove(SideTileMap.PlatformTiles[i]);
@@ -504,7 +504,7 @@ namespace AUTO_Matic
                             }
                             for (int i = offScreenPlatform.Count - 1; i >= 0; i--)
                             {
-                                if (ssCamera.CameraBounds.Intersects(offScreenPlatform[i].Rectangle))
+                                if (worldRect.Intersects(offScreenPlatform[i].Rectangle))
                                 {
                                     SideTileMap.PlatformTiles.Add(offScreenPlatform[i]);
                                     offScreenPlatform.RemoveAt(i);
@@ -599,12 +599,12 @@ namespace AUTO_Matic
                                
                                 for (int i = enemies.Count - 1; i >= 0; i--)
                                 {
-                                    if (ssCamera.CameraBounds.Intersects(enemies[i].enemyRect) || enemies[i].enemyState != SSEnemy.EnemyStates.Idle)
+                                    if (worldRect.Intersects(enemies[i].enemyRect) || enemies[i].enemyState != SSEnemy.EnemyStates.Idle)
                                     {
                                         enemies[i].Update(gameTime, Gravity, ssPlayer, this);
                                         for (int j = i + 1; j < enemies.Count; j++)
                                         {
-                                            if (enemies[i].enemyRect.Intersects(enemies[j].enemyRect))
+                                            if (enemies[i].enemyRect.Intersects(enemies[j].enemyRect) && worldRect.Intersects(enemies[j].enemyRect))
                                             {
                                                 if (enemies[i].velocity.X == enemies[j].velocity.X)
                                                     enemies[i].velocity.X /= 2;
@@ -1244,7 +1244,11 @@ namespace AUTO_Matic
                         }
                         else
                         {
-                            Window.Title = "AnalogStickDir: " + moveDir.ToString();
+                            if(shotGunBoss != null)
+                            {
+                                Window.Title = "AnalogStickDir: " + moveDir.ToString() + "   IsColliding " + shotGunBoss.moveBack;
+                            }
+                          
                             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
                             tdMap.Draw(spriteBatch);
                             tdPlayer.Draw(spriteBatch);

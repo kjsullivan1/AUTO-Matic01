@@ -86,11 +86,18 @@ namespace AUTO_Matic.Scripts.TopDown
         Rectangle tempRect;
         public Rectangle worldRect;
 
-        List<Rectangle> BreakableWalls = new List<Rectangle>();
+        List<WallTiles> BreakableWalls = new List<WallTiles>();
         #endregion
 
-
+        Circle slam;
+        int growthRate = 6;
+        int maxSize = 300;
+        bool slamWave = false;
         float health = 18f;
+        int currWidthMod = 3;
+        public bool moveBack;
+        float slamDelay = 2.25f;
+        float iSlamDelay;
         public float Health
         {
             get { return health; }
@@ -102,7 +109,7 @@ namespace AUTO_Matic.Scripts.TopDown
             }
         }
 
-        public ShotGunBoss(Rectangle rect, int width, int height, ContentManager content, List<Rectangle> walls)
+        public ShotGunBoss(Rectangle rect, int width, int height, ContentManager content, List<WallTiles> walls, Rectangle bounds, TopDownMap tdMap)
         {
             bossRect = new Rectangle(((rect.X + rect.Width / 2) - 64 / 2), (((rect.Y + rect.Height / 2) - 64 / 2)), 64, 64);
             this.content = content;
@@ -114,6 +121,16 @@ namespace AUTO_Matic.Scripts.TopDown
             worldRect = new Rectangle(((bounds.X + bounds.Width / 2) - width / 2), (((bounds.Y + bounds.Height / 2) - height / 2)), width, height);
 
            BreakableWalls = walls;
+           slam = new Circle(new Vector2(bossRect.X + bossRect.Width/2, bossRect.Y+ bossRect.Height/2), 2);
+            iSlamDelay = slamDelay;
+
+            for(int i = tdMap.WallTiles.Count - 1; i >= 0; i--)
+            {
+                if(bounds.Intersects(tdMap.WallTiles[i].Rectangle) == false || bounds.Contains(tdMap.WallTiles[i].Rectangle) == false)
+                {
+                    tdMap.WallTiles.Remove(tdMap.WallTiles[i]);
+                }
+            }
         }
 
         public void Update(GameTime gameTime, TDPlayer tdPlayer, TopDownMap tdMap)
@@ -232,6 +249,8 @@ namespace AUTO_Matic.Scripts.TopDown
                         shootDelay = RandFloat(0, 2);
                     }
 
+                  
+
                 }
 
                 for (int i = bullets.Count - 1; i >= 0; i--)
@@ -260,9 +279,95 @@ namespace AUTO_Matic.Scripts.TopDown
 
                 }
             }
-           
 
-            if(Health <= 0)
+            if (Distance(slam.Position, new Vector2((int)(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2),
+                      (int)(tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2))) <= worldRect.Width / 2 + (64 * 1) && !slamWave)
+            {
+                slamWave = true;
+            }
+
+            if(slamWave)
+            {
+                slamDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (slamDelay <= 0)
+                {
+                    float moveOffset = (float)growthRate;
+                    slam.Radius += growthRate;
+                    slam.SetWidth(currWidthMod);
+
+                    for (int i = tdMap.WallTiles.Count - 1; i >= 0; i--)
+                    {
+                        if (slam.Bounds.Intersects(tdMap.WallTiles[i].Rectangle))
+                        {
+                           
+                            tdMap.FloorTiles.Add(new FloorTiles(9, tdMap.WallTiles[i].Rectangle));
+                            tdMap.WallTiles.Remove(tdMap.WallTiles[i]);
+                        }
+                    }
+
+                    if (slam.Radius >= maxSize)
+                    {
+                        slam.Radius = maxSize;
+                        //currWidthMod = 1;
+                        slamWave = false;
+                        slamDelay = iSlamDelay;
+                    }
+                    else
+                    {
+                        //currWidthMod += 1;
+                        slam.Position = new Vector2(slam.Bounds.X - (moveOffset + currWidthMod), slam.Bounds.Y - moveOffset);
+                    }
+
+                   
+                        
+                    
+                }
+               
+               
+            }
+            if (slam.Bounds.TouchBottomOf(tdPlayer.rectangle))
+            {
+                while(tdPlayer.rectangle.Bottom > slam.Bounds.Top)
+                {
+                    tdPlayer.rectangle.Y -= growthRate;
+                    tdPlayer.position.Y -= growthRate;
+                }
+                
+            }
+            if (slam.Bounds.TouchTopOf(tdPlayer.rectangle))
+            {
+                while(tdPlayer.rectangle.Top < slam.Bounds.Bottom)
+                {
+                    tdPlayer.rectangle.Y += growthRate;
+                    tdPlayer.position.Y += growthRate;
+                }
+              
+            }
+
+            if (slam.Bounds.TouchRightOf(tdPlayer.rectangle))
+            {
+                while(tdPlayer.rectangle.Right > slam.Bounds.Left)
+                {
+                    tdPlayer.rectangle.X -= growthRate;
+                    tdPlayer.position.X -= growthRate;
+                }
+               
+            }
+            if (slam.Bounds.TouchLeftOf(tdPlayer.rectangle))
+            {
+                while(tdPlayer.rectangle.Left < slam.Bounds.Right)
+                {
+                    tdPlayer.rectangle.X += growthRate;
+                    tdPlayer.position.X += growthRate;
+                }
+               
+            }
+            moveBack = false;
+            if (slam.Bounds.Intersects(tdPlayer.rectangle))
+            {
+                moveBack = true;
+            }
+            if (Health <= 0)
             {
                 bossRect = new Rectangle(0, 0, 32, 32);
                 worldRect = new Rectangle(0, 0, 32, 32);
@@ -285,7 +390,10 @@ namespace AUTO_Matic.Scripts.TopDown
             string combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
             return decimalNumber = float.Parse(combined);
         }
-
+        public float Distance(Vector2 pos1, Vector2 pos2)
+        {
+            return (float)Math.Sqrt(Math.Pow(pos2.X - pos1.X, 2) + Math.Pow(pos2.Y - pos1.Y, 2));
+        }
         public void Draw(SpriteBatch spriteBatch)
         {
             if(Health > 0)
@@ -297,7 +405,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     bullet.Draw(spriteBatch);
                 }
             }
-           
+            spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"),slam.Position, slam.Bounds, Color.White);
         }
         //void CreateBulletSpread()
         //{

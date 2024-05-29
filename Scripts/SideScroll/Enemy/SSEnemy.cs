@@ -216,7 +216,7 @@ namespace AUTO_Matic.SideScroll
         int attackBoxWidth = 40, attackBoxHeight = 40;
         float meleeDmg = 1.5f;
         bool outOfRange = false;
-        bool cantReach = false;
+        bool cantReach = true;
         float waitTime = .75f;
         Rectangle HitBox
         {
@@ -545,7 +545,7 @@ namespace AUTO_Matic.SideScroll
                     //Waits for player to enter vision
                     if(cantReach)
                     {
-                       if((int)enemyRect.X/64 == (int)player.playerRect.X/64)
+                       if((int)enemyRect.Y/64 == (int)player.playerRect.Y/64 && player.blockBottom)
                        {
                             cantReach = false;
                        }
