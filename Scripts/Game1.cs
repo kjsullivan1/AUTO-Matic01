@@ -366,7 +366,7 @@ namespace AUTO_Matic
             this.IsMouseVisible = false;
             Tile.Content = Content;
 
-            string filePath = Content.RootDirectory + "/SideScroll/Maps/Map1.txt";
+            string filePath = Content.RootDirectory + "/SideScroll/Maps/Map2.txt";
             SideTileMap.LoadMap(filePath);
             enemies.Clear();
             int j = 0;
@@ -584,6 +584,7 @@ namespace AUTO_Matic
                                 if (kb.IsKeyDown(Keys.P) || ssPlayer.Health <= 0 || ssPlayer.playerRect.Y > SideTileMap.GetWorldDims().Y)//Reset Pos
                                 {
                                     StartNewGame();
+                                    ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
 
                                 }
                                 if (ssPlayer.damaged)

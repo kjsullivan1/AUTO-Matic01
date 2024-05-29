@@ -116,7 +116,7 @@ namespace AUTO_Matic.Scripts.TopDown
             iShootDelay = shootDelay;
             this.width = width;
             this.height = height;
-            bounds = rect;
+            this.bounds = rect;
             tempRect = bossRect;
             worldRect = new Rectangle(((bounds.X + bounds.Width / 2) - width / 2), (((bounds.Y + bounds.Height / 2) - height / 2)), width, height);
 
@@ -307,10 +307,11 @@ namespace AUTO_Matic.Scripts.TopDown
 
                     if (slam.Radius >= maxSize)
                     {
-                        slam.Radius = maxSize;
+                       
                         //currWidthMod = 1;
                         slamWave = false;
                         slamDelay = iSlamDelay;
+                        slam = new Circle(new Vector2(bossRect.X + bossRect.Width / 2, bossRect.Y + bossRect.Height / 2), 2);
                     }
                     else
                     {
@@ -405,7 +406,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     bullet.Draw(spriteBatch);
                 }
             }
-            spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"),slam.Position, slam.Bounds, Color.White);
+           // spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"),slam.Position, slam.Bounds, Color.White);
         }
         //void CreateBulletSpread()
         //{
