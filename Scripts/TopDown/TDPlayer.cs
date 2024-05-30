@@ -18,7 +18,7 @@ namespace AUTO_Matic.TopDown
         enum AnimationStates {Idle ,Walking, Shooting, Death}
         AnimationStates animState = AnimationStates.Idle;
 
-        public enum PlayerState {Movement, Shooting, Death, Hit}
+        public enum PlayerState {Movement, Shooting, Death, Hit, Dash}
         public PlayerState playerState = PlayerState.Movement;
 
         Vector2 controllerMoveDir;
@@ -26,7 +26,12 @@ namespace AUTO_Matic.TopDown
         GamePadButtons prevButtons;
         public int bossRoom = 2;
         bool lockDir = false;
+        Vector2 startPos;
 
+        float meleeDmg = 2.25f;
+        bool melee = false;
+        float meleeDelay = .75f;
+        float iMeleeDelay;
         
         Rectangle MeleeHitbox
         {
@@ -166,7 +171,7 @@ namespace AUTO_Matic.TopDown
             PosYLevels.yLevels = new List<int[,]>();
             PosYLevels.Points = new List<Vector2>();
             PosYLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
-
+            iMeleeDelay = meleeDelay;
         }
 
         #endregion
@@ -216,6 +221,10 @@ namespace AUTO_Matic.TopDown
         public float bulletDmg = 1.2f;
         public float bulletTravelDist = 64 * 4;
         #endregion
+
+
+        float dashDistance = 64 * 2.75f;
+        float dashSpeed = 12f;
 
         public void Load(ContentManager Content, Rectangle bounds)
         {
@@ -344,7 +353,7 @@ namespace AUTO_Matic.TopDown
 
         }
 
-        public void Update(GameTime gameTime, TopDownMap map, ShotGunBoss boss)
+        public void Update(GameTime gameTime, TopDownMap map, ShotGunBoss boss, List<TDEnemy> enemies)
         {
 
             controllerMoveDir = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left;
@@ -352,10 +361,13 @@ namespace AUTO_Matic.TopDown
             this.map = map;
             kb = Keyboard.GetState();
             rectangle = new Rectangle((int)position.X, (int)position.Y, pixelSize, pixelSize);
+
+            meleeDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             switch(playerState)
             {
                 case PlayerState.Movement:
-                    Input();
+                    Input(enemies);
                     if (levelInX >= 1 && levelInY >= 1)
                     {
                         foreach (WallTiles tile in map.WallTiles)
@@ -490,6 +502,193 @@ namespace AUTO_Matic.TopDown
                         }
                     }
                     break;
+                case PlayerState.Dash:
+                    switch(shootDir)
+                    {
+                        case "up":
+                            if(MathHelper.Distance(startPos.Y, position.Y) < dashDistance)
+                            {
+                                position.Y -= dashSpeed;
+                            }
+                            else
+                            {
+                                playerState = PlayerState.Movement;
+                            }
+                            break;
+                        case "down":
+                            if (MathHelper.Distance(startPos.Y, position.Y) < dashDistance)
+                            {
+                                position.Y += dashSpeed;
+                            }
+                            else
+                            {
+                                playerState = PlayerState.Movement;
+                            }
+                            break;
+                        case "right":
+                            if (MathHelper.Distance(startPos.X, position.X) < dashDistance)
+                            {
+                                position.X += dashSpeed;
+                            }
+                            else
+                            {
+                                playerState = PlayerState.Movement;
+                            }
+                            break;
+                        case "left":
+                            if (MathHelper.Distance(startPos.X, position.X) < dashDistance)
+                            {
+                                position.X -= dashSpeed;
+                            }
+                            else
+                            {
+                                playerState = PlayerState.Movement;
+                            }
+                            break;
+
+
+                    }
+                    isColliding = false;
+                    #region Collisions
+                    if (levelInX >= 1 && levelInY >= 1)
+                    {
+                        foreach (WallTiles tile in map.WallTiles)
+                        {
+                            Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
+                            if (boss != null)
+                            {
+                                if (rectangle.TouchLeftOf(boss.worldRect))
+                                {
+                                    while (rectangle.Right > boss.worldRect.Left)
+                                    {
+                                        rectangle.X -= 1;
+                                        position.X -= 1;
+                                    }
+                                }
+                                if (rectangle.TouchRightOf(boss.worldRect))
+                                {
+                                    while (rectangle.Left < boss.worldRect.Right)
+                                    {
+                                        rectangle.X += 1;
+                                        position.X += 1;
+                                    }
+                                }
+                                if (rectangle.TouchBottomOf(boss.worldRect))
+                                {
+                                    while (rectangle.Top < boss.worldRect.Bottom)
+                                    {
+                                        rectangle.Y += 1;
+                                        position.Y += 1;
+                                    }
+                                }
+                                if (rectangle.TouchTopOf(boss.worldRect))
+                                {
+                                    while (rectangle.Bottom > boss.worldRect.Top)
+                                    {
+                                        rectangle.Y -= 1;
+                                        position.Y -= 1;
+                                    }
+                                }
+                            }
+
+                            if (changeLevel)
+                                break;
+                        }
+                    }
+                    else if (levelInY > 1 && levelInX == 1)
+                    {
+                        foreach (WallTiles tile in map.WallTiles)
+                        {
+                            Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
+                            if (boss != null)
+                            {
+                                if (rectangle.TouchLeftOf(boss.worldRect))
+                                {
+                                    while (rectangle.Right > boss.worldRect.Left)
+                                    {
+                                        rectangle.X -= 1;
+                                        position.X -= 1;
+                                    }
+                                }
+                                if (rectangle.TouchRightOf(boss.worldRect))
+                                {
+                                    while (rectangle.Left < boss.worldRect.Right)
+                                    {
+                                        rectangle.X += 1;
+                                        position.X += 1;
+                                    }
+                                }
+                                if (rectangle.TouchBottomOf(boss.worldRect))
+                                {
+                                    while (rectangle.Top < boss.worldRect.Bottom)
+                                    {
+                                        rectangle.Y += 1;
+                                        position.Y += 1;
+                                    }
+                                }
+                                if (rectangle.TouchTopOf(boss.worldRect))
+                                {
+                                    while (rectangle.Bottom > boss.worldRect.Top)
+                                    {
+                                        rectangle.Y -= 1;
+                                        position.Y -= 1;
+                                    }
+                                }
+                            }
+                            if (changeLevel)
+                                break;
+                        }
+                    }
+                    else if (levelInY > 1 && levelInX > 1)
+                    {
+                        foreach (WallTiles tile in map.WallTiles)
+                        {
+                            Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
+                            if (boss != null)
+                            {
+                                if (rectangle.TouchLeftOf(boss.worldRect))
+                                {
+                                    while (rectangle.Right > boss.worldRect.Left)
+                                    {
+                                        rectangle.X -= 1;
+                                        position.X -= 1;
+                                    }
+                                }
+                                if (rectangle.TouchRightOf(boss.worldRect))
+                                {
+                                    while (rectangle.Left < boss.worldRect.Right)
+                                    {
+                                        rectangle.X += 1;
+                                        position.X += 1;
+                                    }
+                                }
+                                if (rectangle.TouchBottomOf(boss.worldRect))
+                                {
+                                    while (rectangle.Top < boss.worldRect.Bottom)
+                                    {
+                                        rectangle.Y += 1;
+                                        position.Y += 1;
+                                    }
+                                }
+                                if (rectangle.TouchTopOf(boss.worldRect))
+                                {
+                                    while (rectangle.Bottom > boss.worldRect.Top)
+                                    {
+                                        rectangle.Y -= 1;
+                                        position.Y -= 1;
+                                    }
+                                }
+                            }
+                            if (changeLevel)
+                                break;
+                        }
+                    }
+                    #endregion
+                    if(isColliding)
+                    {
+                        playerState = PlayerState.Movement;
+                    }
+                    break;
             }
 
             if (bullets.Count != 0)
@@ -518,7 +717,7 @@ namespace AUTO_Matic.TopDown
 
         }
 
-        private void Input()
+        private void Input(List<TDEnemy> enemies)
         {
             if(kb.IsKeyDown(Keys.LeftShift) && prevKb.IsKeyDown(Keys.LeftShift))
             {
@@ -573,6 +772,24 @@ namespace AUTO_Matic.TopDown
                 }
                 
             }
+
+            if(kb.IsKeyDown(Keys.LeftShift) && prevKb.IsKeyUp(Keys.LeftShift) || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released)
+            {
+                playerState = PlayerState.Dash;
+                startPos = position;
+            }
+
+            if(kb.IsKeyDown(Keys.F) && prevKb.IsKeyUp(Keys.F) && meleeDelay <= 0 || currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && meleeDelay <= 0)
+            {
+                meleeDelay = iMeleeDelay;
+                foreach(TDEnemy enemy in enemies)
+                {
+                    if(MeleeHitbox.Intersects(enemy.Rectangle))
+                    {
+                        enemy.Health -= meleeDmg;
+                    }
+                }
+            }
             prevKb = kb;
             prevButtons = currButtons;
         }
@@ -585,8 +802,10 @@ namespace AUTO_Matic.TopDown
                 while(rectangle.Bottom > newRect.Top)
                 {
                     position.Y -= 1;
+
                     rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
                 }
+                isColliding = true;
                 position.Y -= moveSpeed;
             }
             if(rectangle.TouchBottomOf(newRect))
@@ -597,6 +816,7 @@ namespace AUTO_Matic.TopDown
                     rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
                 }
                 position.Y += moveSpeed;
+                isColliding = true;
             }
             if(rectangle.TouchLeftOf(newRect))
             {
@@ -606,6 +826,7 @@ namespace AUTO_Matic.TopDown
                     rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
                 }
                 position.X -= moveSpeed;
+                isColliding = true;
             }
             if(rectangle.TouchRightOf(newRect))
             {
@@ -615,6 +836,7 @@ namespace AUTO_Matic.TopDown
                     rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
                 }
                 position.X += moveSpeed;
+                isColliding = true;
             }
           
             //Border collisions

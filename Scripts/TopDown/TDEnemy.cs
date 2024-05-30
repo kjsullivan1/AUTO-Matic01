@@ -313,6 +313,11 @@ namespace AUTO_Matic.Scripts.TopDown
             {
                 #region Movement
                 case EnemyStates.Movement:
+                    if(rectangle.Intersects(playerRect.rectangle))
+                    {
+                        enemyState = EnemyStates.Shoot;
+                        break;
+                    }
                     SetVision();
 
                     blockedRight = false;
@@ -1508,8 +1513,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 }
             }
 
-           
-
+          
         }
         private void SetVision()
         {

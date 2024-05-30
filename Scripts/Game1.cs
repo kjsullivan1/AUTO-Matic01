@@ -124,6 +124,8 @@ namespace AUTO_Matic
         List<PlatformTile> offScreenPlatform = new List<PlatformTile>();
         List<BackgroundTile> offScreenBackground = new List<BackgroundTile>();
         List<WallTile> offScreenWall = new List<WallTile>();
+
+        List<HealthDrop> bossHealthDrops = new List<HealthDrop>();
         class Door
         {
             BottomDoorTile bottomDoor;
@@ -292,8 +294,15 @@ namespace AUTO_Matic
                 }
                 shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
 
+                //for(int i = 0; i <= 4; i++)
+                //{
 
-               if(GameState == GameStates.Paused)
+                //}
+                bossHealthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, currBounds.Y + 64 * 2, 64, 64)));
+                bossHealthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
+                bossHealthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
+                bossHealthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y) + 64 * 2, 64, 64)));
+                if (GameState == GameStates.Paused)
                     GameState = GameStates.Paused;
                 startBoss = true;
                 //tdPlayer.rectangle.X -= 200;
@@ -798,7 +807,7 @@ namespace AUTO_Matic
                                 UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)(camera.Position.X - GraphicsDevice.Viewport.Width / 2) + 20,
                                        (int)(camera.Position.Y - GraphicsDevice.Viewport.Height / 2) + 20), new Point(0, 0)));
                                 camera.Update(new Vector2(camera.X, camera.Y));
-                                tdPlayer.Update(gameTime, tdMap, shotGunBoss);
+                                tdPlayer.Update(gameTime, tdMap, shotGunBoss, tdEnemies);
                                 camera.Update(CameraPos());
                                 if (kb.IsKeyDown(Keys.J) || tdPlayer.rectangle.Intersects(LeaveDungeon))//Switching back to sidescroll
                                 {
@@ -895,6 +904,15 @@ namespace AUTO_Matic
 
                                     }
                                 }
+                                for(int i = bossHealthDrops.Count - 1; i>= 0; i--)
+                                {
+                                    if (bossHealthDrops[i].rect.Intersects(tdPlayer.rectangle))
+                                    {
+                                        tdPlayer.Health += healAmount;
+                                        bossHealthDrops.RemoveAt(i);
+
+                                    }
+                                }
 
                                 if (tdPlayer.bullets.Count != 0)
                                 {
@@ -976,6 +994,7 @@ namespace AUTO_Matic
                                 if (startBoss)
                                 {
                                     shotGunBoss.Update(gameTime, tdPlayer, tdMap);
+                                  
                                 }
 
                                 if (levelCount >= tdPlayer.bossRoom)
@@ -1265,6 +1284,10 @@ namespace AUTO_Matic
                             if (startBoss)
                             {
                                 shotGunBoss.Draw(spriteBatch);
+                                foreach(HealthDrop health in bossHealthDrops)
+                                {
+                                    health.Draw(spriteBatch);
+                                }
                             }
                             UIManager.Draw(spriteBatch);
                             //foreach(Bullet bullet in bossBullets)
