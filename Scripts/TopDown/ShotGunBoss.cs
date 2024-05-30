@@ -93,7 +93,7 @@ namespace AUTO_Matic.Scripts.TopDown
         int growthRate = 6;
         int maxSize = 300;
         bool slamWave = false;
-        float health = 18f;
+        float health = 25f;
         int currWidthMod = 3;
         public bool moveBack;
         float slamDelay = 1.15f;
@@ -288,7 +288,7 @@ namespace AUTO_Matic.Scripts.TopDown
             }
 
             if (Distance(slam.Position, new Vector2((int)(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2),
-                      (int)(tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2))) <= worldRect.Width / 2 + (64 * 2) && !slamWave)
+                      (int)(tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2))) <= worldRect.Width / 2 + (64 * 2.5f) && !slamWave)
             {
                 slamWave = true;
                 //walls.Clear();
