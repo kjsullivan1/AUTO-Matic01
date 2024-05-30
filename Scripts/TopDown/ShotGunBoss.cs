@@ -146,13 +146,13 @@ namespace AUTO_Matic.Scripts.TopDown
 
             if(health > 0)
             {
-                if (shootDelay >= 0)
+                if (shootDelay >= 0 && !slamWave)
                 {
                     shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                 }
 
                 Vector2 targetDir = new Vector2(tdPlayer.rectangle.X, tdPlayer.rectangle.Y) - new Vector2(bossRect.X, bossRect.Y);
-                if (shootDelay <= 0)
+                if (shootDelay <= 0 && !slamWave)
                 {
                     float angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X))); //sub by 90 if problems occur
                     bossRect = new Rectangle(((bounds.X + bounds.Width / 2) - width / 2), (((bounds.Y + bounds.Height / 2) - height / 2)), width, height);

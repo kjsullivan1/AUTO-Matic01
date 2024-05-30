@@ -24,7 +24,7 @@ namespace AUTO_Matic.TopDown
         Vector2 controllerMoveDir;
         GamePadButtons currButtons;
         GamePadButtons prevButtons;
-        public int bossRoom = 2;
+        public int bossRoom = 10;
         bool lockDir = false;
         Vector2 startPos;
 
@@ -219,7 +219,7 @@ namespace AUTO_Matic.TopDown
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = 1.2f;
-        public float bulletTravelDist = 64 * 4;
+        public float bulletTravelDist = 64 * 6;
         #endregion
 
 

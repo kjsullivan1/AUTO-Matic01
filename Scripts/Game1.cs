@@ -450,7 +450,26 @@ namespace AUTO_Matic
                     (graphics.PreferredBackBufferHeight / 2 + (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)))));
             }
 
-
+            if (tdCameraReached)
+            {
+                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                   (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                   new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                for (int i = tdMap.WallTiles.Count - 1; i >= 0; i--)
+                {
+                    if (currBounds.Contains(tdMap.WallTiles[i].Rectangle) == false)
+                    {
+                        tdMap.WallTiles.Remove(tdMap.WallTiles[i]);
+                    }
+                }
+                for (int i = tdMap.FloorTiles.Count - 1; i >= 0; i--)
+                {
+                    if (currBounds.Contains(tdMap.FloorTiles[i].Rectangle) == false)
+                    {
+                        tdMap.FloorTiles.Remove(tdMap.FloorTiles[i]);
+                    }
+                }
+            }
             return pos;
 
 
@@ -848,11 +867,13 @@ namespace AUTO_Matic
                                                 if (tdEnemies.Contains(new TDEnemy(Content, enemySpawn, tdMap, currMap, GraphicsDevice)) == false)
                                                     tdEnemies.Add(new TDEnemy(Content, enemySpawn, tdMap, currMap, GraphicsDevice));
                                         }
+                                       
                                     }
 
                                     tdPlayer.changeLevel = false;
 
                                 }
+                               
                                 if (tdEnemies.Count != 0)
                                 {
                                     bool hardBreak = false;
@@ -994,11 +1015,6 @@ namespace AUTO_Matic
                                 if (startBoss)
                                 {
                                     shotGunBoss.Update(gameTime, tdPlayer, tdMap);
-                                  
-                                }
-
-                                if (levelCount >= tdPlayer.bossRoom)
-                                {
                                     for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
                                     {
                                         if (shotGunBoss != null && tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
@@ -1007,8 +1023,9 @@ namespace AUTO_Matic
                                             tdPlayer.bullets.RemoveAt(i);
                                         }
                                     }
-
                                 }
+
+                              
 
 
                                 //if(levelCount >= tdPlayer.bossRoom)
