@@ -34,7 +34,7 @@ namespace AUTO_Matic
         Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -501,7 +501,7 @@ namespace AUTO_Matic
                     {
                         #region SideScroll
                         case GameStates.SideScroll: //Default
-                            Rectangle worldRect = new Rectangle(ssCamera.CameraBounds.X - (750 / 2), ssCamera.CameraBounds.Y - (750 / 2), ssCamera.CameraBounds.Width + 750, ssCamera.CameraBounds.Height + 750);
+                            Rectangle worldRect = new Rectangle(ssCamera.CameraBounds.X - (750 / 2), ssCamera.CameraBounds.Y - (950 / 2), ssCamera.CameraBounds.Width + 750, ssCamera.CameraBounds.Height + 950);
                             for (int i = 0; i < SideTileMap.GroundTiles.Count - 1; i++)
                             {
                                 if (worldRect.Intersects(SideTileMap.GroundTiles[i].Rectangle) == false)
@@ -1251,6 +1251,7 @@ namespace AUTO_Matic
                             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, ssCamera.transform);
 
                             SideTileMap.Draw(spriteBatch);
+                            UIManager.Draw(spriteBatch);
                             ssPlayer.Draw(spriteBatch);
                             foreach (SSEnemy enemy in enemies)
                             {
@@ -1266,7 +1267,7 @@ namespace AUTO_Matic
                             //}
 
                             //enemy.Draw(spriteBatch);
-                            UIManager.Draw(spriteBatch);
+                           
                             // spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), ssCamera.CameraBounds, Color.White * .5f);
                             spriteBatch.End();
                         }

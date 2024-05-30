@@ -1375,12 +1375,12 @@ namespace AUTO_Matic.SideScroll
             {
                 bullet.Draw(spriteBatch);
             }
-            foreach (Rectangle rect in vision)
-            {
-                spriteBatch.Draw(visionTxture, rect, Color.White * .25f);
+            //foreach (Rectangle rect in vision)
+            //{
+            //    spriteBatch.Draw(visionTxture, rect, Color.White * .25f);
 
 
-            }
+            //}
             //animManager.Draw(spriteBatch);
         }
 

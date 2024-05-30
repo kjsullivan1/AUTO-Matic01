@@ -14,7 +14,7 @@ namespace AUTO_Matic
 
         Vector2 center;
         public Viewport viewport;
-        private float zoom = .5f;
+        private float zoom = 1f;
         public Vector2 Position
         {
             get { return center; }

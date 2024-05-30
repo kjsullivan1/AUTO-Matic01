@@ -253,7 +253,7 @@ namespace AUTO_Matic
 
             ///Settings Menu elements
             //Title
-            string titleTxt = "How To Play";
+            string titleTxt = "Settings";
             uiElements.Add("SettingsMenuTitle", UIHelper.CreateTextblock("SettingsMenuTitle", titleTxt, (int)(((dims.X * 1.5f)) - (titleTxt.Length * 11.0f)), // dividing the txt * 11 / 2 makes in longer?
                 UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Top - 30 ));
             UIHelper.SetElementRect(uiElements["SettingsMenuTitle"], new Rectangle(uiElements["SettingsMenuTitle"].Position.ToPoint(), new Point(titleTxt.Length, 20)));
