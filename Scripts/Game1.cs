@@ -23,7 +23,7 @@ namespace AUTO_Matic
         SpriteBatch spriteBatch;
 
         Camera camera;
-
+        bool startGame = false;
         UIManager UIManager = new UIManager();
         List<HealthDrop> healthDrops = new List<HealthDrop>();
         Random rand = new Random();
@@ -189,9 +189,11 @@ namespace AUTO_Matic
             UIHelper.ButtonFont = Content.Load<SpriteFont>(@"Fonts\CrawlFont");
             UIHelper.CrawlBgTxture = Content.Load<Texture2D>(@"Textures\TitleCrawlBG");
             UIHelper.MainMenuBG = Content.Load<Texture2D>(@"Textures\TitleScreen");
-          
+            UIHelper.TutorialTexture = Content.Load<Texture2D>(@"Textures\Textbox");
+
             UIHelper.Bounds = new Rectangle(new Point((int)camera.Position.X, (int)camera.Position.Y), new Point(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
             UIHelper.CrawlFont = Content.Load<SpriteFont>(@"Fonts\CrawlFont");
+            UIHelper.TutorialFont = Content.Load<SpriteFont>(@"Fonts\TutorialFont");
             UIManager.CreateUIElements(new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight), this);
             UIHelper.SetElementVisibility("TitleCrawl", true, UIManager.uiElements);
             UIHelper.SetElementVisibility("MainMenuTitle", true, UIManager.uiElements);
@@ -399,7 +401,7 @@ namespace AUTO_Matic
             ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont);
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
-
+           
             prevGameState = GameState;
             GameState = GameStates.Paused;
         }
@@ -1187,6 +1189,7 @@ namespace AUTO_Matic
                             {
                                 iRate = 1;
                                 fade = false;
+                                startGame = true;
                             }
                             
                             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, ssCamera.transform);
@@ -1235,6 +1238,14 @@ namespace AUTO_Matic
                         }
                         else
                         {
+                            if(startGame)
+                            {
+                                UIManager.CreateTutorialUI(SideTileMap.playerSpawns[0], this);
+                                UIHelper.SetElementVisibility("Tutorial", true, UIManager.uiElements);
+                                startGame = false;
+                            }
+                            //UIManager.CreateTutorialUI(SideTileMap.playerSpawns[0], this);
+                            //UIHelper.SetElementVisibility("Tutorial", true, UIManager.uiElements);
                             Window.Title = camera.Position.ToString() + " Player.playrRect " + new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y).ToString() /*+ "    EnemyBounds: " + enemies[0].bounds.ToString()*/ + "    AnalogStickDir: " + moveDir.ToString();
                             //Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
                             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, ssCamera.transform);
@@ -1288,6 +1299,14 @@ namespace AUTO_Matic
                           
                             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
                             tdMap.Draw(spriteBatch);
+                            if (startBoss)
+                            {
+                                shotGunBoss.Draw(spriteBatch);
+                                foreach (HealthDrop health in bossHealthDrops)
+                                {
+                                    health.Draw(spriteBatch);
+                                }
+                            }
                             tdPlayer.Draw(spriteBatch);
 
                             foreach (TDEnemy enemy in tdEnemies)
@@ -1298,14 +1317,7 @@ namespace AUTO_Matic
                             {
                                 health.Draw(spriteBatch);
                             }
-                            if (startBoss)
-                            {
-                                shotGunBoss.Draw(spriteBatch);
-                                foreach(HealthDrop health in bossHealthDrops)
-                                {
-                                    health.Draw(spriteBatch);
-                                }
-                            }
+                           
                             UIManager.Draw(spriteBatch);
                             //foreach(Bullet bullet in bossBullets)
                             //{

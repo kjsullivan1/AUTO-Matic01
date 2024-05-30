@@ -1476,13 +1476,13 @@ namespace AUTO_Matic.SideScroll
                         jumpDelay = 0;
                         //velocity.X += (float)Math.Cos(velocity.X);
                         isFalling = false;
-                        if (groundPound)
-                        {
-                            if (SideTileMap.GetPoint((int)(newRect.Y / 64), (int)(newRect.X / 64)) == 26)
-                            {
-                                breakTiles.Add(newRect);
-                            }
-                        }
+                        //if (groundPound)
+                        //{
+                        //    if (SideTileMap.GetPoint((int)(newRect.Y / 64), (int)(newRect.X / 64)) == 26)
+                        //    {
+                        //        breakTiles.Add(newRect);
+                        //    }
+                        //}
                         groundPound = false;
                         //isDashing = false;
 

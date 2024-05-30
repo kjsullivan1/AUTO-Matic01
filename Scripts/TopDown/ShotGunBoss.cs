@@ -288,7 +288,7 @@ namespace AUTO_Matic.Scripts.TopDown
             }
 
             if (Distance(slam.Position, new Vector2((int)(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2),
-                      (int)(tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2))) <= worldRect.Width / 2 + (64 * 1) && !slamWave)
+                      (int)(tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2))) <= worldRect.Width / 2 + (64 * 2) && !slamWave)
             {
                 slamWave = true;
                 //walls.Clear();

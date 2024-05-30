@@ -259,7 +259,7 @@ namespace AUTO_Matic
             UIHelper.SetElementRect(uiElements["SettingsMenuTitle"], new Rectangle(uiElements["SettingsMenuTitle"].Position.ToPoint(), new Point(titleTxt.Length, 20)));
 
             //Settings Box
-            uiElements.Add("SettingsButtonBox", UIHelper.CreateTextblock("\n\tSettingsButtonBox", "To play this game do the follwing:\n\nUse WASD or left analog stick to move\n\nPress space bar or A button to jump\n\nHold down to get into shooting stance and press Enter key or X button to fire\n\nPress LShift key or B button to dash forwards\n\nThe E key and Y button allows you to open doors and go into the dungeon", (int)(((dims.X * 1.5f))) - (525 / 2),
+            uiElements.Add("SettingsButtonBox", UIHelper.CreateTextblock("\n\tSettingsButtonBox", "Hello", (int)(((dims.X * 1.5f))) - (525 / 2),
                 (int)uiElements["SettingsMenuTitle"].Position.Y + 50));
             UIHelper.SetElementRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(350, 100)));
             UIHelper.SetElementBGRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(525, 350)));
@@ -300,6 +300,24 @@ namespace AUTO_Matic
                     UIButton.ClickHandler(UIButton_Clicked);
                 }
             }
+        }
+
+        public void CreateTutorialUI(Vector2 dims, Game1 game)
+        {
+            if(uiElements.ContainsKey("TutorialBoxGame") == false)
+            {
+                uiElements.Add("TutorialBoxGame", UIHelper.CreateTextblock("TutorialBoxGame", "" +
+                               "\n\n  Use WASD or Left Analog Stick to move" +
+                               "\n\n  Press space bar or (A) button to jump" +
+                               "\n\n  Hold down to get into shooting stance and press Enter key or (X) button to fire" +
+                               "\n\n  If you time it right while in the air, you can ground pound" +
+                               "\n\n  Press LShift key or (B) button to dash forwards" +
+                               "\n\n  The E key and (Y) button allows you to open doors and go into the dungeon" +
+                               "\n\n  Hold them to jump out and play as the pilot\n\n", (int)(dims.X + 192/2), (int)(dims.Y - 300)));
+                UIHelper.SetElementRect(uiElements["TutorialBoxGame"], new Rectangle(uiElements["TutorialBoxGame"].Position.ToPoint(), new Point(450, 600)));
+                UIHelper.SetElementBGRect(uiElements["TutorialBoxGame"], new Rectangle(uiElements["TutorialBoxGame"].Position.ToPoint(), new Point(400, 225)));
+            }
+           
         }
 
         public void Draw(SpriteBatch spriteBatch)

@@ -15,6 +15,8 @@ namespace AUTO_Matic
         public static SpriteFont ButtonFont;
         public static SpriteFont CrawlFont;
         public static SpriteFont TitleFont;
+        public static SpriteFont TutorialFont;
+        public static Texture2D TutorialTexture;
         public static Texture2D CrawlBgTxture;
         public static List<Texture2D> HealthBar;
         public static Texture2D MainMenuBG;
@@ -42,6 +44,9 @@ namespace AUTO_Matic
                 case "MainMenuBackground":
                     UITextBlock e = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, MainMenuBG);
                     return e;
+                case "TutorialBoxGame":
+                    UITextBlock f = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, text, Color.Black, TutorialTexture);
+                    return f;
                 default:
                     UITextBlock b = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, CrawlFont, text, Color.White, CrawlBgTxture);
                     return b;
