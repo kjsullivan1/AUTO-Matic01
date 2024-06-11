@@ -51,6 +51,16 @@ namespace AUTO_Matic
         }
     }
 
+
+    class RepeatBackground:Tile
+    {
+        public RepeatBackground(Rectangle newRect)
+        {
+            texture = Content.Load<Texture2D>("SideScroll/MapTiles/BG2");
+            this.Rectangle = newRect;
+            position = new Vector2(newRect.X, newRect.Y);
+        }
+    }
     class GroundTile : Tile
     {
         public GroundTile(int i, Rectangle newRect)

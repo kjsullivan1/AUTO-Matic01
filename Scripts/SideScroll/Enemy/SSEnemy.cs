@@ -30,6 +30,7 @@ namespace AUTO_Matic.SideScroll
         bool blockBottom = false; 
         bool isFalling = true;
         bool isColliding = false;
+
         Vector2 TargetPos; //Position of where the GOTO targets 
         public float health = 5;
         public bool dead = false;
@@ -116,20 +117,49 @@ namespace AUTO_Matic.SideScroll
                 //    SheetSize = new Point(6, 1);
                 //    fpms = 120;
                 //    break;
-                //case AnimationStates.Walking:
-                //    texture = content.Load<Texture2D>("SideScroll/Animations/PlayerWalk");
-                //    FrameSize = new Point(64, 64);
-                //    CurrFrame = new Point(0, 0);
-                //    SheetSize = new Point(8, 1);
-                //    fpms = 120;
-                //    break;
-                //case AnimationStates.Jump:
-                //    texture = content.Load<Texture2D>("SideScroll/Animations/PlayerJump");
-                //    FrameSize = new Point(64, 64);
-                //    CurrFrame = new Point(0, 0);
-                //    SheetSize = new Point(4, 1);
-                //    fpms = 95;
-                //    break;
+                case AnimationStates.Walking:
+                    if(isShoot)
+                    {
+                        texture = content.Load<Texture2D>("SideScroll/Animations/RangedEnemyWalk");
+                        FrameSize = new Point(64, 64);
+                        CurrFrame = new Point(0, 0);
+                        SheetSize = new Point(4, 1);
+                        fpms = 120;
+                    }
+                    else
+                    {
+                        texture = content.Load<Texture2D>("SideScroll/Animations/MeleeEnemyWalk");
+                        FrameSize = new Point(64, 64);
+                        CurrFrame = new Point(0, 0);
+                        SheetSize = new Point(4, 1);
+                        fpms = 120;
+                    }
+                    break;
+                default:
+                    if (isShoot)
+                    {
+                        texture = content.Load<Texture2D>("SideScroll/Animations/RangedEnemyWalk");
+                        FrameSize = new Point(64, 64);
+                        CurrFrame = new Point(0, 0);
+                        SheetSize = new Point(4, 1);
+                        fpms = 120;
+                    }
+                    else
+                    {
+                        texture = content.Load<Texture2D>("SideScroll/Animations/MeleeEnemyWalk");
+                        FrameSize = new Point(64, 64);
+                        CurrFrame = new Point(0, 0);
+                        SheetSize = new Point(4, 1);
+                        fpms = 120;
+                    }
+                    break;
+                    //case AnimationStates.Jump:
+                    //    texture = content.Load<Texture2D>("SideScroll/Animations/PlayerJump");
+                    //    FrameSize = new Point(64, 64);
+                    //    CurrFrame = new Point(0, 0);
+                    //    SheetSize = new Point(4, 1);
+                    //    fpms = 95;
+                    //    break;
             }
 
             bool isRight = true, isLeft = false, isUp = false, isDown = false;
@@ -154,7 +184,7 @@ namespace AUTO_Matic.SideScroll
         public SSEnemy(ContentManager manager, Rectangle Bounds, int visionLength, Vector2 position, bool isShoot)
         {
             this.position = position;
-            enemyRect = new Rectangle((int)position.X, (int)position.Y, 48, 48);
+            enemyRect = new Rectangle((int)position.X, (int)position.Y, 20, 48);
             content = manager;
             bounds = new Vector2(0, Bounds.Width);
             texture = manager.Load<Texture2D>(@"Textures\TitleCrawlBG");
@@ -167,6 +197,9 @@ namespace AUTO_Matic.SideScroll
             maxShootDelay = shootDelay;
             if(isShoot)
                 attackOffsetFromPlayer = 64 * 3;
+
+            animState = AnimationStates.Walking;
+            ChangeAnimation();
         }
         #endregion
 
@@ -319,7 +352,11 @@ namespace AUTO_Matic.SideScroll
             {
               
                 case EnemyStates.GoTo:
-                   
+                    if(animState != AnimationStates.Walking)
+                    {
+                        animState = AnimationStates.Walking;
+                        ChangeAnimation();
+                    }
                     
                     //if(MathHelper.Distance(position.X, landingPos.X) > bounds.X && velocity.X < 0)
                     //{
@@ -543,6 +580,11 @@ namespace AUTO_Matic.SideScroll
             {
                 case EnemyStates.Idle:
                     //Waits for player to enter vision
+                    if(animState != AnimationStates.Idle)
+                    {
+                        animState = AnimationStates.Idle;
+                        ChangeAnimation();
+                    }
                     if(cantReach)
                     {
                        if((int)enemyRect.Y/64 == (int)player.playerRect.Y/64 && player.blockBottom)
@@ -654,6 +696,11 @@ namespace AUTO_Matic.SideScroll
                         }
                     }
 
+                    if(animState != AnimationStates.Walking)
+                    {
+                        animState = AnimationStates.Walking;
+                        ChangeAnimation();
+                    }
 
                     if (player.velocity.Y == 0 && player.playerRect.Bottom >= enemyRect.Bottom && player.isFalling == false)
                     {
@@ -1306,7 +1353,17 @@ namespace AUTO_Matic.SideScroll
 
             position += velocity; //Move
 
-            enemyRect = new Rectangle((int)position.X, (int)position.Y, 48, 48);
+            if(isShoot)
+            {
+                enemyRect = new Rectangle((int)position.X, (int)position.Y, 48, 48);
+                animManager.Update(gameTime, new Vector2(position.X - enemyRect.Width/4.5f, position.Y - enemyRect.Height / 3));
+            }
+            else
+            {
+                enemyRect = new Rectangle((int)position.X, (int)position.Y, 20, 48);
+                animManager.Update(gameTime, new Vector2(position.X - enemyRect.Width, position.Y - enemyRect.Height / 3));
+            }
+           
 
             if(isShoot) //Update bullets
             {
@@ -1328,6 +1385,20 @@ namespace AUTO_Matic.SideScroll
                 }
                 
             }
+            if(velocity.X < 0)
+            {
+                animManager.isRight = true;
+                animManager.isLeft = false;
+            }
+            else if(velocity.X > 0)
+            {
+                
+                animManager.isLeft = true;
+                animManager.isRight = false;
+            }
+            
+       
+            
 
         }
 
@@ -1375,6 +1446,8 @@ namespace AUTO_Matic.SideScroll
             {
                 bullet.Draw(spriteBatch);
             }
+
+            animManager.Draw(spriteBatch, Color.White);
             //foreach (Rectangle rect in vision)
             //{
             //    spriteBatch.Draw(visionTxture, rect, Color.White * .25f);

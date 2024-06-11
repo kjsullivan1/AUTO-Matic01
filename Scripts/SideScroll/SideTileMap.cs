@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AUTO_Matic.Scripts.SideScroll;
+using AUTO_Matic.SideScroll;
 
 namespace AUTO_Matic
 {
@@ -31,6 +34,9 @@ namespace AUTO_Matic
         public static List<int> WallTilesIndexes = new List<int>(); //List of indexes that contain the wall tiles
         public static List<int> BackgroundIndexes = new List<int>();//List of indexes that contain the background tiles
         public static List<int> PlatformIndexes = new List<int>();//List of the indexes of the platform tiles
+        public static List<RepeatBackground> repeatBG = new List<RepeatBackground>();
+
+        
 
         //public static List<EmptyTile> EmptyTiles
         //{
@@ -38,6 +44,11 @@ namespace AUTO_Matic
         //}
 
         //Public gets of the private lists above
+
+        public static List<RepeatBackground>  RepeatBG
+        {
+            get { return repeatBG; }
+        }
 
         public static List<PlatformTile> PlatformTiles
         {
@@ -119,16 +130,32 @@ namespace AUTO_Matic
             enemySpawns.Clear();
             playerSpawns.Clear();
             dungeonEntrances.Clear();
+
+            int count = 0;//Repeat background are 4 tiles long so must make every 4
+            int count2 = 0;//Repeat is 2 tiles tall so must make every 2
           
             for (int y = 0; y < map.GetLength(0); y++)
             {
+                
                 for (int x = 0; x < map.GetLength(1); x++)
                 {
+                    
                     int num = map[y, x];
                     int num2 = 0;
                     if (y != 0)
                         num2 = map[y - 1, x];
 
+                    if(count == 0 || count >= 4)
+                    {
+                        if(count2 == 0 || count2 >= 2)
+                        {
+                            repeatBG.Add(new RepeatBackground(new Rectangle(x * size, y * size, 256, 128)));
+                            count = 0;
+                            count2 = 0;
+                        }
+                     
+                    }
+                   
                     if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19 || num == 20|| num ==21 || num ==22 || num ==23)
                     {
                         //If at the top of the map
@@ -160,7 +187,7 @@ namespace AUTO_Matic
                     {
                         if (num == 26)
                         {
-                            backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                            //backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         }
 
                         if (y == 0)//If at the top of the map
@@ -183,44 +210,52 @@ namespace AUTO_Matic
                         }
                        
                     }
-                    if(num == 1) //Background
-                    {
-                        backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
-                        if (BackgroundIndexes.Contains(num) == false)
-                            BackgroundIndexes.Add(num);
-                    }
+                    //if(num == 1) //Background
+                    //{
+                    //    backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
+                    //    if (BackgroundIndexes.Contains(num) == false)
+                    //        BackgroundIndexes.Add(num);
+                    //}
                     if(num == 9 || num == 12)//Top of doors
                     {
-                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
+                       // backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
                         topDoorTiles.Add(new TopDoorTile(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     if(num == 8 || num == 11)//Bottom doors
                     {
-                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        //backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         bottomDoorTiles.Add(new BottomDoorTile(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     if(num == 25) //Enemy spawns
                     {
                         enemySpawns.Add(new Vector2(x * size, y * size));
-                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        //backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                     }
                     if(num == 7)//Dungeon entrance
                     {
-                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        //backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         dungeonEntrances.Add(new DungeonEntrance(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     if(num == 24)//Player spawn
                     {
                         playerSpawns.Add(new Vector2(x * size, y * size));
-                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        //backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                     }
-                    
+
+
+                    count++;
                 }
+                count2++;
             }
 
             tileMap.SetDims(map.GetLength(1), map.GetLength(0));
             tileMap.SetMap(map);
             tileMap.SetWorldDims(map.GetLength(1) * 64, map.GetLength(0) * 64);
+
+            //for(int i = 0; i < map.GetLength(1); i += 4)
+            //{
+            //    repeatBG.Add(new RepeatBackground(new Rectangle(i * 64, )))
+            //}
 
 
         }
@@ -300,10 +335,18 @@ namespace AUTO_Matic
 
 
 
-        public static void Draw(SpriteBatch spriteBatch)
+        public static void Draw(SpriteBatch spriteBatch, ContentManager Content, SSCamera ssCamera)
         {
 
             //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, Camera.transform);
+
+
+            foreach(RepeatBackground tile in repeatBG)
+            {
+                tile.Draw(spriteBatch);
+            }
+
+            spriteBatch.Draw(Content.Load<Texture2D>("SideScroll/MapTiles/BG1"), ssCamera.CameraBounds, Color.White);
 
             foreach (BackgroundTile tile in backgroundTiles)
             {

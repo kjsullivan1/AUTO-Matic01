@@ -34,7 +34,7 @@ namespace AUTO_Matic
         Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.TitleScreen;
+        public Scenes currScene = Scenes.InGame;
 
         public enum GameStates { SideScroll, TopDown, Paused}
         public GameStates GameState = GameStates.SideScroll;
@@ -347,7 +347,7 @@ namespace AUTO_Matic
                 GenerateNewMap(false, false, true, false);
             }
             BoundIndexes.Clear();
-            BoundIndexes.Add(camera.Position);
+            BoundIndexes.Add(camera.Position); 
             tdPlayer.Load(Content, camera.viewport.Bounds);
             tdPlayer.position = new Vector2((graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) + (64 * 2), -(graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) + (64 * 2));
 
@@ -386,7 +386,7 @@ namespace AUTO_Matic
                 if(j == 1)
                     enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
                 else
-                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], false));
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
                 j++;
 
             }
@@ -1194,9 +1194,11 @@ namespace AUTO_Matic
                             
                             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, ssCamera.transform);
 
-                            SideTileMap.Draw(spriteBatch);
+                            SideTileMap.Draw(spriteBatch, Content, ssCamera);
+                            //spriteBatch.Draw(Content.Load<Texture2D>("SideScroll/MapTiles/BG1"), ssCamera.CameraBounds, Color.White);
                             ssPlayer.Draw(spriteBatch);
                             spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), ssCamera.CameraBounds, Color.Black * (iRate));
+                           
                             spriteBatch.End();
                         }
                         else if(doorTrans)
@@ -1231,7 +1233,7 @@ namespace AUTO_Matic
 
                             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, ssCamera.transform);
 
-                            SideTileMap.Draw(spriteBatch);
+                            SideTileMap.Draw(spriteBatch, Content, ssCamera);
                             ssPlayer.Draw(spriteBatch);
                             spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), ssCamera.CameraBounds, Color.Black * (sRate));
                             spriteBatch.End();
@@ -1250,7 +1252,7 @@ namespace AUTO_Matic
                             //Window.Title = "Gravity: " + Gravity.Y.ToString() /*+ "  a = " + ((decimal)ssPlayer.Acceleration) + "   F = " + ((decimal)ssPlayer.Force) + " Friction = " + ssPlayer.friction */+ "   Vel = " + enemy.Velocity.ToString() + "   onPlatform = " + enemy.onPlatform + "   enemyState = " + enemy.enemyState.ToString();
                             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, ssCamera.transform);
 
-                            SideTileMap.Draw(spriteBatch);
+                            SideTileMap.Draw(spriteBatch, Content, ssCamera);
                             UIManager.Draw(spriteBatch);
                             ssPlayer.Draw(spriteBatch);
                             foreach (SSEnemy enemy in enemies)

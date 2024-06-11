@@ -36,7 +36,7 @@ namespace AUTO_Matic
             startPos = pos;
             this.travelDist = travelDist;
             this.maxSpeed = maxSpeed;
-            bulletTexture = content.Load<Texture2D>("TopDown/Textures/Player");
+            bulletTexture = content.Load<Texture2D>("Textures/Button");
             rect = new Rectangle((int)pos.X, (int)pos.Y, width, height);
             shootX = isX;
             shootY = isY;
@@ -78,7 +78,7 @@ namespace AUTO_Matic
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), Color.White);
+            spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), Color.FloralWhite);
         }
 
         public float Distance(Vector2 pos1, Vector2 pos2)

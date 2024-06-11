@@ -34,6 +34,18 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/TutorialFont.spritefont
 
+#begin SideScroll/Animations/MeleeEnemyWalk.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:SideScroll/Animations/MeleeEnemyWalk.png
+
 #begin SideScroll/Animations/PilotIdle.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -117,6 +129,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:SideScroll/Animations/PlayerWalk.png
+
+#begin SideScroll/Animations/RangedEnemyWalk.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:SideScroll/Animations/RangedEnemyWalk.png
 
 #begin SideScroll/HealthBar/PilotHealthBar0.png
 /importer:TextureImporter
@@ -261,6 +285,30 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:SideScroll/HealthBar/RoboHealthBar5.png
+
+#begin SideScroll/MapTiles/BG1.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:SideScroll/MapTiles/BG1.png
+
+#begin SideScroll/MapTiles/BG2.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:SideScroll/MapTiles/BG2.png
 
 #begin SideScroll/MapTiles/Tile0.png
 /importer:TextureImporter
