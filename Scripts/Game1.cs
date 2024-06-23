@@ -10,6 +10,7 @@ using AUTO_Matic.Scripts.SideScroll;
 using System.Threading;
 using AUTO_Matic.SideScroll.Enemy;
 using AUTO_Matic.Scripts;
+using AUTO_Matic.Scripts.SideScroll.Enemy;
 
 
 namespace AUTO_Matic
@@ -126,6 +127,8 @@ namespace AUTO_Matic
         List<WallTile> offScreenWall = new List<WallTile>();
 
         List<HealthDrop> bossHealthDrops = new List<HealthDrop>();
+
+        List<FlyingEnemy> flyingEnemies = new List<FlyingEnemy>();
         class Door
         {
             BottomDoorTile bottomDoor;
@@ -379,15 +382,17 @@ namespace AUTO_Matic
 
             string filePath = Content.RootDirectory + "/SideScroll/Maps/Map2.txt";
             SideTileMap.LoadMap(filePath);
+            flyingEnemies.Clear();
             enemies.Clear();
             int j = 0;
             for(int i = 0; i < SideTileMap.enemySpawns.Count - 1; i++)
             {
-                if(j == 1)
-                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
-                else
-                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
-                j++;
+                flyingEnemies.Add(new FlyingEnemy(Content, 5, SideTileMap.enemySpawns[i]));
+                //if(j == 1)
+                //    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
+                //else
+                //    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
+                //j++;
 
             }
 
@@ -807,6 +812,11 @@ namespace AUTO_Matic
                                    
                                 }
 
+                            }
+
+                            for(int i = flyingEnemies.Count - 1; i >= 0; i--)
+                            {
+                                flyingEnemies[i].Update(gameTime, Gravity, ssPlayer, SideTileMap.tileMap);
                             }
 
                             //SSCamera.Move(ssPlayer.Position);
@@ -1256,6 +1266,10 @@ namespace AUTO_Matic
                             UIManager.Draw(spriteBatch);
                             ssPlayer.Draw(spriteBatch);
                             foreach (SSEnemy enemy in enemies)
+                            {
+                                enemy.Draw(spriteBatch);
+                            }
+                            foreach (FlyingEnemy enemy in flyingEnemies)
                             {
                                 enemy.Draw(spriteBatch);
                             }

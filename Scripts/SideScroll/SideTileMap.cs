@@ -85,6 +85,11 @@ namespace AUTO_Matic
             get { return wallTiles; }
         }
 
+        public List<GroundTile> GetGroundTiles()
+        {
+            return groundTiles;
+        }
+
         //World dim in pixels
         public void SetWorldDims(int width, int height)
         {
