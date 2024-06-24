@@ -60,6 +60,9 @@
     <Compile Include="Scripts\AnimationManager.cs" />
     <Compile Include="Scripts\Bullet.cs" />
     <Compile Include="Scripts\Camera.cs" />
+    <Compile Include="Scripts\Effects\Particle.cs" />
+    <Compile Include="Scripts\Effects\ParticleManager.cs" />
+    <Compile Include="Scripts\Effects\SoundManager.cs" />
     <Compile Include="Scripts\Game1.cs" />
     <Compile Include="Scripts\HealthDrop.cs" />
     <Compile Include="Scripts\Program.cs" />
@@ -229,6 +232,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Content\Audio\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />
