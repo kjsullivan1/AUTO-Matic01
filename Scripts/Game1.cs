@@ -129,6 +129,10 @@ namespace AUTO_Matic
         List<HealthDrop> bossHealthDrops = new List<HealthDrop>();
 
         List<FlyingEnemy> flyingEnemies = new List<FlyingEnemy>();
+
+        Rectangle tdPrevBounds = Rectangle.Empty;
+        GAMapBuilder mapBuilder;
+      
         class Door
         {
             BottomDoorTile bottomDoor;
@@ -248,6 +252,10 @@ namespace AUTO_Matic
                 tdPlayer.changeLevel = true;
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
                     tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+
+                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                 (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                 new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
                 //Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
                 //                    (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
                 //                    new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
@@ -280,7 +288,7 @@ namespace AUTO_Matic
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
                     tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
 
-                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+               Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
                     (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
                     new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
                 int[,] mapDims = (tdMap.GenerateMap(filePath));
@@ -333,6 +341,17 @@ namespace AUTO_Matic
             camera.Zoom = 1f;
             Tiles.Content = Content;
 
+            //Give the builder it's maps
+            List<int[,]> maps = new List<int[,]>();
+            for (int i = 1; i < 11; i++)
+            {
+                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + i + ".txt";
+                maps.Add(tdMap.GenerateMap(filePath));
+            }
+
+            mapBuilder = new GAMapBuilder(maps); //Giving maps
+
+            mapBuilder.Start();
             if (tdPlayer.levelInX == 1 && tdPlayer.levelInY == 1)
             {
                 GenerateNewMap(true, false, false, false);
@@ -457,26 +476,30 @@ namespace AUTO_Matic
                     (graphics.PreferredBackBufferHeight / 2 + (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)))));
             }
 
+           
+
+            Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+               (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+               new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
             if (tdCameraReached)
             {
-                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
-                   (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
-                   new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-                for (int i = tdMap.WallTiles.Count - 1; i >= 0; i--)
+                tdPrevBounds = currBounds;
+            }
+            for (int i = tdMap.WallTiles.Count - 1; i >= 0; i--)
+            {
+                if (currBounds.Contains(tdMap.WallTiles[i].Rectangle) == false && tdPrevBounds != Rectangle.Empty && tdPrevBounds.Contains(tdMap.WallTiles[i].Rectangle) == false)
                 {
-                    if (currBounds.Contains(tdMap.WallTiles[i].Rectangle) == false)
-                    {
-                        tdMap.WallTiles.Remove(tdMap.WallTiles[i]);
-                    }
-                }
-                for (int i = tdMap.FloorTiles.Count - 1; i >= 0; i--)
-                {
-                    if (currBounds.Contains(tdMap.FloorTiles[i].Rectangle) == false)
-                    {
-                        tdMap.FloorTiles.Remove(tdMap.FloorTiles[i]);
-                    }
+                    tdMap.WallTiles.Remove(tdMap.WallTiles[i]);
                 }
             }
+            for (int i = tdMap.FloorTiles.Count - 1; i >= 0; i--)
+            {
+                if (currBounds.Contains(tdMap.FloorTiles[i].Rectangle) == false && tdPrevBounds != Rectangle.Empty && tdPrevBounds.Contains(tdMap.FloorTiles[i].Rectangle) == false)
+                {
+                    tdMap.FloorTiles.Remove(tdMap.FloorTiles[i]);
+                }
+            }
+
             return pos;
 
 
@@ -872,12 +895,20 @@ namespace AUTO_Matic
                                         (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
                                         new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
                                     if (!startBoss)
-                                    {
-                                        foreach (Vector2 enemySpawn in tdMap.EnemySpawns)
-                                        {
-                                            if (currBounds.Contains(enemySpawn))
-                                                if (tdEnemies.Contains(new TDEnemy(Content, enemySpawn, tdMap, currMap, GraphicsDevice)) == false)
-                                                    tdEnemies.Add(new TDEnemy(Content, enemySpawn, tdMap, currMap, GraphicsDevice));
+                                    {//Clear map and remove nonused
+                                        for(int i = tdMap.EnemySpawns.Count - 1; i >= 0; i--)
+                                        { 
+                                            if (currBounds.Contains(tdMap.EnemySpawns[i]))
+                                            {
+                                                if (tdEnemies.Contains(new TDEnemy(Content, tdMap.EnemySpawns[i], tdMap, currMap, GraphicsDevice)) == false)
+                                                    tdEnemies.Add(new TDEnemy(Content, tdMap.EnemySpawns[i], tdMap, currMap, GraphicsDevice));
+                                            }
+                                            else
+                                            {
+                                                tdMap.EnemySpawns.Remove(tdMap.EnemySpawns[i]);
+                                            }
+                                              
+                                  
                                         }
                                        
                                     }
