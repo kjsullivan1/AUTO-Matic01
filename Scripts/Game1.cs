@@ -341,17 +341,7 @@ namespace AUTO_Matic
             camera.Zoom = 1f;
             Tiles.Content = Content;
 
-            //Give the builder it's maps
-            List<int[,]> maps = new List<int[,]>();
-            for (int i = 1; i < 11; i++)
-            {
-                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + i + ".txt";
-                maps.Add(tdMap.GenerateMap(filePath));
-            }
 
-            mapBuilder = new GAMapBuilder(maps); //Giving maps
-
-            mapBuilder.Start();
             if (tdPlayer.levelInX == 1 && tdPlayer.levelInY == 1)
             {
                 GenerateNewMap(true, false, false, false);
@@ -372,6 +362,20 @@ namespace AUTO_Matic
             BoundIndexes.Add(camera.Position); 
             tdPlayer.Load(Content, camera.viewport.Bounds);
             tdPlayer.position = new Vector2((graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) + (64 * 2), -(graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) + (64 * 2));
+
+            //Give the builder it's maps
+            List<int[,]> maps = new List<int[,]>();
+            for (int i = 1; i < 11; i++)
+            {
+                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + i + ".txt";
+                maps.Add(tdMap.GenerateMap(filePath));
+            }
+            Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+             (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+             new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+            mapBuilder = new GAMapBuilder(maps); //Giving maps
+
+            mapBuilder.Start(75, tdMap, currBounds);
 
             List<Texture2D> healthbars = new List<Texture2D>();
             for (int i = 0; i < 6; i++)
