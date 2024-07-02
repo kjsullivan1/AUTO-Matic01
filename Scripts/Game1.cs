@@ -214,6 +214,8 @@ namespace AUTO_Matic
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if(currScene == Scenes.InGame)
                 StartNewGame();
+
+           
             // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
 
 
@@ -235,27 +237,53 @@ namespace AUTO_Matic
             if(!isBoss)
             {
                 levelCount++;
-                Random rand = new Random();
-                int num = rand.Next(1, 11);
+                //Random rand = new Random();
+                //int num = rand.Next(1, 11);
 
-                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + num + ".txt";
-
-                if (xLevel)
-                    tdPlayer.PosXLevels.xLevels.Add(tdMap.GenerateMap(filePath));
-                if (yLevel)
-                    tdPlayer.PosYLevels.yLevels.Add(tdMap.GenerateMap(filePath));
-                if (dLevel)
-                    tdPlayer.DiagLevels.dLevels.Add(tdMap.GenerateMap(filePath));
-
-                //tdEnemies.Clear();
-                currMap = tdMap.GenerateMap(filePath);
-                tdPlayer.changeLevel = true;
-                tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
-                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
-
+                //string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + num + ".txt";
+                currMap = mapBuilder.ChooseMap();
+               
                 Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
                  (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
                  new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+
+                if (xLevel)
+                    tdPlayer.PosXLevels.xLevels.Add(currMap);
+                if (yLevel)
+                    tdPlayer.PosYLevels.yLevels.Add(currMap);
+                if (dLevel)
+                    tdPlayer.DiagLevels.dLevels.Add(currMap);
+
+                //tdEnemies.Clear();
+              
+                tdPlayer.changeLevel = true;
+
+                tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                   tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+
+                if (xLevel)
+                {
+                    tdPlayer.PosXLevels.xLevels.Remove(currMap);
+                    tdPlayer.PosXLevels.xLevels.Add(mapBuilder.Start(75, tdMap, currBounds));
+                }
+                   
+                if (yLevel)
+                {
+                    tdPlayer.PosYLevels.yLevels.Remove(currMap);
+                    tdPlayer.PosYLevels.yLevels.Add(mapBuilder.Start(75, tdMap, currBounds));
+                }
+                   
+                if (dLevel)
+                {
+                    tdPlayer.DiagLevels.dLevels.Remove(currMap);
+                    tdPlayer.DiagLevels.dLevels.Add(mapBuilder.Start(75, tdMap, currBounds));
+                }
+
+                tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                 tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                //Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                //(0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                // new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
                 //Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
                 //                    (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
                 //                    new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
@@ -338,9 +366,17 @@ namespace AUTO_Matic
             graphics.IsFullScreen = false;
             graphics.ApplyChanges();
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)), graphics.PreferredBackBufferHeight - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
-            camera.Zoom = 1f;
+            camera.Zoom = .5f;
             Tiles.Content = Content;
 
+            //Give the builder it's maps
+            List<int[,]> maps = new List<int[,]>();
+            for (int i = 1; i < 11; i++)
+            {
+                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + i + ".txt";
+                maps.Add(tdMap.GenerateMap(filePath));
+            }
+            mapBuilder = new GAMapBuilder(maps); //Giving maps
 
             if (tdPlayer.levelInX == 1 && tdPlayer.levelInY == 1)
             {
@@ -363,19 +399,9 @@ namespace AUTO_Matic
             tdPlayer.Load(Content, camera.viewport.Bounds);
             tdPlayer.position = new Vector2((graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) + (64 * 2), -(graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) + (64 * 2));
 
-            //Give the builder it's maps
-            List<int[,]> maps = new List<int[,]>();
-            for (int i = 1; i < 11; i++)
-            {
-                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + i + ".txt";
-                maps.Add(tdMap.GenerateMap(filePath));
-            }
-            Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
-             (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
-             new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-            mapBuilder = new GAMapBuilder(maps); //Giving maps
+          
 
-            mapBuilder.Start(75, tdMap, currBounds);
+            //mapBuilder.Start(75, tdMap, currBounds);
 
             List<Texture2D> healthbars = new List<Texture2D>();
             for (int i = 0; i < 6; i++)
