@@ -27,7 +27,7 @@ namespace AUTO_Matic.Scripts.TopDown
         //List<List<int[,]>> population = new List<List<int[,]>>();
 
 
-        //Different types of changes: Add walls, Change enemy spawn, remove walls, add enemy spawn
+        //Different types of changes: Add walls, Change enemy spawn, remove walls, add enemy spawn, Mirror/Flip map
 
         public int[,] ChooseMap()
         {
