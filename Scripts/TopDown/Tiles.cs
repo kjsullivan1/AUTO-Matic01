@@ -46,6 +46,12 @@ namespace AUTO_Matic.TopDown
 
     class EnemySpawn :Tiles
     {
+        
+        public EnemySpawn(int[] spawnPoints, Rectangle rect)
+        {
+            this.mapPoint = spawnPoints;
+            this.Rectangle = rect;
+        }
         //create enemy
     }
 

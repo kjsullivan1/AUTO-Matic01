@@ -11,6 +11,7 @@ using System.Threading;
 using AUTO_Matic.SideScroll.Enemy;
 using AUTO_Matic.Scripts;
 using AUTO_Matic.Scripts.SideScroll.Enemy;
+using AUTO_Matic.Scripts.TopDown.AUTO_Matic.Scripts.TopDown;
 
 
 namespace AUTO_Matic
@@ -132,6 +133,7 @@ namespace AUTO_Matic
 
         Rectangle tdPrevBounds = Rectangle.Empty;
         GAMapBuilder mapBuilder;
+        
       
         class Door
         {

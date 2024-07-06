@@ -35,6 +35,7 @@ namespace AUTO_Matic.TopDown
         public List<int[,]> xMapDims = new List<int[,]>();
         public List<int[,]> yMapDims = new List<int[,]>();
         public List<int[,]> dMapDims = new List<int[,]>();
+        public List<EnemySpawn> enemySpawnPoints = new List<EnemySpawn>();
         int wallCount = 0;
         int enemyCount = 0;
         int floorCount = 0;
@@ -265,6 +266,7 @@ namespace AUTO_Matic.TopDown
         {
             wallTiles.Clear();
             //enemySpawns.Clear();
+            enemySpawnPoints.Clear();
             floorTiles.Clear();
             //playerT.Clear();
             xMapDims.Clear();
@@ -325,6 +327,7 @@ namespace AUTO_Matic.TopDown
                          
                             floorTiles.Add(new FloorTiles(9, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] {y, x};
+                            enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             floorCount++;
                             if (EnemyIndexes.Contains(num) == false)
                                 EnemyIndexes.Add(num);
@@ -386,6 +389,7 @@ namespace AUTO_Matic.TopDown
                            
                             floorTiles.Add(new FloorTiles(9, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             //floorTiles[floorCount].mapPoint = num;
                             floorCount++;
                             if (EnemyIndexes.Contains(num) == false)
@@ -451,6 +455,7 @@ namespace AUTO_Matic.TopDown
                            
                             floorTiles.Add(new FloorTiles(9, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             //floorTiles[floorCount].mapPoint = num;
                             floorCount++;
                             if (EnemyIndexes.Contains(num) == false)
