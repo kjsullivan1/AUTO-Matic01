@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AUTO_Matic.Scripts.TopDown;
-using AUTO_Matic.TopDown;
+﻿using AUTO_Matic.TopDown;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
 
 namespace AUTO_Matic.Scripts.TopDown
 {
@@ -23,7 +19,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
             List<int[,]> possMaps = new List<int[,]>();
             Random rand = new Random();
-            Chromosome map;
+            CellMap map;
             int accuracy;
             int max;
 
@@ -85,7 +81,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
             public int[,] ChooseMap()
             {
-                map = new Chromosome(possMaps[rand.Next(0, possMaps.Count)]);
+                map = new CellMap(possMaps[rand.Next(0, possMaps.Count)]);
 
                 return ConvertMap(map);
             }
@@ -96,7 +92,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 accuracy = percentAccuracy;
                 max = map.map.GetLength(0) * map.map.GetLength(1);
 
-                Chromosome tempMap = map;
+                CellMap tempMap = map;
                 // List<Rectangle> tempRects = new List<Rectangle>();
                 //for(int y = 0; y < tempMap.map.GetLength(0); y++)
                 //{
@@ -129,9 +125,21 @@ namespace AUTO_Matic.Scripts.TopDown
                 //int removeObjectChance = 10;
                 //mapObjectEffect = MapEffectObjects.AddWall;
 
+                //Effect objects
+                for (int i = 0; i < affectedObjects; i++)
+                {
+                    EffectObjects(mapData, tempMap, numWalls);
+                    ChooseEffectObject();
+                }
 
-
-                mapLayoutEffect = MapEffectLayout.Horizontal;
+                //mapLayoutEffect = MapEffectLayout.Diag;
+                for (int y = 0; y < tempMap.map.GetLength(0); y++)
+                {
+                    for (int x = 0; x < tempMap.map.GetLength(1); x++)
+                    {
+                        tempMap.map[y, x].fitness = true;
+                    }
+                }
                 //Effect layout
                 switch (mapLayoutEffect)
                 {
@@ -142,16 +150,63 @@ namespace AUTO_Matic.Scripts.TopDown
                         {
                             for(int x = 1; x < tempMap.map.GetLength(1) - 1; x++)
                             {
-                                if(mapData.WallIndexes.Contains(tempMap.map[y,x].num))
+                                if(mapData.WallIndexes.Contains(tempMap.map[y,x].num) && tempMap.map[y,x].fitness)
                                 {
                                     tempMap.map[y, x].num = 9;
-                                    //tempMap.map[Math.Abs(x - tempMap.map.GetLength(0)), Math.Abs(y - tempMap.map.GetLength(1))].num = 10;
+                                    tempMap.map[y, x].fitness = false;
+                                   // tempMap.map[Math.Abs(x - tempMap.map.GetLength(0)), Math.Abs(y - tempMap.map.GetLength(1))].num = 0;
+                                    int test = (tempMap.map.GetLength(1) - 1) - x;
+                                    tempMap.map[y, test].num = 0;
                                 }
-                                if(mapData.EnemyIndexes.Contains(tempMap.map[y,x].num))
+                                //else if(tempMap.map[y,x].fitness == false && tempMap.map[y,x].num == 0)
+                                //{
+                                //    //int test = (tempMap.map.GetLength(1)) - x;
+                                //    tempMap.map[y, x].num = 10;
+                                //}
+                                if (mapData.EnemyIndexes.Contains(tempMap.map[y,x].num) && tempMap.map[y,x].fitness)
                                 {
                                     tempMap.map[y, x].num = 9;
+                                    mapData.EnemySpawns.Clear();
+                                    tempMap.map[y, x].fitness = false;
+                                    tempMap.map[y, (tempMap.map.GetLength(1) - 1) - x].num = -1;
                                     //tempMap.map[y, x].num = 9;
                                     //tempMap.map[Math.Abs(x - tempMap.map.GetLength(0)), Math.Abs(y - tempMap.map.GetLength(1))].num = 11;
+                                }
+                                //else if(tempMap.map[y,x].fitness == false && tempMap.map[y,x].num == -1)
+                                //{
+                                //    tempMap.map[y,x]
+                                //}
+                            }
+                        }
+                        for (int y = 1; y < tempMap.map.GetLength(0) - 1; y++)
+                        {
+                            for (int x = 1; x < tempMap.map.GetLength(1) - 1; x++)
+                            {
+                                //if (mapData.WallIndexes.Contains(tempMap.map[y, x].num) && tempMap.map[y, x].fitness)
+                                //{
+                                //    tempMap.map[y, x].num = 9;
+                                //    tempMap.map[y, x].fitness = false;
+                                //    tempMap.map[Math.Abs(x - tempMap.map.GetLength(0)), Math.Abs(y - tempMap.map.GetLength(1))].num = 0;
+                                //    int test = (tempMap.map.GetLength(1)) - x;
+                                //    tempMap.map[y, test].num = 10;
+                                //}
+                                if (tempMap.map[y, x].num == 0)
+                                {
+                                    //int test = (tempMap.map.GetLength(1)) - x;
+                                    tempMap.map[y, x].num = 10;
+                                }
+                                //if (mapData.EnemyIndexes.Contains(tempMap.map[y, x].num) && tempMap.map[y, x].fitness)
+                                //{
+                                //    tempMap.map[y, x].num = 9;
+                                //    mapData.EnemySpawns.Clear();
+                                //    tempMap.map[y, x].fitness = false;
+                                //    tempMap.map[y, (tempMap.map.GetLength(1)) - x].num = -1;
+                                //    //tempMap.map[y, x].num = 9;
+                                //    //tempMap.map[Math.Abs(x - tempMap.map.GetLength(0)), Math.Abs(y - tempMap.map.GetLength(1))].num = 11;
+                                //}
+                                else if (tempMap.map[y, x].num == -1)
+                                {
+                                    tempMap.map[y, x].num = 11;
                                 }
                             }
                         }
@@ -182,26 +237,114 @@ namespace AUTO_Matic.Scripts.TopDown
                         //}
 
                         break;
-                        //case MapEffectLayout.Vertical:
-                        //    foreach (MapObject obj in mapObjects)
-                        //    {
-                        //        for (int i = 0; i < obj.objectRects.Count; i++)
-                        //        {
-                        //            tempMap.map[obj.objectRects[i].mapPoint[0], obj.objectRects[i].mapPoint[1]].num = 9;
+                    case MapEffectLayout.Vertical:
+                        for (int y = 1; y < tempMap.map.GetLength(0) - 1; y++)
+                        {
+                            for (int x = 1; x < tempMap.map.GetLength(1) - 1; x++)
+                            {
+                                if (mapData.WallIndexes.Contains(tempMap.map[y, x].num) && tempMap.map[y, x].fitness)
+                                {
+                                    tempMap.map[y, x].num = 9;
+                                    tempMap.map[y, x].fitness = false;
+                                    // tempMap.map[Math.Abs(x - tempMap.map.GetLength(0)), Math.Abs(y - tempMap.map.GetLength(1))].num = 0;
+                                    //int test = (tempMap.map.GetLength(1)) - x;
+                                    tempMap.map[(tempMap.map.GetLength(0) - 1) - y, x].num = 0;
+                                }
+                                //else if(tempMap.map[y,x].fitness == false && tempMap.map[y,x].num == 0)
+                                //{
+                                //    //int test = (tempMap.map.GetLength(1)) - x;
+                                //    tempMap.map[y, x].num = 10;
+                                //}
+                                if (mapData.EnemyIndexes.Contains(tempMap.map[y, x].num) && tempMap.map[y, x].fitness)
+                                {
+                                    tempMap.map[y, x].num = 9;
+                                    mapData.EnemySpawns.Clear();
+                                    tempMap.map[y, x].fitness = false;
+                                    tempMap.map[(tempMap.map.GetLength(0) - 1) - y, x].num = -1;
+                                    //tempMap.map[y, x].num = 9;
+                                    //tempMap.map[Math.Abs(x - tempMap.map.GetLength(0)), Math.Abs(y - tempMap.map.GetLength(1))].num = 11;
+                                }
+                                //else if(tempMap.map[y,x].fitness == false && tempMap.map[y,x].num == -1)
+                                //{
+                                //    tempMap.map[y,x]
+                                //}
+                            }
+                        }
+                        for (int y = 1; y < tempMap.map.GetLength(0) - 1; y++)
+                        {
+                            for (int x = 1; x < tempMap.map.GetLength(1) - 1; x++)
+                            {
+                               
+                                if (tempMap.map[y, x].num == 0)
+                                {
+                                    //int test = (tempMap.map.GetLength(1)) - x;
+                                    tempMap.map[y, x].num = 10;
+                                }
+                               
+                                else if (tempMap.map[y, x].num == -1)
+                                {
+                                    tempMap.map[y, x].num = 11;
+                                }
+                            }
+                        }
+                        break;
 
-                        //            tempMap.map[tempMap.map.GetLength(0) - obj.objectRects[i].mapPoint[0],
-                        //                (obj.objectRects[i].mapPoint[1])].num = 10;
-                        //            //tempMap.map[obj.objectRects[]
-                        //        }
-                        //    }
-                        //    break;
+                    case MapEffectLayout.Diag:
+
+                        for (int y = 1; y < tempMap.map.GetLength(0) - 1; y++)
+                        {
+                            for (int x = 1; x < tempMap.map.GetLength(1) - 1; x++)
+                            {
+                                if (mapData.WallIndexes.Contains(tempMap.map[y, x].num) && tempMap.map[y, x].fitness)
+                                {
+                                    tempMap.map[y, x].num = 9;
+                                    tempMap.map[y, x].fitness = false;
+                                    // tempMap.map[Math.Abs(x - tempMap.map.GetLength(0)), Math.Abs(y - tempMap.map.GetLength(1))].num = 0;
+                                    //int test = (tempMap.map.GetLength(1)) - x;
+                                    tempMap.map[(tempMap.map.GetLength(0) - 1) - y, (tempMap.map.GetLength(1) - 1) - x].num = 0;
+                                }
+                                //else if(tempMap.map[y,x].fitness == false && tempMap.map[y,x].num == 0)
+                                //{
+                                //    //int test = (tempMap.map.GetLength(1)) - x;
+                                //    tempMap.map[y, x].num = 10;
+                                //}
+                                if (mapData.EnemyIndexes.Contains(tempMap.map[y, x].num) && tempMap.map[y, x].fitness)
+                                {
+                                    tempMap.map[y, x].num = 9;
+                                    mapData.EnemySpawns.Clear();
+                                    tempMap.map[y, x].fitness = false;
+                                    tempMap.map[(tempMap.map.GetLength(0) - 1) - y, (tempMap.map.GetLength(1) - 1) - x].num = -1;
+                                    //tempMap.map[y, x].num = 9;
+                                    //tempMap.map[Math.Abs(x - tempMap.map.GetLength(0)), Math.Abs(y - tempMap.map.GetLength(1))].num = 11;
+                                }
+                                //else if(tempMap.map[y,x].fitness == false && tempMap.map[y,x].num == -1)
+                                //{
+                                //    tempMap.map[y,x]
+                                //}
+                            }
+                        }
+                        for (int y = 1; y < tempMap.map.GetLength(0) - 1; y++)
+                        {
+                            for (int x = 1; x < tempMap.map.GetLength(1) - 1; x++)
+                            {
+
+                                if (tempMap.map[y, x].num == 0)
+                                {
+                                    //int test = (tempMap.map.GetLength(1)) - x;
+                                    tempMap.map[y, x].num = 10;
+                                }
+
+                                else if (tempMap.map[y, x].num == -1)
+                                {
+                                    tempMap.map[y, x].num = 11;
+                                }
+                            }
+                        }
+                        break;
+                    case MapEffectLayout.None:
+                        break;
                 }
-                //Effect objects
-                for (int i = 0; i < affectedObjects; i++)
-                {
-                    EffectObjects(mapData, tempMap, numWalls);
-                    ChooseEffectObject();
-                }
+               
 
                 //Remove everything to test
                 foreach (MapObject obj in mapObjects)
@@ -246,14 +389,14 @@ namespace AUTO_Matic.Scripts.TopDown
                     }
                 }
 
-                int[,] testMap = ConvertMap(tempMap);
+                //int[,] testMap = ConvertMap(tempMap);
 
                 return ConvertMap(tempMap);
 
                 //return mp;
             }
 
-            private void EffectObjects(TopDownMap mapData, Chromosome tempMap, int numWalls)
+            private void EffectObjects(TopDownMap mapData, CellMap tempMap, int numWalls)
             {
                 switch (mapObjectEffect)
                 {
@@ -1056,7 +1199,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 }
             }
 
-            private static int[,] ConvertMap(Chromosome tempMap)
+            private static int[,] ConvertMap(CellMap tempMap)
             {
                 int[,] mp = new int[tempMap.map.GetLength(0), tempMap.map.GetLength(1)];
 
@@ -1071,7 +1214,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 return mp;
             }
 
-            private void GetMapObjects(TopDownMap mapData, Rectangle currBounds, Chromosome tempMap)
+            private void GetMapObjects(TopDownMap mapData, Rectangle currBounds, CellMap tempMap)
             {
                 List<Object> mapObject = new List<Object>();
                 bool up = false, left = false, right = false, down = false, diag = false;
@@ -1305,6 +1448,8 @@ namespace AUTO_Matic.Scripts.TopDown
                     }
                 }
 
+               
+
                 List<Object> enemyLoc = new List<Object>();
                 //int i = 0;
                 foreach(EnemySpawn enemySpawnPoint in mapData.enemySpawnPoints)
@@ -1361,17 +1506,17 @@ namespace AUTO_Matic.Scripts.TopDown
             }
         }
 
-        class Chromosome
+        class CellMap
         {
-            public Gene[,] map;
+            public Cell[,] map;
             public int fitness;
             List<int> possNums;
             int minNum;
             int maxNum;
 
-            public Chromosome(int[,] map)
+            public CellMap(int[,] map)
             {
-                Gene[,] tempMap = new Gene[map.GetLength(0), map.GetLength(1)];
+                Cell[,] tempMap = new Cell[map.GetLength(0), map.GetLength(1)];
                 possNums = new List<int>();
                 for (int y = 0; y < map.GetLength(0); y++)
                 {
@@ -1407,20 +1552,20 @@ namespace AUTO_Matic.Scripts.TopDown
             }
 
             //Map build will need the indexes of the used tiles. 
-            public Chromosome CreateChromosome(int[,] map)
+            public CellMap CreateChromosome(int[,] map)
             {
-                return new Chromosome(map);
+                return new CellMap(map);
             }
 
         }
 
-        struct Gene
+        struct Cell
         {
             public int num;
             public bool fitness;
             public int[] mapPoint;
 
-            public Gene(int num, int[] point)
+            public Cell(int num, int[] point)
             {
                 this.num = num;
                 fitness = false;

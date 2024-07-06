@@ -256,7 +256,7 @@ namespace AUTO_Matic
                 if (dLevel)
                     tdPlayer.DiagLevels.dLevels.Add(currMap);
 
-                //tdEnemies.Clear();
+                tdEnemies.Clear();
               
                 tdPlayer.changeLevel = true;
 
@@ -918,10 +918,10 @@ namespace AUTO_Matic
                                 }
                                 if (tdPlayer.changeLevel)
                                 {
-
+                                    tdEnemies.Clear();
                                     tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
                                         tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
-                                    tdEnemies.Clear();
+                                  
                                     currMap = tdPlayer.DiagLevels.dLevels[tdPlayer.DiagLevels.diagIndex];
                                     Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
                                         (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
