@@ -126,12 +126,9 @@ namespace AUTO_Matic.Scripts.TopDown
                 //mapObjectEffect = MapEffectObjects.AddWall;
 
                 //Effect objects
-                for (int i = 0; i < affectedObjects; i++)
-                {
-                    EffectObjects(mapData, tempMap, numWalls);
-                    ChooseEffectObject();
-                }
+             
 
+                #region MapLayoutEffect
                 //mapLayoutEffect = MapEffectLayout.Diag;
                 for (int y = 0; y < tempMap.map.GetLength(0); y++)
                 {
@@ -344,50 +341,54 @@ namespace AUTO_Matic.Scripts.TopDown
                     case MapEffectLayout.None:
                         break;
                 }
-               
-
-                //Remove everything to test
-                foreach (MapObject obj in mapObjects)
+                #endregion
+                for (int i = 0; i < affectedObjects; i++)
                 {
-                    for (int j = 0; j < obj.objectRects.Count; j++)
-                    {
-
-                        foreach (WallTiles tile1 in mapData.WallTiles)
-                        {
-                            if (tile1.Rectangle == obj.objectRects[j].rect)
-                            {
-                                //tile = tile1;
-                                //tempMap.map[tile1.mapPoint[0], tile1.mapPoint[1]].num = 9;
-                                //break;
-                            }
-                        }
-
-                        #region Old Tests
-                        //if (mapData.WallIndexes.Contains(tempMap.map[Math.Abs(obj.objectRects[i].Y / (64 * levelInY)), obj.objectRects[i].X / (64 * levelInX)].num)
-                        //    || mapData.EnemyIndexes.Contains(tempMap.map[Math.Abs(obj.objectRects[i].Y / (64 * levelInY)), obj.objectRects[i].X / (64 * levelInX)].num))
-                        //{
-                        //    tempMap.map[Math.Abs(obj.objectRects[i].Y / (64 * levelInY)), obj.objectRects[i].X / (64 * levelInX)].num = mapData.FloorIndexes[1];
-                        //}
-                        // WallTiles tile = new WallTiles(10, obj.objectRects[i]);
-
-                        //if(tile.mapPoint != null)
-                        //{
-
-                        //}
-
-                        //if(obj.id == "Wall" && mapData.WallTiles.Contains(new WallTiles(10, obj.objectRects[i])))
-                        //{
-                        //     = new WallTiles(10, obj.objectRects[i]);
-                        //    tempMap.map[mapData.WallTiles..mapPoint[0],
-                        //        mapData.WallTiles.Find(new WallTiles(10, obj.objectRects[i])).mapPoint[1]] = 9;
-                        //}
-
-                        //int y = obj.objectRects[i].Y / (64 * levelInY);
-                        //int x = obj.objectRects[i].X / (64 * levelInX);
-                        //tempMap.map[Math.Abs(y), x].num = 10;
-                        #endregion
-                    }
+                    EffectObjects(mapData, tempMap, numWalls);
+                    ChooseEffectObject();
                 }
+                //Remove everything to test
+                //foreach (MapObject obj in mapObjects)
+                //{
+                //    for (int j = 0; j < obj.objectRects.Count; j++)
+                //    {
+
+                //        foreach (WallTiles tile1 in mapData.WallTiles)
+                //        {
+                //            if (tile1.Rectangle == obj.objectRects[j].rect)
+                //            {
+                //                //tile = tile1;
+                //                //tempMap.map[tile1.mapPoint[0], tile1.mapPoint[1]].num = 9;
+                //                //break;
+                //            }
+                //        }
+
+                //        #region Old Tests
+                //        //if (mapData.WallIndexes.Contains(tempMap.map[Math.Abs(obj.objectRects[i].Y / (64 * levelInY)), obj.objectRects[i].X / (64 * levelInX)].num)
+                //        //    || mapData.EnemyIndexes.Contains(tempMap.map[Math.Abs(obj.objectRects[i].Y / (64 * levelInY)), obj.objectRects[i].X / (64 * levelInX)].num))
+                //        //{
+                //        //    tempMap.map[Math.Abs(obj.objectRects[i].Y / (64 * levelInY)), obj.objectRects[i].X / (64 * levelInX)].num = mapData.FloorIndexes[1];
+                //        //}
+                //        // WallTiles tile = new WallTiles(10, obj.objectRects[i]);
+
+                //        //if(tile.mapPoint != null)
+                //        //{
+
+                //        //}
+
+                //        //if(obj.id == "Wall" && mapData.WallTiles.Contains(new WallTiles(10, obj.objectRects[i])))
+                //        //{
+                //        //     = new WallTiles(10, obj.objectRects[i]);
+                //        //    tempMap.map[mapData.WallTiles..mapPoint[0],
+                //        //        mapData.WallTiles.Find(new WallTiles(10, obj.objectRects[i])).mapPoint[1]] = 9;
+                //        //}
+
+                //        //int y = obj.objectRects[i].Y / (64 * levelInY);
+                //        //int x = obj.objectRects[i].X / (64 * levelInX);
+                //        //tempMap.map[Math.Abs(y), x].num = 10;
+                //        #endregion
+                //    }
+                //}
 
                 //int[,] testMap = ConvertMap(tempMap);
 

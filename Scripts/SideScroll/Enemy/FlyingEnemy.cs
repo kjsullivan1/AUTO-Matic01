@@ -25,6 +25,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
         Rectangle enemyRect;
         float moveSpeed = .5f;
+        int unblockedCount = 0;
         Vector2 pos;
         float gravResistance;
         public float health;
@@ -32,6 +33,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         Vector2 velocity = Vector2.Zero;
         float yOffset = 64 * 3; //How high from the ground 
         Rectangle groundRect;
+        Rectangle collisionRect;
         Texture2D visionTexture;
         //Texture2D texture;
         int visionLength;
@@ -196,19 +198,19 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
         }
 
-        public void Update(GameTime gameTime, Vector2 gravity, SSPlayer player, SideTileMap map)
+        public void Update(GameTime gameTime, Vector2 gravity, SSPlayer player, SideTileMap map, Rectangle currBounds)
         {
             blockBottom = false;
             blockLeft = false;
             blockRight = false;
             blockTop = false;
-
+            //yOffset = 64 * 3;
             switch(enemyState)
             {
                 case EnemyStates.Idle:
                     if (groundRect == Rectangle.Empty)
                     {
-                        groundRect = new Rectangle(enemyRect.X + enemyRect.Width / 2, enemyRect.Bottom - enemyRect.Height/2, enemyRect.Width/2, enemyRect.Height/2);
+                        groundRect = new Rectangle(enemyRect.X + enemyRect.Width / 2, enemyRect.Bottom - enemyRect.Height/2, enemyRect.Width, enemyRect.Height/2);
                     }
                     //groundRect = enemyRect;
                     foreach (Rectangle rect in vision)
@@ -245,42 +247,87 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                     {
                         if (groundRect.TouchTopOf(ground.Rectangle))
                         {
+                           
                             groundRect = new Rectangle(groundRect.X, ground.Rectangle.Y - groundRect.Height, groundRect.Width, groundRect.Height);
+                            collisionRect = groundRect;
+                            collisionRect.Width /= 2;
+                            collisionRect.X += collisionRect.Width / 2;
+                          groundRect = new Rectangle(enemyRect.X, enemyRect.Y + groundRect.Height / 2,
+                                groundRect.Width, groundRect.Height);
+                            break;
                         }
                     }
-                    if (MathHelper.Distance(initYPos, pos.Y) >= yOffset)
+                    foreach(PlatformTile platform in map.GetPlatformTiles())
+                    {
+                        if (groundRect.TouchTopOf(platform.Rectangle))
+                        {
+
+                            groundRect = new Rectangle(groundRect.X, platform.Rectangle.Y - groundRect.Height, groundRect.Width, groundRect.Height);
+                            collisionRect = groundRect;
+                            collisionRect.Width /= 2;
+                            collisionRect.X += collisionRect.Width / 2;
+                            groundRect = new Rectangle(enemyRect.X , enemyRect.Y + groundRect.Height / 2,
+                                groundRect.Width, groundRect.Height);
+                            break;
+                        }
+                    }
+                    if (MathHelper.Distance(initYPos, pos.Y) >= yOffset || blockTop)
                     {
                         prevState = enemyState;
                         enemyState = EnemyStates.GoTo;
                         velocity = Vector2.Zero;
                     }
+
+                    if(groundRect.Y > collisionRect.Y)
+                    {
+                        collisionRect.Y = enemyRect.Y + collisionRect.Height;
+                    }
                     break;
                 case EnemyStates.GoTo:
-
-                   
-
                     groundRect = new Rectangle((int)(groundRect.X + gravity.X), (int)(groundRect.Y + gravity.Y * 10), groundRect.Width, groundRect.Height);
-                    
-                   
+                    collisionRect.X = groundRect.X;
 
-                    foreach(GroundTile ground in SideTileMap.GroundTiles)
+
+                    foreach (GroundTile ground in SideTileMap.GroundTiles)
                     {
                         Collision(ground.Rectangle);
-                        if(groundRect.TouchTopOf(ground.Rectangle))
+                        if (groundRect.TouchTopOf(ground.Rectangle))
                         {
-                            groundRect.Y = ground.Rectangle.Y - groundRect.Height;
+
+                            groundRect = new Rectangle(groundRect.X, ground.Rectangle.Y - groundRect.Height, groundRect.Width, groundRect.Height);
+                            collisionRect = groundRect;
+                            collisionRect.Width /= 2;
+                            collisionRect.X += collisionRect.Width / 2;
+                            groundRect = new Rectangle(enemyRect.X, enemyRect.Y + groundRect.Height / 2,
+                                groundRect.Width, groundRect.Height);
+                            break;
                         }
                     }
                     foreach (WallTile wall in SideTileMap.WallTiles)
                     {
                         Collision(wall.Rectangle);
                     }
-                    foreach(PlatformTile platform in SideTileMap.PlatformTiles)
+                    foreach (PlatformTile platform in SideTileMap.PlatformTiles)
                     {
                         Collision(platform.Rectangle);
+                        if (groundRect.TouchTopOf(platform.Rectangle))
+                        {
+
+                            groundRect = new Rectangle(groundRect.X, platform.Rectangle.Y - groundRect.Height, groundRect.Width, groundRect.Height);
+                            collisionRect = groundRect;
+                            collisionRect.Width /= 2;
+                            collisionRect.X += collisionRect.Width / 2;
+                            groundRect = new Rectangle(enemyRect.X, enemyRect.Y + groundRect.Height / 2,
+                                 groundRect.Width, groundRect.Height);
+                            break;
+                        }
                     }
 
-                    if(pos.X < player.Position.X)
+               
+                    #region Basic Movement
+                   
+
+                    if((int)pos.X < (int)player.Position.X)
                     {
                         if(velocity.X < 0)
                         {
@@ -291,23 +338,30 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                             {
                                 velocity.X = maxSpeed;
                             }
+
+                            if(pos.X + velocity.X > player.Position.X)
+                            {
+                                velocity.X = 0;
+                            }
                         }
-                        else if(velocity.X > 0)
+                        else if(velocity.X >= 0)
                         {
                             velocity.X += moveSpeed;
                             if(velocity.X > maxSpeed)
                             {
                                 velocity.X = maxSpeed;
                             }
+
+                            if (pos.X + velocity.X > player.Position.X)
+                            {
+                                velocity.X = 0;
+                            }
                         }
-                        else
-                        {
-                            velocity.X += moveSpeed;
-                        }
+                    
 
 
                     }
-                    else if(pos.X > player.Position.X)
+                    else if((int)pos.X > (int)player.Position.X)
                     {
                         if(velocity.X > 0)
                         {
@@ -319,7 +373,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                                 velocity.X = -maxSpeed;
                             }
                         }
-                        else if(velocity.X < 0)
+                        else if(velocity.X <= 0)
                         {
                             velocity.X -= moveSpeed/2;
 
@@ -328,23 +382,42 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                                 velocity.X = -maxSpeed;
                             }
                         }
-                        else
+
+                        if (pos.X + velocity.X < player.Position.X)
                         {
-                            velocity.X -= moveSpeed;
+                            velocity.X = 0;
                         }
                     }
+                    if (blockLeft && player.Position.Y > pos.Y || blockRight && player.Position.Y > pos.Y)
+                    {
+                        yOffset = 64;
+                        //unblockedCount = 0;
 
-                  
-                    if (MathHelper.Distance(enemyRect.Y, player.playerRect.Y) > yOffset && !blockBottom)
+
+                    }
+                    else if (!blockLeft && yOffset == 64 || !blockRight && yOffset == 64)
+                    {
+                        unblockedCount++;
+                        if (unblockedCount > 5)
+                        {
+                            unblockedCount = 0;
+                            yOffset = 64 * 3;
+                        }
+
+
+                        //pos.X += velocity.X * 10;
+                    }
+
+                    if (MathHelper.Distance(enemyRect.Y + velocity.Y, player.playerRect.Y) > yOffset && !blockBottom)
                     {
                         if(velocity.Y < 0)
                         {
                             velocity.Y = -velocity.Y;
                         }
                         velocity.Y += moveSpeed/2;
-                        if(velocity.Y > maxSpeed)
+                        if(velocity.Y > maxSpeed/1.5f)
                         {
-                            velocity.Y = maxSpeed;
+                            velocity.Y = maxSpeed/1.5f;
                         }
 
                         if(MathHelper.Distance(enemyRect.Y + velocity.Y, player.playerRect.Y) < yOffset)
@@ -352,16 +425,17 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                             velocity.Y = 0;
                         }
                     }
-                    else if (MathHelper.Distance(enemyRect.Y, player.playerRect.Y) < yOffset && !blockTop)
+                    else if (MathHelper.Distance(enemyRect.Y + velocity.Y, player.playerRect.Y) < yOffset && !blockTop)
                     {
                         if(velocity.Y > 0)
                         {
                             velocity.Y = -velocity.Y;
                         }
+                        
                         velocity.Y -= moveSpeed/2;
-                        if(velocity.Y < -maxSpeed)
+                        if(velocity.Y < -maxSpeed/1.5f)
                         {
-                            velocity.Y = -maxSpeed;
+                            velocity.Y = -maxSpeed/1.5f;
                         }
 
                         if (MathHelper.Distance(enemyRect.Y + velocity.Y, player.playerRect.Y) > yOffset)
@@ -378,11 +452,25 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                     {
                         groundRect = new Rectangle((int)(groundRect.X + velocity.X), (int)(groundRect.Y + velocity.Y), groundRect.Width, groundRect.Height);
                     }
+                    if (groundRect.Y > collisionRect.Y)
+                    {
+                        collisionRect.Y = enemyRect.Y + collisionRect.Height;
+                    }
+
                     pos += velocity;
+                    #endregion
+
+              
+
+
                     break;
             }
 
-            
+            if(groundRect.Y > currBounds.Bottom)
+            {
+                groundRect = new Rectangle(enemyRect.X + enemyRect.Width / 2, enemyRect.Bottom - enemyRect.Height / 2, 
+                    enemyRect.Width, enemyRect.Height / 2);
+            }
 
             enemyRect = new Rectangle((int)pos.X, (int)pos.Y, pixelSize, pixelSize);
         }
@@ -394,6 +482,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             //tRect.X += tRect.Width/5;
             spriteBatch.Draw(texture, enemyRect, Color.White);
             spriteBatch.Draw(texture, groundRect, Color.White);
+            spriteBatch.Draw(texture, collisionRect, Color.Blue);
             //spriteBatch.Draw(texture, HitBox, Color.BlueViolet);
             //foreach (Bullet bullet in bullets)
             //{
@@ -413,7 +502,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         public void Collision(Rectangle newRect)
         {
 
-            if (enemyRect.TouchTopOf(newRect)) //Touch Ground
+            if (enemyRect.TouchTopOf(newRect, true)) //Touch Ground
             {
                 blockBottom = true;
                 while (enemyRect.Bottom > newRect.Top)
@@ -475,37 +564,9 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
             }
 
-            if (enemyRect.TouchLeftOf(newRect))//enemy is colliding to the right
+            if (enemyRect.TouchBottomOf(newRect, true)) //Colliding Top or touching bottom of tile
             {
-                blockRight = true;
-
-                while (enemyRect.Right > newRect.Left)
-                {
-                    pos.X -= 1f;
-                    enemyRect.X = (int)pos.X;
-                }
-
-                //position.X += -Velocity.X;
-                //enemyRect.X = (int)position.X;
-            }
-
-            if (enemyRect.TouchRightOf(newRect))//enemy is Colliding to the left
-            {
-                blockLeft = true;
-
-                while (enemyRect.Left < newRect.Right)
-                {
-                    pos.X += 1;
-                    enemyRect.X = (int)pos.X;
-                }
-
-                //position.X += -Velocity.X;
-                //enemyRect.X = (int)position.X;
-            }
-
-            if (enemyRect.TouchBottomOf(newRect)) //Colliding Top or touching bottom of tile
-            {
-                blockTop = false;
+                blockTop = true;
                 while (enemyRect.Top < newRect.Bottom)
                 {
                     pos.Y += 1;
@@ -521,6 +582,36 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 //    isFalling = true;
                 //}
             }
+
+            if (enemyRect.TouchLeftOf(newRect, true))//enemy is colliding to the right
+            {
+                blockRight = true;
+
+                while (enemyRect.Right > newRect.Left)
+                {
+                    pos.X -= 1f;
+                    enemyRect.X = (int)pos.X;
+                }
+
+                //position.X += -Velocity.X;
+                //enemyRect.X = (int)position.X;
+            }
+
+            if (enemyRect.TouchRightOf(newRect, true))//enemy is Colliding to the left
+            {
+                blockLeft = true;
+
+                while (enemyRect.Left < newRect.Right)
+                {
+                    pos.X += 1;
+                    enemyRect.X = (int)pos.X;
+                }
+
+                //position.X += -Velocity.X;
+                //enemyRect.X = (int)position.X;
+            }
+
+           
         }
     }
 }

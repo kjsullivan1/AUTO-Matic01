@@ -871,7 +871,7 @@ namespace AUTO_Matic
 
                             for(int i = flyingEnemies.Count - 1; i >= 0; i--)
                             {
-                                flyingEnemies[i].Update(gameTime, Gravity, ssPlayer, SideTileMap.tileMap);
+                                flyingEnemies[i].Update(gameTime, Gravity, ssPlayer, SideTileMap.tileMap, ssCamera.CameraBounds);
                             }
 
                             //SSCamera.Move(ssPlayer.Position);

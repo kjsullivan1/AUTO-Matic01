@@ -90,6 +90,11 @@ namespace AUTO_Matic
             return groundTiles;
         }
 
+        public List<PlatformTile> GetPlatformTiles()
+        {
+            return platformTiles;
+        }
+
         //World dim in pixels
         public void SetWorldDims(int width, int height)
         {
