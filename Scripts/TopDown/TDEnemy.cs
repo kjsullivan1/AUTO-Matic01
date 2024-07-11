@@ -61,7 +61,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
         public int points = 0;
         int buffer = 64;
-        int tileSize = 55;
+        int tileSize = 62;
 
         float pauseX = 0;
         float pauseY = 0;
@@ -348,10 +348,14 @@ namespace AUTO_Matic.Scripts.TopDown
                             inSight = true;
                         }
 
+
                     }
                     if (inSight)
                     {
                         target = new Vector2(playerRect.rectangle.X, playerRect.rectangle.Y);
+                        //target = new Vector2(playerRect.rectangle.X, (playerRect.rectangle.Y) / (64 * playerRect.levelInY - 1) * (64 * playerRect.levelInY - 1));
+                        //           target = new Vector2((playerRect.rectangle.X / (64 * playerRect.levelInX - 1) * (64 * playerRect.levelInX - 1)),
+                        //(playerRect.rectangle.Y) / (64 * playerRect.levelInY - 1) * (64 * playerRect.levelInY - 1));
                         enemyState = EnemyStates.Shoot;
                     }
                     else

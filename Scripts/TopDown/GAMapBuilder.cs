@@ -137,6 +137,8 @@ namespace AUTO_Matic.Scripts.TopDown
                         tempMap.map[y, x].fitness = true;
                     }
                 }
+
+                //mapLayoutEffect = MapEffectLayout.Diag;
                 //Effect layout
                 switch (mapLayoutEffect)
                 {
