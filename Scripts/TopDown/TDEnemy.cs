@@ -3565,6 +3565,7 @@ namespace AUTO_Matic.Scripts.TopDown
         int distForm(Vector2 pos1, Vector2 pos2)
         {
             return (int)Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2));
+            
         }
 
         //SkullTiles DetermineClosestTarget()
@@ -3575,7 +3576,7 @@ namespace AUTO_Matic.Scripts.TopDown
         public void Draw(SpriteBatch spriteBatch)
         {
 
-           // spriteBatch.Draw(line, destinationRectangle: destRect, color: Color.White,rotation: angleOfLine);
+           spriteBatch.Draw(line, destinationRectangle: destRect, color: Color.White,rotation: angleOfLine);
             spriteBatch.Draw(texture, rectangle, Color.White);
             foreach(Bullet bullet in bullets)
             {

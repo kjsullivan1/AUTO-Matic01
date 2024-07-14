@@ -158,13 +158,13 @@ namespace AUTO_Matic.Scripts.TopDown
                     bossRect = new Rectangle(((bounds.X + bounds.Width / 2) - width / 2), (((bounds.Y + bounds.Height / 2) - height / 2)), width, height);
                     if (angle < 18 || angle >= 155)//Right
                     {
-                        if (angle < 18)
+                        if (angle < 18)//Right
                         {
                             bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                             bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 7));
                             bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 7));
                         }
-                        else
+                        else//Left
                         {
                             bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height / 2 - 15 / 2), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                             bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height / 2 - 15 / 2), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 7));
@@ -175,13 +175,13 @@ namespace AUTO_Matic.Scripts.TopDown
                     }
                     if (angle >= 18 && angle < 45)
                     {
-                        if (tdPlayer.position.Y < bossRect.Y + 64 / 2)
+                        if (tdPlayer.position.Y < bossRect.Y + 64 / 2)//Right up
                         {
                             bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 4));
                             bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 1.75f));
                             bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
                         }
-                        else
+                        else//Right Down
                         {
                             bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 6));
                             bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
@@ -190,7 +190,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     }
                     if (angle >= 45 && angle < 75)
                     {
-                        if (tdPlayer.position.Y < bossRect.Y + 64 / 2)
+                        if (tdPlayer.position.Y < bossRect.Y + 64 / 2)//
                         {
                             bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
                             bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));

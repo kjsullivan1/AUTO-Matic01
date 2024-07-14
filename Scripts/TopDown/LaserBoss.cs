@@ -73,6 +73,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
         #region Shooting
         Texture2D gunTexture;
+       
         //public float angle;
         public List<Bullet> bullets = new List<Bullet>();
         float bulletSpeed = 5f;
@@ -370,20 +371,46 @@ namespace AUTO_Matic.Scripts.TopDown
                                 if(boss.jumpForce != 0)
                                 {
                                     boss.velocity.Y = boss.jumpForce;
-                                    boss.velocity.X = 0;
+                                    //boss.velocity.X = 0;
                                     boss.jumpForce = 0;
+                                    boss.hasWall = false;
                                 }
                                 else
                                 {
                                     boss.angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X)));
-                                    if (boss.rect.Y + boss.velocity.Y > targetPos.Y)
+                                    if (boss.rect.Y + boss.velocity.Y < targetPos.Y)
                                     {
-                                       
+                                       foreach(WallTiles wall in RightWalls.walls)
+                                        {
+                                            if(boss.rect.Intersects(wall.Rectangle))
+                                            {
+                                                boss.prevState = boss.state;
+                                                boss.state = BossRect.BossState.Fire;
+                                                boss.velocity = Vector2.Zero;
+                                                boss.hasWall = true;
+                                                boss.jumpSide = RightWalls;
+                                                break;
+                                            }
+                                        }
+
+                                       foreach(WallTiles wall in LeftWalls.walls)
+                                        {
+                                            if(boss.rect.Intersects(wall.Rectangle))
+                                            {
+                                                boss.prevState = boss.state;
+                                                boss.state = BossRect.BossState.Fire;
+                                                boss.velocity = Vector2.Zero;
+
+                                                boss.hasWall = true;
+                                                boss.jumpSide = LeftWalls;
+                                                break;
+                                            }
+                                        }
                                     }
                                     else
                                     {
                                         boss.prevState = boss.state;
-                                        //boss.state = BossRect.BossState.EnterWall;
+                                        boss.state = BossRect.BossState.Fire;
                                         boss.velocity = Vector2.Zero;
                                     }
                                 }
@@ -392,20 +419,46 @@ namespace AUTO_Matic.Scripts.TopDown
                                 if(boss.jumpForce != 0)
                                 {
                                     boss.velocity.Y = -boss.jumpForce;
-                                    boss.velocity.X = 0;
+                                    //boss.velocity.X = 0;
                                     boss.jumpForce = 0;
+                                    boss.hasWall = false;
                                 }
                                 else
                                 {
                                     boss.angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X)));
-                                    if (boss.rect.Y + boss.velocity.Y < targetPos.Y)
+                                    if (boss.rect.Y + boss.velocity.Y > targetPos.Y)
                                     {
-                                        
+                                        foreach (WallTiles wall in RightWalls.walls)
+                                        {
+                                            if (boss.rect.Intersects(wall.Rectangle))
+                                            {
+                                                boss.prevState = boss.state;
+                                                boss.state = BossRect.BossState.Fire;
+                                                boss.velocity = Vector2.Zero;
+                                                boss.hasWall = true;
+                                                boss.jumpSide = RightWalls;
+                                                break;
+                                            }
+                                        }
+
+                                        foreach (WallTiles wall in LeftWalls.walls)
+                                        {
+                                            if (boss.rect.Intersects(wall.Rectangle))
+                                            {
+                                                boss.prevState = boss.state;
+                                                boss.state = BossRect.BossState.Fire;
+                                                boss.velocity = Vector2.Zero;
+
+                                                boss.hasWall = true;
+                                                boss.jumpSide = LeftWalls;
+                                                break;
+                                            }
+                                        }
                                     }
                                     else
                                     {
                                         boss.prevState = boss.state;
-                                        //boss.state = BossRect.BossState.EnterWall;
+                                        boss.state = BossRect.BossState.Fire;
                                         boss.velocity = Vector2.Zero;
                                     }
                                 }
@@ -414,20 +467,46 @@ namespace AUTO_Matic.Scripts.TopDown
                                 if(boss.jumpForce !=0)
                                 {
                                     boss.velocity.X = -boss.jumpForce;
-                                    boss.velocity.Y = 0;
+                                    //boss.velocity.Y = 0;
                                     boss.jumpForce = 0;
+                                    boss.hasWall = false;
                                 }
                                 else
                                 {
                                     boss.angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X)));
                                     if (boss.rect.X + boss.velocity.X > targetPos.X)
                                     {
-                                        
+                                        foreach (WallTiles wall in TopWalls.walls)
+                                        {
+                                            if (boss.rect.Intersects(wall.Rectangle))
+                                            {
+                                                boss.prevState = boss.state;
+                                                boss.state = BossRect.BossState.Fire;
+                                                boss.velocity = Vector2.Zero;
+                                                boss.hasWall = true;
+                                                boss.jumpSide = TopWalls;
+                                                break;
+                                            }
+                                        }
+
+                                        foreach (WallTiles wall in BottomWalls.walls)
+                                        {
+                                            if (boss.rect.Intersects(wall.Rectangle))
+                                            {
+                                                boss.prevState = boss.state;
+                                                boss.state = BossRect.BossState.Fire;
+                                                boss.velocity = Vector2.Zero;
+
+                                                boss.hasWall = true;
+                                                boss.jumpSide = BottomWalls;
+                                                break;
+                                            }
+                                        }
                                     }
                                     else
                                     {
                                         boss.prevState = boss.state;
-                                        //boss.state = BossRect.BossState.EnterWall;
+                                        boss.state = BossRect.BossState.Fire;
                                         boss.velocity = Vector2.Zero;
                                     }
                                 }
@@ -436,25 +515,63 @@ namespace AUTO_Matic.Scripts.TopDown
                                 if(boss.jumpForce != 0)
                                 {
                                     boss.velocity.X = boss.jumpForce;
-                                    boss.velocity.Y = 0;
+                                   // boss.velocity.Y = 0;
                                     boss.jumpForce = 0;
+                                    boss.hasWall = false;
                                 }
                                 else
                                 {
                                     boss.angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X)));
                                     if (boss.rect.X + boss.velocity.X < targetPos.X)
                                     {
-                                        
+                                        foreach (WallTiles wall in TopWalls.walls)
+                                        {
+                                            if (boss.rect.Intersects(wall.Rectangle))
+                                            {
+                                                boss.prevState = boss.state;
+                                                boss.state = BossRect.BossState.Fire;
+                                                boss.velocity = Vector2.Zero;
+                                                boss.hasWall = true;
+                                                boss.jumpSide = TopWalls;
+                                                break;
+                                            }
+                                        }
+
+                                        foreach (WallTiles wall in BottomWalls.walls)
+                                        {
+                                            if (boss.rect.Intersects(wall.Rectangle))
+                                            {
+                                                boss.prevState = boss.state;
+                                                boss.state = BossRect.BossState.Fire;
+                                                boss.velocity = Vector2.Zero;
+
+                                                boss.hasWall = true;
+                                                boss.jumpSide = BottomWalls;
+                                                break;
+                                            }
+                                        }
                                     }
                                     else
                                     {
                                         boss.prevState = boss.state;
-                                        //boss.state = BossRect.BossState.EnterWall;
+                                        boss.state = BossRect.BossState.Fire;
                                         boss.velocity = Vector2.Zero;
                                     }
                                 }
                                 break;
                         }
+                        break;
+                    #endregion
+                    #region Fire
+                    case BossRect.BossState.Fire:
+
+                        targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2) -
+                            new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+                        boss.angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X)));
+                        bossPos = new Vector2((boss.rect.X + boss.rect.Width / 2) - tdPlayer.rectangle.Width / 2,
+                           (boss.rect.Y + boss.rect.Height / 2) - tdPlayer.rectangle.Height / 2);
+                        boss.rayRects.Clear();
+                        SetRay(boss.angle, tdPlayer, boss, bossPos);
                         break;
                         #endregion
                 }
@@ -857,16 +974,28 @@ namespace AUTO_Matic.Scripts.TopDown
                     if(i == 0)
                     {
                         spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.White);
+                        foreach (Rectangle rect in boss.rayRects)
+                        {
+                            spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                        }
                         i++;
                     }
                     else if(i ==1)
                     {
                         spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.Black);
+                        foreach (Rectangle rect in boss.rayRects)
+                        {
+                            spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                        }
                         i++;
                     }
                     else if(i == 2)
                     {
                         spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.CornflowerBlue);
+                        foreach (Rectangle rect in boss.rayRects)
+                        {
+                            spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                        }
                         i++;
                     }
                   
@@ -876,6 +1005,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 {
                     bullet.Draw(spriteBatch);
                 }
+               
             }
 
             //foreach (FloorTiles tile in floors)
@@ -897,6 +1027,40 @@ namespace AUTO_Matic.Scripts.TopDown
             string combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
             return decimalNumber = float.Parse(combined);
         }
+
+        void SetRay(float angle, TDPlayer playerRect, BossRect boss, Vector2 bossPos)
+        {
+         
+            if (angle < 18 || angle >= 155)//Right
+            {
+               
+              
+            }
+            if (angle >= 18 && angle < 45)//Right up
+            {
+               
+            }
+            if (angle >= 45 && angle < 75)//more right up
+            {
+                
+            }
+            if (angle >= 75 && angle < 105)//up
+            {
+                
+            }
+            if (angle >= 105 && angle < 135)
+            {
+               
+             
+            }
+            if (angle >= 135 && angle < 155)
+            {
+                
+            }
+
+
+           
+        }
     }
 
     struct PossibleJumpSide
@@ -916,9 +1080,12 @@ namespace AUTO_Matic.Scripts.TopDown
         public float moveSpeed = .75f;
         public float maxSpeed = 8;
         public float angle;
+        public float angleOfLine;
+        public Rectangle bulletRect;
+        public List<Rectangle> rayRects;
 
         public Vector2 velocity;
-        public enum BossState { Idle, EnterWall,InWall, Attack}
+        public enum BossState { Idle, EnterWall,InWall, Attack, Fire}
         public BossState state = BossState.Idle;
         public BossState prevState = BossState.Idle;
 
@@ -928,6 +1095,7 @@ namespace AUTO_Matic.Scripts.TopDown
             jumpSide = side;
             this.rect = rect;
            this.side = s;
+            rayRects = new List<Rectangle>();
         }
     }
 
