@@ -90,6 +90,7 @@ namespace AUTO_Matic
         public int levelCount = 0;
         bool startBoss = false;
         ShotGunBoss shotGunBoss;
+        LaserBoss laserBoss;
         //float shootRate = .5f;
         //float maxShootRate;
         //bool canShoot = false;
@@ -323,7 +324,7 @@ namespace AUTO_Matic
                     new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
                 int[,] mapDims = (tdMap.GenerateMap(filePath));
 
-                LeaveDungeon = new Rectangle(currBounds.X + currBounds.Width/2, currBounds.Y + currBounds.Height/2, 64, 64);
+                //LeaveDungeon = new Rectangle(currBounds.X + currBounds.Width/2, currBounds.Y + currBounds.Height/2, 64, 64);
                 List<WallTiles> walls = new List<WallTiles>();
                 for (int y = 0; y < mapDims.GetLength(0); y++)
                 {
@@ -335,7 +336,8 @@ namespace AUTO_Matic
                         }
                     }
                 }
-                shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
+                //shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
+                laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims);
 
                 //for(int i = 0; i <= 4; i++)
                 //{
@@ -358,7 +360,7 @@ namespace AUTO_Matic
         {
             healthDrops.Clear();
             GameState = GameStates.TopDown;
-            tdPlayer = new TDPlayer(this, 64, 3, 3);
+            tdPlayer = new TDPlayer(this, 64, 2, 2);
             tdMap = new TopDownMap();
             //Boss = new Rectangle();
             levelCount = 0;
@@ -1089,18 +1091,28 @@ namespace AUTO_Matic
                                 //}
                                 if (startBoss)
                                 {
-                                    shotGunBoss.Update(gameTime, tdPlayer, tdMap);
+                                    //shotGunBoss.Update(gameTime, tdPlayer, tdMap);
+                                    //for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                    //{
+                                    //    if (shotGunBoss != null && tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
+                                    //    {
+                                    //        shotGunBoss.Health -= tdPlayer.bulletDmg;
+                                    //        tdPlayer.bullets.RemoveAt(i);
+                                    //    }
+                                    //}
+
+                                    laserBoss.Update(gameTime, tdPlayer, tdMap);
                                     for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
                                     {
-                                        if (shotGunBoss != null && tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
+                                        if (laserBoss != null && tdPlayer.bullets[i].rect.Intersects(laserBoss.worldRect))
                                         {
-                                            shotGunBoss.Health -= tdPlayer.bulletDmg;
+                                            laserBoss.Health -= tdPlayer.bulletDmg;
                                             tdPlayer.bullets.RemoveAt(i);
                                         }
                                     }
                                 }
 
-                              
+
 
 
                                 //if(levelCount >= tdPlayer.bossRoom)
@@ -1381,7 +1393,18 @@ namespace AUTO_Matic
                             tdMap.Draw(spriteBatch);
                             if (startBoss)
                             {
+                                if(shotGunBoss != null)
                                 shotGunBoss.Draw(spriteBatch);
+
+                                Window.Title = " ";
+                                //float[] angles = new float[laserBoss.bossRects.Count];
+                                for (int i = 0; i < laserBoss.bossRects.Count; i++)
+                                {
+                                    //angles[i] = laserBoss.bossRects[i].angle;
+                                    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
+
+                                }
+                                laserBoss.Draw(spriteBatch);
                                 foreach (HealthDrop health in bossHealthDrops)
                                 {
                                     health.Draw(spriteBatch);

@@ -24,7 +24,7 @@ namespace AUTO_Matic.TopDown
         Vector2 controllerMoveDir;
         GamePadButtons currButtons;
         GamePadButtons prevButtons;
-        public int bossRoom = 10;
+        public int bossRoom = 1;
         bool lockDir = false;
         Vector2 startPos;
 
