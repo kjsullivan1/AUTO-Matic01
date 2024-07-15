@@ -433,19 +433,27 @@ namespace AUTO_Matic
             this.IsMouseVisible = false;
             Tile.Content = Content;
 
-            string filePath = Content.RootDirectory + "/SideScroll/Maps/Map2.txt";
+            string filePath = Content.RootDirectory + "/SideScroll/Maps/Map3.txt";
             SideTileMap.LoadMap(filePath);
             flyingEnemies.Clear();
             enemies.Clear();
-            int j = 0;
+            int j = 1;
             for(int i = 0; i < SideTileMap.enemySpawns.Count - 1; i++)
             {
-                flyingEnemies.Add(new FlyingEnemy(Content, 5, SideTileMap.enemySpawns[i]));
-                //if(j == 1)
-                //    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
-                //else
-                //    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
-                //j++;
+                
+                if (j == 1)
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
+                else if(j == 2)
+                {
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], false));
+                }
+                else if(j == 3)
+                {
+                    flyingEnemies.Add(new FlyingEnemy(Content, 5, SideTileMap.enemySpawns[i]));
+                    j = 0;
+                }
+                   
+                j++;
 
             }
 

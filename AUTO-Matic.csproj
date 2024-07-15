@@ -119,6 +119,9 @@
     <Content Include="Content\SideScroll\HealthBar\RoboHealthBar3.png" />
     <Content Include="Content\SideScroll\HealthBar\RoboHealthBar4.png" />
     <Content Include="Content\SideScroll\HealthBar\RoboHealthBar5.png" />
+    <Content Include="Content\SideScroll\Maps\Map3.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\SideScroll\MapTiles\BG1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
