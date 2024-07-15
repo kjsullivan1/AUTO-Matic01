@@ -75,9 +75,9 @@
     <Compile Include="Scripts\SideScroll\SSPlayer.cs" />
     <Compile Include="Scripts\SideScroll\Tile.cs" />
     <Compile Include="Scripts\SideScroll\SideTileMap.cs" />
-    <Compile Include="Scripts\TopDown\GAMapBuilder.cs" />
-    <Compile Include="Scripts\TopDown\LaserBoss.cs" />
-    <Compile Include="Scripts\TopDown\ShotGunBoss.cs" />
+    <Compile Include="Scripts\TopDown\MapBuilder.cs" />
+    <Compile Include="Scripts\TopDown\Bosses\LaserBoss.cs" />
+    <Compile Include="Scripts\TopDown\Bosses\ShotGunBoss.cs" />
     <Compile Include="Scripts\TopDown\TDEnemy.cs" />
     <Compile Include="Scripts\TopDown\TDPlayer.cs" />
     <Compile Include="Scripts\TopDown\TDRectangleHelper.cs" />

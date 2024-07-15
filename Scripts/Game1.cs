@@ -133,7 +133,7 @@ namespace AUTO_Matic
         List<FlyingEnemy> flyingEnemies = new List<FlyingEnemy>();
 
         Rectangle tdPrevBounds = Rectangle.Empty;
-        GAMapBuilder mapBuilder;
+        MapBuilder mapBuilder;
         
       
         class Door
@@ -380,7 +380,7 @@ namespace AUTO_Matic
                 string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + i + ".txt";
                 maps.Add(tdMap.GenerateMap(filePath));
             }
-            mapBuilder = new GAMapBuilder(maps); //Giving maps
+            mapBuilder = new MapBuilder(maps); //Giving maps
 
             if (tdPlayer.levelInX == 1 && tdPlayer.levelInY == 1)
             {

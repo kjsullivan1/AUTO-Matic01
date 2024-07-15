@@ -7,10 +7,10 @@ namespace AUTO_Matic.Scripts.TopDown
 {
     namespace AUTO_Matic.Scripts.TopDown
     {
-        class GAMapBuilder
+        class MapBuilder
         {
 
-            public GAMapBuilder(List<int[,]> possMaps)
+            public MapBuilder(List<int[,]> possMaps)
             {
                 this.possMaps = possMaps;
             }

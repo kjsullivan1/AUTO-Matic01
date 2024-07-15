@@ -114,6 +114,10 @@ namespace AUTO_Matic.SideScroll
         bool startShoot = false;
         float bulletDmg = .65f;
         float bulletTravelDist = 64 * 3;
+        WeaponWheel weaponWheel;
+
+        enum WeaponType { Pistol, Shotgun, Laser, Burst}
+        WeaponType currWeapon = WeaponType.Shotgun;
         #endregion
 
         #region Jumping
@@ -450,7 +454,7 @@ namespace AUTO_Matic.SideScroll
             dashDistance = 3 * pixelSize;
             iMaxRunSpeed = maxRunSpeed;
             position = pos;
-
+            weaponWheel = new WeaponWheel(this, 24);
             isCollidingRight = false;
             isCollidingLeft = false;
         }
@@ -1368,6 +1372,8 @@ namespace AUTO_Matic.SideScroll
 
             if (kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && blockBottom || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && blockBottom)
             {
+                weaponWheel = new WeaponWheel(this, 24);
+                weaponWheel.active = true;
                 playerState = PlayerStates.Shooting;
 
                 if (velocity.Y != 0)
@@ -1414,6 +1420,8 @@ namespace AUTO_Matic.SideScroll
 
             if (kb.IsKeyDown(Keys.S) && playerState == PlayerStates.Shooting && prevKb.IsKeyDown(Keys.S) && blockBottom || controllerMoveDir.Y < -.9 && playerState == PlayerStates.Shooting && blockBottom)
             {
+                weaponWheel = new WeaponWheel(this, 24);
+                weaponWheel.active = true;
                 playerState = PlayerStates.Shooting;
                 float fallSpeed = 2;
                 if(velocity.Y > 0)
@@ -1425,20 +1433,83 @@ namespace AUTO_Matic.SideScroll
                 {
                     if(animManager.isRight)
                     {
-                        bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18/2), position.Y + playerRect.Height/1.5f), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                        switch(currWeapon)
+                        {
+                            case WeaponType.Pistol:
+                                bulletTravelDist = 64 * 3;
+                                bulletSpeed = 3.5f;
+
+                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2), 
+                                    position.Y + playerRect.Height / 1.5f), bulletSpeed, 
+                                    new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                break;
+
+                            case WeaponType.Shotgun:
+                                bulletTravelDist = 64 * 1.5f;
+                                bulletSpeed = 3.5f * 2;
+
+                                //Top 
+                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                   (position.Y + playerRect.Height / 1.5f)), bulletSpeed,
+                                   new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed/3));
+                                //Center
+                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                   position.Y + playerRect.Height / 1.5f), bulletSpeed,
+                                   new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                //Bottom
+                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                   position.Y + playerRect.Height / 1.5f), bulletSpeed,
+                                   new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed/3));
+                                break;
+
+
+                        }
+                        
                     }
                     if(animManager.isLeft)
                     {
-                        bullets.Add(new Bullet(new Vector2(position.X - (18/2), position.Y + playerRect.Height / 1.5f), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                        switch(currWeapon)
+                        {
+                            case WeaponType.Pistol:
+                                bulletTravelDist = 64 * 3;
+                                bulletSpeed = 3.5f;
+                                bullets.Add(new Bullet(new Vector2(position.X - (18 / 2), 
+                                    position.Y + playerRect.Height / 1.5f), -bulletSpeed, 
+                                    new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                break;
+                            case WeaponType.Shotgun:
+                                bulletTravelDist = 64 * 1.5f;
+                                bulletSpeed = 3.5f * 2;
+
+                                //Top 
+                                bullets.Add(new Bullet(new Vector2(position.X + (18/2),
+                                   (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
+                                   new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 3));
+                                //Center
+                                bullets.Add(new Bullet(new Vector2(position.X + (18/2),
+                                   position.Y + playerRect.Height / 1.5f), -bulletSpeed,
+                                   new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                //Bottom
+                                bullets.Add(new Bullet(new Vector2(position.X + (18/2),
+                                   position.Y + playerRect.Height / 1.5f), -bulletSpeed,
+                                   new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 3));
+                                break;
+                        }
+                        
                     }
                     
                 }
+               
             }
             else if(playerState == PlayerStates.Shooting)
             {
                 playerState = PlayerStates.Movement;
             }
-
+            int num = kb.GetPressedKeys().Count<Keys>();
+            if (kb.IsKeyUp(Keys.S) && controllerMoveDir.Y > -.9)
+            {
+                weaponWheel.active = false;
+            }
             prevKb = kb;
             prevControllerBtn = currControllerBtn;
         }
@@ -1828,6 +1899,58 @@ namespace AUTO_Matic.SideScroll
             {
                 bullet.Draw(spriteBatch);
             }
+
+            if(weaponWheel.active)
+            {
+                foreach(WeaponSlot slot in weaponWheel.WeaponSlots)
+                {
+                    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), slot.rect, Color.White * .35f);
+                }
+            }
         }
+    }
+
+    class WeaponWheel
+    {
+        public List<WeaponSlot> WeaponSlots = new List<WeaponSlot>();
+        public bool active;
+        int size;
+        public WeaponWheel(SSPlayer player, int size)
+        {
+            WeaponSlots = new List<WeaponSlot>();
+            active = false;
+            this.size = size;
+            for(int i = 0; i < 4; i++)
+            {
+                WeaponSlots.Add(new WeaponSlot());
+              
+            }
+            WeaponSlots[0].rect = new Rectangle(player.playerRect.Center.X - size/2, 
+                (int)(player.playerRect.Center.Y - (size * 1.75f)), size, size);
+            WeaponSlots[1].rect = new Rectangle(WeaponSlots[0].rect.X - (size + 2),
+                WeaponSlots[0].rect.Y, size, size);
+            WeaponSlots[2].rect = new Rectangle(WeaponSlots[0].rect.Right + 2,
+                WeaponSlots[0].rect.Y, size, size);
+            WeaponSlots[3].rect = new Rectangle(WeaponSlots[0].rect.X,
+                WeaponSlots[0].rect.Y - (size + 2), size, size);
+
+        }
+        public void Update(SSPlayer player)
+        {
+            WeaponSlots[0].rect = new Rectangle(player.playerRect.Center.X - size / 2,
+               player.playerRect.Center.Y - size, size, size);
+            WeaponSlots[1].rect = new Rectangle(WeaponSlots[0].rect.X - (size + 2),
+                WeaponSlots[0].rect.Y, size, size);
+            WeaponSlots[2].rect = new Rectangle(WeaponSlots[0].rect.Right + 2,
+                WeaponSlots[0].rect.Y, size, size);
+            WeaponSlots[3].rect = new Rectangle(WeaponSlots[0].rect.X,
+                WeaponSlots[0].rect.Y - (size + 2), size, size);
+        }
+    }
+
+    class WeaponSlot
+    {
+        public Rectangle rect;
+        public Texture2D texture;
     }
 }
