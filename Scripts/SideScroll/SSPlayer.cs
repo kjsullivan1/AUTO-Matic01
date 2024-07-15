@@ -1445,7 +1445,7 @@ namespace AUTO_Matic.SideScroll
                                 break;
 
                             case WeaponType.Shotgun:
-                                bulletTravelDist = 64 * 1.5f;
+                                bulletTravelDist = 64 * 1f;
                                 bulletSpeed = 3.5f * 2;
 
                                 //Top 
@@ -1478,7 +1478,7 @@ namespace AUTO_Matic.SideScroll
                                     new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                                 break;
                             case WeaponType.Shotgun:
-                                bulletTravelDist = 64 * 1.5f;
+                                bulletTravelDist = 64 * 1f;
                                 bulletSpeed = 3.5f * 2;
 
                                 //Top 
