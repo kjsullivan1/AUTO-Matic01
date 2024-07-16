@@ -26,7 +26,7 @@ namespace AUTO_Matic.Scripts.TopDown
             List<MapObject> mapObjects = new List<MapObject>();
             //List<List<int[,]>> population = new List<List<int[,]>>();
 
-            enum MapEffectObjects { AddWall, AddEnemy, RemoveEnemy, RemoveWall }
+            enum MapEffectObjects { AddWall, AddEnemy, RemoveEnemy, RemoveWall, AddHealthDrop }
             MapEffectObjects mapObjectEffect;
             public void ChooseEffectObject()
             {

@@ -15,8 +15,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         List<GroundLoc> slamLocs = new List<GroundLoc>();
         Rectangle bossRect;
 
-        int slameTimeMin = 3;
-        int slamTimeMax = 8;
+        int slameTimeMin = 1;
+        int slamTimeMax = 2;
 
         float slamDelay = 0;
 
@@ -46,59 +46,64 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                 SlamTiles tTile = tile;
                 int i = 1;
-                while (list.Count < 3)
-                {
-                    list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Y,
-                        tTile.Rectangle.Width, tTile.Rectangle.Height)));
 
-                    list[list.Count - 1].mapPoint = new int[] { tile.mapPoint[0], tile.mapPoint[1] + i };
-                    i++;
+                list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Bottom,
+                       tTile.Rectangle.Width, tTile.Rectangle.Height)));
+                list[list.Count - 1].mapPoint = new int[] { tile.mapPoint[0] + 1, tile.mapPoint[1] +1 };
 
-                    //tdMap.dMapDims[tdMap.dMapDims.Count - 1][list[list.Count - 1].mapPoint[0],
-                    //    list[list.Count - 1].mapPoint[1]] = 0;
-                    tTile = list[list.Count - 1];
-                }
-                tTile = tile;
-                tTile.Rectangle = new Rectangle(tTile.Rectangle.X, tTile.Rectangle.Y + tTile.Rectangle.Height,
-                    tTile.Rectangle.Width, tTile.Rectangle.Height);
-                i = 0;
-                while (list.Count < 6)
-                {
-                    list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Y,
-                          tTile.Rectangle.Width, tTile.Rectangle.Height)));
-                    list[list.Count - 1].mapPoint = new int[] { tile.mapPoint[0] + 1, tile.mapPoint[1] + i };
-                    i++;
+                //while (list.Count < 3)
+                //{
+                //    list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Y,
+                //        tTile.Rectangle.Width, tTile.Rectangle.Height)));
 
-                    //tdMap.dMapDims[tdMap.dMapDims.Count - 1][list[list.Count - 1].mapPoint[0],
-                    //list[list.Count - 1].mapPoint[1]] = 0;
-                    tTile = list[list.Count - 1];
-                }
+                //    list[list.Count - 1].mapPoint = new int[] { tile.mapPoint[0], tile.mapPoint[1] + i };
+                //    i++;
 
-                tTile = tile;
-                //tTile.Rectangle = new Rectangle(tTile.Rectangle.X, tTile.Rectangle.Bottom + (tTile.Rectangle.Height),
+                //    //tdMap.dMapDims[tdMap.dMapDims.Count - 1][list[list.Count - 1].mapPoint[0],
+                //    //    list[list.Count - 1].mapPoint[1]] = 0;
+                //    tTile = list[list.Count - 1];
+                //}
+                //tTile = tile;
+                //tTile.Rectangle = new Rectangle(tTile.Rectangle.X, tTile.Rectangle.Y + tTile.Rectangle.Height,
                 //    tTile.Rectangle.Width, tTile.Rectangle.Height);
-                i = 0;
-                while (list.Count < 9)
-                {
-                    if (i < 3)
-                    {
-                        list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Bottom + (tTile.Rectangle.Height),
-                         tTile.Rectangle.Width, tTile.Rectangle.Height)));
+                //i = 0;
+                //while (list.Count < 6)
+                //{
+                //    list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Y,
+                //          tTile.Rectangle.Width, tTile.Rectangle.Height)));
+                //    list[list.Count - 1].mapPoint = new int[] { tile.mapPoint[0] + 1, tile.mapPoint[1] + i };
+                //    i++;
 
-                        list[list.Count - 1].mapPoint = new int[] { tile.mapPoint[0] + 2, tile.mapPoint[1] + i };
-                        i++;
+                //    //tdMap.dMapDims[tdMap.dMapDims.Count - 1][list[list.Count - 1].mapPoint[0],
+                //    //list[list.Count - 1].mapPoint[1]] = 0;
+                //    tTile = list[list.Count - 1];
+                //}
 
-                        //tdMap.dMapDims[tdMap.dMapDims.Count - 1][list[list.Count - 1].mapPoint[0],
-                        //list[list.Count - 1].mapPoint[1]] = 0;
-                        tTile = list[list.Count - 1];
-                    }
-                    else
-                    {
-                        list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Bottom,
-                         tTile.Rectangle.Width, tTile.Rectangle.Height)));
-                    }
+                //tTile = tile;
+                ////tTile.Rectangle = new Rectangle(tTile.Rectangle.X, tTile.Rectangle.Bottom + (tTile.Rectangle.Height),
+                ////    tTile.Rectangle.Width, tTile.Rectangle.Height);
+                //i = 0;
+                //while (list.Count < 9)
+                //{
+                //    if (i < 3)
+                //    {
+                //        list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Bottom + (tTile.Rectangle.Height),
+                //         tTile.Rectangle.Width, tTile.Rectangle.Height)));
 
-                }
+                //        list[list.Count - 1].mapPoint = new int[] { tile.mapPoint[0] + 2, tile.mapPoint[1] + i };
+                //        i++;
+
+                //        //tdMap.dMapDims[tdMap.dMapDims.Count - 1][list[list.Count - 1].mapPoint[0],
+                //        //list[list.Count - 1].mapPoint[1]] = 0;
+                //        tTile = list[list.Count - 1];
+                //    }
+                //    else
+                //    {
+                //        list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Bottom,
+                //         tTile.Rectangle.Width, tTile.Rectangle.Height)));
+                //    }
+
+                //}
 
                 //tdMap.dMapDims[tdMap.dMapDims.Count - 1][tile.mapPoint[0] + 3, tile.mapPoint[1]] = 10;
                 //tdMap.dMapDims[tdMap.dMapDims.Count - 1][list[4].mapPoint[0], list[4].mapPoint[1]] = 9;
@@ -143,23 +148,30 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     Rectangle centerRec5 = slamLocs[4].slamTiles[slamLocs[4].slamTiles.Count / 2].Rectangle;
 
                     GroundLoc closestLoc = slamLocs[0];
+                    closestLoc.index = 0;
 
-                   //for(int i = 0; i < slamLocs.Count; i++)
-                   // {
-                   //     centerRec = slamLocs[i].slamTiles[slamLocs[i].slamTiles.Count / 2].Rectangle;
-                   //     for(int j = i + 1; j < slamLocs.Count; j++)
-                   //     {
-                   //         Rectangle centerRec1 = slamLocs[j].slamTiles[slamLocs[j].slamTiles.Count / 2].Rectangle;
+                   for(int i = 0; i < 1; i++)
+                    {
+                        centerRec = slamLocs[i].slamTiles[1].Rectangle;
+                        for(int j = i + 1; j < slamLocs.Count; j++)
+                        {
+                            Rectangle centerRec1 = slamLocs[j].slamTiles[1].Rectangle;
 
-                   //         if(DistForm(centerPlayer.ToVector2(), centerRec.Center.ToVector2()) <  
-                   //             DistForm(centerPlayer.ToVector2(), centerRec1.Center.ToVector2()))
-                   //         {
-                   //             closestLoc = slamLocs[i];
-                   //             closestLoc.index = i;
-                   //         }
+                            if(DistForm(centerPlayer.ToVector2(), centerRec.Center.ToVector2()) <  
+                                DistForm(centerPlayer.ToVector2(), centerRec1.Center.ToVector2()))
+                            {
+                                //closestLoc = slamLocs[i];
+                                //closestLoc.index = i;
+                            }
+                            else
+                            {
+                                centerRec = centerRec1;
+                                closestLoc = slamLocs[j];
+                                closestLoc.index = j;
+                            }
                           
-                   //     }
-                   // }
+                        }
+                    }
 
                     
 
@@ -174,16 +186,18 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), bossRect, Color.White);
 
-            foreach(GroundLoc loc in slamLocs)
+            foreach (GroundLoc loc in slamLocs)
             {
-                for(int i = 0; i < loc.slamTiles.Count; i++)
+                for (int i = 0; i < loc.slamTiles.Count; i++)
                 {
                     spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile0"), loc.slamTiles[i].Rectangle, Color.White);
                 }
-               
+
             }
+            spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), bossRect, Color.White);
+
+    
         }
 
         public float RandFloat(int min, int max)

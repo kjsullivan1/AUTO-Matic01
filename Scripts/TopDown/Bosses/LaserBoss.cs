@@ -247,6 +247,12 @@ namespace AUTO_Matic.Scripts.TopDown
                         LeftWalls.isUsed = true;
                         break;
                     }
+                    else
+                    {
+                        bossRects.Add(new BossRect(RightWalls, worldRect, "right"));
+                        RightWalls.isUsed = true;
+                        break;
+                    }
                 }
                 
                
@@ -1188,6 +1194,15 @@ namespace AUTO_Matic.Scripts.TopDown
                         i++;
                     }
                     else if(i == 3)
+                    {
+                        spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.DarkGreen);
+                        foreach (Rectangle rect in boss.bulletRects)
+                        {
+                            spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                        }
+                        i++;
+                    }
+                    else
                     {
                         spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.DarkGreen);
                         foreach (Rectangle rect in boss.bulletRects)
