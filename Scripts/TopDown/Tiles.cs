@@ -75,6 +75,15 @@ namespace AUTO_Matic.TopDown
         }
     }
 
+    class SlamTiles : Tiles
+    {
+        public SlamTiles(int i, Rectangle newRect)
+        {
+            texture = Content.Load<Texture2D>("TopDown/MapTiles/Tile" + i);
+            this.Rectangle = newRect;
+        }
+    }
+
     class PlayerSpawn :Tiles
     {
         //sawn player

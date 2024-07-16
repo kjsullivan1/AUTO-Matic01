@@ -3576,7 +3576,7 @@ namespace AUTO_Matic.Scripts.TopDown
         public void Draw(SpriteBatch spriteBatch)
         {
 
-           spriteBatch.Draw(line, destinationRectangle: destRect, color: Color.White,rotation: angleOfLine);
+           //spriteBatch.Draw(line, destinationRectangle: destRect, color: Color.White,rotation: angleOfLine);
             spriteBatch.Draw(texture, rectangle, Color.White);
             foreach(Bullet bullet in bullets)
             {

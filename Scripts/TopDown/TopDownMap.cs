@@ -31,6 +31,13 @@ namespace AUTO_Matic.TopDown
             get { return floorTiles; }
         }
 
+        private List<SlamTiles> slamTiles = new List<SlamTiles>();
+        public List<SlamTiles> SlamTiles
+        {
+            get { return slamTiles; }
+        }
+
+
         private int width, height;
         public List<int[,]> xMapDims = new List<int[,]>();
         public List<int[,]> yMapDims = new List<int[,]>();
@@ -44,6 +51,7 @@ namespace AUTO_Matic.TopDown
         public List<int> WallIndexes = new List<int>();
         public List<int> FloorIndexes = new List<int>();
         public List<int> EnemyIndexes = new List<int>();
+        public List<int> SlamIndexes = new List<int>();
         public Rectangle ExitDoor = new Rectangle();
 
         public int Width
@@ -427,17 +435,25 @@ namespace AUTO_Matic.TopDown
                 rows.Add(dMaps[i].GetLength(0));
                 cols.Add(dMaps[i].GetLength(1));
 
-                for (int x = 0; x < dMaps[i].GetLength(1); x++)
+                for (int y = 0; y < dMaps[i].GetLength(0); y++)
                 {
-                    for (int y = 0; y < dMaps[i].GetLength(0); y++)
+                    for (int x = 0; x < dMaps[i].GetLength(1); x++)
                     {
                         int num = dMaps[i][y, x];
                         int levelInX = (int)diagPoints[i].X;
                         int levelInY = (int)diagPoints[i].Y;
 
                   
+                        if(num == 0)
+                        {
+                            slamTiles.Add(new TopDown.SlamTiles(9, new Rectangle((levelInX * screenWidth) + (x * size),
+                                (y * size) - (levelInY * screenHeight), size, size)));
+                            slamTiles[slamTiles.Count - 1].mapPoint = new int[] { y, x };
+                            if(SlamIndexes.Contains(num) == false)
+                                SlamIndexes.Add(num);
+                        }
 
-                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
+                        else if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
                         {
                             wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             wallTiles[wallCount].mapPoint = new int[] { y, x };
@@ -448,7 +464,7 @@ namespace AUTO_Matic.TopDown
                                 WallIndexes.Add(num);
                             }
                         }
-                        if (num == 11) //enemy
+                        else if (num == 11) //enemy
                         {
                             if(enemySpawns.Contains(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight))) == false)
                             {
@@ -467,7 +483,7 @@ namespace AUTO_Matic.TopDown
                             //skullTiles[skullCount].mapPoint = new int[] { y, x };
                             //skullCount++;
                         }
-                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15) //Floors
+                        else if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15) //Floors
                         {
                             floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
@@ -610,6 +626,11 @@ namespace AUTO_Matic.TopDown
             //    tile.Draw(spriteBatch);
             //}
             foreach (FloorTiles tile in floorTiles)
+            {
+                tile.Draw(spriteBatch);
+            }
+
+            foreach(SlamTiles tile in slamTiles)
             {
                 tile.Draw(spriteBatch);
             }
