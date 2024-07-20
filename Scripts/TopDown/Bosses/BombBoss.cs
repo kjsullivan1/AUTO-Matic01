@@ -209,7 +209,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 }
             }
         }
-
+        #endregion
         public void Update(GameTime gameTime, TopDownMap tdMap, TDPlayer tdPlayer)
         {
             Vector2 targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2) -
@@ -539,7 +539,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 }
             }
         }
-        #endregion
+
 
         int DistForm(Vector2 pos1, Vector2 pos2)
         {
