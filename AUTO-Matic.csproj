@@ -75,6 +75,7 @@
     <Compile Include="Scripts\SideScroll\SSPlayer.cs" />
     <Compile Include="Scripts\SideScroll\Tile.cs" />
     <Compile Include="Scripts\SideScroll\SideTileMap.cs" />
+    <Compile Include="Scripts\TopDown\Bosses\BombBoss.cs" />
     <Compile Include="Scripts\TopDown\Bosses\SlamBoss.cs" />
     <Compile Include="Scripts\TopDown\MapBuilder.cs" />
     <Compile Include="Scripts\TopDown\Bosses\LaserBoss.cs" />
@@ -195,6 +196,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\TopDown\Maps\Map5.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\Maps\Map59.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\TopDown\Maps\Map6.txt">

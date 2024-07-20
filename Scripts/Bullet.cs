@@ -30,7 +30,8 @@ namespace AUTO_Matic
         public bool delete = false;
 
 
-        public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content, bool isX, float travelDist, bool isY = false, float speedY = 0, float angle = 0)
+        public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content, bool isX, float travelDist,
+            bool isY = false, float speedY = 0, float angle = 0, int size = 14)
         {
             position = pos;
             startPos = pos;
@@ -42,6 +43,8 @@ namespace AUTO_Matic
             shootY = isY;
             bulletSpeed = new Vector2(speed, speedY);
             this.angle = angle;
+            width = size;
+            height = size;
         }
 
         public void Update()

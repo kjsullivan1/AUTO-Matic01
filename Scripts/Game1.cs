@@ -93,6 +93,7 @@ namespace AUTO_Matic
         ShotGunBoss shotGunBoss;
         LaserBoss laserBoss;
         SlamBoss slamBoss;
+        BombBoss bombBoss;
         //float shootRate = .5f;
         //float maxShootRate;
         //bool canShoot = false;
@@ -239,7 +240,7 @@ namespace AUTO_Matic
         public void GenerateNewMap(bool xLevel, bool yLevel, bool dLevel, bool isBoss)
         {
             healthDrops.Clear();
-            if(!isBoss)
+            if(!isBoss && tdPlayer.bossRoom > levelCount)
             {
                 levelCount++;
                 //Random rand = new Random();
@@ -299,14 +300,45 @@ namespace AUTO_Matic
                 //}
 
             }
-            if(isBoss)
+            else if(isBoss && tdPlayer.bossRoom == levelCount)
             {
+                levelCount++;
                 //graphics.PreferredBackBufferWidth = 64 * 15; //1600  // pixelBits * col
                 //graphics.PreferredBackBufferHeight = 64 * 15; //960  // pixelBits * row
                 //graphics.IsFullScreen = false;
                 //graphics.ApplyChanges();
                 //camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)), graphics.PreferredBackBufferHeight - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
                 //camera.Zoom = .5f;
+
+                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 59 + ".txt";
+
+                if (xLevel)
+                    tdPlayer.PosXLevels.xLevels.Add(tdMap.GenerateMap(filePath));
+                if (yLevel)
+                    tdPlayer.PosYLevels.yLevels.Add(tdMap.GenerateMap(filePath));
+                if (dLevel)
+                    tdPlayer.DiagLevels.dLevels.Add(tdMap.GenerateMap(filePath));
+
+                tdEnemies.Clear();
+
+                //tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                //    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+
+                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                     (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                     new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                int[,] mapDims = (tdMap.GenerateMap(filePath));
+
+                bossHealthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, currBounds.Y + 64 * 2, 64, 64)));
+                bossHealthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
+                bossHealthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
+                bossHealthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y) + 64 * 2, 64, 64)));
+                tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+
+            }
+            else if(isBoss && tdPlayer.bossRoom < levelCount)
+            {
                 string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 19 + ".txt";
 
                 if (xLevel)
@@ -321,9 +353,9 @@ namespace AUTO_Matic
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
                     tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
 
-               Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
-                    (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
-                    new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                     (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                     new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
                 int[,] mapDims = (tdMap.GenerateMap(filePath));
 
                 //LeaveDungeon = new Rectangle(currBounds.X + currBounds.Width/2, currBounds.Y + currBounds.Height/2, 64, 64);
@@ -334,13 +366,14 @@ namespace AUTO_Matic
                     {
                         if (tdMap.GetPoint(y, x, mapDims) == 10)
                         {
-                            walls.Add(new WallTiles(tdMap. WallIndexes[0],new Rectangle((0 + (64 * x) + currBounds.X), (0 - (64 * y) - currBounds.Y), 64, 64)));
+                            walls.Add(new WallTiles(tdMap.WallIndexes[0], new Rectangle((0 + (64 * x) + currBounds.X), (0 - (64 * y) - currBounds.Y), 64, 64)));
                         }
                     }
                 }
                 //shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
-                laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims);
+                //laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims);
                 //slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
+                bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer);
 
                 //for(int i = 0; i <= 4; i++)
                 //{
@@ -365,7 +398,7 @@ namespace AUTO_Matic
         {
             healthDrops.Clear();
             GameState = GameStates.TopDown;
-            tdPlayer = new TDPlayer(this, 64, 2, 2);
+            tdPlayer = new TDPlayer(this, 64, 100, 100);
             tdMap = new TopDownMap();
             //Boss = new Rectangle();
             levelCount = 0;
@@ -900,6 +933,38 @@ namespace AUTO_Matic
                             }
                             else
                             {
+                                if (tdPlayer.changeLevel)
+                                {
+                                    tdEnemies.Clear();
+                                    tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                                        tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+
+                                    currMap = tdPlayer.DiagLevels.dLevels[tdPlayer.DiagLevels.diagIndex];
+                                    Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                                        (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                                        new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                                    if (!startBoss)
+                                    {//Clear map and remove nonused
+                                        for (int i = tdMap.EnemySpawns.Count - 1; i >= 0; i--)
+                                        {
+                                            if (currBounds.Contains(tdMap.EnemySpawns[i]))
+                                            {
+                                                if (tdEnemies.Contains(new TDEnemy(Content, tdMap.EnemySpawns[i], tdMap, currMap, GraphicsDevice)) == false)
+                                                    tdEnemies.Add(new TDEnemy(Content, tdMap.EnemySpawns[i], tdMap, currMap, GraphicsDevice));
+                                            }
+                                            else
+                                            {
+                                                tdMap.EnemySpawns.Remove(tdMap.EnemySpawns[i]);
+                                            }
+
+
+                                        }
+
+                                    }
+
+                                    tdPlayer.changeLevel = false;
+
+                                }
                                 if (tdPlayer.Health <= 0)
                                 {
                                     StartDungeon();
@@ -931,38 +996,7 @@ namespace AUTO_Matic
                                     UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
                                     //Camera position not updated
                                 }
-                                if (tdPlayer.changeLevel)
-                                {
-                                    tdEnemies.Clear();
-                                    tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
-                                        tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
-                                  
-                                    currMap = tdPlayer.DiagLevels.dLevels[tdPlayer.DiagLevels.diagIndex];
-                                    Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
-                                        (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
-                                        new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-                                    if (!startBoss)
-                                    {//Clear map and remove nonused
-                                        for(int i = tdMap.EnemySpawns.Count - 1; i >= 0; i--)
-                                        { 
-                                            if (currBounds.Contains(tdMap.EnemySpawns[i]))
-                                            {
-                                                if (tdEnemies.Contains(new TDEnemy(Content, tdMap.EnemySpawns[i], tdMap, currMap, GraphicsDevice)) == false)
-                                                    tdEnemies.Add(new TDEnemy(Content, tdMap.EnemySpawns[i], tdMap, currMap, GraphicsDevice));
-                                            }
-                                            else
-                                            {
-                                                tdMap.EnemySpawns.Remove(tdMap.EnemySpawns[i]);
-                                            }
-                                              
-                                  
-                                        }
-                                       
-                                    }
-
-                                    tdPlayer.changeLevel = false;
-
-                                }
+                               
                                
                                 if (tdEnemies.Count != 0)
                                 {
@@ -1117,9 +1151,11 @@ namespace AUTO_Matic
                                     #endregion
 
                                     #region LaserBoss
-                                    laserBoss.Update(gameTime, tdPlayer, tdMap);
+                                    //laserBoss.Update(gameTime, tdPlayer, tdMap);
                                     #endregion
-
+                                    #region BombBoss
+                                    bombBoss.Update(gameTime, tdMap, tdPlayer);
+                                    #endregion
                                     #region SlamBoss
                                     //slamBoss.Update(gameTime, tdPlayer, tdMap);
                                     #endregion
@@ -1420,14 +1456,16 @@ namespace AUTO_Matic
                                 Window.Title = " ";
                                 //float[] angles = new float[laserBoss.bossRects.Count];
                                 #region LaserBoss
-                                for (int i = 0; i < laserBoss.bossRects.Count; i++)
-                                {
-                                    //angles[i] = laserBoss.bossRects[i].angle;
-                                    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
+                                //for (int i = 0; i < laserBoss.bossRects.Count; i++)
+                                //{
+                                //    //angles[i] = laserBoss.bossRects[i].angle;
+                                //    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
 
-                                }
-                                laserBoss.Draw(spriteBatch);
+                                //}
+                                //laserBoss.Draw(spriteBatch);
                                 #endregion
+                                bombBoss.Draw(spriteBatch);
+                                Window.Title = "Angle: " + bombBoss.angle;
                                 //slamBoss.Draw(spriteBatch);
                                 foreach (HealthDrop health in bossHealthDrops)
                                 {

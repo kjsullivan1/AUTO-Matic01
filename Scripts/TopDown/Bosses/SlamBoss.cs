@@ -150,7 +150,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     GroundLoc closestLoc = slamLocs[0];
                     closestLoc.index = 0;
 
-                   for(int i = 0; i < 1; i++)
+                   for(int i = 0; i < 1; i++) //This is weird cause the intial testing was weird IE stupid
                     {
                         centerRec = slamLocs[i].slamTiles[1].Rectangle;
                         for(int j = i + 1; j < slamLocs.Count; j++)
