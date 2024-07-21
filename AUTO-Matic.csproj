@@ -67,6 +67,7 @@
     <Compile Include="Scripts\HealthDrop.cs" />
     <Compile Include="Scripts\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scripts\SideScroll\Enemy\FinalBoss.cs" />
     <Compile Include="Scripts\SideScroll\Enemy\FlyingEnemy.cs" />
     <Compile Include="Scripts\SideScroll\Enemy\GAJump.cs" />
     <Compile Include="Scripts\SideScroll\SideRectangleHelper.cs" />
@@ -121,6 +122,9 @@
     <Content Include="Content\SideScroll\HealthBar\RoboHealthBar3.png" />
     <Content Include="Content\SideScroll\HealthBar\RoboHealthBar4.png" />
     <Content Include="Content\SideScroll\HealthBar\RoboHealthBar5.png" />
+    <Content Include="Content\SideScroll\Maps\Map19.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\SideScroll\Maps\Map3.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

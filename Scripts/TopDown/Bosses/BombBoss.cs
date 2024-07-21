@@ -75,12 +75,13 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
         public float angle;
         public List<Bullet> bullets = new List<Bullet>();
-        float bulletSpeed = .45f;
-        float bulletMaxX = 6f;
-        float bulletMaxY = 6f;
+        float bulletSpeed = 1.5f;
+        float bulletMaxX = 4f;
+        float bulletMaxY = 4f;
+        int growthRate = 5;
         int spread = 3;
         bool isShootDelay = false;
-        float shootDelay = 6.5f;//In seconds
+        float shootDelay = .25f;//In seconds
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = 1.5f;
@@ -96,10 +97,11 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         WallSide RightWalls;
         WallSide LeftWalls;
         List<WallTiles> JumpWalls = new List<WallTiles>();
+        List<Explosion> explosions = new List<Explosion>();
         #endregion
 
         int sizeMod = 2;
-        float health = 20;
+        float health = 21;
         public float Health
         {
             get { return health; }
@@ -120,6 +122,10 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             this.content = content;
             this.bounds = currBounds;
             iShootDelay = shootDelay;
+            RightWalls.isUsed = false;
+            LeftWalls.isUsed = false;
+            TopWalls.isUsed = false;
+            BottomWalls.isUsed = false;
 
             SetWalls(tdMap, map);
 
@@ -152,12 +158,14 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     bossRect = new Rectangle(TopWalls.walls[TopWalls.walls.Count / 2].Rectangle.X - bossRect.Width/4,
                         TopWalls.walls[TopWalls.walls.Count / 2].Rectangle.Bottom,
                         bossRect.Width, bossRect.Height);
+                    TopWalls.isUsed = true; ;
                 }
                 else
                 {
                     bossRect = new Rectangle(LeftWalls.walls[LeftWalls.walls.Count / 2].Rectangle.Right, 
                         LeftWalls.walls[LeftWalls.walls.Count / 2].Rectangle.Y - bossRect.Height/4,
                         bossRect.Width, bossRect.Height);
+                    LeftWalls.isUsed = true;
                 }
             }
             else if(left && bottom)
@@ -168,12 +176,14 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     bossRect = new Rectangle(BottomWalls.walls[BottomWalls.walls.Count / 2].Rectangle.X - bossRect.Width/4,
                    BottomWalls.walls[BottomWalls.walls.Count / 2].Rectangle.Y - bossRect.Height,
                    bossRect.Width, bossRect.Height);
+                    BottomWalls.isUsed = true;
                 }
                 else
                 {
                     bossRect = new Rectangle(LeftWalls.walls[LeftWalls.walls.Count / 2].Rectangle.Right,
                    LeftWalls.walls[LeftWalls.walls.Count / 2].Rectangle.Y - bossRect.Height/4,
                    bossRect.Width, bossRect.Height);
+                    LeftWalls.isUsed = true;
                 }
             }
             else if(bottom && right)
@@ -184,12 +194,14 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     bossRect = new Rectangle(BottomWalls.walls[BottomWalls.walls.Count / 2].Rectangle.X - bossRect.Width/4,
                    BottomWalls.walls[BottomWalls.walls.Count / 2].Rectangle.Y - bossRect.Height,
                    bossRect.Width, bossRect.Height);
+                    BottomWalls.isUsed = true;
                 }
                 else
                 {
                     bossRect = new Rectangle(RightWalls.walls[RightWalls.walls.Count / 2].Rectangle.X - bossRect.Width,
                   RightWalls.walls[RightWalls.walls.Count / 2].Rectangle.Y - bossRect.Height/4,
                   bossRect.Width, bossRect.Height);
+                    RightWalls.isUsed = true;
                 }
             }
             else if(right && top)
@@ -200,12 +212,15 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     bossRect = new Rectangle(TopWalls.walls[TopWalls.walls.Count / 2].Rectangle.X - bossRect.Width/4,
                     TopWalls.walls[TopWalls.walls.Count / 2].Rectangle.Bottom,
                     bossRect.Width, bossRect.Height);
+                    TopWalls.isUsed = true;
                 }
                 else
                 {
                     bossRect = new Rectangle(RightWalls.walls[RightWalls.walls.Count / 2].Rectangle.X - bossRect.Width,
                  RightWalls.walls[RightWalls.walls.Count / 2].Rectangle.Y - bossRect.Height/4,
                  bossRect.Width, bossRect.Height);
+                    RightWalls.isUsed = true;
+
                 }
             }
         }
@@ -216,22 +231,23 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                            new Vector2(bossRect.Center.X, bossRect.Center.Y);
             angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X)));
 
-            shootDelay -= (float)gameTime.ElapsedGameTime.TotalMilliseconds / 100;
+            shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            #region Shoot&Explosion
             if (shootDelay <= 0)
             {
                 shootDelay = iShootDelay;
-                bulletTravelDist = DistForm(tdPlayer.rectangle.Center.ToVector2(), bossRect.Center.ToVector2());
-                if (angle < 16 || angle >= 170)//Right
+                bulletTravelDist = DistForm(tdPlayer.rectangle.Center.ToVector2(), bossRect.Center.ToVector2()) - bossRect.Width;
+                if (angle < 15 || angle >= 170)//Right
                 {
-                    if (angle < 16)
+                    if (angle < 15)
                     {
                         //boss.bulletRects.Add(new Rectangle((int)bossRect.X + (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2),
                         //    (int)bossRect.Y /*- (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)*/, bossRect.Width, bossRect.Height));
 
 
-                        bullets.Add(new Bullet(new Vector2(bossRect.X + (int)bossRect.X + (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2),
-                            (int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, size: 42));
+                        bullets.Add(new Bullet(new Vector2(bossRect.Right,
+                            (int)bossRect.Center.Y), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, size: 42));
                     }
                     else//Left
                     {
@@ -242,13 +258,13 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                     }
                 }
-                if (angle >= 16 && angle < 35)//Right up
+                else if (angle >= 15 && angle < 25)//Right up
                 {
                     if (bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
-                        bullets.Add(new Bullet(new Vector2((int)bossRect.X + (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2),
-                        (int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)),
-                          bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 4, size: 42));
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                                  (int)bossRect.Center.Y /*- (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)*/), bulletSpeed / 1.5f, new Vector2(bulletMaxX, -bulletMaxY),
+                                  content, true, bulletTravelDist, true, -bulletSpeed / 2.5f, size: 42));
 
                         //     boss.bulletRects.Add(new Rectangle((int)bossRect.X + (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2),
                         //(int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
@@ -258,7 +274,9 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     else
                     {
 
-
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                              (int)bossRect.Center.Y /*- (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)*/), bulletSpeed / 1.5f, new Vector2(bulletMaxX, bulletMaxY),
+                              content, true, bulletTravelDist, true, bulletSpeed / 2.5f, size: 42));
                         //      boss.bulletRects.Add(new Rectangle((int)bossRect.X + (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2),
                         //(int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
 
@@ -266,31 +284,99 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                     //Compare pos for down
                 }
-                if (angle >= 35 && angle < 55)//more right up
+                else if (angle >= 25 && angle < 35)//more right up
                 {
                     if (bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
                         //     boss.bulletRects.Add(new Rectangle((int)bossRect.X + (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
                         //(int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
-
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                                (int)bossRect.Center.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)), bulletSpeed / 2, new Vector2(bulletMaxX, -bulletMaxY),
+                                content, true, bulletTravelDist, true, -bulletSpeed / 2.25f, size: 42));
 
                     }
                     else
                     {
                         //      boss.bulletRects.Add(new Rectangle((int)bossRect.X + (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
                         //(int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
-
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                              (int)bossRect.Bottom /*- (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)*/), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY),
+                              content, true, bulletTravelDist, true, bulletSpeed / 2.25f, size: 42));
                     }
                 }
 
-                if (angle >= 55 && angle < 75)
-                {
-
-                }
-                if (angle >= 75 && angle < 105)//up
+                else if (angle >= 35 && angle < 45)
                 {
                     if (bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                                (int)bossRect.Center.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2) - 21), bulletSpeed / 2.5f, new Vector2(bulletMaxX, -bulletMaxY),
+                                content, true, bulletTravelDist, true, -bulletSpeed / 2f, size: 42));
+                    }
+                    else
+                    {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                      (int)bossRect.Bottom/*- (int)(tdPlayer.rectangle.Height / 2 - bossRect.Height / 2)*/), bulletSpeed / 2.5f, new Vector2(bulletMaxX, bulletMaxY),
+                      content, true, bulletTravelDist, true, bulletSpeed / 2f, size: 42));
+                    }
+                }
+
+                else if(angle >= 45 && angle < 55)
+                {
+                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
+                    {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                          (int)bossRect.Center.Y - (int)(tdPlayer.rectangle.Height / 2 /*+ bossRect.Height / 2*/)), bulletSpeed / 3, new Vector2(bulletMaxX, -bulletMaxY),
+                          content, true, bulletTravelDist, true, -bulletSpeed / 1.75f, size: 42));
+                    }
+                    else
+                    {
+
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+           (int)bossRect.Center.Y + (int)(tdPlayer.rectangle.Height / 2 /*+ bossRect.Height / 2*/)), bulletSpeed / 3f, new Vector2(bulletMaxX, bulletMaxY),
+           content, true, bulletTravelDist, true, bulletSpeed / 1.75f, size: 42));
+                    }
+                }
+
+                else if(angle >= 55 && angle < 65)
+                {
+                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
+                    {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right /*+ (int)(-tdPlayer.rectangle.Width / 2 + bossRect.Width / 4)*/,
+                                   (int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)), bulletSpeed / 3.5f, new Vector2(bulletMaxX, -bulletMaxY),
+                                   content, true, bulletTravelDist, true, -bulletSpeed / 1.5f, size: 42));
+                    }
+                    else
+                    {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right /*+ (int)(-tdPlayer.rectangle.Width / 2 + bossRect.Width / 4)*/,
+                                    (int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)),
+                                    bulletSpeed / 3.5f, new Vector2(bulletMaxX, bulletMaxY),
+                                    content, true, bulletTravelDist, true, bulletSpeed / 1.5f, size: 42));
+                    }
+                }
+
+                else if(angle >= 65 && angle < 75)
+                {
+                    if(bossRect.Center.Y > tdPlayer.rectangle.Y)
+                    {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right /*- (int)(-tdPlayer.rectangle.Width / 2 + bossRect.Width / 4)*/,
+                                   (int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)), bulletSpeed / 4, new Vector2(bulletMaxX, -bulletMaxY),
+                                   content, true, bulletTravelDist, true, -bulletSpeed / 1.25f, size: 42));
+                    }
+                    else
+                    {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.Right /*- (int)(-tdPlayer.rectangle.Width / 2 + bossRect.Width / 4)*/,
+                                  (int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)), bulletSpeed / 4, new Vector2(bulletMaxX, bulletMaxY),
+                                  content, true, bulletTravelDist, true, bulletSpeed / 1.25f, size: 42));
+                    }
+                }
+                else if (angle >= 75 && angle < 105)//up
+                {
+                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
+                    {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X + ((int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 4) - 21),
+                                   (int)bossRect.Y - 21/*- (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)*/), -bulletSpeed / 4, new Vector2(-bulletMaxX, -bulletMaxY),
+                                   content, false, bulletTravelDist, true, -bulletSpeed, size: 42));
                         //       boss.bulletRects.Add(new Rectangle((int)bossRect.X /*+ (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 4)*/,
                         //(int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
 
@@ -300,17 +386,20 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                         //       boss.bulletRects.Add(new Rectangle((int)bossRect.X /*+ (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 4)*/,
                         //(int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
 
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X + ((int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 4) - 21),
+                                   (int)bossRect.Bottom/*- (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)*/), -bulletSpeed / 4, new Vector2(-bulletMaxX, bulletMaxY),
+                                   content, false, bulletTravelDist, true, bulletSpeed, size: 42));
 
                     }
                 }
-                if (angle >= 105 && angle < 115)//up left
+                else if (angle >= 105 && angle < 115)//up left..
                 {
                     if (bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
 
-                        bullets.Add(new Bullet(new Vector2((int)bossRect.X - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X + (int)(-tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
                                     (int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)), -bulletSpeed / 4, new Vector2(-bulletMaxX, -bulletMaxY),
-                                    content, true, bulletTravelDist, true, -bulletSpeed, size: 42));
+                                    content, true, bulletTravelDist, true, -bulletSpeed/1.25f, size: 42));
 
                         //        boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
                         //(int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
@@ -321,20 +410,20 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     {
                         //        boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
                         //(int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
-                        bullets.Add(new Bullet(new Vector2((int)bossRect.X - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
-                                   (int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)), -bulletSpeed / 4, new Vector2(-bulletMaxX, bulletMaxY),
-                                   content, true, bulletTravelDist, true, bulletSpeed, size: 42));
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X + (int)(-tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
+                                    (int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)), -bulletSpeed / 4, new Vector2(-bulletMaxX, bulletMaxY),
+                                    content, true, bulletTravelDist, true, bulletSpeed / 1.25f, size: 42));
 
                     }
                 }
-                if (angle >= 115 && angle < 135)
+                else if (angle >= 115 && angle < 125)
                 {
                     if (bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
 
-                        bullets.Add(new Bullet(new Vector2((int)bossRect.X /*- (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
-                        (int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)), -bulletSpeed, new Vector2(-bulletMaxX, -bulletMaxY),
-                                   content, true, bulletTravelDist, true, -bulletSpeed / 4, size: 42));
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X + (int)(-tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
+                                    (int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)), -bulletSpeed / 3.5f, new Vector2(-bulletMaxX, -bulletMaxY),
+                                    content, true, bulletTravelDist, true, -bulletSpeed / 1.5f, size: 42));
                         //        boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2),
                         //(int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
 
@@ -343,20 +432,22 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     {
                         //         boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2),
                         //(int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
-                        bullets.Add(new Bullet(new Vector2((int)bossRect.X /*- (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
-                       (int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY),
-                                  content, true, bulletTravelDist, true, bulletSpeed / 4, size: 42));
+
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X + (int)(-tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
+                                    (int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)), 
+                                    -bulletSpeed / 3.5f, new Vector2(-bulletMaxX, bulletMaxY),
+                                    content, true, bulletTravelDist, true, bulletSpeed / 1.5f, size: 42));
 
                     }
                 }
-                if (angle >= 135 && angle < 155)
+                else if (angle >= 125 && angle < 135)
                 {
                     if (bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
 
-                        bullets.Add(new Bullet(new Vector2((int)bossRect.X /*- (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
-                        (int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)), -bulletSpeed / 2, new Vector2(-bulletMaxX, -bulletMaxY),
-                                   content, true, bulletTravelDist, true, -bulletSpeed / 4, size: 42));
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                                  (int)bossRect.Center.Y - (int)(tdPlayer.rectangle.Height / 2 /*+ bossRect.Height / 2*/)), -bulletSpeed / 3, new Vector2(-bulletMaxX, -bulletMaxY),
+                                  content, true, bulletTravelDist, true, -bulletSpeed/1.75f, size: 42));
                         //        boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2),
                         //(int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
 
@@ -372,9 +463,9 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     else
                     {
 
-                        bullets.Add(new Bullet(new Vector2((int)bossRect.X /*- (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
-                       (int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)), -bulletSpeed / 2, new Vector2(-bulletMaxX, bulletMaxY),
-                                  content, true, bulletTravelDist, true, bulletSpeed / 4, size: 42));
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+           (int)bossRect.Center.Y + (int)(tdPlayer.rectangle.Height / 2 /*+ bossRect.Height / 2*/)), -bulletSpeed / 3f, new Vector2(-bulletMaxX, bulletMaxY),
+           content, true, bulletTravelDist, true, bulletSpeed / 1.75f, size: 42));
                         //         boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2),
                         //(int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
 
@@ -389,33 +480,172 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     }
                 }
 
-                if (angle >= 155 && angle < 170)
+                else if (angle >= 135 && angle < 145)
                 {
                     if(bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
-                        bullets.Add(new Bullet(new Vector2((int)bossRect.X /*- (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
-                     (int)bossRect.Y + ((int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4) - 21)), -bulletSpeed, new Vector2(-bulletMaxX, -bulletMaxY),
-                                content, true, bulletTravelDist, true, -bulletSpeed / 6, size: 42));
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X - 21/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                                 (int)bossRect.Center.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)- 21), -bulletSpeed / 2.5f, new Vector2(-bulletMaxX, -bulletMaxY),
+                                 content, true, bulletTravelDist, true, -bulletSpeed / 2f, size: 42));
                     }
                     else
                     {
-                        bullets.Add(new Bullet(new Vector2((int)bossRect.X /*- (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
-                     (int)bossRect.Y + ((int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4) - 21)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY),
-                                content, true, bulletTravelDist, true, bulletSpeed / 6, size: 42));
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X - 21/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                      (int)bossRect.Bottom/*- (int)(tdPlayer.rectangle.Height / 2 - bossRect.Height / 2)*/), -bulletSpeed / 2.5f, new Vector2(-bulletMaxX, bulletMaxY),
+                      content, true, bulletTravelDist, true, bulletSpeed / 2f, size: 42));
                     }
 
                    
                 }
+
+                else if(angle >= 145 && angle < 155)
+                {
+                    if(bossRect.Center.Y > tdPlayer.rectangle.Y)
+                    {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                                 (int)bossRect.Center.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)), -bulletSpeed / 2, new Vector2(-bulletMaxX, -bulletMaxY),
+                                 content, true, bulletTravelDist, true, -bulletSpeed / 2.25f, size: 42));
+                    }
+                    else
+                    {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                               (int)bossRect.Bottom /*- (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)*/), -bulletSpeed / 2, new Vector2(-bulletMaxX, bulletMaxY),
+                               content, true, bulletTravelDist, true, bulletSpeed / 2.25f, size: 42));
+                    }
+                }
+                else if (angle >= 155 && angle < 170)
+                {
+                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
+                    {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                                (int)bossRect.Center.Y /*- (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)*/), -bulletSpeed / 1.5f, new Vector2(-bulletMaxX, -bulletMaxY),
+                                content, true, bulletTravelDist, true, -bulletSpeed / 2.5f, size: 42));
+                    }
+                    else
+                    {
+                        bullets.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
+                               (int)bossRect.Center.Y /*- (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)*/), -bulletSpeed / 1.5f, new Vector2(-bulletMaxX, bulletMaxY),
+                               content, true, bulletTravelDist, true, bulletSpeed / 2.5f, size: 42));
+                    }
+                }
             }
         
         
-
+            
             for(int i = bullets.Count - 1; i >= 0; i--)
             {
                 bullets[i].Update();
                 if(bullets[i].delete)
                 {
+                    explosions.Add(new Explosion(new Circle(new Vector2(bullets[i].rect.X, bullets[i].rect.Y), bullets[i].rect.Width),
+                        growthRate, (int)(bullets[i].rect.Width * 2.5f)));
                     bullets.RemoveAt(i);
+                }
+            }
+
+            for(int i = explosions.Count - 1; i >= 0; i--)
+            {
+                explosions[i].Update(gameTime);
+                if(explosions[i].rect.Radius >= explosions[i].maxSize)
+                {
+                    explosions.RemoveAt(i);
+                }
+            }
+            #endregion
+
+            for(int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+            {
+                if(tdPlayer.bullets[i].rect.Intersects(bossRect))
+                {
+                    health -= 1;
+                    tdPlayer.bullets.RemoveAt(i);
+                }
+            }
+            if(health == 16)
+            {
+                health--;
+                ChangeLoc();
+            }
+            else if(health == 11)
+            {
+                health--;
+                ChangeLoc();
+            }
+            else if(health == 5)
+            {
+                health--;
+                ChangeLoc();
+            }
+            else if( health <= 0)
+            {
+                //bullets.Clear();
+            }
+        }
+
+        private void ChangeLoc()
+        {
+            bool done = false;
+            while (!done)
+            {
+
+                switch (rand.Next(0, 4))
+                {
+                    case 0:
+                        if (TopWalls.isUsed)
+                        {
+
+                        }
+                        else
+                        {
+                            bossRect = new Rectangle(TopWalls.walls[TopWalls.walls.Count / 2].Rectangle.X - bossRect.Width / 4,
+              TopWalls.walls[TopWalls.walls.Count / 2].Rectangle.Bottom,
+              bossRect.Width, bossRect.Height);
+                            TopWalls.isUsed = true;
+                            done = true;
+                        }
+                        break;
+                    case 1:
+                        if (BottomWalls.isUsed)
+                        {
+
+                        }
+                        else
+                        {
+                            bossRect = new Rectangle(BottomWalls.walls[BottomWalls.walls.Count / 2].Rectangle.X - bossRect.Width / 4,
+BottomWalls.walls[BottomWalls.walls.Count / 2].Rectangle.Y - bossRect.Height,
+bossRect.Width, bossRect.Height);
+                            BottomWalls.isUsed = true;
+                            done = true;
+                        }
+                        break;
+                    case 2:
+                        if (RightWalls.isUsed)
+                        {
+
+                        }
+                        else
+                        {
+                            bossRect = new Rectangle(RightWalls.walls[RightWalls.walls.Count / 2].Rectangle.X - bossRect.Width,
+            RightWalls.walls[RightWalls.walls.Count / 2].Rectangle.Y - bossRect.Height / 4,
+            bossRect.Width, bossRect.Height);
+                            RightWalls.isUsed = true;
+                            done = true;
+                        }
+                        break;
+                    case 3:
+                        if (LeftWalls.isUsed)
+                        {
+
+                        }
+                        else
+                        {
+                            bossRect = new Rectangle(LeftWalls.walls[LeftWalls.walls.Count / 2].Rectangle.Right,
+             LeftWalls.walls[LeftWalls.walls.Count / 2].Rectangle.Y - bossRect.Height / 4,
+             bossRect.Width, bossRect.Height);
+                            LeftWalls.isUsed = true;
+                            done = true;
+                        }
+                        break;
                 }
             }
         }
@@ -436,6 +666,11 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             for(int i = 0; i < bullets.Count; i++)
             {
                 bullets[i].Draw(spriteBatch);
+            }
+
+            for(int i = 0; i < explosions.Count; i++)
+            {
+                explosions[i].Draw(spriteBatch, content);
             }
 
         }
@@ -553,5 +788,35 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
     {
         public List<WallTiles> walls;
         public bool isUsed;
+    }
+
+    class Explosion
+    {
+        public Circle rect;
+        public int growthRate;
+        public int maxSize;
+
+        public Explosion(Circle rect, int rate, int max)
+        {
+            this.rect = rect;
+            growthRate = rate;
+            maxSize = max;
+        }
+
+        public void Update(GameTime gameTime)
+        {
+            if (rect.Radius < maxSize)
+            {
+                rect.Radius += growthRate;
+                rect.Position = new Vector2(rect.Bounds.X - growthRate, rect.Bounds.Y - growthRate);
+            }
+
+
+        }
+
+        public void Draw(SpriteBatch spriteBatch, ContentManager content)
+        {
+            spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect.Bounds, Color.FloralWhite * .25f);
+        }
     }
 }

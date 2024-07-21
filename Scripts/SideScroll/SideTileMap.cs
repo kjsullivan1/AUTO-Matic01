@@ -126,8 +126,9 @@ namespace AUTO_Matic
         {
             return new Vector2(tileMap.worldWidth, tileMap.worldHeight);
         }
-        public static void Generate(int[,] map, int size)
+        public static void Generate(int[,] map, int size, bool isFinal)
         {
+          
             //pixelSize = size;
             //Map = map;
 
@@ -345,7 +346,7 @@ namespace AUTO_Matic
 
 
 
-        public static void Draw(SpriteBatch spriteBatch, ContentManager Content, SSCamera ssCamera)
+        public static void Draw(SpriteBatch spriteBatch, ContentManager Content, SSCamera ssCamera, bool isFinal = false)
         {
 
             //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, Camera.transform);
@@ -355,8 +356,11 @@ namespace AUTO_Matic
             {
                 tile.Draw(spriteBatch);
             }
-
-            spriteBatch.Draw(Content.Load<Texture2D>("SideScroll/MapTiles/BG1"), ssCamera.CameraBounds, Color.White);
+            if(!isFinal)
+            {
+                spriteBatch.Draw(Content.Load<Texture2D>("SideScroll/MapTiles/BG1"), ssCamera.CameraBounds, Color.White);
+            }
+            
 
             foreach (BackgroundTile tile in backgroundTiles)
             {
@@ -392,7 +396,7 @@ namespace AUTO_Matic
             // spriteBatch.End();
         }
 
-        public static void LoadMap(string filePath)
+        public static void LoadMap(string filePath, bool isFinal = false)
         {
             if (System.IO.File.Exists(filePath))
             {
@@ -476,7 +480,7 @@ namespace AUTO_Matic
                 }
 
                 tileMap.SetDims(width, height);
-                Generate(map, 64);
+                Generate(map, 64, isFinal);
 
             }
         }

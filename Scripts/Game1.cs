@@ -39,7 +39,7 @@ namespace AUTO_Matic
         public enum Scenes { TitleScreen, InGame, Exit }
         public Scenes currScene = Scenes.InGame;
 
-        public enum GameStates { SideScroll, TopDown, Paused}
+        public enum GameStates { SideScroll, TopDown, Paused, FinalBoss}
         public GameStates GameState = GameStates.SideScroll;
         GameStates prevGameState;
 
@@ -137,7 +137,7 @@ namespace AUTO_Matic
 
         Rectangle tdPrevBounds = Rectangle.Empty;
         MapBuilder mapBuilder;
-        
+        FinalBoss finalBoss;
       
         class Door
         {
@@ -217,9 +217,14 @@ namespace AUTO_Matic
             #endregion
 
             HealthDrop.texture = Content.Load<Texture2D>(@"Textures\Health");
+            Tile.Content = Content;
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
-            if(currScene == Scenes.InGame)
-                StartNewGame();
+            if (currScene == Scenes.InGame)
+            {
+                //StartNewGame();
+                LoadFinalBoss();
+            }
+                
 
            
             // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
@@ -458,6 +463,52 @@ namespace AUTO_Matic
             GameState = GameStates.Paused;
         }
 
+        public void LoadFinalBoss()
+        {
+            healthDrops.Clear();
+            string filePath = Content.RootDirectory + "/SideScroll/Maps/Map19.txt";
+            SideTileMap.LoadMap(filePath);
+            
+            flyingEnemies.Clear();
+            enemies.Clear();
+
+            //Add final boss here 
+            graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
+            graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
+
+            //graphics.HardwareModeSwitch = false;
+            //graphics.IsFullScreen = true;
+            graphics.ApplyChanges();
+            //maxShootRate = shootRate;
+            camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2));
+            camera.Zoom = .75f;
+            ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
+
+            //ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
+            ssPlayer.Health = 5;
+            UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
+            UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
+            ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(SideTileMap.playerSpawns[0].X + (64 * 10.5f), 
+                SideTileMap.playerSpawns[0].Y - (64 * 2.5f)), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
+            ssCamera.Zoom = 1f;
+
+            finalBoss = new FinalBoss(SideTileMap.enemySpawns[0], Content);
+            
+            //ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont);
+            //ssCamera.Zoom = 1.25f;
+            // ssCamera.Position = ssPlayer.Position;
+            //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
+
+            GameState = GameStates.FinalBoss;
+            prevGameState = GameState;
+            GameState = GameStates.Paused;
+
+            UIHelper.SetElementVisibility("MainMenu", false, UIManager.uiElements);
+            UIHelper.SetElementVisibility("Settings", false, UIManager.uiElements);
+            UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
+
+        }
+
         public void StartNewGame()
         {
             healthDrops.Clear();
@@ -501,7 +552,8 @@ namespace AUTO_Matic
             ssPlayer.Health = 5;
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
             UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
-            ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0,0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
+            ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0,0),
+                (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
             ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont);
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
@@ -661,7 +713,7 @@ namespace AUTO_Matic
                                         float num = MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X);
                                         if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) < 64 * 8/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
                                         {
-                                            dont = true;
+                                            dont = true; //dont move camera
                                         }
                                         else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 8 ||
                                             ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 5)
@@ -1230,10 +1282,99 @@ namespace AUTO_Matic
                                     fade = true;
                                 }
                             }
+                            else if(prevGameState == GameStates.FinalBoss)
+                            {
+                                fade = true;
+                                GameState = GameStates.FinalBoss;
+                            }
+                            break;
+                        case GameStates.FinalBoss:
+                            if(fade)
+                            {
+                                ssPlayer.Update(gameTime, Gravity, enemies, true);
+                                fade = false;
+                                // UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point(ssCamera.CameraBounds.X + 20,
+                                //  ssCamera.CameraBounds.Y + 20), new Point(0, 0)));
+                                //ssCamera.Update(ssCamera.Position, true);
+                            }
+                            else
+                            {
+                                SideTileMap.RepeatBG.Clear();
+                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point(ssCamera.CameraBounds.X + 20,
+                                ssCamera.CameraBounds.Y + 20), new Point(0, 0)));
+                                ssPlayer.Update(gameTime, Gravity, enemies);
+                                ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X + (64 * 10.5f), SideTileMap.playerSpawns[0].Y - (64 * 2.5f)), false);
+
+                                #region Collisions
+                                ssPlayer.blockBottom = false;
+
+                                //ssPlayer.isColliding = false;
+
+                                foreach (GroundTile tile in SideTileMap.GroundTiles)
+                                {
+                                    ssPlayer.Collision(tile.Rectangle);
+                                    if (ssPlayer.isCollidingRight == true &&
+                                    ssPlayer.isCollidingLeft == true)
+                                    {
+                                        ssPlayer.isCollidingRight = false;
+                                        ssPlayer.isCollidingLeft = false;
+                                    }
+
+                                    bool trueBreak = false;
+                                    foreach (Rectangle breakables in ssPlayer.breakTiles)
+                                    {
+                                        if (breakables == tile.Rectangle)
+                                        {
+                                            destroyedGround.Add(tile);
+                                            SideTileMap.GroundTiles.Remove(tile);
+                                            ssPlayer.breakTiles.Remove(breakables);
+                                            respawnDelay = respawnDelaySet;
+                                            trueBreak = true;
+                                            break;
+                                        }
+                                    }
+                                    if (trueBreak)
+                                        break;
+                                }
+
+                                foreach (PlatformTile tile1 in SideTileMap.PlatformTiles)
+                                {
+                                    ssPlayer.Collision(tile1.Rectangle);
+                                    bool trueBreak = false;
+                                    foreach (Rectangle breakables in ssPlayer.breakTiles)
+                                    {
+                                        if (breakables == tile1.Rectangle)
+                                        {
+                                            destroyedPlatfroms.Add(tile1);
+                                            SideTileMap.PlatformTiles.Remove(tile1);
+                                            ssPlayer.breakTiles.Remove(breakables);
+                                            respawnDelay = respawnDelaySet;
+                                            trueBreak = true;
+                                            break;
+                                        }
+                                    }
+                                    if (trueBreak)
+                                        break;
+                                }
+                                foreach (WallTile tile2 in SideTileMap.WallTiles)
+                                {
+                                    ssPlayer.Collision(tile2.Rectangle);
+                                }
+                                if (ssPlayer.blockBottom == false && ssPlayer.playerState != SSPlayer.PlayerStates.Jumping)
+                                {
+                                    ssPlayer.isFalling = true;
+
+                                }
+                            }
+                            #endregion
+
+                            finalBoss.Update(gameTime, ssPlayer);
                             break;
                     }
+                    
 
                     break;
+                
 
 
             }
@@ -1501,6 +1642,39 @@ namespace AUTO_Matic
                         if(black)
                             GraphicsDevice.Clear(Color.Black * .25f);
                         Window.Title = ssCamera.CameraBounds.ToString();
+                    }
+                    else if(GameState == GameStates.FinalBoss)
+                    {
+                        if (fade)
+                        {
+                            iRate -= rate;
+                            if (iRate < 0)
+                            {
+                                iRate = 1;
+                                fade = false;
+                                startGame = true;
+                            }
+
+                            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, ssCamera.transform);
+
+                            SideTileMap.Draw(spriteBatch, Content, ssCamera, true);
+                            //spriteBatch.Draw(Content.Load<Texture2D>("SideScroll/MapTiles/BG1"), ssCamera.CameraBounds, Color.White);
+                            ssPlayer.Draw(spriteBatch);
+                            spriteBatch.Draw(Content.Load<Texture2D>("TopDown/Textures/Player"), ssCamera.CameraBounds, Color.Black * (iRate));
+
+                            spriteBatch.End();
+                        }
+                        else
+                        {
+                            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, ssCamera.transform);
+
+                            SideTileMap.Draw(spriteBatch, Content, ssCamera, true);
+                            UIManager.Draw(spriteBatch);
+                            ssPlayer.Draw(spriteBatch);
+                            finalBoss.Draw(spriteBatch);
+
+                            spriteBatch.End();
+                        }
                     }
                    
                     break;

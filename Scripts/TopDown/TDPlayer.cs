@@ -22,6 +22,7 @@ namespace AUTO_Matic.TopDown
         public PlayerState playerState = PlayerState.Movement;
 
         Vector2 controllerMoveDir;
+        public Vector2 velocity;
         GamePadButtons currButtons;
         GamePadButtons prevButtons;
         public int bossRoom = 1;
@@ -730,27 +731,36 @@ namespace AUTO_Matic.TopDown
             //Else ifs for cardinal
             if (kb.IsKeyDown(Keys.D) || controllerMoveDir.X > 0 /*&& controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
             {
-                position.X += moveSpeed;
+                velocity.X += moveSpeed;
                 if(!lockDir)
                     shootDir = "right";
             }
             if (kb.IsKeyDown(Keys.A) || controllerMoveDir.X  < 0/* && controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
             {
-                position.X += -moveSpeed;
+                velocity.X += -moveSpeed;
                 if (!lockDir)
                     shootDir = "left";
             }
             if (kb.IsKeyDown(Keys.W) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y > 0 /*&& controllerMoveDir.X > -.6*/)
             {
-                position.Y += -moveSpeed;
+                velocity.Y += -moveSpeed;
                 if (!lockDir)
                     shootDir = "up";
             }
             if (kb.IsKeyDown(Keys.S) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y < 0 /*&& controllerMoveDir.X > -.6*/ )
             {
-                position.Y += moveSpeed;
+                velocity.Y += moveSpeed;
                 if (!lockDir)
                     shootDir = "down";
+            }
+
+            if(kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D))
+            {
+                velocity.X = 0;
+            }
+            if(kb.IsKeyUp(Keys.S) && kb.IsKeyUp(Keys.W))
+            {
+                velocity.Y = 0;
             }
 
             if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
@@ -792,6 +802,29 @@ namespace AUTO_Matic.TopDown
             }
             prevKb = kb;
             prevButtons = currButtons;
+
+            if(velocity.X >= moveSpeed)
+            {
+                velocity.X = moveSpeed;
+            }
+            else if(velocity.X <= -moveSpeed)
+            {
+                velocity.X = -moveSpeed;
+            }
+            if(velocity.Y >= moveSpeed)
+            {
+                velocity.Y = moveSpeed;
+            }
+            else if(velocity.Y <= -moveSpeed)
+            {
+                velocity.Y = -moveSpeed;
+            }
+
+            position += velocity;
+            if(controllerMoveDir != Vector2.Zero)
+            {
+
+            }
         }
 
         public void Collision(Rectangle newRect, int xOffset, int yOffset, Rectangle bounds)
