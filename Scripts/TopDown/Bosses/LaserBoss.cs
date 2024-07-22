@@ -1246,7 +1246,7 @@ namespace AUTO_Matic.Scripts.TopDown
             int size = 64;
             if (angle < 16 || angle >= 155)//Right
             {
-               if(angle < 16)
+                if (angle < 16)
                 {
                     boss.bulletRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 2),
                         (int)bossPos.Y /*- (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 2)*/, size, size));
@@ -1274,17 +1274,17 @@ namespace AUTO_Matic.Scripts.TopDown
             }
             if (angle >= 16 && angle < 35)//Right up
             {
-                if(boss.rect.Center.Y > playerRect.rectangle.Y)
+                if (boss.rect.Center.Y > playerRect.rectangle.Y)
                 {
                     boss.bulletRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 2),
                (int)bossPos.Y - (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 4), size, size));
 
                     Rectangle startRect = boss.bulletRects[0];
 
-                    while (boss.bulletRects[boss.bulletRects.Count - 1].Right < RightWalls.walls[0].Rectangle.X && 
+                    while (boss.bulletRects[boss.bulletRects.Count - 1].Right < RightWalls.walls[0].Rectangle.X &&
                         boss.bulletRects[boss.bulletRects.Count - 1].Top > TopWalls.walls[0].Rectangle.Top)
                     {
-                        boss.bulletRects.Add(new Rectangle(startRect.Right, startRect.Y - size/4, size, size));
+                        boss.bulletRects.Add(new Rectangle(startRect.Right, startRect.Y - size / 4, size, size));
                         startRect = boss.bulletRects[boss.bulletRects.Count - 1];
                     }
                 }
@@ -1298,11 +1298,11 @@ namespace AUTO_Matic.Scripts.TopDown
                     while (boss.bulletRects[boss.bulletRects.Count - 1].Right < RightWalls.walls[0].Rectangle.X &&
                       boss.bulletRects[boss.bulletRects.Count - 1].Bottom < BottomWalls.walls[0].Rectangle.Top)
                     {
-                        boss.bulletRects.Add(new Rectangle(startRect.Right, startRect.Bottom - size/2, size, size));
+                        boss.bulletRects.Add(new Rectangle(startRect.Right, startRect.Bottom - size / 2, size, size));
                         startRect = boss.bulletRects[boss.bulletRects.Count - 1];
                     }
                 }
-       
+
                 //Compare pos for down
             }
             if (angle >= 35 && angle < 75)//more right up
@@ -1410,7 +1410,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     while (boss.bulletRects[boss.bulletRects.Count - 1].X > LeftWalls.walls[0].Rectangle.Right &&
                       boss.bulletRects[boss.bulletRects.Count - 1].Top > TopWalls.walls[0].Rectangle.Bottom)
                     {
-                        boss.bulletRects.Add(new Rectangle(startRect.X - size, startRect.Y - size/4, size, size));
+                        boss.bulletRects.Add(new Rectangle(startRect.X - size, startRect.Y - size / 4, size, size));
                         startRect = boss.bulletRects[boss.bulletRects.Count - 1];
                     }
                 }
@@ -1431,7 +1431,7 @@ namespace AUTO_Matic.Scripts.TopDown
             }
 
 
-           
+
         }
     }
 
