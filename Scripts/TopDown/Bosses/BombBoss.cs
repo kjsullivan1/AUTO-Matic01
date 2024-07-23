@@ -234,6 +234,60 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             #region Shoot&Explosion
+            LaunchBomb(tdPlayer);
+
+            for (int i = bullets.Count - 1; i >= 0; i--)
+            {
+                bullets[i].Update();
+                if (bullets[i].delete)
+                {
+                    explosions.Add(new Explosion(new Circle(new Vector2(bullets[i].rect.X, bullets[i].rect.Y), bullets[i].rect.Width),
+                        growthRate, (int)(bullets[i].rect.Width * 2.5f)));
+                    bullets.RemoveAt(i);
+                }
+            }
+
+            for (int i = explosions.Count - 1; i >= 0; i--)
+            {
+                explosions[i].Update(gameTime);
+                if (explosions[i].rect.Radius >= explosions[i].maxSize)
+                {
+                    explosions.RemoveAt(i);
+                }
+            }
+            #endregion
+
+            for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+            {
+                if (tdPlayer.bullets[i].rect.Intersects(bossRect))
+                {
+                    health -= 1;
+                    tdPlayer.bullets.RemoveAt(i);
+                }
+            }
+            if (health == 16)
+            {
+                health--;
+                ChangeLoc();
+            }
+            else if (health == 11)
+            {
+                health--;
+                ChangeLoc();
+            }
+            else if (health == 5)
+            {
+                health--;
+                ChangeLoc();
+            }
+            else if (health <= 0)
+            {
+                //bullets.Clear();
+            }
+        }
+
+        private void LaunchBomb(TDPlayer tdPlayer)
+        {
             if (shootDelay <= 0)
             {
                 shootDelay = iShootDelay;
@@ -321,7 +375,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     }
                 }
 
-                else if(angle >= 45 && angle < 55)
+                else if (angle >= 45 && angle < 55)
                 {
                     if (bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
@@ -338,7 +392,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     }
                 }
 
-                else if(angle >= 55 && angle < 65)
+                else if (angle >= 55 && angle < 65)
                 {
                     if (bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
@@ -355,9 +409,9 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     }
                 }
 
-                else if(angle >= 65 && angle < 75)
+                else if (angle >= 65 && angle < 75)
                 {
-                    if(bossRect.Center.Y > tdPlayer.rectangle.Y)
+                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
                         bullets.Add(new Bullet(new Vector2((int)bossRect.Right /*- (int)(-tdPlayer.rectangle.Width / 2 + bossRect.Width / 4)*/,
                                    (int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)), bulletSpeed / 4, new Vector2(bulletMaxX, -bulletMaxY),
@@ -399,7 +453,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                         bullets.Add(new Bullet(new Vector2((int)bossRect.X + (int)(-tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
                                     (int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)), -bulletSpeed / 4, new Vector2(-bulletMaxX, -bulletMaxY),
-                                    content, true, bulletTravelDist, true, -bulletSpeed/1.25f, size: 42));
+                                    content, true, bulletTravelDist, true, -bulletSpeed / 1.25f, size: 42));
 
                         //        boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
                         //(int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
@@ -434,7 +488,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                         //(int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
 
                         bullets.Add(new Bullet(new Vector2((int)bossRect.X + (int)(-tdPlayer.rectangle.Width / 2 + bossRect.Width / 4),
-                                    (int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)), 
+                                    (int)bossRect.Y + (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)),
                                     -bulletSpeed / 3.5f, new Vector2(-bulletMaxX, bulletMaxY),
                                     content, true, bulletTravelDist, true, bulletSpeed / 1.5f, size: 42));
 
@@ -447,7 +501,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                         bullets.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
                                   (int)bossRect.Center.Y - (int)(tdPlayer.rectangle.Height / 2 /*+ bossRect.Height / 2*/)), -bulletSpeed / 3, new Vector2(-bulletMaxX, -bulletMaxY),
-                                  content, true, bulletTravelDist, true, -bulletSpeed/1.75f, size: 42));
+                                  content, true, bulletTravelDist, true, -bulletSpeed / 1.75f, size: 42));
                         //        boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2),
                         //(int)bossRect.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
 
@@ -482,10 +536,10 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                 else if (angle >= 135 && angle < 145)
                 {
-                    if(bossRect.Center.Y > tdPlayer.rectangle.Y)
+                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
                         bullets.Add(new Bullet(new Vector2((int)bossRect.X - 21/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
-                                 (int)bossRect.Center.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2)- 21), -bulletSpeed / 2.5f, new Vector2(-bulletMaxX, -bulletMaxY),
+                                 (int)bossRect.Center.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 2) - 21), -bulletSpeed / 2.5f, new Vector2(-bulletMaxX, -bulletMaxY),
                                  content, true, bulletTravelDist, true, -bulletSpeed / 2f, size: 42));
                     }
                     else
@@ -495,12 +549,12 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                       content, true, bulletTravelDist, true, bulletSpeed / 2f, size: 42));
                     }
 
-                   
+
                 }
 
-                else if(angle >= 145 && angle < 155)
+                else if (angle >= 145 && angle < 155)
                 {
-                    if(bossRect.Center.Y > tdPlayer.rectangle.Y)
+                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
                     {
                         bullets.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(tdPlayer.rectangle.Width / 2 + bossRect.Width / 2)*/,
                                  (int)bossRect.Center.Y - (int)(tdPlayer.rectangle.Height / 2 + bossRect.Height / 4)), -bulletSpeed / 2, new Vector2(-bulletMaxX, -bulletMaxY),
@@ -528,57 +582,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                                content, true, bulletTravelDist, true, bulletSpeed / 2.5f, size: 42));
                     }
                 }
-            }
-        
-        
-            
-            for(int i = bullets.Count - 1; i >= 0; i--)
-            {
-                bullets[i].Update();
-                if(bullets[i].delete)
-                {
-                    explosions.Add(new Explosion(new Circle(new Vector2(bullets[i].rect.X, bullets[i].rect.Y), bullets[i].rect.Width),
-                        growthRate, (int)(bullets[i].rect.Width * 2.5f)));
-                    bullets.RemoveAt(i);
-                }
-            }
-
-            for(int i = explosions.Count - 1; i >= 0; i--)
-            {
-                explosions[i].Update(gameTime);
-                if(explosions[i].rect.Radius >= explosions[i].maxSize)
-                {
-                    explosions.RemoveAt(i);
-                }
-            }
-            #endregion
-
-            for(int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
-            {
-                if(tdPlayer.bullets[i].rect.Intersects(bossRect))
-                {
-                    health -= 1;
-                    tdPlayer.bullets.RemoveAt(i);
-                }
-            }
-            if(health == 16)
-            {
-                health--;
-                ChangeLoc();
-            }
-            else if(health == 11)
-            {
-                health--;
-                ChangeLoc();
-            }
-            else if(health == 5)
-            {
-                health--;
-                ChangeLoc();
-            }
-            else if( health <= 0)
-            {
-                //bullets.Clear();
             }
         }
 

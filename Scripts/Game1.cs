@@ -334,10 +334,10 @@ namespace AUTO_Matic
                      new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
                 int[,] mapDims = (tdMap.GenerateMap(filePath));
 
-                bossHealthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, currBounds.Y + 64 * 2, 64, 64)));
-                bossHealthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
-                bossHealthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
-                bossHealthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y) + 64 * 2, 64, 64)));
+                healthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, currBounds.Y + 64 * 2, 64, 64)));
+                healthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
+                healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
+                healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y) + 64 * 2, 64, 64)));
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
                     tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
 
@@ -377,8 +377,8 @@ namespace AUTO_Matic
                 }
                 //shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
                 //laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims);
-                //slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
-                bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer);
+                slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
+                //bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer);
 
                 //for(int i = 0; i <= 4; i++)
                 //{
@@ -413,7 +413,7 @@ namespace AUTO_Matic
             graphics.IsFullScreen = false;
             graphics.ApplyChanges();
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)), graphics.PreferredBackBufferHeight - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
-            camera.Zoom = .5f;
+            camera.Zoom = 1f;
             Tiles.Content = Content;
 
             //Give the builder it's maps
@@ -1206,10 +1206,10 @@ namespace AUTO_Matic
                                     //laserBoss.Update(gameTime, tdPlayer, tdMap);
                                     #endregion
                                     #region BombBoss
-                                    bombBoss.Update(gameTime, tdMap, tdPlayer);
+                                    //bombBoss.Update(gameTime, tdMap, tdPlayer);
                                     #endregion
                                     #region SlamBoss
-                                    //slamBoss.Update(gameTime, tdPlayer, tdMap);
+                                    slamBoss.Update(gameTime, tdPlayer, tdMap);
                                     #endregion
                                     for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
                                     {
@@ -1605,9 +1605,10 @@ namespace AUTO_Matic
                                 //}
                                 //laserBoss.Draw(spriteBatch);
                                 #endregion
-                                bombBoss.Draw(spriteBatch);
-                                Window.Title = "Angle: " + bombBoss.angle;
-                                //slamBoss.Draw(spriteBatch);
+                                //bombBoss.Draw(spriteBatch);
+                                //Window.Title = "Angle: " + bombBoss.angle;
+                               slamBoss.Draw(spriteBatch);
+                                Window.Title = "Angle: " + slamBoss.angle;
                                 foreach (HealthDrop health in bossHealthDrops)
                                 {
                                     health.Draw(spriteBatch);
