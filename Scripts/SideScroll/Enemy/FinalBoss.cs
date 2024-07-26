@@ -18,8 +18,8 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         enum BossStates { ChooseWeapon, SpinToPlace, Attack ,Move, Return}
         BossStates bossState = BossStates.ChooseWeapon;
 
-        List<Rectangle> SideWall = new List<Rectangle>(); //9 
-        List<Rectangle> TopWall = new List<Rectangle>(); //22
+        List<Rectangle> SideWall = new List<Rectangle>(); //15 
+        List<Rectangle> TopWall = new List<Rectangle>(); //25
         List<Rectangle> rayRects = new List<Rectangle>();
         ContentManager content;
         Random random = new Random();
@@ -170,12 +170,12 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             shootLocs[3].type = "Bomb";
 
 
-            for(int i = 0; i < 9; i++)
+            for(int i = 0; i < 15; i++)
             {
                 SideWall.Add(new Rectangle((int)bossRect.Right, (int)(bossRect.Y + (64 * i)), 64, 64));
             }
 
-            for(int i = 0; i < 24; i++)
+            for(int i = 0; i < 25; i++)
             {
                 TopWall.Add(new Rectangle(bossRect.Right - (64 + (64 * i)), bossRect.Y - 64, 64, 64));
             }

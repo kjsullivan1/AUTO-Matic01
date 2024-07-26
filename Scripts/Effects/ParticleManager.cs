@@ -64,8 +64,8 @@ namespace AUTO_Matic.Scripts.Effects
             particleEffect.CurrentTechnique = particleEffect.Techniques["ParticleTechnique"];
 
             particleEffect.Parameters["particleTexture"].SetValue(particleTexture);
-            //particleEffect.Parameters["View"].SetValue(camera.transform);
-            //particleEffect.Parameters["Projection"].SetValue(camera.transform);
+            particleEffect.Parameters["View"].SetValue(camera.transform);
+            particleEffect.Parameters["Projection"].SetValue(camera.transform);
 
             graphicsDevice.RasterizerState = RasterizerState.CullNone;
             graphicsDevice.BlendState = BlendState.Additive;

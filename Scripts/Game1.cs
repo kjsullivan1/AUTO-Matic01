@@ -37,7 +37,7 @@ namespace AUTO_Matic
         Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { SideScroll, TopDown, Paused, FinalBoss}
         public GameStates GameState = GameStates.SideScroll;
@@ -47,7 +47,7 @@ namespace AUTO_Matic
         public MenuStates MenuState = MenuStates.TitleCrawl;
         bool startCrawl = false;
 
-        Vector2 mainMenuPos;
+        Vector2 mainMenuPos = new Vector2(768 / 2, 432 / 2);
 
         KeyboardState prevKB;
         GamePadButtons prevButtons;
@@ -162,15 +162,15 @@ namespace AUTO_Matic
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
-            graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
+            graphics.PreferredBackBufferWidth = 768;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
+            graphics.PreferredBackBufferHeight = 432;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
 
             //graphics.HardwareModeSwitch = false;
             //graphics.IsFullScreen = true;
             graphics.ApplyChanges();
             //maxShootRate = shootRate;
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth/2, graphics.PreferredBackBufferHeight/2));
-
+            camera.Zoom = 1f;
             
             ssPlayer = new SSPlayer(this, 64);
             //StartNewGame();
@@ -221,8 +221,8 @@ namespace AUTO_Matic
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if (currScene == Scenes.InGame)
             {
-                //StartNewGame();
-                LoadFinalBoss();
+                StartNewGame();
+                //LoadFinalBoss();
             }
                 
 
@@ -376,8 +376,8 @@ namespace AUTO_Matic
                     }
                 }
                 //shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
-                //laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims);
-                slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
+                laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims);
+               // slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
                 //bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer);
 
                 //for(int i = 0; i <= 4; i++)
@@ -412,7 +412,7 @@ namespace AUTO_Matic
             graphics.PreferredBackBufferHeight = 64 * 15; //960  // pixelBits * row
             graphics.IsFullScreen = false;
             graphics.ApplyChanges();
-            camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)), graphics.PreferredBackBufferHeight - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
+            camera = new Camera(GraphicsDevice.Viewport, new Vector2(0 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)), 0 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
             camera.Zoom = 1f;
             Tiles.Content = Content;
 
@@ -511,6 +511,16 @@ namespace AUTO_Matic
 
         public void StartNewGame()
         {
+
+            graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
+            graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
+
+            //graphics.HardwareModeSwitch = false;
+            graphics.IsFullScreen = true;
+            graphics.ApplyChanges();
+            //maxShootRate = shootRate;
+            camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2));
+
             healthDrops.Clear();
             UIHelper.SetElementVisibility("MainMenu", false, UIManager.uiElements);
             UIHelper.SetElementVisibility("Settings", false, UIManager.uiElements);
@@ -579,21 +589,43 @@ namespace AUTO_Matic
             if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) > pos.X))
             {
                 pos.X += graphics.PreferredBackBufferWidth / pixelBits;
+
+                //if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) < pos.X))
+                //{
+                //    pos.X = graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1));
+                //}
+
                 tdCameraReached = false;
             }
             else if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) < pos.X))
             {
                 pos.X -= graphics.PreferredBackBufferWidth / pixelBits;
+
+                //if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) > pos.X))
+                //{
+                //    pos.X = graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1));
+                //}
+
                 tdCameraReached = false;
             }
             if (((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))) < pos.Y))
             {
                 pos.Y -= graphics.PreferredBackBufferHeight / pixelBits;
+
+                //if (((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))) > pos.Y))
+                //{
+                //    pos.Y = ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
+                //}
                 tdCameraReached = false;
             }
             else if ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) > pos.Y))
             {
                 pos.Y += graphics.PreferredBackBufferHeight / pixelBits;
+
+                //if (((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))) < pos.Y))
+                //{
+                //    pos.Y = ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
+                //}
                 tdCameraReached = false;
             }
 
@@ -649,6 +681,7 @@ namespace AUTO_Matic
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             KeyboardState kb = Keyboard.GetState();
+            
             moveDir = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left;
             switch(currScene)
             {
@@ -1203,13 +1236,13 @@ namespace AUTO_Matic
                                     #endregion
 
                                     #region LaserBoss
-                                    //laserBoss.Update(gameTime, tdPlayer, tdMap);
+                                    laserBoss.Update(gameTime, tdPlayer, tdMap);
                                     #endregion
                                     #region BombBoss
                                     //bombBoss.Update(gameTime, tdMap, tdPlayer);
                                     #endregion
                                     #region SlamBoss
-                                    slamBoss.Update(gameTime, tdPlayer, tdMap);
+                                    //slamBoss.Update(gameTime, tdPlayer, tdMap);
                                     #endregion
                                     for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
                                     {
@@ -1597,18 +1630,18 @@ namespace AUTO_Matic
                                 Window.Title = " ";
                                 //float[] angles = new float[laserBoss.bossRects.Count];
                                 #region LaserBoss
-                                //for (int i = 0; i < laserBoss.bossRects.Count; i++)
-                                //{
-                                //    //angles[i] = laserBoss.bossRects[i].angle;
-                                //    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
+                                for (int i = 0; i < laserBoss.bossRects.Count; i++)
+                                {
+                                    //angles[i] = laserBoss.bossRects[i].angle;
+                                    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
 
-                                //}
-                                //laserBoss.Draw(spriteBatch);
+                                }
+                                laserBoss.Draw(spriteBatch);
                                 #endregion
                                 //bombBoss.Draw(spriteBatch);
                                 //Window.Title = "Angle: " + bombBoss.angle;
-                               slamBoss.Draw(spriteBatch);
-                                Window.Title = "Angle: " + slamBoss.angle;
+                                //slamBoss.Draw(spriteBatch);
+                                //Window.Title = "Angle: " + slamBoss.angle;
                                 foreach (HealthDrop health in bossHealthDrops)
                                 {
                                     health.Draw(spriteBatch);
@@ -1695,55 +1728,76 @@ namespace AUTO_Matic
             switch (MenuState)
             {
                 case MenuStates.TitleCrawl:
-                    if (kb.IsKeyDown(Keys.Enter) && prevKB.IsKeyUp(Keys.Enter) && !startCrawl || currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released)
+                    UIManager.UpdateTextBlock("MainMenuBackground");
+                    UIHelper.SetElementVisibility("MainMenuTitle", false, UIManager.uiElements);
+                    camera.Update(mainMenuPos);
+                    startCrawl = true;
+
+                    if(startCrawl)
                     {
-                        prevKB = kb;
-                        startCrawl = true;
-                    }
-                    UIManager.UpdateTextBlock("TitleCrawl");
-                    if (startCrawl)
-                    {
-                        TitleCrawl(3);
-                        if (kb.IsKeyDown(Keys.G) && prevKB.IsKeyUp(Keys.G) || currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released 
-                            || currButtons.Y == ButtonState.Pressed && prevButtons.Y == ButtonState.Released || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
+                        UIManager.UpdateTextBlock("TitleCrawl");
+
+                        if (kb.IsKeyDown(Keys.G) && prevKB.IsKeyUp(Keys.G) || currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released
+                            || currButtons.Y == ButtonState.Pressed && prevButtons.Y == ButtonState.Released || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released ||
+                            UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom <= 0)
                         {
-                            camera.Update(new Vector2(camera.X, (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2))));
-                            UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
-                            MenuState = MenuStates.MainMenu;
+                            UIManager.SkipCrawl("TitleCrawl");
                             startCrawl = false;
-                            prevKB = kb;
+                            MenuState = MenuStates.MainMenu;
+                            //UIHelper.SetElementVisibility("MainMenuBackground", false, UIManager.ui)
                         }
                     }
+                    #region ReversedPsychology
+                    //if (kb.IsKeyDown(Keys.Enter) && prevKB.IsKeyUp(Keys.Enter) && !startCrawl || currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released)
+                    //{
+                    //    prevKB = kb;
+                    //    startCrawl = true;
+                    //}
+                    //UIManager.UpdateTextBlock("TitleCrawl");
+                    //if (startCrawl)
+                    //{
+                    //    TitleCrawl(3);
+                    //    if (kb.IsKeyDown(Keys.G) && prevKB.IsKeyUp(Keys.G) || currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released 
+                    //        || currButtons.Y == ButtonState.Pressed && prevButtons.Y == ButtonState.Released || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
+                    //    {
+                    //        camera.Update(new Vector2(camera.X, (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2))));
+                    //        UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
+                    //        MenuState = MenuStates.MainMenu;
+                    //        startCrawl = false;
+                    //        prevKB = kb;
+                    //    }
+                    //}
 
 
-                    if (camera.Y >= (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2)) && startCrawl)
-                    {
-                        MenuState = MenuStates.MainMenu;
-                        //screenCenter.X = this.Window.ClientBounds.Width / 2;
-                        //screenCenter.Y = this.Window.ClientBounds.Height / 2;
+                    //if (camera.Y >= (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2)) && startCrawl)
+                    //{
+                    //    MenuState = MenuStates.MainMenu;
+                    //    //screenCenter.X = this.Window.ClientBounds.Width / 2;
+                    //    //screenCenter.Y = this.Window.ClientBounds.Height / 2;
 
-                        UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
-                        mainMenuPos = camera.Position;
-                        mainMenuPos.Y = (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2));
-                        //break;
-                    }
+                    //    UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
+                    //    mainMenuPos = camera.Position;
+                    //    mainMenuPos.Y = (UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom + (graphics.PreferredBackBufferHeight / 2));
+                    //    //break;
+                    //}
+                    #endregion
                     break;
                 case MenuStates.MainMenu:
-                    if (count == 0)
-                    {
-                        mainMenuPos = camera.Position;
-                        count++;
-                    }
+                    //if (count == 0)
+                    //{
+                    //    mainMenuPos = camera.Position;
+                    //    count++;
+                    //}
                     UIHelper.SetElementVisibility("MainMenu", true, UIManager.uiElements);
                     UseMouse(kb, crawlSpeed);
                     UpdateCamera(mainMenuPos, 10);
                     UIManager.UpdateButton("MainMenu", crawlSpeed);
 
-                    if(currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released)
+                    if (currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released)
                     {
                         MenuState = MenuStates.StartGame;
                     }
-                    if(prevButtons.B == ButtonState.Pressed && currButtons.B == ButtonState.Released)
+                    if (prevButtons.B == ButtonState.Pressed && currButtons.B == ButtonState.Released)
                     {
                         MenuState = MenuStates.Settings;
                     }
@@ -1751,18 +1805,23 @@ namespace AUTO_Matic
                 case MenuStates.StartGame:
 
                     UIManager.UpdateButton("StartGame", crawlSpeed);
+                    UIHelper.SetButtonState("StartNewGame", false, UIManager.uiElements);
+                    UIHelper.SetElementVisibility("StartNewGame", true, UIManager.uiElements);
                     UseMouse(kb, crawlSpeed);
                     UpdateCamera(mainMenuPos, 28);
-                    if(prevButtons.Start == ButtonState.Pressed && currButtons.Start == ButtonState.Released)
+                    if (prevButtons.Start == ButtonState.Pressed && currButtons.Start == ButtonState.Released)
                     {
                         currScene = Scenes.InGame;
                         StartNewGame();
                     }
                     break;
                 case MenuStates.Settings:
-                    UseMouse(kb, crawlSpeed);
-                    UpdateCamera(new Vector2(graphics.PreferredBackBufferWidth * 1.5f, camera.Y), crawlSpeed);
                     UIHelper.SetElementVisibility("Settings", true, UIManager.uiElements);
+                    UseMouse(kb, crawlSpeed);
+                    UIManager.UpdateButton("Settings", crawlSpeed);
+                    UIManager.UpdateTextBlock("Settings");
+                    //UpdateCamera(new Vector2(graphics.PreferredBackBufferWidth * 1.5f, camera.Y), crawlSpeed);
+                  
                     if (prevButtons.B == ButtonState.Pressed && currButtons.B == ButtonState.Released)
                     {
                         MenuState = MenuStates.MainMenu;
@@ -1869,7 +1928,8 @@ namespace AUTO_Matic
 
         void TitleCrawl(float crawlSpeed)
         {
-            camera.Update(new Vector2(camera.X, camera.Y + crawlSpeed));
+            //camera.Update(new Vector2(camera.X, camera.Y + crawlSpeed));
+            
         }
 
         public float RandFloat(int min, int max)

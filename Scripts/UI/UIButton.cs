@@ -88,8 +88,8 @@ namespace AUTO_Matic
                 if (Pressed)
                     drawBase = new Point(0, Bounds.Height * 2);//Make the pressed image
               
-                spriteBatch.Draw(Texture, Position, new Rectangle(0, 0, Bounds.Width, Bounds.Height), Color.White);
-                spriteBatch.DrawString(Font, Text, Position + TextOffset, Color.Black);
+                spriteBatch.Draw(Texture, Bounds, Color.White);
+                spriteBatch.DrawString(Font, Text, new Vector2(Bounds.X + TextOffset.X, Bounds.Y + TextOffset.Y), Color.Black);
 
             }
             base.Draw(spriteBatch);

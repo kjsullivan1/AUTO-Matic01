@@ -1920,19 +1920,21 @@ namespace AUTO_Matic.SideScroll
             WeaponSlots = new List<WeaponSlot>();
             active = false;
             this.size = size;
-            for(int i = 0; i < 4; i++)
+            for(int i = 0; i < 5; i++)
             {
                 WeaponSlots.Add(new WeaponSlot());
               
             }
             WeaponSlots[0].rect = new Rectangle(player.playerRect.Center.X - size/2, 
-                (int)(player.playerRect.Center.Y - (size * 1.75f)), size, size);
+                (int)(player.playerRect.Center.Y - (size * 3f)), size, size); //Center
             WeaponSlots[1].rect = new Rectangle(WeaponSlots[0].rect.X - (size + 2),
-                WeaponSlots[0].rect.Y, size, size);
+                WeaponSlots[0].rect.Y, size, size);//Left
             WeaponSlots[2].rect = new Rectangle(WeaponSlots[0].rect.Right + 2,
-                WeaponSlots[0].rect.Y, size, size);
+                WeaponSlots[0].rect.Y, size, size);//Right
             WeaponSlots[3].rect = new Rectangle(WeaponSlots[0].rect.X,
-                WeaponSlots[0].rect.Y - (size + 2), size, size);
+                WeaponSlots[0].rect.Y - (size + 2), size, size);//Top
+            WeaponSlots[4].rect = new Rectangle(player.playerRect.Center.X - size / 2,
+                WeaponSlots[0].rect.Bottom + 2, size, size);//Bottom
 
         }
         public void Update(SSPlayer player)

@@ -139,6 +139,14 @@ namespace AUTO_Matic
                 return Rectangle.Empty;
         }
 
+        public static Rectangle GetElementRect(UIWidget uiElement)
+        {
+            if (uiElement is UITextBlock)
+                return ((UITextBlock)uiElement).Rect;
+            else
+                return Rectangle.Empty;
+        }
+
         public static Rectangle GetRectangle(UIWidget uiElement)
         {
             if (uiElement is UIButton)

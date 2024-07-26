@@ -21,6 +21,10 @@ namespace AUTO_Matic
         Vector2 buttonPos;
         Vector2 buttonPos2;
 
+        bool transition = false;
+
+        List<Rectangle> savedPos = new List<Rectangle>();
+
         public void UIButton_Clicked(object sender, UIButtonArgs e)
         {
             string buttonName = e.ID;
@@ -48,7 +52,7 @@ namespace AUTO_Matic
                     break;
                 case "SettingsReturnBtn":
                     game.ChangeMenuState(Game1.MenuStates.MainMenu);
-                  
+                    transition = true;
                    
                     break;
                 case "StartGameReturn":
@@ -68,51 +72,7 @@ namespace AUTO_Matic
                     UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
                     game.StartNewGame();
                     break;
-                //case "Left":
-                //    tanks[playerNumber].TurretRotation += 0.01f;
-                //    break;
-                //case "Right":
-                //    tanks[playerNumber].TurretRotation -= 0.01f;
-                //    break;
-                //case "Up":
-                //    tanks[playerNumber].GunElevation -= 0.01f;
-                //    break;
-                //case "Down":
-                //    tanks[playerNumber].GunElevation += 0.01f;
-                //    break;
-                //case "Fire":
-                //    Vector3 fireAngle = Vector3.Zero;
-                //    float rotation = tanks[playerNumber].TankRotation;
-                //    rotation += tanks[playerNumber].TurretRotation;
-                //    float elevation = tanks[playerNumber].GunElevation;
-
-                    //    Matrix rotMatrix = Matrix.CreateFromYawPitchRoll(rotation, MathHelper.ToRadians(90) + elevation, 0);
-
-                    //    fireAngle = Vector3.Transform(Vector3.Up, rotMatrix);
-                    //    fireAngle.Normalize();
-
-
-                    //    if (tanks[playerNumber] == tanks[0])
-                    //    {
-                    //        ShotManager.FireShot(tanks[playerNumber].Position + new Vector3(0f, 1f, 0f) + fireAngle * 2, fireAngle * shotPower);
-                    //    }
-                    //    else
-                    //    {
-                    //        ShotManager.FireShot(tanks[playerNumber].Position + new Vector3(0f, 1f, 0f) + fireAngle * 2, fireAngle * shotPower2);
-                    //    }
-                    //    break;
-                    //case "PowerUp":
-                    //    if (tanks[playerNumber] == tanks[0])
-                    //        shotPower += .5f;
-                    //    if (tanks[playerNumber] == tanks[1])
-                    //        shotPower2 += .5f;
-                    //    break;
-                    //case "PowerDown":
-                    //    if (tanks[playerNumber] == tanks[0])
-                    //        shotPower -= .5f;
-                    //    if (tanks[playerNumber] == tanks[1])
-                    //        shotPower2 -= .5f;
-                    //    break;
+              
             }
         }
 
@@ -124,6 +84,16 @@ namespace AUTO_Matic
                     //StreamReader sr = new StreamReader(Directory.GetCurrentDirectory() + "/TextFiles/TitleCrawl.txt");
                     string text = "This is the text crawl kjdashgflkjaswhfuksehfjkashdfjashdfkjahsfdkjhaskjdfhsakjfhjksahfjsdhfjkashdfjkhasgjkfhasdkfhasjkdfhjaskhdfjkashdfjkashdfkjashdfkjashdflkjhaskljdfhaskjdhfakjshdfkjashdfjkashdfkjdashfkjashfkjshadjkfhaskjdfhaskjhdfkjashdfkjashfjkahskjfdhaskjdfhaskjdfhkjashfdlkjashlkfsdhfkjashdfkjahlsdfkjhasjdfkhaslkdjfhaskjdfhkalsjdhfkjashdfjkashdfkjashdlfk";
                     UIHelper.SetElementText(uiElements[keyWord], text);
+                    if(UIHelper.GetElementBGRect(uiElements[keyWord]).Bottom > 0)
+                    {
+                        UIHelper.SetElementBGRect(uiElements[keyWord], 
+                            new Rectangle(UIHelper.GetElementBGRect(uiElements[keyWord]).X, (int)(UIHelper.GetElementBGRect(uiElements[keyWord]).Y - 1.5f),
+                            UIHelper.GetElementBGRect(uiElements[keyWord]).Width, UIHelper.GetElementBGRect(uiElements[keyWord]).Height));
+
+                        UIHelper.SetElementRect(uiElements[keyWord],
+                           new Rectangle(UIHelper.GetElementRect(uiElements[keyWord]).X, (int)(UIHelper.GetElementRect(uiElements[keyWord]).Y - 1.5f),
+                           UIHelper.GetElementRect(uiElements[keyWord]).Width, UIHelper.GetElementRect(uiElements[keyWord]).Height));
+                    }
                     break;
                 case "MainMenuTitle":
                     //StreamReader sr1 = new StreamReader(Directory.GetCurrentDirectory() + "/TextFiles/MainMenuTitle.txt");
@@ -144,75 +114,246 @@ namespace AUTO_Matic
             //UIHelper.SetElementText(uiElements["p2Power"], "Power: " + p2Power.ToString("N2"));
         }
 
+        public void SkipCrawl(string keyWord)
+        {
+            uiElements[keyWord].Visible = false;
+        }
+
         public void UpdateButton(string keyWord, float moveSpeed)
         {
             switch(keyWord)
             {
                 case "StartGame":
-                    if(uiElements["StartNewGame"].Position.Y > uiElements["MainMenuPlay"].Position.Y)
+                    if (UIHelper.GetRectangle(uiElements["StartNewGame"]).Y > UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Y)
                     {
-                        uiElements["StartNewGame"].SetY(uiElements["StartNewGame"].Position.Y - moveSpeed);
-                    }
-                    if (uiElements["StartNewGame"].Position.Y == uiElements["MainMenuPlay"].Position.Y)
-                    {
-                        uiElements["StartNewGame"].SetY(uiElements["MainMenuPlay"].Position.Y);
-                        uiElements["MainMenuPlay"].SetY(buttonPos.Y);
-
-                        UIHelper.SetRectangle(uiElements["StartNewGame"], new Rectangle((int)uiElements["StartNewGame"].Position.X, (int)uiElements["StartNewGame"].Position.Y,
+                        UIHelper.SetRectangle(uiElements["StartNewGame"],
+                            new Rectangle(UIHelper.GetRectangle(uiElements["StartNewGame"]).X, (int)(UIHelper.GetRectangle(uiElements["StartNewGame"]).Y - moveSpeed),
                             UIHelper.GetRectangle(uiElements["StartNewGame"]).Width, UIHelper.GetRectangle(uiElements["StartNewGame"]).Height));
 
-                        UIHelper.SetRectangle(uiElements["MainMenuPlay"], new Rectangle((int)uiElements["MainMenuPlay"].Position.X, (int)uiElements["MainMenuPlay"].Position.Y,
-                           UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
+                        //uiElements["StartNewGame"].SetY(uiElements["StartNewGame"].Position.Y - moveSpeed);
+                    }
+                    if (UIHelper.GetRectangle(uiElements["StartNewGame"]).Y <= UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Y)
+                    {
+                        UIHelper.SetRectangle(uiElements["StartNewGame"], new Rectangle((int)uiElements["MainMenuPlay"].Position.X,
+                            (int)uiElements["MainMenuPlay"].Position.Y, UIHelper.GetRectangle(uiElements["StartNewGame"]).Width,
+                            UIHelper.GetRectangle(uiElements["StartNewGame"]).Height));
 
+                        UIHelper.SetRectangle(uiElements["MainMenuPlay"],
+                            new Rectangle((int)uiElements["StartNewGame"].Position.X, (int)uiElements["StartNewGame"].Position.Y, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width,
+                            UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
                     }
 
-                    if (uiElements["LoadGame"].Position.Y > uiElements["MainMenuExit"].Position.Y)
+                    if (UIHelper.GetRectangle(uiElements["LoadGame"]).Y > UIHelper.GetRectangle(uiElements["MainMenuExit"]).Y)
                     {
-                        uiElements["LoadGame"].SetY(uiElements["LoadGame"].Position.Y - moveSpeed);
+                        UIHelper.SetRectangle(uiElements["LoadGame"],
+                            new Rectangle(UIHelper.GetRectangle(uiElements["LoadGame"]).X, (int)(UIHelper.GetRectangle(uiElements["LoadGame"]).Y - moveSpeed),
+                            UIHelper.GetRectangle(uiElements["LoadGame"]).Width, UIHelper.GetRectangle(uiElements["LoadGame"]).Height));
+
+                        //uiElements["LoadGame"].SetY(uiElements["LoadGame"].Position.Y - moveSpeed);
                     }
-                    if (uiElements["LoadGame"].Position.Y == uiElements["MainMenuExit"].Position.Y)
+                    if (UIHelper.GetRectangle(uiElements["LoadGame"]).Y <= UIHelper.GetRectangle(uiElements["MainMenuExit"]).Y)
                     {
-                        uiElements["LoadGame"].SetY(uiElements["MainMenuExit"].Position.Y);
-                        uiElements["MainMenuExit"].SetY(buttonPos2.Y);
+                        UIHelper.SetRectangle(uiElements["LoadGame"], new Rectangle((int)uiElements["MainMenuExit"].Position.X,
+                            (int)uiElements["MainMenuExit"].Position.Y, UIHelper.GetRectangle(uiElements["LoadGame"]).Width,
+                            UIHelper.GetRectangle(uiElements["LoadGame"]).Height));
 
-                        UIHelper.SetRectangle(uiElements["LoadGame"], new Rectangle((int)uiElements["LoadGame"].Position.X, (int)uiElements["LoadGame"].Position.Y,
-                           UIHelper.GetRectangle(uiElements["LoadGame"]).Width, UIHelper.GetRectangle(uiElements["LoadGame"]).Height));
+                        UIHelper.SetRectangle(uiElements["MainMenuExit"],
+                            new Rectangle((int)uiElements["LoadGame"].Position.X, (int)uiElements["LoadGame"].Position.Y, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Width,
+                            UIHelper.GetRectangle(uiElements["MainMenuExit"]).Height));
 
-                        UIHelper.SetRectangle(uiElements["MainMenuExit"], new Rectangle((int)uiElements["MainMenuExit"].Position.X, (int)uiElements["MainMenuExit"].Position.Y,
-                          UIHelper.GetRectangle(uiElements["MainMenuExit"]).Width, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Height));
+                      
+
                     }
                     break;
                 case "MainMenu":
-                    if (uiElements["MainMenuPlay"].Position.Y > uiElements["StartNewGame"].Position.Y)
+                    //Move Main Menu elements back to center
+                    if(UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).X < ((int)dims.X / 2) - (450 / 2))
                     {
-                        uiElements["MainMenuPlay"].SetY(uiElements["MainMenuPlay"].Position.Y - moveSpeed);
+                        //Move all the Main menu elements
+
+                        UIHelper.SetElementBGRect(uiElements["MainMenuTitle"],
+                          new Rectangle((int)(UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).X + moveSpeed), UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Y,
+                          UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Width, UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Height));
+
+                        UIHelper.SetElementRect(uiElements["MainMenuTitle"],
+                          new Rectangle((int)(UIHelper.GetElementRect(uiElements["MainMenuTitle"]).X + moveSpeed), UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Y,
+                          UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Width, UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Height));
+
+
+                        UIHelper.SetRectangle(uiElements["MainMenuPlay"], new Rectangle((int)(UIHelper.GetRectangle(uiElements["MainMenuPlay"]).X + moveSpeed),
+                            UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Y, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["MainMenuExit"], new Rectangle((int)(UIHelper.GetRectangle(uiElements["MainMenuExit"]).X + moveSpeed),
+                           UIHelper.GetRectangle(uiElements["MainMenuExit"]).Y, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Width, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["MainMenuSetting"], new Rectangle((int)(UIHelper.GetRectangle(uiElements["MainMenuSetting"]).X + moveSpeed),
+                           UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Y, UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Width, UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Height));
+
+                        if (UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).X > ((int)dims.X / 2) - (450 / 2))
+                        {
+                            UIHelper.SetElementBGRect(uiElements["MainMenuTitle"],
+                          new Rectangle(((int)dims.X / 2) - (450 / 2), UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Y,
+                          UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Width, UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Height));
+
+                            UIHelper.SetElementRect(uiElements["MainMenuTitle"],
+                        new Rectangle(((int)dims.X / 2) - (450 / 2), UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Y,
+                        UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Width, UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Height));
+
+
+                            UIHelper.SetRectangle(uiElements["MainMenuPlay"], new Rectangle(((int)dims.X / 2) - (200 / 2),
+                                UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Y, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
+
+                            UIHelper.SetRectangle(uiElements["MainMenuExit"], new Rectangle(((int)dims.X / 2) - (200 / 2),
+                               UIHelper.GetRectangle(uiElements["MainMenuExit"]).Y, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Width, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Height));
+
+                            UIHelper.SetRectangle(uiElements["MainMenuSetting"], new Rectangle(((int)dims.X / 2) - (200 / 2),
+                               UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Y, UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Width, UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Height));
+
+                            transition = false;
+                        }
                     }
-                    if(uiElements["MainMenuPlay"].Position.Y == uiElements["StartNewGame"].Position.Y)
+
+                    //All settings Move back
+                    if (UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).X <
+                        dims.X * 1.5f)
                     {
-                        uiElements["MainMenuPlay"].SetY(uiElements["StartNewGame"].Position.Y);
-                        uiElements["StartNewGame"].SetY(buttonPos.Y);
+                        //UIHelper.SetElementBGRect(uiElements["SettingsMenuTitle"], new Rectangle((int)(UIHelper.GetElementBGRect(uiElements["SettingsMenuTitle"]).X + moveSpeed),
+                        //    UIHelper.GetElementBGRect(uiElements["SettingsMenuTitle"]).Y, UIHelper.GetElementBGRect(uiElements["SettingsMenuTitle"]).Width,
+                        //    UIHelper.GetElementBGRect(uiElements["SettingsMenuTitle"]).Height));
 
-                        UIHelper.SetRectangle(uiElements["StartNewGame"], new Rectangle((int)uiElements["StartNewGame"].Position.X, (int)uiElements["StartNewGame"].Position.Y,
-                          UIHelper.GetRectangle(uiElements["StartNewGame"]).Width, UIHelper.GetRectangle(uiElements["StartNewGame"]).Height));
+                        UIHelper.SetElementRect(uiElements["SettingsMenuTitle"], new Rectangle((int)(UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).X + moveSpeed),
+                              UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Y, UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Width,
+                              UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Height));
 
-                        UIHelper.SetRectangle(uiElements["MainMenuPlay"], new Rectangle((int)uiElements["MainMenuPlay"].Position.X, (int)uiElements["MainMenuPlay"].Position.Y,
-                           UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
+                        UIHelper.SetElementBGRect(uiElements["SettingsButtonBox"], new Rectangle((int)(UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).X + moveSpeed),
+                             UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Y, UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Width,
+                             UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Height));
+
+                        UIHelper.SetElementRect(uiElements["SettingsButtonBox"], new Rectangle((int)(UIHelper.GetElementRect(uiElements["SettingsButtonBox"]).X + moveSpeed),
+                              UIHelper.GetElementRect(uiElements["SettingsButtonBox"]).Y, UIHelper.GetElementRect(uiElements["SettingsButtonBox"]).Width,
+                              UIHelper.GetElementRect(uiElements["SettingsButtonBox"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["SettingsReturnBtn"], new Rectangle((int)(UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).X + moveSpeed),
+                            UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Y, UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Width,
+                            (UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Height)));
                     }
 
-                    if (uiElements["MainMenuExit"].Position.Y > uiElements["LoadGame"].Position.Y)
+                        //Start/Load/Exit/NewGame buttons
+                    if (UIHelper.GetRectangle(uiElements["StartNewGame"]).Y < UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Y)
                     {
-                        uiElements["MainMenuExit"].SetY(uiElements["MainMenuExit"].Position.Y - moveSpeed);
+                        UIHelper.SetRectangle(uiElements["MainMenuPlay"],
+                            new Rectangle(UIHelper.GetRectangle(uiElements["MainMenuPlay"]).X, (int)(UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Y - moveSpeed),
+                            UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
+
+                        //uiElements["StartNewGame"].SetY(uiElements["StartNewGame"].Position.Y - moveSpeed);
                     }
-                    if (uiElements["MainMenuExit"].Position.Y == uiElements["LoadGame"].Position.Y)
+                    if (UIHelper.GetRectangle(uiElements["StartNewGame"]).Y >= UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Y && !transition)
                     {
-                        uiElements["MainMenuExit"].SetY(uiElements["LoadGame"].Position.Y);
-                        uiElements["LoadGame"].SetY(buttonPos2.Y);
+                        UIHelper.SetRectangle(uiElements["MainMenuPlay"], new Rectangle((int)uiElements["MainMenuPlay"].Position.X,
+                            (int)uiElements["MainMenuPlay"].Position.Y, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width,
+                            UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
 
-                        UIHelper.SetRectangle(uiElements["LoadGame"], new Rectangle((int)uiElements["LoadGame"].Position.X, (int)uiElements["LoadGame"].Position.Y,
-                           UIHelper.GetRectangle(uiElements["LoadGame"]).Width, UIHelper.GetRectangle(uiElements["LoadGame"]).Height));
+                        UIHelper.SetRectangle(uiElements["StartNewGame"],
+                            new Rectangle((int)uiElements["StartNewGame"].Position.X, (int)uiElements["StartNewGame"].Position.Y, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width,
+                            UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
+                    }
 
-                        UIHelper.SetRectangle(uiElements["MainMenuExit"], new Rectangle((int)uiElements["MainMenuExit"].Position.X, (int)uiElements["MainMenuExit"].Position.Y,
-                          UIHelper.GetRectangle(uiElements["MainMenuExit"]).Width, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Height));
+                    if (UIHelper.GetRectangle(uiElements["LoadGame"]).Y < UIHelper.GetRectangle(uiElements["MainMenuExit"]).Y)
+                    {
+                        UIHelper.SetRectangle(uiElements["MainMenuExit"],
+                            new Rectangle(UIHelper.GetRectangle(uiElements["MainMenuExit"]).X, (int)(UIHelper.GetRectangle(uiElements["MainMenuExit"]).Y - moveSpeed),
+                            UIHelper.GetRectangle(uiElements["LoadGame"]).Width, UIHelper.GetRectangle(uiElements["LoadGame"]).Height));
+
+                        //uiElements["LoadGame"].SetY(uiElements["LoadGame"].Position.Y - moveSpeed);
+                    }
+                    if (UIHelper.GetRectangle(uiElements["LoadGame"]).Y >= UIHelper.GetRectangle(uiElements["MainMenuExit"]).Y && !transition)
+                    {
+                        UIHelper.SetRectangle(uiElements["MainMenuExit"], new Rectangle((int)uiElements["MainMenuExit"].Position.X,
+                            (int)uiElements["MainMenuExit"].Position.Y, UIHelper.GetRectangle(uiElements["LoadGame"]).Width,
+                            UIHelper.GetRectangle(uiElements["LoadGame"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["LoadGame"],
+                            new Rectangle((int)uiElements["LoadGame"].Position.X, (int)uiElements["LoadGame"].Position.Y, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Width,
+                            UIHelper.GetRectangle(uiElements["MainMenuExit"]).Height));
+
+
+
+                    }
+                    break;
+                case "Settings":
+                    //Move main menu elements to the left
+                    if(UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Right > -100)
+                    {
+                        //Move all Main menu elements
+
+                        UIHelper.SetElementBGRect(uiElements["MainMenuTitle"],
+                            new Rectangle((int)(UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).X - moveSpeed), UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Y,
+                            UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Width, UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Height));
+
+                        UIHelper.SetElementRect(uiElements["MainMenuTitle"],
+                          new Rectangle((int)(UIHelper.GetElementRect(uiElements["MainMenuTitle"]).X - moveSpeed), UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Y,
+                          UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Width, UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Height));
+
+
+                        UIHelper.SetRectangle(uiElements["MainMenuPlay"], new Rectangle((int)(UIHelper.GetRectangle(uiElements["MainMenuPlay"]).X - moveSpeed),
+                            UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Y, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["MainMenuExit"], new Rectangle((int)(UIHelper.GetRectangle(uiElements["MainMenuExit"]).X - moveSpeed),
+                           UIHelper.GetRectangle(uiElements["MainMenuExit"]).Y, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Width, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["MainMenuSetting"], new Rectangle((int)(UIHelper.GetRectangle(uiElements["MainMenuSetting"]).X - moveSpeed),
+                           UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Y, UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Width, UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Height));
+
+                    }
+
+                    if(UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).X > 
+                        (int)((dims.X/2) -(UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Width/2)))
+                    {
+                        UIHelper.SetElementBGRect(uiElements["SettingsMenuTitle"], new Rectangle((int)(UIHelper.GetElementBGRect(uiElements["SettingsMenuTitle"]).X - moveSpeed),
+                            UIHelper.GetElementBGRect(uiElements["SettingsMenuTitle"]).Y, UIHelper.GetElementBGRect(uiElements["SettingsMenuTitle"]).Width,
+                            UIHelper.GetElementBGRect(uiElements["SettingsMenuTitle"]).Height));
+
+                        UIHelper.SetElementRect(uiElements["SettingsMenuTitle"], new Rectangle((int)(UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).X - moveSpeed),
+                              UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Y, UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Width,
+                              UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Height));
+
+                        UIHelper.SetElementBGRect(uiElements["SettingsButtonBox"], new Rectangle((int)(UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).X - moveSpeed),
+                             UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Y, UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Width,
+                             UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Height));
+
+                        UIHelper.SetElementRect(uiElements["SettingsButtonBox"], new Rectangle((int)(UIHelper.GetElementRect(uiElements["SettingsButtonBox"]).X - moveSpeed),
+                              UIHelper.GetElementRect(uiElements["SettingsButtonBox"]).Y, UIHelper.GetElementRect(uiElements["SettingsButtonBox"]).Width,
+                              UIHelper.GetElementRect(uiElements["SettingsButtonBox"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["SettingsReturnBtn"], new Rectangle((int)(UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).X - moveSpeed),
+                            UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Y, UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Width,
+                            (UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Height)));
+
+                        if (UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).X <
+                       (int)((dims.X / 2) - (UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Width / 2)))
+                        {
+                           // UIHelper.SetElementRect(uiElements["SettingsMenuTitle"], new Rectangle((int)((dims.X / 2) - (UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Width / 2)),
+                           //UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Y, UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Width,
+                           //UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Height));
+
+                            UIHelper.SetElementRect(uiElements["SettingsMenuTitle"], new Rectangle((int)((dims.X / 2) - (UIHelper.GetElementBGRect(uiElements["SettingsMenuTitle"]).Width / 2)),
+                                  UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Y, UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Width,
+                                  UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Height));
+
+                            UIHelper.SetElementBGRect(uiElements["SettingsButtonBox"], new Rectangle((int)(((dims.X /2))) - (525 / 2),
+                       UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Y, UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Width,
+                       UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Height));
+
+                            UIHelper.SetElementRect(uiElements["SettingsButtonBox"], new Rectangle((int)(((dims.X /2))) - (525 / 2),
+                                  UIHelper.GetElementRect(uiElements["SettingsButtonBox"]).Y, UIHelper.GetElementRect(uiElements["SettingsButtonBox"]).Width,
+                                  UIHelper.GetElementRect(uiElements["SettingsButtonBox"]).Height));
+
+                            UIHelper.SetRectangle(uiElements["SettingsReturnBtn"], new Rectangle(UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Right - 65,
+                             UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Y, UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Width,
+                             (UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Height)));
+
+
+                        }
                     }
                     break;
             }
@@ -225,19 +366,22 @@ namespace AUTO_Matic
             uiElements.Clear();
             this.dims = dims;
             this.game = game;
+
             //Background
             uiElements.Add("MainMenuBackground", UIHelper.CreateTextblock("MainMenuBackground", "", 0, 0));
-            UIHelper.SetElementBGRect(uiElements["MainMenuBackground"], new Rectangle(new Point((int)uiElements["MainMenuBackground"].Position.X, (int)uiElements["MainMenuBackground"].Position.Y), 
-                new Point((int)(dims.X * 2), (int)(dims.Y * 2.75f))));
+            UIHelper.SetElementBGRect(uiElements["MainMenuBackground"], new Rectangle(new Point((int)uiElements["MainMenuBackground"].Position.X, (int)uiElements["MainMenuBackground"].Position.Y),
+                new Point(768, 432)));
 
             uiElements.Add("TitleCrawl", UIHelper.CreateTextblock("TitleCrawl", "This is the title crawl", ((int)dims.X / 2) - (550/2), (int)(dims.Y /2))); //Replace 550 with UIHelper.ScrollBG.Width
             UIHelper.SetElementRect(uiElements["TitleCrawl"], new Rectangle(new Point((int)uiElements["TitleCrawl"].Position.X, (int)uiElements["TitleCrawl"].Position.Y), new Point(80, 40)));
             UIHelper.SetElementBGRect(uiElements["TitleCrawl"], new Rectangle((int)uiElements["TitleCrawl"].Position.X, (int)uiElements["TitleCrawl"].Position.Y, 550, (int)(dims.Y + (dims.Y/4))));
 
+         
+
             ///Main Menu elements
             //Title
             uiElements.Add("MainMenuTitle", UIHelper.CreateTextblock("MainMenuTitle", "AUTO-Matic", ((int)dims.X / 2) - (450 / 2), //450 with UIHelper.MenuTitle.Width
-                UIHelper.GetElementBGRect(uiElements["TitleCrawl"]).Height + 800));
+                ((int)dims.Y /2) - (int)(200)));
             UIHelper.SetElementRect(uiElements["MainMenuTitle"], new Rectangle(new Point((int)(uiElements["MainMenuTitle"].Position.X + 180), (int)uiElements["MainMenuTitle"].Position.Y + 90), new Point(80, 40)));
             UIHelper.SetElementBGRect(uiElements["MainMenuTitle"], new Rectangle((int)uiElements["MainMenuTitle"].Position.X, (int)uiElements["MainMenuTitle"].Position.Y, 450, 200));
             //Play
