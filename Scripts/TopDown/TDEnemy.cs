@@ -41,6 +41,58 @@ namespace AUTO_Matic.Scripts.TopDown
         }
 
 
+        #region Animations
+        AnimationManager animManager;
+        //Texture2D texture;
+        Point FrameSize;//Size of frame
+        Point CurrFrame;//Location of currFram on the sheet
+        Point SheetSize;//num of frames.xy
+        int fpms;
+        public void ChangeAnimation()
+        {
+            //switch (animState)
+            //{
+            //    case AnimationStates.Idle:
+            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerIdle");
+            //        FrameSize = new Point(64, 64);
+            //        CurrFrame = new Point(0, 0);
+            //        SheetSize = new Point(6, 1);
+            //        fpms = 120;
+            //        break;
+            //    case AnimationStates.Walking:
+            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerWalk");
+            //        FrameSize = new Point(64, 64);
+            //        CurrFrame = new Point(0, 0);
+            //        SheetSize = new Point(8, 1);
+            //        fpms = 120;
+            //        break;
+            //    case AnimationStates.Shooting:
+            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerShoot");
+            //        FrameSize = new Point(64, 64);
+            //        CurrFrame = new Point(0, 0);
+            //        SheetSize = new Point(4, 1);
+            //        fpms = 95;
+            //        break;
+            //}
+
+            //bool isRight = true, isLeft = false, isUp = false, isDown = false;
+            //if (animManager != null)
+            //{
+            //    isRight = animManager.isRight;
+            //    isLeft = animManager.isLeft;
+            //    isUp = animManager.isUp;
+            //    isDown = animManager.isDown;
+            //}
+
+            //animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, Position);
+
+            //animManager.isRight = isRight;
+            //animManager.isLeft = isLeft;
+            //animManager.isUp = isUp;
+            //animManager.isDown = isDown;
+        }
+        #endregion
+
         public bool strafeUp;
         public bool strafeDown;
         public bool strafeLeft;
@@ -127,7 +179,7 @@ namespace AUTO_Matic.Scripts.TopDown
         public TDEnemy(ContentManager Content, Vector2 spawnPos, TopDownMap map, int[,] mapDims, GraphicsDevice graphics)
         {
             content = Content;
-            texture = Content.Load<Texture2D>("TopDown/MapTiles/Tile11");
+            texture = Content.Load<Texture2D>("TopDown/Animations/TankTopDown");
             this.map = map;
             this.mapDims = mapDims;
             position = spawnPos;
@@ -136,7 +188,7 @@ namespace AUTO_Matic.Scripts.TopDown
             this.graphics = graphics;
             line = new Texture2D(graphics, 1, 1, false, SurfaceFormat.Color);
             line.SetData(new[] { Color.Crimson });
-            
+            animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, new Vector2(rectangle.X, rectangle.Y));
 
         }
 
@@ -470,6 +522,8 @@ namespace AUTO_Matic.Scripts.TopDown
                                 position.Y -= moveSpeed;
                                 blockedBottom = false;
                                 stopper = true;
+                                animManager.isUp = true;
+                                animManager.isDown = false;
                             }
                             else if (distToTravel.Y >= 0)
                             {
@@ -504,6 +558,8 @@ namespace AUTO_Matic.Scripts.TopDown
                                 position.Y += moveSpeed;
                                 blockedTop = false;
                                 stopper = true;
+                                animManager.isDown = true;
+                                animManager.isUp = false;
                             }
                             else if (distToTravel.Y <= 0)
                             {
@@ -558,6 +614,8 @@ namespace AUTO_Matic.Scripts.TopDown
                                 distToTravel.X += moveSpeed;
                                 position.X -= moveSpeed;
                                 blockedRight = false;
+                                animManager.isLeft = true;
+                                animManager.isRight = false;
                             }
                             else if (distToTravel.X >= 0)
                             {
@@ -600,6 +658,8 @@ namespace AUTO_Matic.Scripts.TopDown
                                 distToTravel.X -= moveSpeed;
                                 position.X += moveSpeed;
                                 blockedLeft = false;
+                                animManager.isRight = true;
+                                animManager.isLeft = false;
                             }
                             else if (distToTravel.X <= 0)
                             {
@@ -793,6 +853,8 @@ namespace AUTO_Matic.Scripts.TopDown
                             else if (!blockedRight)
                             {
                                 position.X += moveSpeed;
+                                animManager.isRight = true;
+                                animManager.isLeft = false;
                                 if (distToTravel.X < 0)
                                 {
                                     distToTravel.X = 0;
@@ -928,6 +990,8 @@ namespace AUTO_Matic.Scripts.TopDown
                             else if (!blockedLeft)
                             {
                                 position.X -= moveSpeed;
+                                animManager.isLeft = true;
+                                animManager.isRight = false;
                                 if (distToTravel.X > 0)
                                 {
                                     distToTravel.X = 0;
@@ -1052,6 +1116,8 @@ namespace AUTO_Matic.Scripts.TopDown
                             else if (!blockedTop)
                             {
                                 position.Y -= moveSpeed;
+                                animManager.isUp = true;
+                                animManager.isDown = false;
                                 if (distToTravel.Y > 0)
                                 {
                                     distToTravel.Y = 0;
@@ -1192,6 +1258,8 @@ namespace AUTO_Matic.Scripts.TopDown
                             else if (!blockedBottom)
                             {
                                 position.Y += moveSpeed;
+                                animManager.isDown = true;
+                                animManager.isUp = false;
                                 if (distToTravel.Y < 0)
                                 {
                                     distToTravel.Y = 0;
@@ -3577,7 +3645,17 @@ namespace AUTO_Matic.Scripts.TopDown
         {
 
            //spriteBatch.Draw(line, destinationRectangle: destRect, color: Color.White,rotation: angleOfLine);
-            spriteBatch.Draw(texture, rectangle, Color.White);
+
+            if(animManager.isUp)
+            {
+                spriteBatch.Draw(texture, destinationRectangle: rectangle,color: Color.White, effects: SpriteEffects.FlipVertically);
+            }
+            else
+            {
+                spriteBatch.Draw(texture, rectangle, Color.White);
+            }
+
+        
             foreach(Bullet bullet in bullets)
             {
                 bullet.Draw(spriteBatch);

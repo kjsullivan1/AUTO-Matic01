@@ -16,7 +16,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
     class FlyingEnemy
     {
         enum AnimationStates { Walking, Idle, Death, Jump, Shoot }
-        AnimationStates animState = AnimationStates.Idle;
+        AnimationStates animState = AnimationStates.Walking;
 
         public enum EnemyStates { Idle, GoTo, Attacking, Jumping, Launch }
         public EnemyStates enemyState = EnemyStates.Idle;
@@ -125,6 +125,8 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         #region Animations
         AnimationManager animManager;
         Texture2D texture;
+        Texture2D collisionTexture;
+        ContentManager content;
         Point FrameSize;//Size of frame
         Point CurrFrame;//Location of currFram on the sheet
         Point SheetSize;//num of frames.xy
@@ -141,7 +143,19 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 //    fpms = 120;
                 //    break;
                 case AnimationStates.Walking:
+                    texture = content.Load<Texture2D>("SideScroll/Animations/DroneEnemy");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(0, 0);
+                    SheetSize = new Point(2, 1);
+                    fpms = 120;
+                    break;
                 default:
+                    texture = content.Load<Texture2D>("SideScroll/Animations/DroneEnemy");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(0, 0);
+                    SheetSize = new Point(2, 1);
+                    fpms = 120;
+                
                     //if (isShoot)
                     //{
                     //    texture = content.Load<Texture2D>("SideScroll/Animations/RangedEnemyWalk");
@@ -177,12 +191,13 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 isDown = animManager.isDown;
             }
 
-            animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, pos);
+            animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, new Vector2(enemyRect.X, enemyRect.Y));
 
             animManager.isRight = isRight;
             animManager.isLeft = isLeft;
             animManager.isUp = isUp;
             animManager.isDown = isDown;
+            animManager.StopLoop();
         }
         #endregion
 
@@ -191,11 +206,15 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             this.visionLength = visionLength;
             pos = position;
             enemyRect = new Rectangle((int)position.X, (int)position.Y, pixelSize, pixelSize);
-            texture = contentManager.Load<Texture2D>(@"Textures\white");
+            texture = contentManager.Load<Texture2D>(@"SideScroll/Animations/DroneEnemy");
+            collisionTexture = contentManager.Load<Texture2D>(@"Textures\Button");
             visionTexture = contentManager.Load<Texture2D>(@"Textures\Red");
             CreateVision();
             prevState = enemyState;
-
+            content = contentManager;
+            animState = AnimationStates.Walking;
+            animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, new Vector2(enemyRect.X, enemyRect.Y));
+            ChangeAnimation();
         }
 
         public void Update(GameTime gameTime, Vector2 gravity, SSPlayer player, SideTileMap map, Rectangle currBounds)
@@ -251,7 +270,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                             groundRect = new Rectangle(groundRect.X, ground.Rectangle.Y - groundRect.Height, groundRect.Width, groundRect.Height);
                             collisionRect = groundRect;
                             collisionRect.Width /= 2;
-                            collisionRect.X += collisionRect.Width / 2;
+                            //collisionRect.X += collisionRect.Width / 2;
                           groundRect = new Rectangle(enemyRect.X, enemyRect.Y + groundRect.Height / 2,
                                 groundRect.Width, groundRect.Height);
                             break;
@@ -265,7 +284,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                             groundRect = new Rectangle(groundRect.X, platform.Rectangle.Y - groundRect.Height, groundRect.Width, groundRect.Height);
                             collisionRect = groundRect;
                             collisionRect.Width /= 2;
-                            collisionRect.X += collisionRect.Width / 2;
+                            //collisionRect.X += collisionRect.Width / 2;
                             groundRect = new Rectangle(enemyRect.X , enemyRect.Y + groundRect.Height / 2,
                                 groundRect.Width, groundRect.Height);
                             break;
@@ -297,7 +316,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                             groundRect = new Rectangle(groundRect.X, ground.Rectangle.Y - groundRect.Height, groundRect.Width, groundRect.Height);
                             collisionRect = groundRect;
                             collisionRect.Width /= 2;
-                            collisionRect.X += collisionRect.Width / 2;
+                            //collisionRect.X += collisionRect.Width / 2;
                             groundRect = new Rectangle(enemyRect.X, enemyRect.Y + groundRect.Height / 2,
                                 groundRect.Width, groundRect.Height);
                             break;
@@ -316,7 +335,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                             groundRect = new Rectangle(groundRect.X, platform.Rectangle.Y - groundRect.Height, groundRect.Width, groundRect.Height);
                             collisionRect = groundRect;
                             collisionRect.Width /= 2;
-                            collisionRect.X += collisionRect.Width / 2;
+                            //collisionRect.X += collisionRect.Width / 2;
                             groundRect = new Rectangle(enemyRect.X, enemyRect.Y + groundRect.Height / 2,
                                  groundRect.Width, groundRect.Height);
                             break;
@@ -473,6 +492,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             }
 
             enemyRect = new Rectangle((int)pos.X, (int)pos.Y, pixelSize, pixelSize);
+            animManager.Update(gameTime, new Vector2(enemyRect.X, enemyRect.Y));
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -480,9 +500,10 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
 
             //tRect.X += tRect.Width/5;
-            spriteBatch.Draw(texture, enemyRect, Color.White);
-            spriteBatch.Draw(texture, groundRect, Color.White);
-            spriteBatch.Draw(texture, collisionRect, Color.Blue);
+            animManager.Draw(spriteBatch, Color.White);
+            //spriteBatch.Draw(texture, enemyRect, Color.White);
+            //spriteBatch.Draw(texture, groundRect, Color.White);
+            spriteBatch.Draw(collisionTexture, collisionRect, Color.Blue);
             //spriteBatch.Draw(texture, HitBox, Color.BlueViolet);
             //foreach (Bullet bullet in bullets)
             //{

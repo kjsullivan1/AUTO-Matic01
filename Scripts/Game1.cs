@@ -37,7 +37,7 @@ namespace AUTO_Matic
         Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.TitleScreen;
+        public Scenes currScene = Scenes.InGame;
 
         public enum GameStates { SideScroll, TopDown, Paused, FinalBoss}
         public GameStates GameState = GameStates.SideScroll;
@@ -203,6 +203,12 @@ namespace AUTO_Matic
             UIHelper.CrawlBgTxture = Content.Load<Texture2D>(@"Textures\TitleCrawlBG");
             UIHelper.MainMenuBG = Content.Load<Texture2D>(@"Textures\TitleScreen");
             UIHelper.TutorialTexture = Content.Load<Texture2D>(@"Textures\Textbox");
+            UIHelper.MenuTitle = Content.Load<Texture2D>(@"Textures\Title");
+
+            UIHelper.PlayGameBtn = Content.Load<Texture2D>(@"Textures\UI\PlayButton");
+            UIHelper.ExitGameBtn = Content.Load<Texture2D>(@"Textures\UI\ExitButton");
+            UIHelper.ReturnBtn = Content.Load<Texture2D>(@"Textures\UI\BackButton");
+            UIHelper.SettingsBtn = Content.Load<Texture2D>(@"Textures\UI\SettingsButton");
 
             UIHelper.Bounds = new Rectangle(new Point((int)camera.Position.X, (int)camera.Position.Y), new Point(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
             UIHelper.CrawlFont = Content.Load<SpriteFont>(@"Fonts\CrawlFont");
@@ -516,7 +522,7 @@ namespace AUTO_Matic
             graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
 
             //graphics.HardwareModeSwitch = false;
-            graphics.IsFullScreen = true;
+            graphics.IsFullScreen = false;
             graphics.ApplyChanges();
             //maxShootRate = shootRate;
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2));

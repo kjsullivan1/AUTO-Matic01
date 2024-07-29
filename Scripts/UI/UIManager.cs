@@ -97,7 +97,7 @@ namespace AUTO_Matic
                     break;
                 case "MainMenuTitle":
                     //StreamReader sr1 = new StreamReader(Directory.GetCurrentDirectory() + "/TextFiles/MainMenuTitle.txt");
-                    string text1 = "AUTO-Matic";
+                    string text1 = "";
                     UIHelper.SetElementText(uiElements[keyWord], text1);
                     break;
 
@@ -167,7 +167,7 @@ namespace AUTO_Matic
                     break;
                 case "MainMenu":
                     //Move Main Menu elements back to center
-                    if(UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).X < ((int)dims.X / 2) - (450 / 2))
+                    if(UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).X < ((int)dims.X / 2) - (UIHelper.MenuTitle.Width / 2))
                     {
                         //Move all the Main menu elements
 
@@ -189,7 +189,7 @@ namespace AUTO_Matic
                         UIHelper.SetRectangle(uiElements["MainMenuSetting"], new Rectangle((int)(UIHelper.GetRectangle(uiElements["MainMenuSetting"]).X + moveSpeed),
                            UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Y, UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Width, UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Height));
 
-                        if (UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).X > ((int)dims.X / 2) - (450 / 2))
+                        if (UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).X > ((int)dims.X / 2) - (UIHelper.MenuTitle.Width / 2))
                         {
                             UIHelper.SetElementBGRect(uiElements["MainMenuTitle"],
                           new Rectangle(((int)dims.X / 2) - (450 / 2), UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Y,
@@ -372,7 +372,7 @@ namespace AUTO_Matic
             UIHelper.SetElementBGRect(uiElements["MainMenuBackground"], new Rectangle(new Point((int)uiElements["MainMenuBackground"].Position.X, (int)uiElements["MainMenuBackground"].Position.Y),
                 new Point(768, 432)));
 
-            uiElements.Add("TitleCrawl", UIHelper.CreateTextblock("TitleCrawl", "This is the title crawl", ((int)dims.X / 2) - (550/2), (int)(dims.Y /2))); //Replace 550 with UIHelper.ScrollBG.Width
+            uiElements.Add("TitleCrawl", UIHelper.CreateTextblock("TitleCrawl", "This is t he title crawl", ((int)dims.X / 2) - (550/2), (int)(dims.Y /2))); //Replace 550 with UIHelper.ScrollBG.Width
             UIHelper.SetElementRect(uiElements["TitleCrawl"], new Rectangle(new Point((int)uiElements["TitleCrawl"].Position.X, (int)uiElements["TitleCrawl"].Position.Y), new Point(80, 40)));
             UIHelper.SetElementBGRect(uiElements["TitleCrawl"], new Rectangle((int)uiElements["TitleCrawl"].Position.X, (int)uiElements["TitleCrawl"].Position.Y, 550, (int)(dims.Y + (dims.Y/4))));
 
@@ -380,10 +380,10 @@ namespace AUTO_Matic
 
             ///Main Menu elements
             //Title
-            uiElements.Add("MainMenuTitle", UIHelper.CreateTextblock("MainMenuTitle", "AUTO-Matic", ((int)dims.X / 2) - (450 / 2), //450 with UIHelper.MenuTitle.Width
-                ((int)dims.Y /2) - (int)(200)));
+            uiElements.Add("MainMenuTitle", UIHelper.CreateTextblock("MainMenuTitle", "", ((int)dims.X / 2) - (UIHelper.MenuTitle.Width / 2), //450 with UIHelper.MenuTitle.Width
+                ((int)dims.Y /2) - (int)(UIHelper.MenuTitle.Height + 50)));
             UIHelper.SetElementRect(uiElements["MainMenuTitle"], new Rectangle(new Point((int)(uiElements["MainMenuTitle"].Position.X + 180), (int)uiElements["MainMenuTitle"].Position.Y + 90), new Point(80, 40)));
-            UIHelper.SetElementBGRect(uiElements["MainMenuTitle"], new Rectangle((int)uiElements["MainMenuTitle"].Position.X, (int)uiElements["MainMenuTitle"].Position.Y, 450, 200));
+            UIHelper.SetElementBGRect(uiElements["MainMenuTitle"], new Rectangle((int)uiElements["MainMenuTitle"].Position.X, (int)uiElements["MainMenuTitle"].Position.Y, UIHelper.MenuTitle.Width, UIHelper.MenuTitle.Height));
             //Play
             uiElements.Add("MainMenuPlay", UIHelper.CreateButton("MainMenuPlay", "Play", ((int)dims.X / 2) - (200 / 2), //Multiplying the width * 2 in the Draw Method
                 UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Bottom + 20));
@@ -399,7 +399,7 @@ namespace AUTO_Matic
             //Title
             string titleTxt = "Settings";
             uiElements.Add("SettingsMenuTitle", UIHelper.CreateTextblock("SettingsMenuTitle", titleTxt, (int)(((dims.X * 1.5f)) - (titleTxt.Length * 11.0f)), // dividing the txt * 11 / 2 makes in longer?
-                UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Top - 30 ));
+                UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Top - 100 ));
             UIHelper.SetElementRect(uiElements["SettingsMenuTitle"], new Rectangle(uiElements["SettingsMenuTitle"].Position.ToPoint(), new Point(titleTxt.Length, 20)));
 
             //Settings Box

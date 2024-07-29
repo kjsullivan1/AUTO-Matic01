@@ -1402,17 +1402,17 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), SideWall[i], Color.Black);
             }
 
-            spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), bossRect, Color.White);
+            spriteBatch.Draw(content.Load<Texture2D>("SideScroll/Animations/FinalBoss/MonoBoss"), bossRect, Color.White);
 
             foreach(ShootingLocs loc in shootLocs)
             {
                 if(loc.type == chosenWeapon)
                 {
-                    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), loc.rect, Color.Blue);
+                    spriteBatch.Draw(content.Load<Texture2D>("SideScroll/Animations/FinalBoss/BossGun"), loc.rect, Color.Blue);
                 }
                 else
                 {
-                    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), loc.rect, Color.White);
+                    spriteBatch.Draw(content.Load<Texture2D>("SideScroll/Animations/FinalBoss/BossGun"), loc.rect, Color.White);
                 }
           
             }

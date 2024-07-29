@@ -12,21 +12,63 @@ namespace AUTO_Matic
     static class UIHelper
     {
         public static Texture2D ButtonTexture;
+        public static Texture2D PlayGameBtn;
+        public static Texture2D ExitGameBtn;
+        public static Texture2D StartGameBtn;
+        public static Texture2D LoadGameBtn;
+        public static Texture2D ReturnBtn;
+        public static Texture2D SettingsBtn;
+     
+
         public static SpriteFont ButtonFont;
         public static SpriteFont CrawlFont;
         public static SpriteFont TitleFont;
         public static SpriteFont TutorialFont;
         public static Texture2D TutorialTexture;
         public static Texture2D CrawlBgTxture;
+        public static Texture2D MenuTitle;
         public static List<Texture2D> HealthBar;
         public static Texture2D MainMenuBG;
         public static Rectangle Bounds;
 
         public static UIButton CreateButton(string id, string text, int x, int y)//ButtonTexture Width and Height need to change
         {
-            UIButton b = new UIButton(id, new Vector2(x, y), new Vector2(200 ,75), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
-            b.Disabled = false;
-            return b;
+            switch(id)
+            {
+                case "MainMenuPlay":
+                    UIButton b = new UIButton(id, new Vector2(x, y),
+                        new Vector2(200, 75), ButtonFont, "", Color.White, PlayGameBtn);
+                    b.Disabled = false;
+                    return b;
+                case "MainMenuExit":
+                    UIButton c = new UIButton(id, new Vector2(x, y),
+                       new Vector2(200, 75), ButtonFont, "", Color.White, ExitGameBtn);
+                    c.Disabled = false;
+                    return c;
+                case "MainMenuSetting":
+                    UIButton d = new UIButton(id, new Vector2(x, y), new Vector2(50,50),
+                        ButtonFont, "", Color.White, SettingsBtn);
+                    d.Disabled = false;
+                    return d;
+                case "StartGameReturn":
+                    UIButton e = new UIButton(id, new Vector2(x, y), new Vector2(50,50),
+                        ButtonFont, "", Color.White, ReturnBtn);
+                    e.Disabled = false;
+                    return e;
+                case "SettingsReturnBtn":
+                    UIButton f = new UIButton(id, new Vector2(x, y), new Vector2(50,50),
+                        ButtonFont, "", Color.White, ReturnBtn);
+                    f.Disabled = false;
+                    return f;
+                default:
+                    UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(200, 75), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
+                    a.Disabled = false;
+                    return a;
+                 
+            }
+          
+
+
         }
         public static UITextBlock CreateTextblock(string id, string text, int x, int y)
         {
@@ -47,6 +89,9 @@ namespace AUTO_Matic
                 case "TutorialBoxGame":
                     UITextBlock f = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, text, Color.Black, TutorialTexture);
                     return f;
+                case "MainMenuTitle":
+                    UITextBlock g = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, "", Color.White, MenuTitle);
+                    return g;
                 default:
                     UITextBlock b = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, CrawlFont, text, Color.White, CrawlBgTxture);
                     return b;
