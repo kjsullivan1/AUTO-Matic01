@@ -37,7 +37,7 @@ namespace AUTO_Matic
         Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { SideScroll, TopDown, Paused, FinalBoss}
         public GameStates GameState = GameStates.SideScroll;
