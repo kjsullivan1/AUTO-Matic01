@@ -18,7 +18,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         Random rand = new Random();
         ParticleManager particles;
 
-        enum BossStates { Shoot};
+        enum BossStates {Shoot};
 
         #region Animations
         AnimationManager animManager;
@@ -83,7 +83,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         int growthRate = 5;
         int spread = 3;
         bool isShootDelay = false;
-        float shootDelay = .25f;//In seconds
+        float shootDelay = 1f;//In seconds
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = 1.5f;
@@ -130,7 +130,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             TopWalls.isUsed = false;
             BottomWalls.isUsed = false;
             particles = new ParticleManager();
-            particles.Initialize(device, effect, explosionTexture);
+            particles.Initialize(explosionTexture);
             SetWalls(tdMap, map);
             
             bool left = false, top = false, right = false, bottom = false;
@@ -247,6 +247,14 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 {
                     explosions.Add(new Explosion(new Circle(new Vector2(bullets[i].rect.X, bullets[i].rect.Y), bullets[i].rect.Width),
                         growthRate, (int)(bullets[i].rect.Width * 2.5f)));
+
+                    int radiusDif = explosions[explosions.Count - 1].maxSize - explosions[explosions.Count - 1].rect.Radius;
+
+                    particles.MakeExplosion(explosions[explosions.Count - 1].rect.Bounds,
+                        new Rectangle(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif, explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif,
+                        explosions[explosions.Count - 1].rect.Bounds.Width + radiusDif, explosions[explosions.Count - 1].rect.Bounds.Height + radiusDif),
+                        20);
+
                     bullets.RemoveAt(i);
                 }
             }
@@ -256,12 +264,13 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 explosions[i].Update(gameTime);
                 if (explosions[i].rect.Radius >= explosions[i].maxSize)
                 {
-                    particles.CreateEffect(20);
-                    particles.MakeExplosion(new Vector3(explosions[i].rect.Bounds.X, explosions[i].rect.Bounds.Y, 0), 20);
+                    //particles.CreateEffect(20);
+                    
                     explosions.RemoveAt(i);
                     
                 }
             }
+            particles.Update(gameTime);
             #endregion
             
             for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
@@ -661,7 +670,7 @@ bossRect.Width, bossRect.Height);
             }
         }
 
-        public void Draw(SpriteBatch spriteBatch, Camera camera)
+        public void Draw(SpriteBatch spriteBatch)
         {
 
             //foreach (GroundLoc loc in slamLocs)
@@ -684,7 +693,7 @@ bossRect.Width, bossRect.Height);
                 explosions[i].Draw(spriteBatch, content);
             }
 
-            particles.Draw(camera);
+            particles.Draw(spriteBatch);
         }
 
         private void SetWalls(TopDownMap tdMap, int[,] map)
@@ -823,8 +832,6 @@ bossRect.Width, bossRect.Height);
             {
                 rect.Radius += growthRate;
                 rect.Position = new Vector2(rect.Bounds.X - growthRate, rect.Bounds.Y - growthRate);
-               
-                
             }
 
 
@@ -833,7 +840,7 @@ bossRect.Width, bossRect.Height);
 
         public void Draw(SpriteBatch spriteBatch, ContentManager content)
         {
-            spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect.Bounds, Color.FloralWhite * .25f);
+            //spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect.Bounds, Color.FloralWhite * .25f);
         }
     }
 }

@@ -60,7 +60,6 @@
     <Compile Include="Scripts\AnimationManager.cs" />
     <Compile Include="Scripts\Bullet.cs" />
     <Compile Include="Scripts\Camera.cs" />
-    <Compile Include="Scripts\Effects\Particle.cs" />
     <Compile Include="Scripts\Effects\ParticleManager.cs" />
     <Compile Include="Scripts\Effects\SoundManager.cs" />
     <Compile Include="Scripts\Game1.cs" />

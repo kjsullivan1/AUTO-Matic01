@@ -1329,7 +1329,7 @@ namespace AUTO_Matic
                                 {
                                     GameState = prevGameState;
                                     fade = true;
-                                    soundManager.PlaySound();
+                                    //soundManager.PlaySound();
                                 }
                             }
                             else if(prevGameState == GameStates.TopDown)
@@ -1671,7 +1671,7 @@ namespace AUTO_Matic
                                 //}
                                 //laserBoss.Draw(spriteBatch);
                                 #endregion
-                                bombBoss.Draw(spriteBatch, camera);
+                                bombBoss.Draw(spriteBatch);
                                 //Window.Title = "Angle: " + bombBoss.angle;
                                 //slamBoss.Draw(spriteBatch);
                                 //Window.Title = "Angle: " + slamBoss.angle;
