@@ -31,7 +31,10 @@ namespace AUTO_Matic.Scripts.Effects
             sound = content.Load<Microsoft.Xna.Framework.Audio.SoundEffect>(@"Audio\" + effectName);
             soundInstance = sound.CreateInstance();
             soundInstance.IsLooped = canLoop;
+
         }
+
+
 
         public void PlaySound()
         {

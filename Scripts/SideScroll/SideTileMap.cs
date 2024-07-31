@@ -358,7 +358,8 @@ namespace AUTO_Matic
             }
             if(!isFinal)
             {
-                spriteBatch.Draw(Content.Load<Texture2D>("SideScroll/MapTiles/BG1"), ssCamera.CameraBounds, Color.White);
+                spriteBatch.Draw(Content.Load<Texture2D>("SideScroll/MapTiles/BG1"), 
+                    new Rectangle(ssCamera.CameraBounds.X, ssCamera.CameraBounds.Y, ssCamera.CameraBounds.Width, 620), Color.White);
             }
             
 

@@ -80,9 +80,10 @@ namespace AUTO_Matic.Scripts.TopDown
         float bulletMaxX = 20f;
         float bulletMaxY = 20f;
         int spread = 3;
-        bool isShootDelay = false;
-        float shootDelay = 2.5f;//In seconds
+       // bool isShootDelay = false;
+        //float shootDelay = 2.5f;//In seconds
         float iShootDelay;
+        float chargeTime;
         bool startShoot = false;
         public float bulletDmg = 1.5f;
         public float bulletTravelDist = 64 * 8;
@@ -120,7 +121,7 @@ namespace AUTO_Matic.Scripts.TopDown
             worldRect = new Rectangle(((rect.X + rect.Width / 2) - size / 2), (((rect.Y + rect.Height / 2) - size / 2)), size, size);
             this.content = content;
             this.bounds = rect;
-            iShootDelay = shootDelay;
+            //iShootDelay = shootDelay;
           
             TopWalls.isUsed = false;
             BottomWalls.isUsed = false;
@@ -381,12 +382,13 @@ namespace AUTO_Matic.Scripts.TopDown
 
                         MoveInWall(tdPlayer, boss, bossPos);
 
-                        shootDelay -= (float)gameTime.ElapsedGameTime.TotalMilliseconds/100;
-                        if(shootDelay <= 0)
+                        boss.shootDelay -= (float)gameTime.ElapsedGameTime.TotalMilliseconds/100;
+                        if(boss.shootDelay <= 0)
                         {
-                            shootDelay = RandFloat(1,6);
+                            boss.shootDelay = RandFloat(boss.shootDelayMin,boss.shootDelayMax);
+                            //shootDelay = iShootDelay;
                             boss.jumpForce = RandFloat(6, 12);
-                            
+                            boss.chargeTime = RandFloat(boss.chargeTimeMin, boss.chargeTimeMax);
                             boss.state = BossRect.BossState.Attack;
                             
                         }
@@ -403,6 +405,8 @@ namespace AUTO_Matic.Scripts.TopDown
                         Vector2 targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width/2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height/2) -
                             new Vector2(boss.rect.X + boss.rect.Width/2, boss.rect.Y + boss.rect.Height/2);
                         boss.lingerTime = RandFloat(1, 3);
+                        //boss.lingerTime = 0;
+                        
                         switch (boss.side)
                         {
                             case "top":
@@ -672,94 +676,97 @@ namespace AUTO_Matic.Scripts.TopDown
                         boss.angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X)));
                         bossPos = new Vector2((boss.rect.X + boss.rect.Width / 2) - tdPlayer.rectangle.Width / 2,
                            (boss.rect.Y + boss.rect.Height / 2) - tdPlayer.rectangle.Height / 2);
-                        //boss.bulletRects.Clear();
-                        if(boss.bulletRects.Count == 0)
-                        {
-                            SetRay(boss.angle, tdPlayer, boss, bossPos);
-                        }
-                  
+                        boss.bulletRects.Clear();
+                        chargeTime -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                      //Charge time is being used in the method as it delays and tracks until fire
+                      SetRay(boss.angle, tdPlayer, boss, bossPos);
 
-                        boss.lingerTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                        if(boss.lingerTime <= 0)
+                        if(boss.chargeTime <= 0)
                         {
-                            boss.bulletRects.Clear();
-                            if(boss.hasWall == false)
+                            boss.lingerTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                            if (boss.lingerTime <= 0)
                             {
-                                if(boss.moveDir.X >= 0 && boss.moveDir.Y >=0)
+                                boss.bulletRects.Clear();
+                                if (boss.hasWall == false)
                                 {
-                                    if (MathHelper.Distance(boss.rect.Bottom, BottomWalls.walls[0].Rectangle.Top) <
-                                        MathHelper.Distance(boss.rect.Right, RightWalls.walls[0].Rectangle.Left) && BottomWalls.isUsed == false)
+                                    if (boss.moveDir.X >= 0 && boss.moveDir.Y >= 0)
                                     {
-                                        boss.jumpSide = BottomWalls;
-                                        boss.side = "bottom";
-                                        boss.hasWall = true;
-                                        BottomWalls.isUsed = true;
+                                        if (MathHelper.Distance(boss.rect.Bottom, BottomWalls.walls[0].Rectangle.Top) <
+                                            MathHelper.Distance(boss.rect.Right, RightWalls.walls[0].Rectangle.Left) && BottomWalls.isUsed == false)
+                                        {
+                                            boss.jumpSide = BottomWalls;
+                                            boss.side = "bottom";
+                                            boss.hasWall = true;
+                                            BottomWalls.isUsed = true;
+                                        }
+                                        else if (RightWalls.isUsed == false)
+                                        {
+                                            boss.jumpSide = RightWalls;
+                                            boss.side = "right";
+                                            boss.hasWall = true;
+                                            RightWalls.isUsed = true;
+                                        }
                                     }
-                                    else if (RightWalls.isUsed == false)
+                                    if (boss.moveDir.X <= 0 && boss.moveDir.Y <= 0)
                                     {
-                                        boss.jumpSide = RightWalls;
-                                        boss.side = "right";
-                                        boss.hasWall = true;
-                                        RightWalls.isUsed = true;
+                                        if (MathHelper.Distance(boss.rect.Top, TopWalls.walls[0].Rectangle.Bottom) <
+                                            MathHelper.Distance(boss.rect.Left, LeftWalls.walls[0].Rectangle.Right) && TopWalls.isUsed == false)
+                                        {
+                                            boss.jumpSide = TopWalls;
+                                            boss.side = "top";
+                                            boss.hasWall = true;
+                                            TopWalls.isUsed = false;
+                                        }
+                                        else if (LeftWalls.isUsed == false)
+                                        {
+                                            boss.jumpSide = LeftWalls;
+                                            boss.side = "left";
+                                            boss.hasWall = true;
+                                            LeftWalls.isUsed = true;
+                                        }
+                                    }
+                                    if (boss.moveDir.X >= 0 && boss.moveDir.Y <= 0)
+                                    {
+                                        if (MathHelper.Distance(boss.rect.Top, TopWalls.walls[0].Rectangle.Bottom) <
+                                           MathHelper.Distance(boss.rect.Right, RightWalls.walls[0].Rectangle.Left) && TopWalls.isUsed == false)
+                                        {
+                                            boss.jumpSide = TopWalls;
+                                            boss.side = "top";
+                                            boss.hasWall = true;
+                                            TopWalls.isUsed = false;
+                                        }
+                                        else if (RightWalls.isUsed == false)
+                                        {
+                                            boss.jumpSide = RightWalls;
+                                            boss.side = "right";
+                                            boss.hasWall = true;
+                                            RightWalls.isUsed = true;
+                                        }
+                                    }
+                                    if (boss.moveDir.X <= 0 && boss.moveDir.Y >= 0)
+                                    {
+                                        if (MathHelper.Distance(boss.rect.Bottom, BottomWalls.walls[0].Rectangle.Top) <
+                                           MathHelper.Distance(boss.rect.Left, LeftWalls.walls[0].Rectangle.Right) && BottomWalls.isUsed)
+                                        {
+                                            boss.jumpSide = BottomWalls;
+                                            boss.side = "bottom";
+                                            boss.hasWall = true;
+                                            BottomWalls.isUsed = true;
+                                        }
+                                        else if (LeftWalls.isUsed == false)
+                                        {
+                                            boss.jumpSide = LeftWalls;
+                                            boss.side = "left";
+                                            boss.hasWall = true;
+                                            LeftWalls.isUsed = true;
+                                        }
                                     }
                                 }
-                                if(boss.moveDir.X <= 0 && boss.moveDir.Y <= 0)
-                                {
-                                    if (MathHelper.Distance(boss.rect.Top, TopWalls.walls[0].Rectangle.Bottom) <
-                                        MathHelper.Distance(boss.rect.Left, LeftWalls.walls[0].Rectangle.Right) && TopWalls.isUsed == false)
-                                    {
-                                        boss.jumpSide = TopWalls;
-                                        boss.side = "top";
-                                        boss.hasWall = true;
-                                        TopWalls.isUsed = false;
-                                    }
-                                    else if(LeftWalls.isUsed == false)
-                                    {
-                                        boss.jumpSide = LeftWalls;
-                                        boss.side = "left";
-                                        boss.hasWall = true;
-                                        LeftWalls.isUsed = true;
-                                    }
-                                }
-                                if(boss.moveDir.X >= 0 && boss.moveDir.Y <= 0)
-                                {
-                                    if (MathHelper.Distance(boss.rect.Top, TopWalls.walls[0].Rectangle.Bottom) <
-                                       MathHelper.Distance(boss.rect.Right, RightWalls.walls[0].Rectangle.Left) && TopWalls.isUsed == false)
-                                    {
-                                        boss.jumpSide = TopWalls;
-                                        boss.side = "top";
-                                        boss.hasWall = true;
-                                        TopWalls.isUsed = false;
-                                    }
-                                    else if(RightWalls.isUsed == false)
-                                    {
-                                        boss.jumpSide = RightWalls;
-                                        boss.side = "right";
-                                        boss.hasWall = true;
-                                        RightWalls.isUsed = true;
-                                    }
-                                }
-                                if(boss.moveDir.X <= 0 && boss.moveDir.Y >= 0)
-                                {
-                                    if (MathHelper.Distance(boss.rect.Bottom, BottomWalls.walls[0].Rectangle.Top) <
-                                       MathHelper.Distance(boss.rect.Left, LeftWalls.walls[0].Rectangle.Right) && BottomWalls.isUsed)
-                                    {
-                                        boss.jumpSide = BottomWalls;
-                                        boss.side = "bottom";
-                                        boss.hasWall = true;
-                                        BottomWalls.isUsed = true;
-                                    }
-                                    else if(LeftWalls.isUsed == false)
-                                    {
-                                        boss.jumpSide = LeftWalls;
-                                        boss.side = "left";
-                                        boss.hasWall = true;
-                                        LeftWalls.isUsed = true;
-                                    }
-                                }
+                                boss.state = BossRect.BossState.Idle;
                             }
-                            boss.state = BossRect.BossState.Idle;
                         }
+
+                       
                        
                         break;
                         #endregion
@@ -1163,57 +1170,116 @@ namespace AUTO_Matic.Scripts.TopDown
             {
                 //worldRect = new Rectangle(((bounds.X + bounds.Width / 2) - worldRect.Width / 2), (((bounds.Y + bounds.Height / 2) -  / 2)), width, height);
                 //spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), worldRect, Color.White);
-                int i = 0;
+                int i = 0; 
+
+                //Sets up 4 unique colors
                 foreach(BossRect boss in bossRects)
                 {
                     if(i == 0)
                     {
                         spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.White);
-                        foreach (Rectangle rect in boss.bulletRects)
+
+                        if(boss.chargeTime > 0)
                         {
-                            spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                            foreach (Rectangle rect in boss.bulletRects)
+                            {
+                                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                            }
                         }
+                        else if(boss.chargeTime <= 0)
+                        {
+                            foreach (Rectangle rect in boss.bulletRects)
+                            {
+                                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.Blue);
+                            }
+                        }
+                       
                         i++;
                     }
                     else if(i ==1)
                     {
                         spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.Black);
-                        foreach (Rectangle rect in boss.bulletRects)
+                        if (boss.chargeTime > 0)
                         {
-                            spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                            foreach (Rectangle rect in boss.bulletRects)
+                            {
+                                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                            }
                         }
+                        else if (boss.chargeTime <= 0)
+                        {
+                            foreach (Rectangle rect in boss.bulletRects)
+                            {
+                                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.Blue);
+                            }
+                        }
+
                         i++;
                     }
                     else if(i == 2)
                     {
                         spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.CornflowerBlue);
-                        foreach (Rectangle rect in boss.bulletRects)
+                        if (boss.chargeTime > 0)
                         {
-                            spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                            foreach (Rectangle rect in boss.bulletRects)
+                            {
+                                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                            }
                         }
+                        else if (boss.chargeTime <= 0)
+                        {
+                            foreach (Rectangle rect in boss.bulletRects)
+                            {
+                                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.Blue);
+                            }
+                        }
+
                         i++;
                     }
                     else if(i == 3)
                     {
                         spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.DarkGreen);
-                        foreach (Rectangle rect in boss.bulletRects)
+                        if (boss.chargeTime > 0)
                         {
-                            spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                            foreach (Rectangle rect in boss.bulletRects)
+                            {
+                                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                            }
                         }
+                        else if (boss.chargeTime <= 0)
+                        {
+                            foreach (Rectangle rect in boss.bulletRects)
+                            {
+                                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.Blue);
+                            }
+                        }
+
                         i++;
                     }
                     else
                     {
                         spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.DarkGreen);
-                        foreach (Rectangle rect in boss.bulletRects)
+                        if (boss.chargeTime > 0)
                         {
-                            spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                            foreach (Rectangle rect in boss.bulletRects)
+                            {
+                                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
+                            }
                         }
+                        else if (boss.chargeTime <= 0)
+                        {
+                            foreach (Rectangle rect in boss.bulletRects)
+                            {
+                                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.Blue);
+                            }
+                        }
+
                         i++;
                     }
                   
                     
                 }
+             
                 foreach (Bullet bullet in bullets)
                 {
                     bullet.Draw(spriteBatch);
@@ -1243,6 +1309,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
         void SetRay(float angle, TDPlayer playerRect, BossRect boss, Vector2 bossPos)
         {
+          
             int size = 64;
             if (angle < 16 || angle >= 155)//Right
             {
@@ -1457,6 +1524,16 @@ namespace AUTO_Matic.Scripts.TopDown
         public List<Rectangle> bulletRects;
         public float lingerTime;
 
+        public int chargeTimeMax = 4;
+        public int chargeTimeMin = 0;
+
+        public int shootDelayMin = 1;
+        public int shootDelayMax = 6;
+
+
+        public float chargeTime;
+        public float shootDelay;
+
         public Vector2 velocity;
         public Vector2 moveDir;
         public enum BossState { Idle, EnterWall,InWall, Attack, Fire}
@@ -1470,6 +1547,21 @@ namespace AUTO_Matic.Scripts.TopDown
             this.rect = rect;
            this.side = s;
             bulletRects = new List<Rectangle>();
+            shootDelay = RandFloat(shootDelayMin, shootDelayMax);
+            chargeTime = RandFloat(chargeTimeMin, chargeTimeMax);
+        }
+
+        public float RandFloat(int min, int max)
+        {
+            Random r = new Random();
+            float decimalNumber;
+            string beforePoint = r.Next(min, max).ToString();//number before decimal point
+            string afterPoint = r.Next(0, 10).ToString();
+            string afterPoint2 = r.Next(0, 10).ToString();
+            string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
+                                                          //string secondDP = r.Next(0, 9).ToString();//2nd decimal point
+            string combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
+            return decimalNumber = float.Parse(combined);
         }
     }
 

@@ -24,6 +24,7 @@ namespace AUTO_Matic
         bool shootY = false;
         public Vector2 bulletSpeed;
         float angle;
+        public Color color;
 
         Vector2 startPos;
         float travelDist;
@@ -81,7 +82,7 @@ namespace AUTO_Matic
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), Color.FloralWhite);
+            spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), color);
         }
 
         public float Distance(Vector2 pos1, Vector2 pos2)

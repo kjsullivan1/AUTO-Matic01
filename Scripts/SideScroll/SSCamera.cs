@@ -32,6 +32,9 @@ namespace AUTO_Matic.Scripts.SideScroll
         Vector2 prevPos = Vector2.One;
         int count = 0;
         bool stop = false;
+
+        int cameraWidth = 1100;
+        int cameraHeight = 900;
         public Vector2 Position
         {
             get { return center; }
@@ -74,7 +77,7 @@ namespace AUTO_Matic.Scripts.SideScroll
             this.height = height;
         }
 
-        public void Update(Vector2 position, bool dont)
+        public void Update(Vector2 position, bool dont, bool fade)
         {
             count++;
             //if (position.Y - viewport.Height / 2 <= 0)
@@ -207,62 +210,8 @@ namespace AUTO_Matic.Scripts.SideScroll
                 count = 0;
             }
 
-            if (CameraBounds.Left < min + 5 && !dont)
-            {
-                center.X += moveSpeed;
-                //center.X = min + CameraBounds.Width / 2;
-
-            }
-            else if (CameraBounds.Left < min && dont)
-            {
-                center.X += moveSpeed;
-                //center.X = min + CameraBounds.Width / 2;
-
-            }
-             
-            if (CameraBounds.Top < 0 + 5 && !dont)
-            {
-                 center.Y += moveSpeed;
-                //if (center.Y > 0 + CameraBounds.Height / 2)
-                //{
-                //    center.Y = 0 + CameraBounds.Height / 2;
-                //}
-
-            }   
-            else if (CameraBounds.Top < 0 && dont)
-            {
-                center.Y += moveSpeed;
-
-              
-            }
-              
-            if (CameraBounds.Right > width - 5 && !dont)
-            {
-                center.X -= moveSpeed;
-               
-            }
-            else if (CameraBounds.Right > width && dont)
-            {
-                center.X -= moveSpeed;
-               
-            }
-           
-            if (CameraBounds.Bottom > height - 5 && !dont)
-            {
-                center.Y -= moveSpeed;
-                if(center.Y > height - CameraBounds.Height / 2)
-                {
-                    center.Y = height - CameraBounds.Height / 2;
-                }
-
-                
-            }
-            else if (CameraBounds.Bottom > height && dont)
-            {
-                center.Y -= moveSpeed;
-                center.Y = height - CameraBounds.Height / 2;
-
-            }
+            
+            
 
            
          
@@ -370,7 +319,37 @@ namespace AUTO_Matic.Scripts.SideScroll
             //}
             #endregion
             transform = Matrix.CreateTranslation(new Vector3((int)-center.X, (int)-center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
-            CameraBounds = new Rectangle(new Point((int)(center.X - 1100 / 2), (int)(center.Y - 620 / 2)), new Point(1100, 620));
+            CameraBounds = new Rectangle(new Point((int)(center.X - cameraWidth / 2), (int)(center.Y - cameraHeight/2)), new Point(cameraWidth, cameraHeight));
+
+            Rectangle viewRect = CameraBounds;
+            viewRect.Height = 620;
+            if (viewRect.Left < min)
+            {
+                center.X += moveSpeed;
+                //center.X = min + viewRect.Width / 2;
+
+            }
+            if (viewRect.Top < 0 )
+            {
+                center.Y += moveSpeed;
+                if (!fade)
+                    CameraBounds.Y = 0;
+                //center.Y = 0;
+
+            }
+
+            if (viewRect.Right > width)
+            {
+                center.X -= moveSpeed;
+
+            }
+
+            if (viewRect.Bottom > height && dont)
+            {
+                 center.Y -= moveSpeed;
+                //center.Y = height - viewRect.Height / 2;
+
+            }
             //else if(position.Y + viewport.Height/2 >= height)
             //{
 
@@ -381,7 +360,7 @@ namespace AUTO_Matic.Scripts.SideScroll
             //    center = new Vector2(center.X, position.Y);
             //    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
             //}
-           
+
         }
         public Rectangle FollowBox
         {

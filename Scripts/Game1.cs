@@ -13,7 +13,7 @@ using AUTO_Matic.Scripts;
 using AUTO_Matic.Scripts.SideScroll.Enemy;
 using AUTO_Matic.Scripts.TopDown.AUTO_Matic.Scripts.TopDown;
 using AUTO_Matic.Scripts.TopDown.Bosses;
-
+using AUTO_Matic.Scripts.Effects;
 
 namespace AUTO_Matic
 {
@@ -37,7 +37,7 @@ namespace AUTO_Matic
         Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.TitleScreen;
+        public Scenes currScene = Scenes.InGame;
 
         public enum GameStates { SideScroll, TopDown, Paused, FinalBoss}
         public GameStates GameState = GameStates.SideScroll;
@@ -112,7 +112,7 @@ namespace AUTO_Matic
         bool fade = true;
         bool canChange = false;
         bool doorTrans = false;
-        float rate = .005f;
+        float rate = .0099f;
         float iRate = 1;
         float sRate = 0;
         Vector2 fadePos = Vector2.Zero;
@@ -120,6 +120,9 @@ namespace AUTO_Matic
         int minChange = 0;
         #endregion
 
+        #region SoundHelpers
+        SoundManager soundManager;
+        #endregion
         List<GroundTile> destroyedGround = new List<GroundTile>();
         List<PlatformTile> destroyedPlatfroms = new List<PlatformTile>();
         float respawnDelay = 0;
@@ -171,7 +174,7 @@ namespace AUTO_Matic
             //maxShootRate = shootRate;
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth/2, graphics.PreferredBackBufferHeight/2));
             camera.Zoom = 1f;
-            
+           
             ssPlayer = new SSPlayer(this, 64);
             //StartNewGame();
 
@@ -224,6 +227,7 @@ namespace AUTO_Matic
 
             HealthDrop.texture = Content.Load<Texture2D>(@"Textures\Health");
             Tile.Content = Content;
+            soundManager = new SoundManager("Level0Side", Content, false);
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if (currScene == Scenes.InGame)
             {
@@ -570,12 +574,14 @@ namespace AUTO_Matic
             UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
             ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0,0),
                 (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
-            ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont);
+            ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
+            ssCamera.Zoom = .5f;
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
            
             prevGameState = GameState;
             GameState = GameStates.Paused;
+           
         }
 
         public void TakeDamage()
@@ -700,6 +706,7 @@ namespace AUTO_Matic
                     {
                         #region SideScroll
                         case GameStates.SideScroll: //Default
+                            soundManager.Update(gameTime);
                             Rectangle worldRect = new Rectangle(ssCamera.CameraBounds.X - (750 / 2), ssCamera.CameraBounds.Y - (950 / 2), ssCamera.CameraBounds.Width + 750, ssCamera.CameraBounds.Height + 950);
                             for (int i = 0; i < SideTileMap.GroundTiles.Count - 1; i++)
                             {
@@ -742,7 +749,7 @@ namespace AUTO_Matic
                           
                             if (fade || doorTrans)
                             {
-                                ssCamera.Update(fadePos, dont);
+                                ssCamera.Update(fadePos, dont, fade);
                                
                                 ssPlayer.Update(gameTime, Gravity, enemies, true);
                                 if(fade)
@@ -755,7 +762,7 @@ namespace AUTO_Matic
                                             dont = true; //dont move camera
                                         }
                                         else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 8 ||
-                                            ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 5)
+                                            ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 8)
                                         {
                                             if (dont)
                                                 dont = false;
@@ -772,21 +779,38 @@ namespace AUTO_Matic
                                 foreach (BottomDoorTile door in SideTileMap.BottomDoorTiles)
                                 {
 
-                                    float num = MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X);
-                                    if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) < 64 * 8/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
+                                    float num = MathHelper.Distance(ssPlayer.playerRect.Center.X, door.Rectangle.Center.X);
+                                    if (ssCamera.CameraBounds.Contains(door.Rectangle) && num < 64 * 12/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
                                     {
                                     
                                         dont = true;
                                     }
-                                    else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 8 ||
-                                            ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 5)
+                                    else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 12 
+                                            /*|| ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 10*/)
                                     {
-                                        if (dont)
+                                     
                                             dont = false;
                                     }
                                 }
 
-                                if(dont == false && canChange)
+                                foreach (TopDoorTile door in SideTileMap.TopDoorTiles)
+                                {
+
+                                    float num = MathHelper.Distance(ssPlayer.playerRect.Center.X, door.Rectangle.Center.X);
+                                    if (ssCamera.CameraBounds.Contains(door.Rectangle) && num < 64 * 12/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
+                                    {
+
+                                        dont = true;
+                                    }
+                                    else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 12
+                                            /*|| ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 10*/)
+                                    {
+
+                                        dont = false;
+                                    }
+                                }
+
+                                if (dont == false && canChange)
                                 {
                                     ssCamera.min = 0;
                                 }
@@ -794,11 +818,11 @@ namespace AUTO_Matic
 
                                 if (ssPlayer.isPilot)
                                 {
-                                    ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y - (60 - ssPlayer.playerRect.Height)), dont);
+                                    ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y - (60 - ssPlayer.playerRect.Height)), dont, fade);
                                 }
                                 else
                                 {
-                                    ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont);
+                                    ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
                                 }
                                 
 
@@ -1294,7 +1318,7 @@ namespace AUTO_Matic
                                 {
                                     fadePos = SideTileMap.playerSpawns[0];
                                 }
-                                ssCamera.Update(fadePos, dont);
+                                ssCamera.Update(fadePos, dont, fade);
                                 //ssPlayer.Update(gameTime, -ssPlayer.velocity, enemies);
                                 if (ssCamera.reached == false)
                                 {
@@ -1304,6 +1328,7 @@ namespace AUTO_Matic
                                 {
                                     GameState = prevGameState;
                                     fade = true;
+                                    soundManager.PlaySound();
                                 }
                             }
                             else if(prevGameState == GameStates.TopDown)
@@ -1342,7 +1367,7 @@ namespace AUTO_Matic
                                 UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point(ssCamera.CameraBounds.X + 20,
                                 ssCamera.CameraBounds.Y + 20), new Point(0, 0)));
                                 ssPlayer.Update(gameTime, Gravity, enemies);
-                                ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X + (64 * 10.5f), SideTileMap.playerSpawns[0].Y - (64 * 2.5f)), false);
+                                ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X + (64 * 10.5f), SideTileMap.playerSpawns[0].Y - (64 * 2.5f)), false, fade);
 
                                 #region Collisions
                                 ssPlayer.blockBottom = false;
@@ -1567,6 +1592,7 @@ namespace AUTO_Matic
                                 UIManager.CreateTutorialUI(SideTileMap.playerSpawns[0], this);
                                 UIHelper.SetElementVisibility("Tutorial", true, UIManager.uiElements);
                                 startGame = false;
+                              
                             }
                             //UIManager.CreateTutorialUI(SideTileMap.playerSpawns[0], this);
                             //UIHelper.SetElementVisibility("Tutorial", true, UIManager.uiElements);
@@ -1687,6 +1713,7 @@ namespace AUTO_Matic
                     {
                         if (fade)
                         {
+                            
                             iRate -= rate;
                             if (iRate < 0)
                             {
