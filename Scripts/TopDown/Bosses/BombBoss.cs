@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AUTO_Matic.TopDown;
 using Microsoft.Xna.Framework.Content;
+using AUTO_Matic.Scripts.Effects;
 
 namespace AUTO_Matic.Scripts.TopDown.Bosses
 {
@@ -15,6 +16,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         public Rectangle bossRect;
         ContentManager content;
         Random rand = new Random();
+        ParticleManager particles;
 
         enum BossStates { Shoot};
 
@@ -114,7 +116,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         }
 
         #region Constructor
-        public BombBoss(Rectangle currBounds, ContentManager content, TopDownMap tdMap, int[,] map, TDPlayer tdPlayer)
+        public BombBoss(Rectangle currBounds, ContentManager content, TopDownMap tdMap, int[,] map,
+            TDPlayer tdPlayer, GraphicsDevice device, Effect effect, Texture2D explosionTexture)
         {
             int size = 64 * sizeMod;
 
@@ -126,9 +129,10 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             LeftWalls.isUsed = false;
             TopWalls.isUsed = false;
             BottomWalls.isUsed = false;
-
+            particles = new ParticleManager();
+            particles.Initialize(device, effect, explosionTexture);
             SetWalls(tdMap, map);
-
+            
             bool left = false, top = false, right = false, bottom = false;
             if(MathHelper.Distance(RightWalls.walls[0].Rectangle.X, tdPlayer.rectangle.Center.X) >  
                 MathHelper.Distance(LeftWalls.walls[0].Rectangle.Right, tdPlayer.rectangle.Center.X))
@@ -252,11 +256,14 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 explosions[i].Update(gameTime);
                 if (explosions[i].rect.Radius >= explosions[i].maxSize)
                 {
+                    particles.CreateEffect(20);
+                    particles.MakeExplosion(new Vector3(explosions[i].rect.Bounds.X, explosions[i].rect.Bounds.Y, 0), 20);
                     explosions.RemoveAt(i);
+                    
                 }
             }
             #endregion
-
+            
             for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
             {
                 if (tdPlayer.bullets[i].rect.Intersects(bossRect))
@@ -265,6 +272,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     tdPlayer.bullets.RemoveAt(i);
                 }
             }
+            particles.Update(gameTime);
             if (health == 16)
             {
                 health--;
@@ -653,7 +661,7 @@ bossRect.Width, bossRect.Height);
             }
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, Camera camera)
         {
 
             //foreach (GroundLoc loc in slamLocs)
@@ -676,6 +684,7 @@ bossRect.Width, bossRect.Height);
                 explosions[i].Draw(spriteBatch, content);
             }
 
+            particles.Draw(camera);
         }
 
         private void SetWalls(TopDownMap tdMap, int[,] map)
@@ -798,12 +807,14 @@ bossRect.Width, bossRect.Height);
         public Circle rect;
         public int growthRate;
         public int maxSize;
+        //public ParticleManager particles;
 
         public Explosion(Circle rect, int rate, int max)
         {
             this.rect = rect;
             growthRate = rate;
             maxSize = max;
+            //particles.CreateEffect(20);
         }
 
         public void Update(GameTime gameTime)
@@ -812,7 +823,10 @@ bossRect.Width, bossRect.Height);
             {
                 rect.Radius += growthRate;
                 rect.Position = new Vector2(rect.Bounds.X - growthRate, rect.Bounds.Y - growthRate);
+               
+                
             }
+
 
 
         }

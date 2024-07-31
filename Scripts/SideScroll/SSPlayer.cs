@@ -1342,32 +1342,32 @@ namespace AUTO_Matic.SideScroll
             }
 
             //Holding a button to become pilot
-            if (kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyDown(Keys.E) && !isPilot
-                || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Pressed && blockBottom && !isPilot)
-            {
-                jumpOutDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //if (kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyDown(Keys.E) && !isPilot
+            //    || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Pressed && blockBottom && !isPilot)
+            //{
+            //    jumpOutDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                if(jumpOutDelay <= 0)
-                {
-                    jumpOutDelay = .75f;
-                    playerState = PlayerStates.Pilot;
-                }
-            }
-            else if(kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyDown(Keys.E) && isPilot && playerRect.Intersects(RoboRect) //Holding button to go back to robo
-                || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Pressed && blockBottom && isPilot && playerRect.Intersects(RoboRect))
-            {
-                jumpOutDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //    if(jumpOutDelay <= 0)
+            //    {
+            //        jumpOutDelay = .75f;
+            //        playerState = PlayerStates.Pilot;
+            //    }
+            //}
+            //else if(kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyDown(Keys.E) && isPilot && playerRect.Intersects(RoboRect) //Holding button to go back to robo
+            //    || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Pressed && blockBottom && isPilot && playerRect.Intersects(RoboRect))
+            //{
+            //    jumpOutDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                if(jumpOutDelay <= 0)
-                {
-                    BecomeRobo();
-                    jumpOutDelay = .75f;
-                }
-            }
-            else
-            {
-                jumpOutDelay = .75f;
-            }
+            //    if(jumpOutDelay <= 0)
+            //    {
+            //        BecomeRobo();
+            //        jumpOutDelay = .75f;
+            //    }
+            //}
+            //else
+            //{
+            //    jumpOutDelay = .75f;
+            //}
 
 
             if (kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && blockBottom || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && blockBottom)

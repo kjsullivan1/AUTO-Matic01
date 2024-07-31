@@ -19,21 +19,18 @@ namespace AUTO_Matic.Scripts.Effects
         #endregion
 
         #region Initialization
-        public static void Initialize(GraphicsDevice device, Effect effect, Texture2D texture)
+        public void Initialize(GraphicsDevice device, Effect effect, Texture2D texture)
         {
             graphicsDevice = device;
             particleEffect = effect;
             particleTexture = texture;
             Particle.GraphicsDevice = device;
-            for (int x = 0; x < 300; x++)
-            {
-                particles.Add(new Particle());
-            }
+        
         }
         #endregion
 
         #region Particle Creation
-        public static void AddParticle(Vector3 position, Vector3 velocity, float duration, float scale)
+        public void AddParticle(Vector3 position, Vector3 velocity, float duration, float scale)
         {
             for (int x = 0; x < particles.Count; x++)
             {
@@ -47,7 +44,7 @@ namespace AUTO_Matic.Scripts.Effects
         #endregion
 
         #region Update
-        public static void Update(GameTime gameTime)
+        public void Update(GameTime gameTime)
         {
             foreach (Particle particle in particles)
             {
@@ -58,7 +55,7 @@ namespace AUTO_Matic.Scripts.Effects
         #endregion
 
         #region Draw
-        public static void Draw(SideScroll.SSCamera camera)
+        public void Draw(SideScroll.SSCamera camera)
         {
             graphicsDevice.BlendState = BlendState.Additive;
             particleEffect.CurrentTechnique = particleEffect.Techniques["ParticleTechnique"];
@@ -83,8 +80,39 @@ namespace AUTO_Matic.Scripts.Effects
         }
         #endregion
 
+        public void Draw(Camera camera)
+        {
+            graphicsDevice.BlendState = BlendState.Additive;
+            particleEffect.CurrentTechnique = particleEffect.Techniques["ParticleTechnique"];
+
+            particleEffect.Parameters["particleTexture"].SetValue(particleTexture);
+            particleEffect.Parameters["View"].SetValue(camera.transform);
+            particleEffect.Parameters["Projection"].SetValue(camera.transform);
+
+            graphicsDevice.RasterizerState = RasterizerState.CullNone;
+            graphicsDevice.BlendState = BlendState.Additive;
+            graphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
+
+            foreach (Particle particle in particles)
+            {
+                if (particle.IsActive)
+                    particle.Draw(camera, particleEffect);
+            }
+
+            graphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
+            graphicsDevice.BlendState = BlendState.Opaque;
+            graphicsDevice.DepthStencilState = DepthStencilState.Default;
+        }
+        public void CreateEffect(int numParticles)
+        {
+            for (int x = 0; x < numParticles; x++)
+            {
+                particles.Add(new Particle());
+            }
+        }
+
         #region Helper Methods
-        public static void MakeExplosion(Vector3 position, int particleCount)
+        public void MakeExplosion(Vector3 position, int particleCount)
         {
             for (int i = 0; i < particleCount; i++)
             {

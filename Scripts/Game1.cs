@@ -386,9 +386,10 @@ namespace AUTO_Matic
                     }
                 }
                 //shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
-                laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims);
+                //laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims);
                // slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
-                //bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer);
+                bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer, GraphicsDevice, 
+                    Content.Load<Effect>(@"Effects\Particles"), Content.Load<Texture2D>(@"Textures\white"));
 
                 //for(int i = 0; i <= 4; i++)
                 //{
@@ -1266,10 +1267,10 @@ namespace AUTO_Matic
                                     #endregion
 
                                     #region LaserBoss
-                                    laserBoss.Update(gameTime, tdPlayer, tdMap);
+                                    //laserBoss.Update(gameTime, tdPlayer, tdMap);
                                     #endregion
                                     #region BombBoss
-                                    //bombBoss.Update(gameTime, tdMap, tdPlayer);
+                                    bombBoss.Update(gameTime, tdMap, tdPlayer);
                                     #endregion
                                     #region SlamBoss
                                     //slamBoss.Update(gameTime, tdPlayer, tdMap);
@@ -1662,15 +1663,15 @@ namespace AUTO_Matic
                                 Window.Title = " ";
                                 //float[] angles = new float[laserBoss.bossRects.Count];
                                 #region LaserBoss
-                                for (int i = 0; i < laserBoss.bossRects.Count; i++)
-                                {
-                                    //angles[i] = laserBoss.bossRects[i].angle;
-                                    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
+                                //for (int i = 0; i < laserBoss.bossRects.Count; i++)
+                                //{
+                                //    //angles[i] = laserBoss.bossRects[i].angle;
+                                //    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
 
-                                }
-                                laserBoss.Draw(spriteBatch);
+                                //}
+                                //laserBoss.Draw(spriteBatch);
                                 #endregion
-                                //bombBoss.Draw(spriteBatch);
+                                bombBoss.Draw(spriteBatch, camera);
                                 //Window.Title = "Angle: " + bombBoss.angle;
                                 //slamBoss.Draw(spriteBatch);
                                 //Window.Title = "Angle: " + slamBoss.angle;

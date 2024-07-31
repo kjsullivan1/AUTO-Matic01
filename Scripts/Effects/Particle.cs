@@ -100,6 +100,19 @@ namespace AUTO_Matic.Scripts.Effects
                 GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 6, 0, 2);
             }
         }
+        public void Draw(Camera camera, Effect effect)
+        {
+            Matrix billboard = Matrix.CreateBillboard(position, new Vector3(camera.X, camera.Y, 0), Vector3.Up, null);
+            effect.Parameters["World"].SetValue(Matrix.CreateScale(scale) * billboard);
+            effect.Parameters["alphaValue"].SetValue(duration / initialDuration);
+            foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                GraphicsDevice.SetVertexBuffer(vertexBuffer);
+                GraphicsDevice.Indices = indexBuffer;
+                GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 6, 0, 2);
+            }
+        }
         #endregion
     }
 }

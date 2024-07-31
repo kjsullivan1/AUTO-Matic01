@@ -404,7 +404,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
                         Vector2 targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width/2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height/2) -
                             new Vector2(boss.rect.X + boss.rect.Width/2, boss.rect.Y + boss.rect.Height/2);
-                        boss.lingerTime = RandFloat(1, 3);
+                        boss.lingerTime = RandFloat(1, 2);
                         //boss.lingerTime = 0;
                         
                         switch (boss.side)
@@ -676,10 +676,16 @@ namespace AUTO_Matic.Scripts.TopDown
                         boss.angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X)));
                         bossPos = new Vector2((boss.rect.X + boss.rect.Width / 2) - tdPlayer.rectangle.Width / 2,
                            (boss.rect.Y + boss.rect.Height / 2) - tdPlayer.rectangle.Height / 2);
-                        boss.bulletRects.Clear();
-                        chargeTime -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                        
+                        boss.chargeTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                       //Charge time is being used in the method as it delays and tracks until fire
-                      SetRay(boss.angle, tdPlayer, boss, bossPos);
+
+                        if(boss.chargeTime > 0)
+                        {
+                            boss.bulletRects.Clear();
+                            SetRay(boss.angle, tdPlayer, boss, bossPos);
+                        }
+                      
 
                         if(boss.chargeTime <= 0)
                         {
@@ -761,7 +767,9 @@ namespace AUTO_Matic.Scripts.TopDown
                                             LeftWalls.isUsed = true;
                                         }
                                     }
+                                    
                                 }
+                                boss.chargeTime = RandFloat(boss.chargeTimeMin, boss.chargeTimeMax);
                                 boss.state = BossRect.BossState.Idle;
                             }
                         }
@@ -1179,14 +1187,14 @@ namespace AUTO_Matic.Scripts.TopDown
                     {
                         spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.White);
 
-                        if(boss.chargeTime > 0)
+                        if (boss.chargeTime > 0)
                         {
                             foreach (Rectangle rect in boss.bulletRects)
                             {
                                 spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
                             }
                         }
-                        else if(boss.chargeTime <= 0)
+                        else if (boss.chargeTime <= 0 && boss.lingerTime > 0)
                         {
                             foreach (Rectangle rect in boss.bulletRects)
                             {
@@ -1206,7 +1214,7 @@ namespace AUTO_Matic.Scripts.TopDown
                                 spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
                             }
                         }
-                        else if (boss.chargeTime <= 0)
+                        else if (boss.chargeTime <= 0 && boss.lingerTime > 0)
                         {
                             foreach (Rectangle rect in boss.bulletRects)
                             {
@@ -1525,7 +1533,7 @@ namespace AUTO_Matic.Scripts.TopDown
         public float lingerTime;
 
         public int chargeTimeMax = 4;
-        public int chargeTimeMin = 0;
+        public int chargeTimeMin = 1;
 
         public int shootDelayMin = 1;
         public int shootDelayMax = 6;
