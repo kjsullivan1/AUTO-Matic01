@@ -313,112 +313,116 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                 Vector2 targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2) -
                    new Vector2(bossRect.Center.X, bossRect.Center.Y);
-                angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X)));
+                angle = (float)Math.Atan2(targetDir.Y, targetDir.X);
 
                 Vector2 bossPos = new Vector2(bossRect.Center.X - tdPlayer.rectangle.Width / 2, bossRect.Center.Y - tdPlayer.rectangle.Height / 2);
 
+                float bulletSpeedX = (float)Math.Cos((double)angle) * 2;
+                float bulletSpeedY = (float)Math.Sin((double)angle) * 2;
 
-                if (angle < 16 || angle >= 155)//Right
-                {
-                    if (angle < 16)
-                    {
+                bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
 
-                        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY),
-                            content, true, 64 * 25));
+                //if (angle < 16 || angle >= 155)//Right
+                //{
+                //    if (angle < 16)
+                //    {
 
-                    }
-                    else//Left
-                    {
-                        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY),
-                                content, true, 64 * 25));
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY),
+                //            content, true, 64 * 25));
 
-                    }
-                }
-                if (angle >= 16 && angle < 35)//Right up
-                {
-                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
-                    {
-                        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), bulletSpeed / 4, new Vector2(bulletMaxX, -bulletMaxY),
-                            content, true, 64 * 25, true, -bulletSpeed / 8));
-                    }
-                    else
-                    {
-                        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), bulletSpeed / 4, new Vector2(bulletMaxX, bulletMaxY),
-                          content, true, 64 * 25, true, bulletSpeed / 8));
+                //    }
+                //    else//Left
+                //    {
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY),
+                //                content, true, 64 * 25));
 
-
-                    }
-
-                    //Compare pos for down
-                }
-                if (angle >= 35 && angle < 75)//more right up
-                {
-                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
-                    {
-                        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), bulletSpeed / 2, new Vector2(bulletMaxX, -bulletMaxY),
-                          content, true, 64 * 25, true, -bulletSpeed / 4));
+                //    }
+                //}
+                //if (angle >= 16 && angle < 35)//Right up
+                //{
+                //    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
+                //    {
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), bulletSpeed / 4, new Vector2(bulletMaxX, -bulletMaxY),
+                //            content, true, 64 * 25, true, -bulletSpeed / 8));
+                //    }
+                //    else
+                //    {
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), bulletSpeed / 4, new Vector2(bulletMaxX, bulletMaxY),
+                //          content, true, 64 * 25, true, bulletSpeed / 8));
 
 
-                    }
-                    else
-                    {
-                        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY),
-                          content, true, 64 * 25, true, bulletSpeed / 4));
+                //    }
+
+                //    //Compare pos for down
+                //}
+                //if (angle >= 35 && angle < 75)//more right up
+                //{
+                //    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
+                //    {
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), bulletSpeed / 2, new Vector2(bulletMaxX, -bulletMaxY),
+                //          content, true, 64 * 25, true, -bulletSpeed / 4));
 
 
-                    }
-                }
-                if (angle >= 75 && angle < 105)//up
-                {
-                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
-                    {
-                        bullets.Add(new Bullet(new Vector2(bossPos.X, bossPos.Y - bossRect.Height / 2), bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY),
-                      content, false, 64 * 25, true, -bulletSpeed));
+                //    }
+                //    else
+                //    {
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY),
+                //          content, true, 64 * 25, true, bulletSpeed / 4));
 
 
-                    }
-                    else
-                    {
-                        bullets.Add(new Bullet(new Vector2(bossPos.X, bossPos.Y + bossRect.Height / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY),
-                   content, false, 64 * 25, true, bulletSpeed));
+                //    }
+                //}
+                //if (angle >= 75 && angle < 105)//up
+                //{
+                //    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
+                //    {
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X, bossPos.Y - bossRect.Height / 2), bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY),
+                //      content, false, 64 * 25, true, -bulletSpeed));
 
 
-                    }
-                }
-                if (angle >= 105 && angle < 135)//up left
-                {
-                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
-                    {
-                        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), -bulletSpeed / 4, new Vector2(-bulletMaxX, -bulletMaxY),
-                  content, true, 64 * 25, true, -bulletSpeed / 8));
+                //    }
+                //    else
+                //    {
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X, bossPos.Y + bossRect.Height / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY),
+                //   content, false, 64 * 25, true, bulletSpeed));
 
 
-                    }
-                    else
-                    {
-                        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), -bulletSpeed / 4, new Vector2(-bulletMaxX, bulletMaxY),
-                   content, true, 64 * 25, true, bulletSpeed / 8));
+                //    }
+                //}
+                //if (angle >= 105 && angle < 135)//up left
+                //{
+                //    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
+                //    {
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), -bulletSpeed / 4, new Vector2(-bulletMaxX, -bulletMaxY),
+                //  content, true, 64 * 25, true, -bulletSpeed / 8));
 
 
-                    }
-                }
-                if (angle >= 135 && angle < 155)
-                {
-                    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
-                    {
-                        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), -bulletSpeed / 2, new Vector2(-bulletMaxX, -bulletMaxY),
-                      content, true, 64 * 25, true, -bulletSpeed / 4));
+                //    }
+                //    else
+                //    {
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), -bulletSpeed / 4, new Vector2(-bulletMaxX, bulletMaxY),
+                //   content, true, 64 * 25, true, bulletSpeed / 8));
 
 
-                    }
-                    else
-                    {
-                        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), -bulletSpeed / 2, new Vector2(-bulletMaxX, bulletMaxY),
-                   content, true, 64 * 25, true, bulletSpeed / 4));
+                //    }
+                //}
+                //if (angle >= 135 && angle < 155)
+                //{
+                //    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
+                //    {
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), -bulletSpeed / 2, new Vector2(-bulletMaxX, -bulletMaxY),
+                //      content, true, 64 * 25, true, -bulletSpeed / 4));
 
 
-                    }
-                }
+                //    }
+                //    else
+                //    {
+                //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), -bulletSpeed / 2, new Vector2(-bulletMaxX, bulletMaxY),
+                //   content, true, 64 * 25, true, bulletSpeed / 4));
+
+
+                //    }
+                //}
             }
         }
 

@@ -118,5 +118,27 @@ namespace AUTO_Matic
 
 
         }
+
+        public void Draw(SpriteBatch spriteBatch, Color color, float angle, Rectangle originRect)
+        {
+ 
+
+            spriteBatch.Draw(CurrTexture,position:position, sourceRectangle: new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X, FrameSize.Y),
+                color: color, origin: new Vector2(originRect.Width/2, originRect.Height/2), rotation: angle);
+
+          
+
+            //if (isRight)
+            //{
+
+            //    spriteBatch.Draw(CurrTexture, position, new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X, FrameSize.Y), color);
+            //}
+            //else if (isLeft)
+            //{
+            //    spriteBatch.Draw(CurrTexture, position: position, sourceRectangle: new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X, FrameSize.Y), color: color, effects: SpriteEffects.FlipHorizontally);
+            //}
+
+
+        }
     }
 }

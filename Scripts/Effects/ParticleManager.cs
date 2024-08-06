@@ -66,6 +66,11 @@ namespace AUTO_Matic.Scripts.Effects
         }
         #endregion
 
+        public void SetParticles(int particle)
+        {
+            particleCount = particle;
+        }
+
         #region Update
         public void Update(GameTime gameTime)
         {

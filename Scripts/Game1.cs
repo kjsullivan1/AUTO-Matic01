@@ -37,7 +37,7 @@ namespace AUTO_Matic
         Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { SideScroll, TopDown, Paused, FinalBoss}
         public GameStates GameState = GameStates.SideScroll;
@@ -133,6 +133,7 @@ namespace AUTO_Matic
         List<PlatformTile> offScreenPlatform = new List<PlatformTile>();
         List<BackgroundTile> offScreenBackground = new List<BackgroundTile>();
         List<WallTile> offScreenWall = new List<WallTile>();
+        List<DungeonEntrance> dungeons = new List<DungeonEntrance>();
 
         List<HealthDrop> bossHealthDrops = new List<HealthDrop>();
 
@@ -141,6 +142,8 @@ namespace AUTO_Matic
         Rectangle tdPrevBounds = Rectangle.Empty;
         MapBuilder mapBuilder;
         FinalBoss finalBoss;
+
+        int dungeonNum = 0;
       
         class Door
         {
@@ -234,9 +237,66 @@ namespace AUTO_Matic
                 StartNewGame();
                 //LoadFinalBoss();
             }
-                
 
-           
+            //dungeons.Add(SideTileMap.DungeonEntrances[0]);
+            //for (int j = 1; j < SideTileMap.DungeonEntrances.Count; j++)
+            //{
+            //    if (dungeons[0].Rectangle.X > SideTileMap.DungeonEntrances[j].Rectangle.X)
+            //    {
+            //        dungeons.Clear();
+            //        dungeons.Add(SideTileMap.DungeonEntrances[j]);
+            //    }
+            //}
+
+            //dungeons = SideTileMap.DungeonEntrances;
+            //dungeons.Sort();
+
+            //DungeonEntrance closest = SideTileMap.DungeonEntrances[0];
+            //DungeonEntrance furthest = SideTileMap.DungeonEntrances[0];
+            //while(dungeons.Count != SideTileMap.DungeonEntrances.Count - 1)
+            //{
+            //    for (int i = 0; i < SideTileMap.DungeonEntrances.Count; i++)
+            //    {
+            //        //closest = SideTileMap.DungeonEntrances[i];
+            //        if (!dungeons.Contains(SideTileMap.DungeonEntrances[i]))
+            //        {
+            //            for (int j = 0; j < SideTileMap.DungeonEntrances.Count; j++)
+            //            {
+            //                if(!dungeons.Contains(SideTileMap.DungeonEntrances[j]))
+            //                {
+            //                    if (SideTileMap.DungeonEntrances[i].Rectangle.X < SideTileMap.DungeonEntrances[j].Rectangle.X)
+            //                    {
+            //                        closest = SideTileMap.DungeonEntrances[i];
+            //                    }
+            //                    else if (SideTileMap.DungeonEntrances[i].Rectangle.X > SideTileMap.DungeonEntrances[j].Rectangle.X)
+            //                    {
+            //                        closest = SideTileMap.DungeonEntrances[j];
+            //                        //furthest = SideTileMap.DungeonEntrances[]
+            //                    }
+            //                    else if (furthest.Rectangle.X < SideTileMap.DungeonEntrances[j].Rectangle.X)
+            //                    {
+            //                        furthest = SideTileMap.DungeonEntrances[j];
+            //                    }
+            //                }
+                       
+            //            }
+            //        }
+            //    }
+            //    if(dungeons.Contains(closest) == false)
+            //        dungeons.Add(closest);
+                
+            //}
+            //if (dungeons.Contains(furthest) == false)
+            //    dungeons.Add(furthest);
+
+
+
+
+
+
+
+
+
             // UIHelper.SetElementVisibility("ExitButton", true, UIManager.uiElements);
 
 
@@ -280,7 +340,7 @@ namespace AUTO_Matic
                 tdPlayer.changeLevel = true;
 
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
-                   tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                   tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points, dungeonNum);
 
                 if (xLevel)
                 {
@@ -301,7 +361,7 @@ namespace AUTO_Matic
                 }
 
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
-                 tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                 tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points, dungeonNum);
                 //Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
                 //(0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
                 // new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
@@ -349,7 +409,7 @@ namespace AUTO_Matic
                 healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
                 healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y) + 64 * 2, 64, 64)));
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
-                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points, dungeonNum);
 
             }
             else if(isBoss && tdPlayer.bossRoom < levelCount)
@@ -366,7 +426,7 @@ namespace AUTO_Matic
                 tdEnemies.Clear();
 
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
-                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points, dungeonNum);
 
                 Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
                      (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
@@ -386,8 +446,8 @@ namespace AUTO_Matic
                     }
                 }
                 //shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
-                //laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims);
-               // slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
+              //laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims, GraphicsDevice);
+               //slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
                 bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer, GraphicsDevice, 
                     Content.Load<Effect>(@"Effects\Particles"), Content.Load<Texture2D>(@"Textures\white"));
 
@@ -403,7 +463,7 @@ namespace AUTO_Matic
                     GameState = GameStates.Paused;
                 startBoss = true;
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
-                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points, dungeonNum);
                 //tdPlayer.rectangle.X -= 200;
                 //canShoot = true;
             }
@@ -414,6 +474,9 @@ namespace AUTO_Matic
         {
             healthDrops.Clear();
             GameState = GameStates.TopDown;
+
+            SetDungeonNum();
+
             tdPlayer = new TDPlayer(this, 64, 100, 100);
             tdMap = new TopDownMap();
             //Boss = new Rectangle();
@@ -453,11 +516,11 @@ namespace AUTO_Matic
                 GenerateNewMap(false, false, true, false);
             }
             BoundIndexes.Clear();
-            BoundIndexes.Add(camera.Position); 
+            BoundIndexes.Add(camera.Position);
             tdPlayer.Load(Content, camera.viewport.Bounds);
             tdPlayer.position = new Vector2((graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) + (64 * 2), -(graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) + (64 * 2));
 
-          
+
 
             //mapBuilder.Start(75, tdMap, currBounds);
 
@@ -472,6 +535,20 @@ namespace AUTO_Matic
 
             prevGameState = GameState;
             GameState = GameStates.Paused;
+        }
+
+        private void SetDungeonNum()
+        {
+            DungeonEntrance entrance = dungeons[0];
+
+            for (int i = 1; i < dungeons.Count; i++)
+            {
+                if (MathHelper.Distance(entrance.Rectangle.X, ssPlayer.Rectangle.X) >
+                    MathHelper.Distance(dungeons[i].Rectangle.X, ssPlayer.Rectangle.X))
+                {
+                    dungeonNum = i;
+                }
+            }
         }
 
         public void LoadFinalBoss()
@@ -576,7 +653,7 @@ namespace AUTO_Matic
             ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0,0),
                 (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
             ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
-            ssCamera.Zoom = .5f;
+            //ssCamera.Zoom = 1.35f;
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
            
@@ -1053,7 +1130,7 @@ namespace AUTO_Matic
                                 {
                                     tdEnemies.Clear();
                                     tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
-                                        tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+                                        tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points, dungeonNum);
 
                                     currMap = tdPlayer.DiagLevels.dLevels[tdPlayer.DiagLevels.diagIndex];
                                     Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),

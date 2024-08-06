@@ -84,6 +84,10 @@ namespace AUTO_Matic
         {
             spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), Color.White);
         }
+        public void Draw(SpriteBatch spriteBatch, Color color)
+        {
+            spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), color);
+        }
 
         public float Distance(Vector2 pos1, Vector2 pos2)
         {

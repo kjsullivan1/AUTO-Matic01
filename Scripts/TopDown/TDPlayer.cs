@@ -16,7 +16,7 @@ namespace AUTO_Matic.TopDown
     {
         ContentManager content;
         enum AnimationStates {Idle ,Walking, Shooting, Death}
-        AnimationStates animState = AnimationStates.Idle;
+        AnimationStates animState = AnimationStates.Walking;
 
         public enum PlayerState {Movement, Shooting, Death, Hit, Dash}
         public PlayerState playerState = PlayerState.Movement;
@@ -44,16 +44,16 @@ namespace AUTO_Matic.TopDown
                 switch(shootDir)
                 {
                     case "up":
-                        rect = new Rectangle(rectangle.X - Math.Abs((rectangle.Width - meleeHeight)/2), rectangle.Y - (meleeHeight / widthMod), meleeHeight, meleeHeight / widthMod);
+                        rect = new Rectangle(rectangle.X - Math.Abs((rectangle.Width - meleeHeight)/3), rectangle.Y - (meleeHeight / widthMod), meleeHeight, meleeHeight / widthMod);
                         break;
                     case "down":
-                        rect = new Rectangle(rectangle.X - Math.Abs((rectangle.Width - meleeHeight)/2), rectangle.Y + Math.Abs((rectangle.Height)), meleeHeight, meleeHeight/widthMod);
+                        rect = new Rectangle(rectangle.X - Math.Abs((rectangle.Width - meleeHeight)/3), rectangle.Y + Math.Abs((rectangle.Height)), meleeHeight, meleeHeight/widthMod);
                         break;
                     case "left":
-                        rect = new Rectangle(rectangle.X - ((meleeHeight/widthMod)), rectangle.Y - Math.Abs((rectangle.Height - meleeHeight)/2), meleeHeight / widthMod, meleeHeight);
+                        rect = new Rectangle(rectangle.X - ((meleeHeight / widthMod) - 10), rectangle.Y - Math.Abs((rectangle.Height - meleeHeight)/3), meleeHeight / widthMod, meleeHeight);
                         break;
                     case "right":
-                        rect = new Rectangle(rectangle.Right, rectangle.Y - Math.Abs((rectangle.Height - meleeHeight)/2), meleeHeight/widthMod, meleeHeight);
+                        rect = new Rectangle(rectangle.Right, rectangle.Y - Math.Abs((rectangle.Height - meleeHeight)/3), meleeHeight/widthMod, meleeHeight);
                         break;
                         
                 }
@@ -68,48 +68,65 @@ namespace AUTO_Matic.TopDown
         Point CurrFrame;//Location of currFram on the sheet
         Point SheetSize;//num of frames.xy
         int fpms;
+        
         public void ChangeAnimation()
         {
-            //switch (animState)
-            //{
-            //    case AnimationStates.Idle:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerIdle");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(6, 1);
-            //        fpms = 120;
-            //        break;
-            //    case AnimationStates.Walking:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerWalk");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(8, 1);
-            //        fpms = 120;
-            //        break;
-            //    case AnimationStates.Shooting:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerShoot");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(4, 1);
-            //        fpms = 95;
-            //        break;
-            //}
+            switch (animState)
+            {
+                case AnimationStates.Idle:
+                    texture = content.Load<Texture2D>("TopDown/Animations/PlayerIdle");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(0, 0);
+                    SheetSize = new Point(6, 1);
+                    fpms = 120;
+                    break;
+                case AnimationStates.Walking:
 
-            //bool isRight = true, isLeft = false, isUp = false, isDown = false;
-            //if (animManager != null)
-            //{
-            //    isRight = animManager.isRight;
-            //    isLeft = animManager.isLeft;
-            //    isUp = animManager.isUp;
-            //    isDown = animManager.isDown;
-            //}
+                    if(shootDir == "up")
+                    {
+                        texture = content.Load<Texture2D>("TopDown/Animations/PilotUpWalk");
+                    }
+                    else if(shootDir == "down")
+                    {
+                        texture = content.Load<Texture2D>("TopDown/Animations/PilotDownWalk");
+                    }
+                    else if(shootDir == "right")
+                    {
+                        texture = content.Load<Texture2D>("TopDown/Animations/PilotRightWalk");
+                    }
+                    else if(shootDir == "left")
+                    {
+                        texture = content.Load<Texture2D>("TopDown/Animations/PilotLeftWalk");
+                    }
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(0, 0);
+                    SheetSize = new Point(3, 1);
+                    fpms = 120;
+                    break;
+                case AnimationStates.Shooting:
+                    texture = content.Load<Texture2D>("TopDown/Animations/PlayerShoot");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(0, 0);
+                    SheetSize = new Point(4, 1);
+                    fpms = 95;
+                    break;
+            }
 
-            //animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, Position);
+            bool isRight = true, isLeft = false, isUp = false, isDown = false;
+            if (animManager != null)
+            {
+                isRight = animManager.isRight;
+                isLeft = animManager.isLeft;
+                isUp = animManager.isUp;
+                isDown = animManager.isDown;
+            }
 
-            //animManager.isRight = isRight;
-            //animManager.isLeft = isLeft;
-            //animManager.isUp = isUp;
-            //animManager.isDown = isDown;
+            animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, new Vector2(rectangle.X, rectangle.Y));
+
+            animManager.isRight = isRight;
+            animManager.isLeft = isLeft;
+            animManager.isUp = isUp;
+            animManager.isDown = isDown;
         }
         #endregion
 
@@ -234,7 +251,7 @@ namespace AUTO_Matic.TopDown
             lowerBound = bounds.Height + (bounds.Height * -(levelInY - 1));
             this.bounds = bounds;
             this.content = Content;
-            
+            ChangeAnimation();
         }
 
         public void GenerateMap(bool xLevel, bool yLevel, bool dLevel)
@@ -715,7 +732,7 @@ namespace AUTO_Matic.TopDown
 
                 }
             }
-
+            animManager.Update(gameTime, new Vector2(rectangle.X, rectangle.Y - (64 - rectangle.Height)));
         }
 
         private void Input(List<TDEnemy> enemies)
@@ -732,26 +749,43 @@ namespace AUTO_Matic.TopDown
             if (kb.IsKeyDown(Keys.D) || controllerMoveDir.X > 0 /*&& controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
             {
                 velocity.X += moveSpeed;
-                if(!lockDir)
+                if(!lockDir && shootDir != "right")
+                {
                     shootDir = "right";
+
+                    ChangeAnimation();
+                }
+                    
             }
             if (kb.IsKeyDown(Keys.A) || controllerMoveDir.X  < 0/* && controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
             {
                 velocity.X += -moveSpeed;
-                if (!lockDir)
+                if (!lockDir && shootDir != "left")
+                {
                     shootDir = "left";
+                    ChangeAnimation();
+                }
+                   
             }
             if (kb.IsKeyDown(Keys.W) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y > 0 /*&& controllerMoveDir.X > -.6*/)
             {
                 velocity.Y += -moveSpeed;
-                if (!lockDir)
+                if (!lockDir && shootDir != "up")
+                {
                     shootDir = "up";
+                    ChangeAnimation();
+                }
+                  
             }
             if (kb.IsKeyDown(Keys.S) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y < 0 /*&& controllerMoveDir.X > -.6*/ )
             {
                 velocity.Y += moveSpeed;
-                if (!lockDir)
+                if (!lockDir && shootDir != "down")
+                {
                     shootDir = "down";
+                    ChangeAnimation();
+                }
+                    
             }
 
             if(kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D))
@@ -1367,8 +1401,9 @@ namespace AUTO_Matic.TopDown
             //    animManager.Draw(spriteBatch, Color.White);
             //}
 
-            spriteBatch.Draw(texture, MeleeHitbox, Color.White);
-            spriteBatch.Draw(texture, rectangle, Color.White);
+            spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"), MeleeHitbox, Color.White);
+            //spriteBatch.Draw(texture, rectangle, Color.White);
+            animManager.Draw(spriteBatch, Color.White);
 
             foreach(Bullet bullet in bullets)
             {

@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using AUTO_Matic.SideScroll.Enemy;
 using AUTO_Matic.Scripts;
 using AUTO_Matic.SideScroll;
+using AUTO_Matic;
+using AUTO_Matic.Scripts.Effects;
 
 namespace AUTO_Matic.Scripts.SideScroll.Enemy
 {
@@ -22,7 +24,15 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         public EnemyStates enemyState = EnemyStates.Idle;
         public EnemyStates prevState;
 
+        int growthRate = 5;
+        ParticleManager particles;
 
+        List<Bullet> bullets = new List<Bullet>();
+        List<Explosion> explosions = new List<Explosion>();
+        float attackDist = 64 * 2.5f;
+        float iShootDelay;
+        float shootDelay = 1.35f; 
+        float bulletTravelDist;
         Rectangle enemyRect;
         float moveSpeed = .5f;
         int unblockedCount = 0;
@@ -215,6 +225,10 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             animState = AnimationStates.Walking;
             animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, new Vector2(enemyRect.X, enemyRect.Y));
             ChangeAnimation();
+            particles = new ParticleManager();
+            particles.Initialize(contentManager.Load<Texture2D>(@"Textures\white"));
+          
+            iShootDelay = shootDelay;
         }
 
         public void Update(GameTime gameTime, Vector2 gravity, SSPlayer player, SideTileMap map, Rectangle currBounds)
@@ -224,37 +238,37 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             blockRight = false;
             blockTop = false;
             //yOffset = 64 * 3;
-            switch(enemyState)
+            switch (enemyState)
             {
                 case EnemyStates.Idle:
                     if (groundRect == Rectangle.Empty)
                     {
-                        groundRect = new Rectangle(enemyRect.X + enemyRect.Width / 2, enemyRect.Bottom - enemyRect.Height/2, enemyRect.Width, enemyRect.Height/2);
+                        groundRect = new Rectangle(enemyRect.X + enemyRect.Width / 2, enemyRect.Bottom - enemyRect.Height / 2, enemyRect.Width, enemyRect.Height / 2);
                     }
                     //groundRect = enemyRect;
                     foreach (Rectangle rect in vision)
                     {
-                        if(rect.Intersects(player.playerRect))
+                        if (rect.Intersects(player.playerRect))
                         {
-                           // bool found = false;
-                            
-                                //foreach (GroundTile ground in map.GetGroundTiles())
-                                //{
-                                //    if (groundRect.TouchTopOf(ground.Rectangle))
-                                //    {
-                                //        groundRect = ground.Rectangle;
-                                //        //found = true;
-                                //        break;
-                                //    }
-                                //}
-                            
-                            
+                            // bool found = false;
+
+                            //foreach (GroundTile ground in map.GetGroundTiles())
+                            //{
+                            //    if (groundRect.TouchTopOf(ground.Rectangle))
+                            //    {
+                            //        groundRect = ground.Rectangle;
+                            //        //found = true;
+                            //        break;
+                            //    }
+                            //}
+
+
 
                             velocity = new Vector2(0, -launchStr);
                             initYPos = pos.Y;
                             prevState = enemyState;
                             enemyState = EnemyStates.Launch;
-                           
+
                         }
                     }
                     break;
@@ -266,17 +280,17 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                     {
                         if (groundRect.TouchTopOf(ground.Rectangle))
                         {
-                           
+
                             groundRect = new Rectangle(groundRect.X, ground.Rectangle.Y - groundRect.Height, groundRect.Width, groundRect.Height);
                             collisionRect = groundRect;
                             collisionRect.Width /= 2;
                             //collisionRect.X += collisionRect.Width / 2;
-                          groundRect = new Rectangle(enemyRect.X, enemyRect.Y + groundRect.Height / 2,
-                                groundRect.Width, groundRect.Height);
+                            groundRect = new Rectangle(enemyRect.X, enemyRect.Y + groundRect.Height / 2,
+                                  groundRect.Width, groundRect.Height);
                             break;
                         }
                     }
-                    foreach(PlatformTile platform in map.GetPlatformTiles())
+                    foreach (PlatformTile platform in map.GetPlatformTiles())
                     {
                         if (groundRect.TouchTopOf(platform.Rectangle))
                         {
@@ -285,7 +299,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                             collisionRect = groundRect;
                             collisionRect.Width /= 2;
                             //collisionRect.X += collisionRect.Width / 2;
-                            groundRect = new Rectangle(enemyRect.X , enemyRect.Y + groundRect.Height / 2,
+                            groundRect = new Rectangle(enemyRect.X, enemyRect.Y + groundRect.Height / 2,
                                 groundRect.Width, groundRect.Height);
                             break;
                         }
@@ -297,7 +311,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                         velocity = Vector2.Zero;
                     }
 
-                    if(groundRect.Y > collisionRect.Y)
+                    if (groundRect.Y > collisionRect.Y)
                     {
                         collisionRect.Y = enemyRect.Y + collisionRect.Height;
                     }
@@ -342,13 +356,13 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                         }
                     }
 
-               
-                    #region Basic Movement
-                   
 
-                    if((int)pos.X < (int)player.Position.X)
+                    #region Basic Movement
+
+
+                    if ((int)pos.X < (int)player.Position.X)
                     {
-                        if(velocity.X < 0)
+                        if (velocity.X < 0)
                         {
                             velocity.X = -velocity.X;
                             velocity.X += moveSpeed;
@@ -358,15 +372,15 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                                 velocity.X = maxSpeed;
                             }
 
-                            if(pos.X + velocity.X > player.Position.X)
+                            if (pos.X + velocity.X > player.Position.X)
                             {
                                 velocity.X = 0;
                             }
                         }
-                        else if(velocity.X >= 0)
+                        else if (velocity.X >= 0)
                         {
                             velocity.X += moveSpeed;
-                            if(velocity.X > maxSpeed)
+                            if (velocity.X > maxSpeed)
                             {
                                 velocity.X = maxSpeed;
                             }
@@ -376,27 +390,27 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                                 velocity.X = 0;
                             }
                         }
-                    
+
 
 
                     }
-                    else if((int)pos.X > (int)player.Position.X)
+                    else if ((int)pos.X > (int)player.Position.X)
                     {
-                        if(velocity.X > 0)
+                        if (velocity.X > 0)
                         {
                             velocity.X = -velocity.X;
-                            velocity.X -= moveSpeed/2;
+                            velocity.X -= moveSpeed / 2;
 
-                            if(velocity.X < -maxSpeed)
+                            if (velocity.X < -maxSpeed)
                             {
                                 velocity.X = -maxSpeed;
                             }
                         }
-                        else if(velocity.X <= 0)
+                        else if (velocity.X <= 0)
                         {
-                            velocity.X -= moveSpeed/2;
+                            velocity.X -= moveSpeed / 2;
 
-                            if(velocity.X < -maxSpeed)
+                            if (velocity.X < -maxSpeed)
                             {
                                 velocity.X = -maxSpeed;
                             }
@@ -429,32 +443,32 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
                     if (MathHelper.Distance(enemyRect.Y + velocity.Y, player.playerRect.Y) > yOffset && !blockBottom)
                     {
-                        if(velocity.Y < 0)
+                        if (velocity.Y < 0)
                         {
                             velocity.Y = -velocity.Y;
                         }
-                        velocity.Y += moveSpeed/2;
-                        if(velocity.Y > maxSpeed/1.5f)
+                        velocity.Y += moveSpeed / 2;
+                        if (velocity.Y > maxSpeed / 1.5f)
                         {
-                            velocity.Y = maxSpeed/1.5f;
+                            velocity.Y = maxSpeed / 1.5f;
                         }
 
-                        if(MathHelper.Distance(enemyRect.Y + velocity.Y, player.playerRect.Y) < yOffset)
+                        if (MathHelper.Distance(enemyRect.Y + velocity.Y, player.playerRect.Y) < yOffset)
                         {
                             velocity.Y = 0;
                         }
                     }
                     else if (MathHelper.Distance(enemyRect.Y + velocity.Y, player.playerRect.Y) < yOffset && !blockTop)
                     {
-                        if(velocity.Y > 0)
+                        if (velocity.Y > 0)
                         {
                             velocity.Y = -velocity.Y;
                         }
-                        
-                        velocity.Y -= moveSpeed/2;
-                        if(velocity.Y < -maxSpeed/1.5f)
+
+                        velocity.Y -= moveSpeed / 2;
+                        if (velocity.Y < -maxSpeed / 1.5f)
                         {
-                            velocity.Y = -maxSpeed/1.5f;
+                            velocity.Y = -maxSpeed / 1.5f;
                         }
 
                         if (MathHelper.Distance(enemyRect.Y + velocity.Y, player.playerRect.Y) > yOffset)
@@ -479,20 +493,91 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                     pos += velocity;
                     #endregion
 
-              
 
+                    if (groundRect.Intersects(player.playerRect) || MathHelper.Distance(enemyRect.Center.X, player.playerRect.Center.X) < attackDist)
+                    {
+                        enemyState = EnemyStates.Attacking;
+                    }
 
+                    break;
+                case EnemyStates.Attacking:
+                    shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                    if (shootDelay <= 0)
+                    {
+                        Vector2 targetDir = new Vector2(player.playerRect.X + player.playerRect.Width / 2, player.playerRect.Y + player.playerRect.Height / 2) -
+                          new Vector2(enemyRect.Center.X, enemyRect.Center.Y);
+                        float angle = (float)Math.Atan2(targetDir.Y, targetDir.X);
+                        LaunchBomb(player, angle);
+                    }
+
+                    if(MathHelper.Distance(enemyRect.Center.X, player.playerRect.Center.X) > attackDist)
+                    {
+                        enemyState = EnemyStates.GoTo;
+                    }
                     break;
             }
 
-            if(groundRect.Y > currBounds.Bottom)
+            UpdateBombs(gameTime, player);
+            particles.Update(gameTime);
+            if (groundRect.Y > currBounds.Bottom)
             {
-                groundRect = new Rectangle(enemyRect.X + enemyRect.Width / 2, enemyRect.Bottom - enemyRect.Height / 2, 
+                groundRect = new Rectangle(enemyRect.X + enemyRect.Width / 2, enemyRect.Bottom - enemyRect.Height / 2,
                     enemyRect.Width, enemyRect.Height / 2);
             }
 
             enemyRect = new Rectangle((int)pos.X, (int)pos.Y, pixelSize, pixelSize);
             animManager.Update(gameTime, new Vector2(enemyRect.X, enemyRect.Y));
+            
+        }
+
+        private void UpdateBombs(GameTime gameTime, SSPlayer player)
+        {
+            for (int i = bullets.Count - 1; i >= 0; i--)
+            {
+                bullets[i].Update();
+                if (bullets[i].delete || player.playerRect.Contains(bullets[i].rect.Center))
+                {
+                    explosions.Add(new Explosion(new Circle(new Vector2(bullets[i].rect.X, bullets[i].rect.Y), bullets[i].rect.Width),
+                       growthRate, (int)(bullets[i].rect.Width * 2.5f)));
+
+                    int radiusDif = explosions[explosions.Count - 1].maxSize - explosions[explosions.Count - 1].rect.Radius;
+
+                    particles.MakeExplosion(explosions[explosions.Count - 1].rect.Bounds,
+                        new Rectangle(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif, explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif,
+                        explosions[explosions.Count - 1].rect.Bounds.Width + radiusDif, explosions[explosions.Count - 1].rect.Bounds.Height + radiusDif),
+                        20);
+
+                    bullets.RemoveAt(i);
+                }
+            }
+
+            for (int i = explosions.Count - 1; i >= 0; i--)
+            {
+                explosions[i].Update(gameTime);
+                if (explosions[i].rect.Radius >= explosions[i].maxSize)
+                {
+                    //particles.CreateEffect(20);
+
+                    explosions.RemoveAt(i);
+
+                }
+            }
+        }
+
+        private void LaunchBomb(SSPlayer ssPlayer, float angle)
+        {
+                shootDelay = iShootDelay;
+                bulletTravelDist = DistForm(ssPlayer.playerRect.Center.ToVector2(), enemyRect.Center.ToVector2());
+
+                Vector2 bossPos = new Vector2(enemyRect.Center.X - ssPlayer.playerRect.Width / 2, enemyRect.Center.Y - ssPlayer.playerRect.Height / 2);
+
+                float bulletSpeedX = (float)Math.Cos((double)angle) * 2;
+                float bulletSpeedY = (float)Math.Sin((double)angle) * 2;
+
+                bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
+                    content, true, bulletTravelDist, true, bulletSpeedY, size: 21));
+            
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -504,6 +589,18 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             //spriteBatch.Draw(texture, enemyRect, Color.White);
             //spriteBatch.Draw(texture, groundRect, Color.White);
             spriteBatch.Draw(collisionTexture, collisionRect, Color.Blue);
+
+            for (int i = 0; i < bullets.Count; i++)
+            {
+                bullets[i].Draw(spriteBatch);
+            }
+
+            for (int i = 0; i < explosions.Count; i++)
+            {
+                explosions[i].Draw(spriteBatch, content);
+            }
+
+            particles.Draw(spriteBatch);
             //spriteBatch.Draw(texture, HitBox, Color.BlueViolet);
             //foreach (Bullet bullet in bullets)
             //{
@@ -634,5 +731,46 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
            
         }
+        int DistForm(Vector2 pos1, Vector2 pos2)
+        {
+            int num = (int)Math.Sqrt(Math.Pow(pos2.X - pos1.X, 2) + Math.Pow(pos2.Y - pos1.Y, 2));
+            return num;
+
+        }
+    }
+
+
+}
+
+class Explosion
+{
+    public Circle rect;
+    public int growthRate;
+    public int maxSize;
+    //public ParticleManager particles;
+
+    public Explosion(Circle rect, int rate, int max)
+    {
+        this.rect = rect;
+        growthRate = rate;
+        maxSize = max;
+        //particles.CreateEffect(20);
+    }
+
+    public void Update(GameTime gameTime)
+    {
+        if (rect.Radius < maxSize)
+        {
+            rect.Radius += growthRate;
+            rect.Position = new Vector2(rect.Bounds.X - growthRate, rect.Bounds.Y - growthRate);
+        }
+
+
+
+    }
+
+    public void Draw(SpriteBatch spriteBatch, ContentManager content)
+    {
+        //spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect.Bounds, Color.FloralWhite * .25f);
     }
 }
