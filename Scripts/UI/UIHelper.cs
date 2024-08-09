@@ -161,7 +161,13 @@ namespace AUTO_Matic
         public static void UpdateHealthBar(UIWidget uiElement, Rectangle bounds)
         {
             if (uiElement is UITextBlock)
-                ((UITextBlock)uiElement).TextureRect = new Rectangle(bounds.X, bounds.Y, ((UITextBlock)uiElement).TextureRect.Width, ((UITextBlock)uiElement).TextureRect.Height);
+            {
+                
+                    ((UITextBlock)uiElement).TextureRect = new Rectangle(bounds.X, bounds.Y, ((UITextBlock)uiElement).TextureRect.Width, ((UITextBlock)uiElement).TextureRect.Height);
+                
+              
+            }
+               
         }
 
         public static void UpdateHealthBarX(UIWidget uiElement, int xPos)

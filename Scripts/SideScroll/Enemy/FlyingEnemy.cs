@@ -543,10 +543,16 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
                     int radiusDif = explosions[explosions.Count - 1].maxSize - explosions[explosions.Count - 1].rect.Radius;
 
-                    particles.MakeExplosion(explosions[explosions.Count - 1].rect.Bounds,
-                        new Rectangle(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif, explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif,
-                        explosions[explosions.Count - 1].rect.Bounds.Width + radiusDif, explosions[explosions.Count - 1].rect.Bounds.Height + radiusDif),
+                    particles.MakeExplosion(explosions[explosions.Count - 1].rect.Bounds, 
+                        new Circle(new Vector2(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif,
+                        explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif), explosions[explosions.Count - 1].maxSize/2),
                         20);
+
+                    //particles.MakeExplosion(explosions[explosions.Count - 1].rect.Bounds, new Circle(new Vector2(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif, explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif), explosions[explosions.Count - 1].rect.Radius)
+
+                    //   new Rectangle(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif, explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif,
+                    //   explosions[explosions.Count - 1].rect.Bounds.Width + radiusDif, explosions[explosions.Count - 1].rect.Bounds.Height + radiusDif),
+                    //   20);
 
                     bullets.RemoveAt(i);
                 }

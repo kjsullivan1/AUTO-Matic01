@@ -184,6 +184,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     {
                         bossRects.Add(new BossRect(TopWalls, worldRect, "top", content));
                         TopWalls.isUsed = true;
+                       
                         break;
                     }
                     else if (!RightWalls.isUsed && num == 1)
@@ -204,7 +205,7 @@ namespace AUTO_Matic.Scripts.TopDown
                         LeftWalls.isUsed = true;
                         break;
                     }
-                    else
+                    else if(i > 3)
                     {
                         bossRects.Add(new BossRect(RightWalls, worldRect, "right", content));
                         RightWalls.isUsed = true;
@@ -212,8 +213,23 @@ namespace AUTO_Matic.Scripts.TopDown
                     }
                 }
                 
-               
+            
                 
+            }
+
+            int num1 = 1;
+            for (int i = 0; i < bossRects.Count; i++)
+            {
+                if(num1 >= 0)
+                {
+                    bossRects[i].personalityOffset = num1;
+                    num1--;
+                }
+                else
+                {
+                    bossRects[i].personalityOffset = num1;
+                }
+               
             }
 
         }
@@ -664,26 +680,25 @@ namespace AUTO_Matic.Scripts.TopDown
                     #endregion
                     #region Fire
                     case BossRect.BossState.Fire:
+                        targetDir = OffsetAim(tdPlayer, boss);
 
-                        targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2) -
-                            new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
                         boss.angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X)));
-                       
+
                         bossPos = new Vector2((boss.rect.X + boss.rect.Width / 2) - tdPlayer.rectangle.Width / 2,
                            (boss.rect.Y + boss.rect.Height / 2) - tdPlayer.rectangle.Height / 2);
-                        
-                        boss.chargeTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                      //Charge time is being used in the method as it delays and tracks until fire
 
-                        if(boss.fireTime > 0)
+                        boss.chargeTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                        //Charge time is being used in the method as it delays and tracks until fire
+
+                        if (boss.fireTime > 0)
                         {
                             boss.rotateAngle = (float)Math.Atan2(targetDir.Y, targetDir.X);
                             boss.bulletRects.Clear();
-                            SetRay(boss.rotateAngle, tdPlayer, boss, bossPos,gameTime);
+                            SetRay(boss.rotateAngle, targetDir,tdPlayer, boss, bossPos, gameTime);
                         }
-                      
 
-                        if(boss.chargeTime <= 0 && boss.fireTime < 0)
+
+                        if (boss.chargeTime <= 0 && boss.fireTime < 0)
                         {
                             boss.lingerTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                             if (boss.lingerTime <= 0)
@@ -764,15 +779,15 @@ namespace AUTO_Matic.Scripts.TopDown
                                             LeftWalls.isUsed = true;
                                         }
                                     }
-                                    
+
                                 }
                                 boss.chargeTime = RandFloat(boss.chargeTimeMin, boss.chargeTimeMax);
                                 boss.state = BossRect.BossState.Idle;
                             }
                         }
 
-                       
-                       
+
+
                         break;
                         #endregion
                 }
@@ -795,6 +810,72 @@ namespace AUTO_Matic.Scripts.TopDown
                 }
             }
         }
+
+        private static Vector2 OffsetAim(TDPlayer tdPlayer, BossRect boss)
+        {
+            Vector2 targetDir;
+            //If personalityOffset is greater than 0, Lead the shot in the direction the player is facing
+            if (boss.personalityOffset > 0)
+            {
+                switch (tdPlayer.shootDir)
+                {
+                    case "right":
+                        targetDir = new Vector2(tdPlayer.rectangle.Right, tdPlayer.rectangle.Center.Y) -
+                   new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+                        break;
+                    case "left":
+                        targetDir = new Vector2(tdPlayer.rectangle.Left, tdPlayer.rectangle.Center.Y) -
+                  new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+                        break;
+                    case "up":
+                        targetDir = new Vector2(tdPlayer.rectangle.Center.X, tdPlayer.rectangle.Y) -
+                  new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+                        break;
+                    case "down":
+                        targetDir = new Vector2(tdPlayer.rectangle.Center.X, tdPlayer.rectangle.Bottom) -
+        new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+                        break;
+                    default:
+                        targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2) -
+                   new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+                        break;
+                }
+            }
+            else if (boss.personalityOffset < 0) //If it less than 0, shoot behind the player 
+            {
+                switch (tdPlayer.shootDir)
+                {
+                    case "right":
+                        targetDir = new Vector2(tdPlayer.rectangle.Left, tdPlayer.rectangle.Center.Y) -
+              new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+                        break;
+                    case "left":
+                        targetDir = new Vector2(tdPlayer.rectangle.Right, tdPlayer.rectangle.Center.Y) -
+                 new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+                        break;
+                    case "up":
+                        targetDir = new Vector2(tdPlayer.rectangle.Center.X, tdPlayer.rectangle.Bottom) -
+                 new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+                        break;
+                    case "down":
+                        targetDir = new Vector2(tdPlayer.rectangle.Center.X, tdPlayer.rectangle.Y) -
+                 new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+                        break;
+                    default:
+                        targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2) -
+                   new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+                        break;
+                }
+            }
+            else //If it is 0 target headON
+            {
+                targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2) -
+                  new Vector2(boss.rect.X + boss.rect.Width / 2, boss.rect.Y + boss.rect.Height / 2);
+            }
+
+            return targetDir;
+        }
+
         private static void MoveInWall(TDPlayer tdPlayer, BossRect boss, Vector2 bossPos)
         {
             switch (boss.side)
@@ -1382,7 +1463,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
         }
 
-        void SetRay(float angle, TDPlayer playerRect, BossRect boss, Vector2 bossPos, GameTime gameTime)
+        void SetRay(float angle, Vector2 shootPos,TDPlayer playerRect, BossRect boss, Vector2 bossPos, GameTime gameTime)
         {
           
             int size = 64;
@@ -1405,7 +1486,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 boss.fireTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                 float bulletSpeedX = (float)Math.Cos((double)angle) * 8;
                 float bulletSpeedY = (float)Math.Sin((double)angle) * 8;
-                boss.bullets.Add(new Bullet(new Vector2(boss.rect.Center.X, boss.rect.Center.Y), bulletSpeedX,
+                boss.bullets.Add(new Bullet(new Vector2(boss.destRect.X, boss.destRect.Y), bulletSpeedX,
                     new Vector2(bulletSpeedX, bulletSpeedY), content, true, bounds.Width, true, bulletSpeedY, size: 30));
 
 
@@ -1640,6 +1721,8 @@ namespace AUTO_Matic.Scripts.TopDown
 
         public float chargeTime;
         public float shootDelay;
+
+        public float personalityOffset;// used to adjust aim
 
         public Vector2 velocity;
         public Vector2 moveDir;

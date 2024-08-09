@@ -48,17 +48,21 @@ namespace AUTO_Matic.Scripts.Effects
             //}
         }
 
-        public void MakeExplosion(Rectangle startRect, Rectangle boundRect, int width)
+        public void MakeExplosion(Rectangle startRect, Circle boundRect, int width)
         {
             particles.Clear();
             for(int i = 0; i < particleCount; i++)
             {
-                particles.Add(new Particle(startRect, rand, width));
+                //particles.Add(new Particle(new Rectangle(startRect.X + startRect.Width/2, startRect.Y - 1, startRect.Width, startRect.Height), 
+                //    rand, width));
+                particles.Add(new Particle(startRect,
+                    rand, width));
             }
 
             ParticleEffect effect;
             effect.particles = particles;
-            effect.boundingRect = boundRect;
+            effect.boundingRect = new Rectangle();
+            effect.boundingCircle = boundRect;
 
             particleEffects.Add(effect);
 
@@ -85,8 +89,8 @@ namespace AUTO_Matic.Scripts.Effects
                     particleEffects[j].particles[i].rect = new Rectangle((int)particleEffects[j].particles[i].position.X, (int)particleEffects[j].particles[i].position.Y,
                        particleEffects[j].particles[i].rect.Width, particleEffects[j].particles[i].rect.Height);
 
-                    if (!particleEffects[j].boundingRect.Contains(particleEffects[j].particles[i].position.ToPoint()) ||
-                        particleEffects[j].particles[i].duration <= 0)
+                    if (/*!particleEffects[j].boundingRect.Contains(particleEffects[j].particles[i].position.ToPoint())*/ 
+                        !CollideCircle(particleEffects[j].boundingCircle, particleEffects[j].particles[i]) )
                     {
                         particleEffects[j].particles.RemoveAt(i);
                     }
@@ -107,6 +111,17 @@ namespace AUTO_Matic.Scripts.Effects
             //}
         }
         #endregion
+
+        public bool CollideCircle(Circle pos, Particle particle)
+        {
+            float num = (pos.Bounds.Center.ToVector2() - particle.rect.Center.ToVector2()).Length();
+            if ( num < (pos.Bounds.Center.X + particle.rect.Center.X)/50)
+            {
+                return true;
+            }
+            else
+                return false;
+        }
 
         #region Draw
         public void Draw(SpriteBatch spriteBatch)
@@ -173,6 +188,7 @@ namespace AUTO_Matic.Scripts.Effects
     {
         public List<Particle> particles;
         public Rectangle boundingRect;
+        public Circle boundingCircle;
     }
 
     class Particle

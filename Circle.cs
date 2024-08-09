@@ -25,6 +25,10 @@ namespace AUTO_Matic
             set { Bounds = value; }
         }
 
+
+ 
+
+
         public void SetWidth(int width)
         {
             widthOffset += width;

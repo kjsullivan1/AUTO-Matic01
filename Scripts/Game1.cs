@@ -37,7 +37,7 @@ namespace AUTO_Matic
         Rectangle LeaveDungeon;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.TitleScreen;
+        public Scenes currScene = Scenes.InGame;
 
         public enum GameStates { SideScroll, TopDown, Paused, FinalBoss}
         public GameStates GameState = GameStates.SideScroll;
@@ -112,7 +112,7 @@ namespace AUTO_Matic
         bool fade = true;
         bool canChange = false;
         bool doorTrans = false;
-        float rate = .0099f;
+        float rate = .015f;//.0099
         float iRate = 1;
         float sRate = 0;
         Vector2 fadePos = Vector2.Zero;
@@ -238,56 +238,7 @@ namespace AUTO_Matic
                 //LoadFinalBoss();
             }
 
-            //dungeons.Add(SideTileMap.DungeonEntrances[0]);
-            //for (int j = 1; j < SideTileMap.DungeonEntrances.Count; j++)
-            //{
-            //    if (dungeons[0].Rectangle.X > SideTileMap.DungeonEntrances[j].Rectangle.X)
-            //    {
-            //        dungeons.Clear();
-            //        dungeons.Add(SideTileMap.DungeonEntrances[j]);
-            //    }
-            //}
-
-            //dungeons = SideTileMap.DungeonEntrances;
-            //dungeons.Sort();
-
-            //DungeonEntrance closest = SideTileMap.DungeonEntrances[0];
-            //DungeonEntrance furthest = SideTileMap.DungeonEntrances[0];
-            //while(dungeons.Count != SideTileMap.DungeonEntrances.Count - 1)
-            //{
-            //    for (int i = 0; i < SideTileMap.DungeonEntrances.Count; i++)
-            //    {
-            //        //closest = SideTileMap.DungeonEntrances[i];
-            //        if (!dungeons.Contains(SideTileMap.DungeonEntrances[i]))
-            //        {
-            //            for (int j = 0; j < SideTileMap.DungeonEntrances.Count; j++)
-            //            {
-            //                if(!dungeons.Contains(SideTileMap.DungeonEntrances[j]))
-            //                {
-            //                    if (SideTileMap.DungeonEntrances[i].Rectangle.X < SideTileMap.DungeonEntrances[j].Rectangle.X)
-            //                    {
-            //                        closest = SideTileMap.DungeonEntrances[i];
-            //                    }
-            //                    else if (SideTileMap.DungeonEntrances[i].Rectangle.X > SideTileMap.DungeonEntrances[j].Rectangle.X)
-            //                    {
-            //                        closest = SideTileMap.DungeonEntrances[j];
-            //                        //furthest = SideTileMap.DungeonEntrances[]
-            //                    }
-            //                    else if (furthest.Rectangle.X < SideTileMap.DungeonEntrances[j].Rectangle.X)
-            //                    {
-            //                        furthest = SideTileMap.DungeonEntrances[j];
-            //                    }
-            //                }
-                       
-            //            }
-            //        }
-            //    }
-            //    if(dungeons.Contains(closest) == false)
-            //        dungeons.Add(closest);
-                
-            //}
-            //if (dungeons.Contains(furthest) == false)
-            //    dungeons.Add(furthest);
+           
 
 
 
@@ -446,10 +397,10 @@ namespace AUTO_Matic
                     }
                 }
                 //shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
-              //laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims, GraphicsDevice);
+              laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims, GraphicsDevice);
                //slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
-                bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer, GraphicsDevice, 
-                    Content.Load<Effect>(@"Effects\Particles"), Content.Load<Texture2D>(@"Textures\white"));
+                //bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer, GraphicsDevice, 
+                //    Content.Load<Effect>(@"Effects\Particles"), Content.Load<Texture2D>(@"Textures\white"));
 
                 //for(int i = 0; i <= 4; i++)
                 //{
@@ -621,28 +572,81 @@ namespace AUTO_Matic
             Tile.Content = Content;
 
             string filePath = Content.RootDirectory + "/SideScroll/Maps/Map3.txt";
+
+            //dungeons.Add(SideTileMap.DungeonEntrances[0]);
+            //for (int j = 1; j < SideTileMap.DungeonEntrances.Count; j++)
+            //{
+            //    if (dungeons[0].Rectangle.X > SideTileMap.DungeonEntrances[j].Rectangle.X)
+            //    {
+            //        dungeons.Clear();
+            //        dungeons.Add(SideTileMap.DungeonEntrances[j]);
+            //    }
+            //}
+
+            //dungeons = SideTileMap.DungeonEntrances;
+            //dungeons.Sort();
+
+           
+
             SideTileMap.LoadMap(filePath);
             flyingEnemies.Clear();
             enemies.Clear();
-            int j = 1;
+            int k = 1;
             for(int i = 0; i < SideTileMap.enemySpawns.Count - 1; i++)
             {
                 flyingEnemies.Add(new FlyingEnemy(Content, 5, SideTileMap.enemySpawns[i]));
-                //if (j == 1)
+                //if (k == 1)
                 //    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
-                //else if(j == 2)
+                //else if (k == 2)
                 //{
                 //    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], false));
                 //}
-                //else if(j == 3)
+                //else if (k == 3)
                 //{
                 //    flyingEnemies.Add(new FlyingEnemy(Content, 5, SideTileMap.enemySpawns[i]));
-                //    j = 0;
+                //    k = 0;
                 //}
 
-                j++;
+                k++;
 
             }
+            DungeonEntrance closest = SideTileMap.DungeonEntrances[0];
+            DungeonEntrance furthest = SideTileMap.DungeonEntrances[0];
+            while (dungeons.Count < SideTileMap.DungeonEntrances.Count - 1)
+            {
+                for (int i = 0; i < SideTileMap.DungeonEntrances.Count; i++)
+                {
+                    //closest = SideTileMap.DungeonEntrances[i];
+                    if (!dungeons.Contains(SideTileMap.DungeonEntrances[i]))
+                    {
+                        for (int j = 0; j < SideTileMap.DungeonEntrances.Count; j++)
+                        {
+                            if (!dungeons.Contains(SideTileMap.DungeonEntrances[j]))
+                            {
+                                if (SideTileMap.DungeonEntrances[i].Rectangle.X < SideTileMap.DungeonEntrances[j].Rectangle.X)
+                                {
+                                    closest = SideTileMap.DungeonEntrances[i];
+                                }
+                                else if (SideTileMap.DungeonEntrances[i].Rectangle.X > SideTileMap.DungeonEntrances[j].Rectangle.X)
+                                {
+                                    closest = SideTileMap.DungeonEntrances[j];
+                                    //furthest = SideTileMap.DungeonEntrances[]
+                                }
+                                else if (furthest.Rectangle.X < SideTileMap.DungeonEntrances[j].Rectangle.X)
+                                {
+                                    furthest = SideTileMap.DungeonEntrances[j];
+                                }
+                            }
+
+                        }
+                    }
+                }
+                if (dungeons.Contains(closest) == false)
+                    dungeons.Add(closest);
+
+            }
+            if (dungeons.Contains(furthest) == false && dungeons.Count != SideTileMap.DungeonEntrances.Count)
+                dungeons.Add(furthest);
 
             //camera.Zoom = 1.35f;
 
@@ -653,7 +657,7 @@ namespace AUTO_Matic
             ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0,0),
                 (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
             ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
-            //ssCamera.Zoom = 1.35f;
+            //ssCamera.Zoom = .5f;
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
            
@@ -1344,10 +1348,10 @@ namespace AUTO_Matic
                                     #endregion
 
                                     #region LaserBoss
-                                    //laserBoss.Update(gameTime, tdPlayer, tdMap);
+                                    laserBoss.Update(gameTime, tdPlayer, tdMap);
                                     #endregion
                                     #region BombBoss
-                                    bombBoss.Update(gameTime, tdMap, tdPlayer);
+                                    //bombBoss.Update(gameTime, tdMap, tdPlayer);
                                     #endregion
                                     #region SlamBoss
                                     //slamBoss.Update(gameTime, tdPlayer, tdMap);
@@ -1740,15 +1744,15 @@ namespace AUTO_Matic
                                 Window.Title = " ";
                                 //float[] angles = new float[laserBoss.bossRects.Count];
                                 #region LaserBoss
-                                //for (int i = 0; i < laserBoss.bossRects.Count; i++)
-                                //{
-                                //    //angles[i] = laserBoss.bossRects[i].angle;
-                                //    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
+                                for (int i = 0; i < laserBoss.bossRects.Count; i++)
+                                {
+                                    //angles[i] = laserBoss.bossRects[i].angle;
+                                    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
 
-                                //}
-                                //laserBoss.Draw(spriteBatch);
+                                }
+                                laserBoss.Draw(spriteBatch);
                                 #endregion
-                                bombBoss.Draw(spriteBatch);
+                                //`bombBoss.Draw(spriteBatch);
                                 //Window.Title = "Angle: " + bombBoss.angle;
                                 //slamBoss.Draw(spriteBatch);
                                 //Window.Title = "Angle: " + slamBoss.angle;

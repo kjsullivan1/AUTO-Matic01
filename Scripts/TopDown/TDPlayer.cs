@@ -25,7 +25,7 @@ namespace AUTO_Matic.TopDown
         public Vector2 velocity;
         GamePadButtons currButtons;
         GamePadButtons prevButtons;
-        public int bossRoom = 1;
+        public int bossRoom = 3;
         bool lockDir = false;
         Vector2 startPos;
 
@@ -144,7 +144,7 @@ namespace AUTO_Matic.TopDown
         int pixelSize = 32;
         TopDownMap map;
         Rectangle bounds;
-        string shootDir = "right";
+        public string shootDir = "right";
         float health = 5;
         public bool damaged = false;
         public float Health

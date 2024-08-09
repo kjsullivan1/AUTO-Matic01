@@ -1478,7 +1478,7 @@ namespace AUTO_Matic.SideScroll
                                     new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                                 break;
                             case WeaponType.Shotgun:
-                                bulletTravelDist = 64 * 1f;
+                                bulletTravelDist = 64 * 1.5f;
                                 bulletSpeed = 3.5f * 2;
 
                                 //Top 
@@ -1509,6 +1509,19 @@ namespace AUTO_Matic.SideScroll
             if (kb.IsKeyUp(Keys.S) && controllerMoveDir.Y > -.9)
             {
                 weaponWheel.active = false;
+            }
+
+            //Weapon Wheel actions
+            if(weaponWheel.active)
+            {
+                if(kb.IsKeyDown(Keys.NumPad2))
+                {
+                    currWeapon = WeaponType.Shotgun;            
+                }
+                else if(kb.IsKeyDown(Keys.NumPad5))
+                {
+                    currWeapon = WeaponType.Pistol;
+                }
             }
             prevKb = kb;
             prevControllerBtn = currControllerBtn;
