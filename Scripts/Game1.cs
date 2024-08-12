@@ -139,12 +139,16 @@ namespace AUTO_Matic
 
         List<FlyingEnemy> flyingEnemies = new List<FlyingEnemy>();
 
+        List<FlyingControlBeacon> flyingBeacons = new List<FlyingControlBeacon>();
+
         Rectangle tdPrevBounds = Rectangle.Empty;
         MapBuilder mapBuilder;
         FinalBoss finalBoss;
 
         int dungeonNum = 0;
-      
+
+       
+
         class Door
         {
             BottomDoorTile bottomDoor;
@@ -396,8 +400,8 @@ namespace AUTO_Matic
                         }
                     }
                 }
-                //shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
-              laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims, GraphicsDevice);
+                shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
+              //laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims, GraphicsDevice);
                //slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
                 //bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer, GraphicsDevice, 
                 //    Content.Load<Effect>(@"Effects\Particles"), Content.Load<Texture2D>(@"Textures\white"));
@@ -428,7 +432,7 @@ namespace AUTO_Matic
 
             SetDungeonNum();
 
-            tdPlayer = new TDPlayer(this, 64, 100, 100);
+            tdPlayer = new TDPlayer(this, 64, 200, 200);
             tdMap = new TopDownMap();
             //Boss = new Rectangle();
             levelCount = 0;
@@ -610,6 +614,7 @@ namespace AUTO_Matic
                 k++;
 
             }
+            SideTileMap.SetFlyingEnemies(flyingEnemies);
             DungeonEntrance closest = SideTileMap.DungeonEntrances[0];
             DungeonEntrance furthest = SideTileMap.DungeonEntrances[0];
             while (dungeons.Count < SideTileMap.DungeonEntrances.Count - 1)
@@ -790,51 +795,14 @@ namespace AUTO_Matic
                         case GameStates.SideScroll: //Default
                             soundManager.Update(gameTime);
                             Rectangle worldRect = new Rectangle(ssCamera.CameraBounds.X - (750 / 2), ssCamera.CameraBounds.Y - (950 / 2), ssCamera.CameraBounds.Width + 750, ssCamera.CameraBounds.Height + 950);
-                            for (int i = 0; i < SideTileMap.GroundTiles.Count - 1; i++)
-                            {
-                                if (worldRect.Intersects(SideTileMap.GroundTiles[i].Rectangle) == false)
-                                {
-                                    offScreenGround.Add(SideTileMap.GroundTiles[i]);
-                                    SideTileMap.GroundTiles.Remove(SideTileMap.GroundTiles[i]);
-                                }
+                            worldRect = CheckForTiles(worldRect); //Checks if tiles are in range to be added back
 
-
-
-                            }
-                            for(int i = offScreenGround.Count -1; i >= 0; i--)
-                            {
-                                if (worldRect.Intersects(offScreenGround[i].Rectangle))
-                                {
-                                    SideTileMap.GroundTiles.Add(offScreenGround[i]);
-                                    offScreenGround.RemoveAt(i);
-                                }
-                            }
-
-
-                            for(int i = 0; i < SideTileMap.PlatformTiles.Count - 1; i++)
-                            {
-                                if (worldRect.Intersects(SideTileMap.PlatformTiles[i].Rectangle) == false)
-                                {
-                                    offScreenPlatform.Add(SideTileMap.PlatformTiles[i]);
-                                    SideTileMap.PlatformTiles.Remove(SideTileMap.PlatformTiles[i]);
-                                }
-
-                            }
-                            for (int i = offScreenPlatform.Count - 1; i >= 0; i--)
-                            {
-                                if (worldRect.Intersects(offScreenPlatform[i].Rectangle))
-                                {
-                                    SideTileMap.PlatformTiles.Add(offScreenPlatform[i]);
-                                    offScreenPlatform.RemoveAt(i);
-                                }
-                            }
-                          
                             if (fade || doorTrans)
                             {
                                 ssCamera.Update(fadePos, dont, fade);
-                               
+
                                 ssPlayer.Update(gameTime, Gravity, enemies, true);
-                                if(fade)
+                                if (fade)
                                 {
                                     foreach (BottomDoorTile door in SideTileMap.BottomDoorTiles)
                                     {
@@ -857,21 +825,21 @@ namespace AUTO_Matic
                             else
                             {
                                 dont = false;
-                               
+
                                 foreach (BottomDoorTile door in SideTileMap.BottomDoorTiles)
                                 {
 
                                     float num = MathHelper.Distance(ssPlayer.playerRect.Center.X, door.Rectangle.Center.X);
                                     if (ssCamera.CameraBounds.Contains(door.Rectangle) && num < 64 * 12/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
                                     {
-                                    
+
                                         dont = true;
                                     }
-                                    else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 12 
+                                    else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 12
                                             /*|| ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 10*/)
                                     {
-                                     
-                                            dont = false;
+
+                                        dont = false;
                                     }
                                 }
 
@@ -896,7 +864,7 @@ namespace AUTO_Matic
                                 {
                                     ssCamera.min = 0;
                                 }
-                                
+
 
                                 if (ssPlayer.isPilot)
                                 {
@@ -906,7 +874,7 @@ namespace AUTO_Matic
                                 {
                                     ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
                                 }
-                                
+
 
 
 
@@ -932,7 +900,7 @@ namespace AUTO_Matic
                                 }
                                 ssPlayer.Update(gameTime, Gravity, enemies);
 
-                               
+
                                 for (int i = enemies.Count - 1; i >= 0; i--)
                                 {
                                     if (worldRect.Intersects(enemies[i].enemyRect) || enemies[i].enemyState != SSEnemy.EnemyStates.Idle)
@@ -969,7 +937,7 @@ namespace AUTO_Matic
                                             enemies.RemoveAt(i);
                                         }
                                     }
-                                   
+
                                 }
 
                                 for (int i = healthDrops.Count - 1; i >= 0; i--)
@@ -1001,64 +969,64 @@ namespace AUTO_Matic
                                         ssPlayer.isCollidingLeft = false;
                                     }
 
-                                    bool trueBreak = false;
-                                    foreach(Rectangle breakables in ssPlayer.breakTiles)
-                                    {
-                                        if(breakables == tile.Rectangle)
-                                        {
-                                            destroyedGround.Add(tile);
-                                            SideTileMap.GroundTiles.Remove(tile);
-                                            ssPlayer.breakTiles.Remove(breakables);
-                                            respawnDelay = respawnDelaySet;
-                                            trueBreak = true;
-                                            break;
-                                        }
-                                    }
-                                    if (trueBreak)
-                                        break;
+                                    //bool trueBreak = false;
+                                    //foreach (Rectangle breakables in ssPlayer.breakTiles)
+                                    //{
+                                    //    if (breakables == tile.Rectangle)
+                                    //    {
+                                    //        destroyedGround.Add(tile);
+                                    //        SideTileMap.GroundTiles.Remove(tile);
+                                    //        ssPlayer.breakTiles.Remove(breakables);
+                                    //        respawnDelay = respawnDelaySet;
+                                    //        trueBreak = true;
+                                    //        break;
+                                    //    }
+                                    //}
+                                    //if (trueBreak)
+                                    //    break;
                                 }
 
                                 foreach (PlatformTile tile1 in SideTileMap.PlatformTiles)
                                 {
                                     ssPlayer.Collision(tile1.Rectangle);
-                                    bool trueBreak = false;
-                                    foreach (Rectangle breakables in ssPlayer.breakTiles)
-                                    {
-                                        if (breakables == tile1.Rectangle)
-                                        {
-                                            destroyedPlatfroms.Add(tile1);
-                                            SideTileMap.PlatformTiles.Remove(tile1);
-                                            ssPlayer.breakTiles.Remove(breakables);
-                                            respawnDelay = respawnDelaySet;
-                                            trueBreak = true;
-                                            break;
-                                        }
-                                    }
-                                    if (trueBreak)
-                                        break;
+                                    //bool trueBreak = false;
+                                    //foreach (Rectangle breakables in ssPlayer.breakTiles)
+                                    //{
+                                    //    if (breakables == tile1.Rectangle)
+                                    //    {
+                                    //        destroyedPlatfroms.Add(tile1);
+                                    //        SideTileMap.PlatformTiles.Remove(tile1);
+                                    //        ssPlayer.breakTiles.Remove(breakables);
+                                    //        respawnDelay = respawnDelaySet;
+                                    //        trueBreak = true;
+                                    //        break;
+                                    //    }
+                                    //}
+                                    //if (trueBreak)
+                                    //    break;
                                 }
 
-                                if (respawnDelay > 0 && destroyedGround.Count != 0)
-                                {
-                                    respawnDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                                    if (respawnDelay <= 0)
-                                    {
-                                        SideTileMap.GroundTiles.Add(destroyedGround[0]);
-                                        destroyedGround.Remove(destroyedGround[0]);
-                                        respawnDelay = respawnDelaySet;
-                                    }
-                                }
+                                //if (respawnDelay > 0 && destroyedGround.Count != 0)
+                                //{
+                                //    respawnDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                                //    if (respawnDelay <= 0)
+                                //    {
+                                //        SideTileMap.GroundTiles.Add(destroyedGround[0]);
+                                //        destroyedGround.Remove(destroyedGround[0]);
+                                //        respawnDelay = respawnDelaySet;
+                                //    }
+                                //}
 
-                                if (respawnDelay > 0 && destroyedPlatfroms.Count != 0)
-                                {
-                                    respawnDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                                    if (respawnDelay <= 0)
-                                    {
-                                        SideTileMap.PlatformTiles.Add(destroyedPlatfroms[0]);
-                                        destroyedPlatfroms.Remove(destroyedPlatfroms[0]);
-                                        respawnDelay = respawnDelaySet;
-                                    }
-                                }
+                                //if (respawnDelay > 0 && destroyedPlatfroms.Count != 0)
+                                //{
+                                //    respawnDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                                //    if (respawnDelay <= 0)
+                                //    {
+                                //        SideTileMap.PlatformTiles.Add(destroyedPlatfroms[0]);
+                                //        destroyedPlatfroms.Remove(destroyedPlatfroms[0]);
+                                //        respawnDelay = respawnDelaySet;
+                                //    }
+                                //}
 
 
 
@@ -1095,7 +1063,7 @@ namespace AUTO_Matic
                                     }
 
                                 }
-                               
+
                                 foreach (WallTile tile2 in SideTileMap.WallTiles)
                                 {
                                     ssPlayer.Collision(tile2.Rectangle);
@@ -1109,19 +1077,41 @@ namespace AUTO_Matic
                                 {
                                     GameState = GameStates.TopDown;
                                     StartDungeon();
-                                   
+
                                 }
 
                             }
 
-                            for(int i = flyingEnemies.Count - 1; i >= 0; i--)
+                            for (int i = flyingEnemies.Count - 1; i >= 0; i--)
                             {
                                 flyingEnemies[i].Update(gameTime, Gravity, ssPlayer, SideTileMap.tileMap, ssCamera.CameraBounds);
                             }
 
+                            for(int i = flyingBeacons.Count - 1; i >= 0; i--)
+                            {
+                                if(ssCamera.CameraBounds.Intersects(flyingBeacons[i].rect))
+                                {
+                                    flyingBeacons[i].Update(ssPlayer);
+
+                                    if (flyingBeacons[i].Health <= 0)
+                                    {
+                                        for (int k = flyingBeacons[i].controlledEnemies.Count - 1; k >= 0; k--)
+                                        {
+                                            for (int j = flyingEnemies.Count - 1; j >= 0; j--)
+                                            {
+                                                if (flyingEnemies[j] == flyingBeacons[i].controlledEnemies[k])
+                                                    flyingEnemies[j].health = 0;
+                                            }
+                                        }
+                                    }
+                                }
+
+                               
+                            }
+
                             //SSCamera.Move(ssPlayer.Position);
                             break;
-#endregion
+                        #endregion
                         #region TopDown
                         case GameStates.TopDown:
                             if(fade)
@@ -1336,22 +1326,22 @@ namespace AUTO_Matic
                                 if (startBoss)
                                 {
                                     #region ShotGunBoss
-                                    //shotGunBoss.Update(gameTime, tdPlayer, tdMap);
-                                    //for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
-                                    //{
-                                    //    if (shotGunBoss != null && tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
-                                    //    {
-                                    //        shotGunBoss.Health -= tdPlayer.bulletDmg;
-                                    //        tdPlayer.bullets.RemoveAt(i);
-                                    //    }
-                                    //}
+                                    shotGunBoss.Update(gameTime, tdPlayer, tdMap);
+                                    for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                    {
+                                        if (shotGunBoss != null && tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
+                                        {
+                                            shotGunBoss.Health -= tdPlayer.bulletDmg;
+                                            tdPlayer.bullets.RemoveAt(i);
+                                        }
+                                    }
                                     #endregion
 
                                     #region LaserBoss
-                                    laserBoss.Update(gameTime, tdPlayer, tdMap);
+                                    //laserBoss.Update(gameTime, tdPlayer, tdMap);
                                     #endregion
                                     #region BombBoss
-                                    //bombBoss.Update(gameTime, tdMap, tdPlayer);
+                                   //bombBoss.Update(gameTime, tdMap, tdPlayer);
                                     #endregion
                                     #region SlamBoss
                                     //slamBoss.Update(gameTime, tdPlayer, tdMap);
@@ -1393,6 +1383,7 @@ namespace AUTO_Matic
                            
                             break;
                         #endregion
+                        #region Paused
                         case GameStates.Paused:
                             if(prevGameState == GameStates.SideScroll)
                             {
@@ -1516,8 +1507,9 @@ namespace AUTO_Matic
 
                             finalBoss.Update(gameTime, ssPlayer);
                             break;
+                            #endregion
                     }
-                    
+
 
                     break;
                 
@@ -1532,6 +1524,49 @@ namespace AUTO_Matic
             base.Update(gameTime);
         }
 
+        private Rectangle CheckForTiles(Rectangle worldRect)
+        {
+            for (int i = 0; i < SideTileMap.GroundTiles.Count - 1; i++)
+            {
+                if (worldRect.Intersects(SideTileMap.GroundTiles[i].Rectangle) == false)
+                {
+                    offScreenGround.Add(SideTileMap.GroundTiles[i]);
+                    SideTileMap.GroundTiles.Remove(SideTileMap.GroundTiles[i]);
+                }
+
+
+
+            }
+            for (int i = offScreenGround.Count - 1; i >= 0; i--)
+            {
+                if (worldRect.Intersects(offScreenGround[i].Rectangle))
+                {
+                    SideTileMap.GroundTiles.Add(offScreenGround[i]);
+                    offScreenGround.RemoveAt(i);
+                }
+            }
+
+
+            for (int i = 0; i < SideTileMap.PlatformTiles.Count - 1; i++)
+            {
+                if (worldRect.Intersects(SideTileMap.PlatformTiles[i].Rectangle) == false)
+                {
+                    offScreenPlatform.Add(SideTileMap.PlatformTiles[i]);
+                    SideTileMap.PlatformTiles.Remove(SideTileMap.PlatformTiles[i]);
+                }
+
+            }
+            for (int i = offScreenPlatform.Count - 1; i >= 0; i--)
+            {
+                if (worldRect.Intersects(offScreenPlatform[i].Rectangle))
+                {
+                    SideTileMap.PlatformTiles.Add(offScreenPlatform[i]);
+                    offScreenPlatform.RemoveAt(i);
+                }
+            }
+
+            return worldRect;
+        }
 
         public void OpenDoor(Rectangle bottomTile)
         {
@@ -1744,13 +1779,13 @@ namespace AUTO_Matic
                                 Window.Title = " ";
                                 //float[] angles = new float[laserBoss.bossRects.Count];
                                 #region LaserBoss
-                                for (int i = 0; i < laserBoss.bossRects.Count; i++)
-                                {
-                                    //angles[i] = laserBoss.bossRects[i].angle;
-                                    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
+                                //for (int i = 0; i < laserBoss.bossRects.Count; i++)
+                                //{
+                                //    //angles[i] = laserBoss.bossRects[i].angle;
+                                //    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
 
-                                }
-                                laserBoss.Draw(spriteBatch);
+                                //}
+                                //laserBoss.Draw(spriteBatch);
                                 #endregion
                                 //`bombBoss.Draw(spriteBatch);
                                 //Window.Title = "Angle: " + bombBoss.angle;

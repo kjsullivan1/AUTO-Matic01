@@ -103,7 +103,7 @@ namespace AUTO_Matic.SideScroll
 
         #region Shooting
         Texture2D gunTexture;
-        List<Bullet> bullets = new List<Bullet>();
+        public List<Bullet> bullets = new List<Bullet>();
         MouseState prevMs;
         float bulletSpeed = 3.5f;
         float bulletMaxX = 15f;
@@ -112,7 +112,7 @@ namespace AUTO_Matic.SideScroll
         float shootDelay = .8f;//In seconds
         float iShootDelay;
         bool startShoot = false;
-        float bulletDmg = .65f;
+        public float bulletDmg = .65f;
         float bulletTravelDist = 64 * 3;
         WeaponWheel weaponWheel;
 

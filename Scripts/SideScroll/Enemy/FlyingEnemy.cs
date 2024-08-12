@@ -12,6 +12,7 @@ using AUTO_Matic.Scripts;
 using AUTO_Matic.SideScroll;
 using AUTO_Matic;
 using AUTO_Matic.Scripts.Effects;
+using AUTO_Matic.Scripts.SideScroll;
 
 namespace AUTO_Matic.Scripts.SideScroll.Enemy
 {
@@ -33,7 +34,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         float iShootDelay;
         float shootDelay = 1.35f; 
         float bulletTravelDist;
-        Rectangle enemyRect;
+        public Rectangle enemyRect;
         float moveSpeed = .5f;
         int unblockedCount = 0;
         Vector2 pos;
@@ -43,7 +44,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         Vector2 velocity = Vector2.Zero;
         float yOffset = 64 * 3; //How high from the ground 
         Rectangle groundRect;
-        Rectangle collisionRect;
+        public Rectangle collisionRect;
         Texture2D visionTexture;
         //Texture2D texture;
         int visionLength;
@@ -227,7 +228,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             ChangeAnimation();
             particles = new ParticleManager();
             particles.Initialize(contentManager.Load<Texture2D>(@"Textures\white"));
-          
+            
             iShootDelay = shootDelay;
         }
 

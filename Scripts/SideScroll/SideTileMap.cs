@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AUTO_Matic.Scripts.SideScroll;
 using AUTO_Matic.SideScroll;
+using AUTO_Matic.Scripts.SideScroll.Enemy;
 
 namespace AUTO_Matic
 {
@@ -35,6 +36,7 @@ namespace AUTO_Matic
         public static List<int> BackgroundIndexes = new List<int>();//List of indexes that contain the background tiles
         public static List<int> PlatformIndexes = new List<int>();//List of the indexes of the platform tiles
         public static List<RepeatBackground> repeatBG = new List<RepeatBackground>();
+        public static List<FlyingEnemy> flyingEnemies = new List<FlyingEnemy>();
 
         
 
@@ -48,6 +50,15 @@ namespace AUTO_Matic
         public static List<RepeatBackground>  RepeatBG
         {
             get { return repeatBG; }
+        }
+
+        public static void SetFlyingEnemies(List<FlyingEnemy> enemies)
+        {
+            flyingEnemies = enemies;
+        }
+        public static List<FlyingEnemy> GetFlyingEnemies()
+        {
+            return flyingEnemies;
         }
 
         public static List<PlatformTile> PlatformTiles

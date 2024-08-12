@@ -320,7 +320,17 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 float bulletSpeedX = (float)Math.Cos((double)angle) * 2;
                 float bulletSpeedY = (float)Math.Sin((double)angle) * 2;
 
-                bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
+                //bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
+                #region BurstShot
+                bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
+                    content, true, bulletTravelDist, true, bulletSpeedY));
+
+                bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y), bulletSpeedX * 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
+               content, true, bulletTravelDist, true, bulletSpeedY * 1.5f));
+
+                bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y), bulletSpeedX / 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
+              content, true, bulletTravelDist, true, bulletSpeedY / 1.5f));
+                #endregion
 
                 //if (angle < 16 || angle >= 155)//Right
                 //{

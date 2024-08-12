@@ -5,7 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
+using AUTO_Matic.Scripts.TopDown.AUTO_Matic.Scripts.TopDown;
+using AUTO_Matic.Scripts.TopDown;
 namespace AUTO_Matic.Scripts.Effects
 {
     class ParticleManager
@@ -36,17 +37,6 @@ namespace AUTO_Matic.Scripts.Effects
         #endregion
 
         #region Particle Creation
-        public void AddParticle(Vector3 position, Vector3 velocity, float duration, float scale)
-        {
-            //for (int x = 0; x < particles.Count; x++)
-            //{
-            //    if (!particles[x].IsActive)
-            //    {
-            //        particles[x].Activate(position, velocity, duration, scale);
-            //        return;
-            //    }
-            //}
-        }
 
         public void MakeExplosion(Rectangle startRect, Circle boundRect, int width)
         {
@@ -62,7 +52,8 @@ namespace AUTO_Matic.Scripts.Effects
             ParticleEffect effect;
             effect.particles = particles;
             effect.boundingRect = new Rectangle();
-            effect.boundingCircle = boundRect;
+            effect.boundingCircle = new Circle(new Vector2(boundRect.Bounds.X + boundRect.Bounds.Width/2, boundRect.Bounds.Y + boundRect.Bounds.Height/2), boundRect.Radius);
+            //effect.boundingCircle = boundRect;
 
             particleEffects.Add(effect);
 
@@ -76,7 +67,7 @@ namespace AUTO_Matic.Scripts.Effects
         }
 
         #region Update
-        public void Update(GameTime gameTime)
+        public void Update(GameTime gameTime,AUTO_Matic.TopDown.TDPlayer tdPlayer = null,bool top = false)
         {
 
             for(int j = particleEffects.Count - 1; j >= 0; j--)
@@ -88,12 +79,23 @@ namespace AUTO_Matic.Scripts.Effects
 
                     particleEffects[j].particles[i].rect = new Rectangle((int)particleEffects[j].particles[i].position.X, (int)particleEffects[j].particles[i].position.Y,
                        particleEffects[j].particles[i].rect.Width, particleEffects[j].particles[i].rect.Height);
-
-                    if (/*!particleEffects[j].boundingRect.Contains(particleEffects[j].particles[i].position.ToPoint())*/ 
-                        !CollideCircle(particleEffects[j].boundingCircle, particleEffects[j].particles[i]) )
+                    if(top)
                     {
-                        particleEffects[j].particles.RemoveAt(i);
+                        if (/*!particleEffects[j].boundingRect.Contains(particleEffects[j].particles[i].position.ToPoint())*/
+                    !CollideCircleTop(particleEffects[j].boundingCircle, particleEffects[j].particles[i], tdPlayer) || particleEffects[j].particles[i].duration <= 0)
+                        {
+                            particleEffects[j].particles.RemoveAt(i);
+                        }
                     }
+                    else
+                    {
+                        if (/*!particleEffects[j].boundingRect.Contains(particleEffects[j].particles[i].position.ToPoint())*/
+                    !CollideCircle(particleEffects[j].boundingCircle, particleEffects[j].particles[i]) || particleEffects[j].particles[i].duration <= 0)
+                        {
+                            particleEffects[j].particles.RemoveAt(i);
+                        }
+                    }
+                
                    
                 }
 
@@ -115,7 +117,21 @@ namespace AUTO_Matic.Scripts.Effects
         public bool CollideCircle(Circle pos, Particle particle)
         {
             float num = (pos.Bounds.Center.ToVector2() - particle.rect.Center.ToVector2()).Length();
-            if ( num < (pos.Bounds.Center.X + particle.rect.Center.X)/50)
+            if ( num < (pos.Bounds.Center.X + particle.rect.Center.X)/64)
+            {
+                return true;
+            }
+            else
+                return false;
+        }
+        public bool CollideCircleTop(Circle pos, Particle particle, AUTO_Matic.TopDown.TDPlayer tdPlayer)
+        {
+            int div = tdPlayer.levelInY;
+            if (tdPlayer.levelInX < div)
+                div = tdPlayer.levelInX;
+
+            float num = (pos.Bounds.Center.ToVector2() - particle.rect.Center.ToVector2()).Length();
+            if (num < (pos.Bounds.Center.X + particle.rect.Center.X)/(div * 10))
             {
                 return true;
             }
@@ -134,54 +150,11 @@ namespace AUTO_Matic.Scripts.Effects
                 }
             }
 
-            //graphicsDevice.BlendState = BlendState.Additive;
-            //particleEffect.CurrentTechnique = particleEffect.Techniques["ParticleTechnique"];
-
-            //particleEffect.Parameters["particleTexture"].SetValue(particleTexture);
-            //particleEffect.Parameters["View"].SetValue(camera.transform);
-            //particleEffect.Parameters["Projection"].SetValue(camera.transform);
-
-            //graphicsDevice.RasterizerState = RasterizerState.CullNone;
-            //graphicsDevice.BlendState = BlendState.Additive;
-            //graphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
-
-            //foreach (Particle particle in particles)
-            //{
-            //    if (particle.IsActive)
-            //        particle.Draw(camera, particleEffect);
-            //}
-
-            //graphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
-            //graphicsDevice.BlendState = BlendState.Opaque;
-            //graphicsDevice.DepthStencilState = DepthStencilState.Default;
         }
         #endregion
 
-       
-        public void CreateEffect(int numParticles)
-        {
-            //for (int x = 0; x < numParticles; x++)
-            //{
-            //    particles.Add(new Particle());
-            //}
-        }
 
-        #region Helper Methods
-        //public void MakeExplosion(Vector3 position, int particleCount)
-        //{
-        //    for (int i = 0; i < particleCount; i++)
-        //    {
-        //        float duration = (float)(rand.Next(0, 20)) / 10f + 2;
-        //        float x = ((float)rand.NextDouble() - 0.5f) * 1.5f;
-        //        float y = ((float)rand.Next(1, 100)) / 10f;
-        //        float z = ((float)rand.NextDouble() - 0.5f) * 1.5f;
-        //        float s = (float)rand.NextDouble() + 1.0f;
-        //        Vector3 direction = Vector3.Normalize(new Vector3(x, y, 0)) * (((float)rand.NextDouble() * 3f) + 6f);
 
-        //        AddParticle(position + new Vector3(0, -2, 0), direction, duration, s);
-        //    }
-        //}
-        #endregion
     }
 
     struct ParticleEffect
@@ -195,7 +168,7 @@ namespace AUTO_Matic.Scripts.Effects
     {
         public Rectangle rect;
         public Vector2 velocity;
-        int maxVel = 18;
+        int maxVel = 16;
         public float duration;
         public Vector2 position;
         public Color color;
@@ -236,7 +209,7 @@ namespace AUTO_Matic.Scripts.Effects
             Random r = new Random();
             float decimalNumber;
             string beforePoint = r.Next(min, max).ToString();//number before decimal point
-            string afterPoint = r.Next(3, 6).ToString();
+            string afterPoint = r.Next(9, 10).ToString();
             string afterPoint2 = r.Next(0, 10).ToString();
             string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
                                                           //string secondDP = r.Next(0, 9).ToString();//2nd decimal point
