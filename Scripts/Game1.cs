@@ -38,7 +38,7 @@ namespace AUTO_Matic
         bool closeDoor = false;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { SideScroll, TopDown, Paused, FinalBoss}
         public GameStates GameState = GameStates.SideScroll;
@@ -535,16 +535,16 @@ namespace AUTO_Matic
         private void SetDungeonNum()
         {
             DungeonEntrance entrance = dungeons[0];
-            dungeonNum = 3;
-            //for (int i = 1; i < dungeons.Count; i++)
-            //{
-            //    if (MathHelper.Distance(entrance.Rectangle.X, ssPlayer.Rectangle.X) >
-            //        MathHelper.Distance(dungeons[i].Rectangle.X, ssPlayer.Rectangle.X))
-            //    {
-            //        dungeonNum = i;
-            //        entrance = dungeons[i];
-            //    }
-            //}
+            //dungeonNum = 3;
+            for (int i = 1; i < dungeons.Count; i++)
+            {
+                if (MathHelper.Distance(entrance.Rectangle.X, ssPlayer.Rectangle.X) >
+                    MathHelper.Distance(dungeons[i].Rectangle.X, ssPlayer.Rectangle.X))
+                {
+                    dungeonNum = i;
+                    entrance = dungeons[i];
+                }
+            }
         }
 
         public void LoadFinalBoss()
