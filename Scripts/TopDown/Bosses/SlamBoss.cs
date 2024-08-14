@@ -25,7 +25,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         float slamDelay = 5;
         float iSlamDelay;
 
-        public float health = 15;
+        public float health = 30;
 
         Random rand = new Random();
 
