@@ -15,62 +15,115 @@ namespace AUTO_Matic.Scripts.TopDown
     {
         Rectangle bossRect;
         ContentManager content;
+        Rectangle turretRect;
+
         #region Animations
-        AnimationManager animManager;
-        Texture2D texture;
+        enum AnimationStates { Idle, Shoot, Slam}
+        AnimationStates animState = AnimationStates.Idle;
+        float turretAngle;
+        AnimationManager animManagerTurret;
+        AnimationManager animManagerBase;
+        Texture2D baseTexture;
+        Texture2D turretTexture;
         Point FrameSize;//Size of frame
         Point CurrFrame;//Location of currFram on the sheet
         Point SheetSize;//num of frames.xy
         int fpms;
-        public void ChangeAnimation()
+        public void ChangeAnimationBase()
         {
-            //switch (animState)
-            //{
-            //    case AnimationStates.Idle:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerIdle");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(6, 1);
-            //        fpms = 120;
-            //        break;
-            //    case AnimationStates.Walking:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerWalk");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(8, 1);
-            //        fpms = 120;
-            //        break;
-            //    case AnimationStates.Shooting:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerShoot");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(4, 1);
-            //        fpms = 95;
-            //        break;
-            //}
+            switch (animState)
+            {
+                case AnimationStates.Idle:
+                    baseTexture = content.Load<Texture2D>("TopDown/Animations/ShotgunBossBase");
+                    FrameSize = new Point(256, 256);
+                    CurrFrame = new Point(1, 0);
+                    SheetSize = new Point(1, 1);
+                    fpms = 0;
+                    break;
+                case AnimationStates.Shoot:
+                    baseTexture = content.Load<Texture2D>("TopDown/Animations/ShotgunBossBase");
+                    FrameSize = new Point(256, 256);
+                    CurrFrame = new Point(1, 0);
+                    SheetSize = new Point(1, 1);
+                    fpms = 0;
+                    break;
+                case AnimationStates.Slam:
+                    baseTexture = content.Load<Texture2D>("TopDown/Animations/ShotgunBossBase");
+                    FrameSize = new Point(256, 256);
+                    CurrFrame = new Point(1, 0);
+                    SheetSize = new Point(3, 1);
+                    fpms = 120;
+                    break;
+            }
 
-            //bool isRight = true, isLeft = false, isUp = false, isDown = false;
-            //if (animManager != null)
-            //{
-            //    isRight = animManager.isRight;
-            //    isLeft = animManager.isLeft;
-            //    isUp = animManager.isUp;
-            //    isDown = animManager.isDown;
-            //}
+            bool isRight = true, isLeft = false, isUp = false, isDown = false;
+            if (animManagerBase != null)
+            {
+                isRight = animManagerBase.isRight;
+                isLeft = animManagerBase.isLeft;
+                isUp = animManagerBase.isUp;
+                isDown = animManagerBase.isDown;
+            }
 
-            //animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, Position);
+            animManagerBase = new AnimationManager(baseTexture, FrameSize, CurrFrame, SheetSize, fpms, new Vector2(worldRect.X -2, worldRect.Y));
 
-            //animManager.isRight = isRight;
-            //animManager.isLeft = isLeft;
-            //animManager.isUp = isUp;
-            //animManager.isDown = isDown;
+            animManagerBase.isRight = isRight;
+            animManagerBase.isLeft = isLeft;
+            animManagerBase.isUp = isUp;
+            animManagerBase.isDown = isDown;
+        }
+        public void ChangeAnimationTurret()
+        {
+            switch (animState)
+            {
+                case AnimationStates.Idle:
+                    turretTexture = content.Load<Texture2D>("TopDown/Animations/ShotgunBossTurret");
+                    FrameSize = new Point(256, 256);
+                    CurrFrame = new Point(1, 0);
+                    SheetSize = new Point(2, 1);
+                    fpms = 0;
+                    
+                    break;
+                case AnimationStates.Shoot:
+                    turretTexture = content.Load<Texture2D>("TopDown/Animations/ShotgunBossTurret");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(0, 0);
+                    SheetSize = new Point(8, 1);
+                    fpms = 120;
+                    break;
+                case AnimationStates.Slam:
+                    turretTexture = content.Load<Texture2D>("TopDown/Animations/PlayerShoot");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(0, 0);
+                    SheetSize = new Point(4, 1);
+                    fpms = 95;
+                    break;
+            }
+
+            bool isRight = true, isLeft = false, isUp = false, isDown = false;
+            if (animManagerTurret != null)
+            {
+                isRight = animManagerTurret.isRight;
+                isLeft = animManagerTurret.isLeft;
+                isUp = animManagerTurret.isUp;
+                isDown = animManagerTurret.isDown;
+            }
+
+            animManagerTurret = new AnimationManager(turretTexture, FrameSize, CurrFrame, SheetSize, fpms, new Vector2(worldRect.Center.X, worldRect.Center.Y));
+
+            animManagerTurret.isRight = isRight;
+            animManagerTurret.isLeft = isLeft;
+            animManagerTurret.isUp = isUp;
+            animManagerTurret.isDown = isDown;
+            animManagerTurret.StopLoop();
         }
         #endregion
 
         #region Shooting
         Texture2D gunTexture;
         public List<Bullet> bullets = new List<Bullet>();
-        float bulletSpeed = 2.5f;
+        float angle;
+        float bulletSpeed = 4f;
         float bulletMaxX = 10f;
         float bulletMaxY = 10f;
         int spread = 3;
@@ -79,7 +132,7 @@ namespace AUTO_Matic.Scripts.TopDown
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = .7f;
-        public float bulletTravelDist = 64 * 8;
+        public float bulletTravelDist = 64 * 15;
         Texture2D visionTxture;
         int width;
         int height;
@@ -91,11 +144,11 @@ namespace AUTO_Matic.Scripts.TopDown
         #endregion
 
         Circle slam;
-        int growthRate = 6;
+        int growthRate = 2;
         int maxSize = 300;
         bool slamWave = false;
         float health = 25f;
-        int currWidthMod = 3;
+        int currWidthMod = 1;
         public bool moveBack;
         float slamDelay = 1.15f;
         float respawnDelay = 1.75f;
@@ -143,7 +196,9 @@ namespace AUTO_Matic.Scripts.TopDown
                 }
             }
             particleManager.Initialize(content.Load<Texture2D>(@"Textures\white"));
-            particleManager.SetParticles(500);
+            particleManager.SetParticles(800);
+            ChangeAnimationTurret();
+            ChangeAnimationBase();
         }
 
         public void Update(GameTime gameTime, TDPlayer tdPlayer, TopDownMap tdMap)
@@ -157,11 +212,16 @@ namespace AUTO_Matic.Scripts.TopDown
                     shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                 }
 
-                Vector2 targetDir = new Vector2(tdPlayer.rectangle.X, tdPlayer.rectangle.Y) - new Vector2(bossRect.X, bossRect.Y);
+                Vector2 targetDir = new Vector2(tdPlayer.rectangle.Center.X, tdPlayer.rectangle.Center.Y) - new Vector2(worldRect.Center.X, worldRect.Center.Y);
+                turretAngle = (float)Math.Atan2(targetDir.Y, targetDir.X); //sub by 90 if problems occur
                 if (shootDelay <= 0 && !slamWave)
                 {
-                    float angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X))); //sub by 90 if problems occur
+                    
                     bossRect = new Rectangle(((bounds.X + bounds.Width / 2) - width / 2), (((bounds.Y + bounds.Height / 2) - height / 2)), width, height);
+
+                    targetDir = new Vector2(tdPlayer.rectangle.X, tdPlayer.rectangle.Y) - new Vector2(bossRect.X, bossRect.Y);
+                    angle = (float)Math.Atan2(targetDir.Y, targetDir.X); //sub by 90 if problems occur
+
                     ShootShotgun(tdPlayer, angle);
 
                     #region BrokenAngle
@@ -261,7 +321,7 @@ namespace AUTO_Matic.Scripts.TopDown
                         if (slam.Bounds.X < worldRect.X)
                         {
                             particleManager.MakeExplosion(new Rectangle((int)worldRect.X + worldRect.Width/2, (int)worldRect.Y + worldRect.Height/2, worldRect.Width, worldRect.Height),
-                                   new Circle(new Vector2(slam.Position.X , slam.Position.Y), slam.Radius/2), 30);
+                                   new Circle(new Vector2(slam.Position.X + 45/2, slam.Position.Y), (int)(slam.Radius/2)), 45);
                          
                            
                         }
@@ -379,102 +439,128 @@ namespace AUTO_Matic.Scripts.TopDown
             //{
             //    bullet.Update();
             //}
+        
+                animManagerTurret.Update(gameTime, new Vector2(worldRect.Center.X, worldRect.Center.Y));
+
+            animManagerBase.Update(gameTime, new Vector2(worldRect.X - 8, worldRect.Y));
         }
 
         private void ShootShotgun(TDPlayer tdPlayer, float angle)
         {
-            if (angle < 18 || angle >= 155)//Right
-            {
-                if (angle < 18)//Right
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 7));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 7));
-                }
-                else//Left
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height / 2 - 15 / 2), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height / 2 - 15 / 2), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 7));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height / 2 - 15 / 2), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 7));
-                }
 
 
-            }
-            if (angle >= 18 && angle < 45)
-            {
-                if (tdPlayer.position.Y < bossRect.Y + 64 / 2)//Right up
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 4));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 1.75f));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                }
-                else//Right Down
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 6));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 2));
-                }
-            }
-            if (angle >= 45 && angle < 75)
-            {
-                if (tdPlayer.position.Y < bossRect.Y + 64 / 2)//
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                }
-                else
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                }
-            }
-            if (angle >= 75 && angle < 105)
-            {
-                if (tdPlayer.position.Y < bossRect.Y + 64 / 2)
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                }
-                else
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                }
-            }
-            if (angle >= 105 && angle < 135)
-            {
-                if (tdPlayer.position.Y < bossRect.Y + 64 / 2)
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                }
-                else
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                }
-            }
-            if (angle >= 135 && angle < 155)
-            {
-                if (tdPlayer.position.Y < bossRect.Y + 64 / 2)
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 3.75f));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 1.75f));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                }
-                else
-                {
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 3.75f));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 1.75f));
-                    bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                }
-            }
+            float bulletUpSpeedX = (float)Math.Cos((double)angle - .15f) * bulletSpeed;
+            float bulletUpSpeedY = (float)Math.Sin((double)angle - .15f) * bulletSpeed;
+
+            float bulletSpeedX = (float)Math.Cos((double)angle) * bulletSpeed; //Direct SpeedX
+            float bulletSpeedY = (float)Math.Sin((double)angle) * bulletSpeed; //DirectSpeedY
+
+            float bulletDownSpeedX = (float)Math.Cos((double)angle + .15f) * bulletSpeed;
+            float bulletDownSpeedY = (float)Math.Sin((double)angle + .15f) * bulletSpeed;
+
+            bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
+                content, true, bulletTravelDist, true, bulletSpeedY));
+
+            bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletUpSpeedX, new Vector2(bulletUpSpeedX, bulletUpSpeedY),
+             content, true, bulletTravelDist, true, bulletUpSpeedY));
+
+
+            bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletDownSpeedX, new Vector2(bulletDownSpeedX, bulletDownSpeedY),
+             content, true, bulletTravelDist, true, bulletDownSpeedY));
+
+
+            //if (angle < 18 || angle >= 155)//Right
+            //{
+            //    if (angle < 18)//Right
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width/2 - 15/2, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 7));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 7));
+            //    }
+            //    else//Left
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height / 2 - 15 / 2), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height / 2 - 15 / 2), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 7));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height / 2 - 15 / 2), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 7));
+            //    }
+
+
+            //}
+            //if (angle >= 18 && angle < 45)
+            //{
+            //    if (tdPlayer.position.Y < bossRect.Y + 64 / 2)//Right up
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 4));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 1.75f));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+            //    }
+            //    else//Right Down
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 6));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 2));
+            //    }
+            //}
+            //if (angle >= 45 && angle < 75)
+            //{
+            //    if (tdPlayer.position.Y < bossRect.Y + 64 / 2)//
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+            //    }
+            //    else
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+            //    }
+            //}
+            //if (angle >= 75 && angle < 105)
+            //{
+            //    if (tdPlayer.position.Y < bossRect.Y + 64 / 2)
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+            //    }
+            //    else
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+            //    }
+            //}
+            //if (angle >= 105 && angle < 135)
+            //{
+            //    if (tdPlayer.position.Y < bossRect.Y + 64 / 2)
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+            //    }
+            //    else
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+            //    }
+            //}
+            //if (angle >= 135 && angle < 155)
+            //{
+            //    if (tdPlayer.position.Y < bossRect.Y + 64 / 2)
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 3.75f));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 1.75f));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+            //    }
+            //    else
+            //    {
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 3.75f));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 1.75f));
+            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+            //    }
+            //}
         }
 
         public float RandFloat(int min, int max)
@@ -499,7 +585,9 @@ namespace AUTO_Matic.Scripts.TopDown
             if (Health > 0)
             {
                 bossRect = new Rectangle(((bounds.X + bounds.Width / 2) - width / 2), (((bounds.Y + bounds.Height / 2) - height / 2)), width, height);
-                spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), bossRect, Color.White);
+                //spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), bossRect, Color.White);
+                animManagerBase.Draw(spriteBatch, Color.White);
+                animManagerTurret.Draw(spriteBatch, Color.White, turretAngle, new Rectangle(worldRect.X, worldRect.Y, worldRect.Width + 8, worldRect.Height + 8));
                 foreach (Bullet bullet in bullets)
                 {
                     bullet.Draw(spriteBatch);
@@ -510,6 +598,8 @@ namespace AUTO_Matic.Scripts.TopDown
             {
                 tile.Draw(spriteBatch);
             }
+           
+      
            //spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"),slam.Position, slam.Bounds, Color.White * .5f);
            
         }

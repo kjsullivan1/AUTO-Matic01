@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Circle.cs" />
     <Compile Include="Scripts\AnimationManager.cs" />
+    <Compile Include="Scripts\Bomb.cs" />
     <Compile Include="Scripts\Bullet.cs" />
     <Compile Include="Scripts\Camera.cs" />
     <Compile Include="Scripts\Effects\ParticleManager.cs" />
@@ -198,7 +199,10 @@
     <Content Include="Content\TopDown\Animations\PilotLeftWalk.png" />
     <Content Include="Content\TopDown\Animations\PilotRightWalk.png" />
     <Content Include="Content\TopDown\Animations\PilotUpWalk.png" />
+    <Content Include="Content\TopDown\Animations\ShotgunBossBase.png" />
+    <Content Include="Content\TopDown\Animations\ShotGunBossTurret.png" />
     <Content Include="Content\TopDown\Animations\TankTopDown.png" />
+    <Content Include="Content\TopDown\Maps\Map.txt" />
     <Content Include="Content\TopDown\Maps\Map0.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -236,6 +240,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\TopDown\Maps\Map9.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\Maps\Map99.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\TopDown\MapTiles\Tile0.png">
@@ -289,10 +296,88 @@
     <Content Include="Content\TopDown\MapTiles\Tile23.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile24.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile25.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile26.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile27.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile28.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile29.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\TopDown\MapTiles\Tile3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile30.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile31.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile32.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile33.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile34.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile35.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile36.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile37.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile38.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile39.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\TopDown\MapTiles\Tile4.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile40.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile41.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile42.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile43.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile44.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile45.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile46.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile47.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile48.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile49.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\TopDown\MapTiles\Tile5.png">

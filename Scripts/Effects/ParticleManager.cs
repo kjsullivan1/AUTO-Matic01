@@ -116,8 +116,11 @@ namespace AUTO_Matic.Scripts.Effects
 
         public bool CollideCircle(Circle pos, Particle particle)
         {
+            //int div = (int)(ssPlayer.Position.X / 1980);
+            //if (div == 0)
+            //    div = 1;
             float num = (pos.Bounds.Center.ToVector2() - particle.rect.Center.ToVector2()).Length();
-            if ( num < (pos.Bounds.Center.X + particle.rect.Center.X)/64)
+            if ( num < (pos.Radius + (particle.rect.Width/2)))
             {
                 return true;
             }
@@ -168,7 +171,7 @@ namespace AUTO_Matic.Scripts.Effects
     {
         public Rectangle rect;
         public Vector2 velocity;
-        int maxVel = 16;
+        int maxVel = 10;
         public float duration;
         public Vector2 position;
         public Color color;

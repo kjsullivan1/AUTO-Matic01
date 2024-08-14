@@ -101,7 +101,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         #endregion
 
         int sizeMod = 2;
-        float health = 21;
+        public float health = 21;
         public float Health
         {
             get { return health; }

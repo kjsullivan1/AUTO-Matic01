@@ -15,7 +15,7 @@ namespace AUTO_Matic
         Vector2 position;
         Vector2 velocity;
         //float moveSpeed;
-        Vector2 maxSpeed;
+        public Vector2 maxSpeed;
         Texture2D bulletTexture;
         int width = 14;
         int height = 14;
@@ -64,11 +64,23 @@ namespace AUTO_Matic
             }
             else if (shootX)
             {
-                velocity.X += bulletSpeed.X;
+                if (velocity.X < maxSpeed.X)
+                {
+                    velocity.X += bulletSpeed.X;
+                }
+                else
+                {
+                    velocity.X = maxSpeed.X;
+                }
+
             }
             else if(shootY)
             {
-                velocity.Y += bulletSpeed.Y;
+
+                if (velocity.Y < maxSpeed.Y)
+                    velocity.Y += bulletSpeed.Y;
+                else
+                    velocity.Y = maxSpeed.Y;
             }
            
             position += velocity;

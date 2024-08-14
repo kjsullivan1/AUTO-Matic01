@@ -308,6 +308,16 @@ namespace AUTO_Matic.TopDown
                 case 0:
                     BuildDungeon0(maps, yMaps, dMaps, size, screenWidth, screenHeight, xPoints, yPoints, diagPoints);
                     break;
+                case 1:
+                    BuildDungeon1(maps, yMaps, dMaps, size, screenWidth, screenHeight, xPoints, yPoints, diagPoints);
+                    break;
+                case 2:
+                    BuildDungeon2(maps, yMaps, dMaps, size, screenWidth, screenHeight, xPoints, yPoints, diagPoints);
+                    break;
+                case 3:
+                    BuildDungeon3(maps, yMaps, dMaps, size, screenWidth, screenHeight, xPoints, yPoints, diagPoints);
+                    break;
+
 
             }
 
@@ -355,8 +365,7 @@ namespace AUTO_Matic.TopDown
                             //skullTiles[skullCount].mapPoint = new int[] { y, x };
                             //skullCount++;
                         }
-                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19
-                            || num == 20 || num == 21 || num == 22 || num == 23) //Floors
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19) //Floors
                         {
                             floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
@@ -378,17 +387,17 @@ namespace AUTO_Matic.TopDown
                 //height = maps[i].GetLength(0);
             }
 
-            for (int i = 1; i < yMaps.Count + 1; i++)
+            for (int i = 0; i < yMaps.Count; i++)
             {
-                rows.Add(yMaps[i - 1].GetLength(0));
-                cols.Add(yMaps[i - 1].GetLength(1));
+                rows.Add(yMaps[i].GetLength(0));
+                cols.Add(yMaps[i].GetLength(1));
 
                 int levelInY = (int)yPoints[i].Y;
-                for (int x = 0; x < cols[i - 1]; x++)
+                for (int x = 0; x < cols[i]; x++)
                 {
-                    for (int y = 0; y < yMaps[i - 1].GetLength(0); y++)
+                    for (int y = 0; y < yMaps[i].GetLength(0); y++)
                     {
-                        int num = yMaps[i - 1][y, x];
+                        int num = yMaps[i][y, x];
 
                         if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
                         {
@@ -419,8 +428,7 @@ namespace AUTO_Matic.TopDown
                             //skullTiles[skullCount].mapPoint = new int[] { y, x };
                             //skullCount++;
                         }
-                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19
-                            || num == 20 || num == 21 || num == 22 || num == 23) //Floors
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19) //Floors
                         {
                             floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
@@ -497,8 +505,7 @@ namespace AUTO_Matic.TopDown
                             //skullTiles[skullCount].mapPoint = new int[] { y, x };
                             //skullCount++;
                         }
-                        else if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19
-                            || num == 20 || num == 21 || num == 22 || num == 23) //Floors
+                        else if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19) //Floors
                         {
                             floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
@@ -518,7 +525,1010 @@ namespace AUTO_Matic.TopDown
                 //height = dMaps[i].GetLength(0);
             }
         }
+        private void BuildDungeon1(List<int[,]> maps, List<int[,]> yMaps, List<int[,]> dMaps, int size, int screenWidth, int screenHeight, List<Vector2> xPoints, List<Vector2> yPoints, List<Vector2> diagPoints)
+        {
+            for (int i = 0; i < maps.Count; i++)
+            {
+                rows.Add(maps[i].GetLength(0));
+                cols.Add(maps[i].GetLength(1));
+                int levelInX = (int)xPoints[i].X;
+                for (int y = 0; y < maps[i].GetLength(0); y++)
+                {
+                    for (int x = 0; x < maps[i].GetLength(1); x++)
+                    {
+                        int num = maps[i][y, x];
 
+                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8)//Walls
+                        {
+                            //wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+
+                            switch(num)
+                            {
+                                case 10:
+                                    wallTiles.Add(new WallTiles(28, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 1:
+                                    wallTiles.Add(new WallTiles(21, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 2:
+                                    wallTiles.Add(new WallTiles(29, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 3:
+                                    wallTiles.Add(new WallTiles(20, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 4:
+                                    wallTiles.Add(new WallTiles(22, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 5:
+                                    wallTiles.Add(new WallTiles(23, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 6:
+                                    wallTiles.Add(new WallTiles(24, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 7:
+                                    wallTiles.Add(new WallTiles(25, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 8:
+                                    wallTiles.Add(new WallTiles(26, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;  
+
+                            }
+
+                            wallTiles[wallCount].mapPoint = new[] { y, x };
+                            wallCount++;
+                            if (WallIndexes.Contains(num) == false)
+                            {
+                                WallIndexes.Add(num);
+                            }
+                        }
+                        if (num == 11) //enemy
+                        {
+                            if (enemySpawns.Contains(new Vector2((levelInX * screenWidth) + (x * size), y * size)) == false)
+                            {
+                                enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), y * size));
+                            }
+
+                            floorTiles.Add(new FloorTiles(27, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorCount++;
+                            if (EnemyIndexes.Contains(num) == false)
+                                EnemyIndexes.Add(num);
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            //skullTiles[skullCount].mapPoint = new int[] { y, x };
+                            //skullCount++;
+                        }
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19) //Floors
+                        {
+                            switch(num)
+                            {
+                                case 9:
+                                    floorTiles.Add(new FloorTiles(27, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+
+                            }
+                            //floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            floorCount++;
+                            if (FloorIndexes.Contains(num) == false)
+                                FloorIndexes.Add(num);
+
+                            if (num == 12)
+                            {
+                                ExitDoor = new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size);
+                            }
+                        }
+
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
+                    }
+                }
+                //width = maps[i].GetLength(1);
+                //height = maps[i].GetLength(0);
+            }
+
+            for (int i = 0; i < yMaps.Count; i++)
+            {
+                rows.Add(yMaps[i].GetLength(0));
+                cols.Add(yMaps[i].GetLength(1));
+
+                int levelInY = (int)yPoints[i].Y;
+                for (int x = 0; x < cols[i]; x++)
+                {
+                    for (int y = 0; y < yMaps[i].GetLength(0); y++)
+                    {
+                        int num = yMaps[i][y, x];
+
+                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
+                        {
+                            //wallTiles.Add(new WallTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            switch (num)
+                            {
+                                case 10:
+                                    wallTiles.Add(new WallTiles(28, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 1:
+                                    wallTiles.Add(new WallTiles(21, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 2:
+                                    wallTiles.Add(new WallTiles(29, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 3:
+                                    wallTiles.Add(new WallTiles(20, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 4:
+                                    wallTiles.Add(new WallTiles(22, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 5:
+                                    wallTiles.Add(new WallTiles(23, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 6:
+                                    wallTiles.Add(new WallTiles(24, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 7:
+                                    wallTiles.Add(new WallTiles(25, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 8:
+                                    wallTiles.Add(new WallTiles(26, new Rectangle( (x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    wallTiles.Add(new WallTiles(num, new Rectangle( (x * size), (y * size), size, size)));
+                                    break;
+
+                            }
+                            wallTiles[wallCount].mapPoint = new[] { y, x };
+                            //wallTiles[wallCount].mapPoint = num;
+                            wallCount++;
+                            if (WallIndexes.Contains(num) == false)
+                            {
+                                WallIndexes.Add(num);
+                            }
+                        }
+                        if (num == 11) //enemy
+                        {
+                            if (enemySpawns.Contains(new Vector2(x * size, (y * size) - (levelInY * screenHeight))) == false)
+                            {
+                                enemySpawns.Add(new Vector2(x * size, (y * size) - (levelInY * screenHeight)));
+                            }
+
+                            floorTiles.Add(new FloorTiles(27, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (EnemyIndexes.Contains(num) == false)
+                                EnemyIndexes.Add(num);
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            //skullTiles[skullCount].mapPoint = new int[] { y, x };
+                            //skullCount++;
+                        }
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19
+                            || num == 20 || num == 21 || num == 22 || num == 23) //Floors
+                        {
+                            switch (num)
+                            {
+                                case 9:
+                                    floorTiles.Add(new FloorTiles(27, new Rectangle( (x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+
+                            }
+                            //floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (FloorIndexes.Contains(num) == false)
+                                FloorIndexes.Add(num);
+
+                            if (num == 12)
+                            {
+                                ExitDoor = new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size);
+                            }
+                        }
+
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
+                    }
+                }
+                //width = yMaps[i].GetLength(1);
+                //height = yMaps[i].GetLength(0);
+            }
+
+
+            for (int i = 0; i < dMaps.Count; i++)
+            {
+                rows.Add(dMaps[i].GetLength(0));
+                cols.Add(dMaps[i].GetLength(1));
+
+                for (int y = 0; y < dMaps[i].GetLength(0); y++)
+                {
+                    for (int x = 0; x < dMaps[i].GetLength(1); x++)
+                    {
+                        int num = dMaps[i][y, x];
+                        int levelInX = (int)diagPoints[i].X;
+                        int levelInY = (int)diagPoints[i].Y;
+
+
+                        if (num == 0)
+                        {
+                            slamTiles.Add(new TopDown.SlamTiles(9, new Rectangle((levelInX * screenWidth) + (x * size),
+                                (y * size) - (levelInY * screenHeight), size, size)));
+                            slamTiles[slamTiles.Count - 1].mapPoint = new int[] { y, x };
+                            if (SlamIndexes.Contains(num) == false)
+                                SlamIndexes.Add(num);
+                        }
+
+                        else if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
+                        {
+
+                            switch (num)
+                            {
+                                case 10:
+                                    wallTiles.Add(new WallTiles(28, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 1:
+                                    wallTiles.Add(new WallTiles(21, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 2:
+                                    wallTiles.Add(new WallTiles(29, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 3:
+                                    wallTiles.Add(new WallTiles(20, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 4:
+                                    wallTiles.Add(new WallTiles(22, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 5:
+                                    wallTiles.Add(new WallTiles(23, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 6:
+                                    wallTiles.Add(new WallTiles(24, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 7:
+                                    wallTiles.Add(new WallTiles(25, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 8:
+                                    wallTiles.Add(new WallTiles(26, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                default:
+                                    wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+
+                            }
+                            wallTiles[wallCount].mapPoint = new int[] { y, x };
+                            //wallTiles[wallCount].mapPoint = num;
+                            wallCount++;
+                            if (WallIndexes.Contains(num) == false)
+                            {
+                                WallIndexes.Add(num);
+                            }
+                        }
+                        else if (num == 11) //enemy
+                        {
+                            if (enemySpawns.Contains(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight))) == false)
+                            {
+                                enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight)));
+                                enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            }
+
+                            floorTiles.Add(new FloorTiles(27, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (EnemyIndexes.Contains(num) == false)
+                                EnemyIndexes.Add(num);
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            //skullTiles[skullCount].mapPoint = new int[] { y, x };
+                            //skullCount++;
+                        }
+                        else if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19
+                            || num == 20 || num == 21 || num == 22 || num == 23) //Floors
+                        {
+                            switch (num)
+                            {
+                                case 9:
+                                    floorTiles.Add(new FloorTiles(27, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                default:
+                                    floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+
+                            }
+                            //floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (FloorIndexes.Contains(num) == false)
+                                FloorIndexes.Add(num);
+
+                            ExitDoor = new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size);
+                        }
+
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
+                    }
+                }
+                //width = dMaps[i].GetLength(1);
+                //height = dMaps[i].GetLength(0);
+            }
+        }
+        private void BuildDungeon2(List<int[,]> maps, List<int[,]> yMaps, List<int[,]> dMaps, int size, int screenWidth, int screenHeight, List<Vector2> xPoints, List<Vector2> yPoints, List<Vector2> diagPoints)
+        {
+            for (int i = 0; i < maps.Count; i++)
+            {
+                rows.Add(maps[i].GetLength(0));
+                cols.Add(maps[i].GetLength(1));
+                int levelInX = (int)xPoints[i].X;
+                for (int y = 0; y < maps[i].GetLength(0); y++)
+                {
+                    for (int x = 0; x < maps[i].GetLength(1); x++)
+                    {
+                        int num = maps[i][y, x];
+
+                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8)//Walls
+                        {
+                            //wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+
+                            switch (num)
+                            {
+                                case 10:
+                                    wallTiles.Add(new WallTiles(39, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 1:
+                                    wallTiles.Add(new WallTiles(32, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 2:
+                                    wallTiles.Add(new WallTiles(30, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 3:
+                                    wallTiles.Add(new WallTiles(31, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 4:
+                                    wallTiles.Add(new WallTiles(33, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 5:
+                                    wallTiles.Add(new WallTiles(34, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 6:
+                                    wallTiles.Add(new WallTiles(35, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 7:
+                                    wallTiles.Add(new WallTiles(36, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 8:
+                                    wallTiles.Add(new WallTiles(37, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+
+                            }
+
+                            wallTiles[wallCount].mapPoint = new[] { y, x };
+                            wallCount++;
+                            if (WallIndexes.Contains(num) == false)
+                            {
+                                WallIndexes.Add(num);
+                            }
+                        }
+                        if (num == 11) //enemy
+                        {
+                            if (enemySpawns.Contains(new Vector2((levelInX * screenWidth) + (x * size), y * size)) == false)
+                            {
+                                enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), y * size));
+                            }
+
+                            floorTiles.Add(new FloorTiles(38, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorCount++;
+                            if (EnemyIndexes.Contains(num) == false)
+                                EnemyIndexes.Add(num);
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            //skullTiles[skullCount].mapPoint = new int[] { y, x };
+                            //skullCount++;
+                        }
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19) //Floors
+                        {
+                            switch (num)
+                            {
+                                case 9:
+                                    floorTiles.Add(new FloorTiles(38, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+
+                            }
+                            //floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            floorCount++;
+                            if (FloorIndexes.Contains(num) == false)
+                                FloorIndexes.Add(num);
+
+                            if (num == 12)
+                            {
+                                ExitDoor = new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size);
+                            }
+                        }
+
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
+                    }
+                }
+                //width = maps[i].GetLength(1);
+                //height = maps[i].GetLength(0);
+            }
+
+            for (int i = 0; i < yMaps.Count; i++)
+            {
+                rows.Add(yMaps[i].GetLength(0));
+                cols.Add(yMaps[i].GetLength(1));
+
+                int levelInY = (int)yPoints[i].Y;
+                for (int x = 0; x < cols[i]; x++)
+                {
+                    for (int y = 0; y < yMaps[i].GetLength(0); y++)
+                    {
+                        int num = yMaps[i][y, x];
+
+                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
+                        {
+                            //wallTiles.Add(new WallTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            switch (num)
+                            {
+                                case 10:
+                                    wallTiles.Add(new WallTiles(39, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 1:
+                                    wallTiles.Add(new WallTiles(32, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 2:
+                                    wallTiles.Add(new WallTiles(30, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 3:
+                                    wallTiles.Add(new WallTiles(31, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 4:
+                                    wallTiles.Add(new WallTiles(33, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 5:
+                                    wallTiles.Add(new WallTiles(34, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 6:
+                                    wallTiles.Add(new WallTiles(35, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 7:
+                                    wallTiles.Add(new WallTiles(36, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 8:
+                                    wallTiles.Add(new WallTiles(37, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    wallTiles.Add(new WallTiles(num, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+
+                            }
+                            wallTiles[wallCount].mapPoint = new[] { y, x };
+                            //wallTiles[wallCount].mapPoint = num;
+                            wallCount++;
+                            if (WallIndexes.Contains(num) == false)
+                            {
+                                WallIndexes.Add(num);
+                            }
+                        }
+                        if (num == 11) //enemy
+                        {
+                            if (enemySpawns.Contains(new Vector2(x * size, (y * size) - (levelInY * screenHeight))) == false)
+                            {
+                                enemySpawns.Add(new Vector2(x * size, (y * size) - (levelInY * screenHeight)));
+                            }
+
+                            floorTiles.Add(new FloorTiles(38, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (EnemyIndexes.Contains(num) == false)
+                                EnemyIndexes.Add(num);
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            //skullTiles[skullCount].mapPoint = new int[] { y, x };
+                            //skullCount++;
+                        }
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19) //Floors
+                        {
+                            switch (num)
+                            {
+                                case 9:
+                                    floorTiles.Add(new FloorTiles(38, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+
+                            }
+                            //floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (FloorIndexes.Contains(num) == false)
+                                FloorIndexes.Add(num);
+
+                            if (num == 12)
+                            {
+                                ExitDoor = new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size);
+                            }
+                        }
+
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
+                    }
+                }
+                //width = yMaps[i].GetLength(1);
+                //height = yMaps[i].GetLength(0);
+            }
+
+
+            for (int i = 0; i < dMaps.Count; i++)
+            {
+                rows.Add(dMaps[i].GetLength(0));
+                cols.Add(dMaps[i].GetLength(1));
+
+                for (int y = 0; y < dMaps[i].GetLength(0); y++)
+                {
+                    for (int x = 0; x < dMaps[i].GetLength(1); x++)
+                    {
+                        int num = dMaps[i][y, x];
+                        int levelInX = (int)diagPoints[i].X;
+                        int levelInY = (int)diagPoints[i].Y;
+
+
+                        if (num == 0)
+                        {
+                            slamTiles.Add(new TopDown.SlamTiles(9, new Rectangle((levelInX * screenWidth) + (x * size),
+                                (y * size) - (levelInY * screenHeight), size, size)));
+                            slamTiles[slamTiles.Count - 1].mapPoint = new int[] { y, x };
+                            if (SlamIndexes.Contains(num) == false)
+                                SlamIndexes.Add(num);
+                        }
+
+                        else if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
+                        {
+
+                            switch (num)
+                            {
+                                case 10:
+                                    wallTiles.Add(new WallTiles(39, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 1:
+                                    wallTiles.Add(new WallTiles(32, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 2:
+                                    wallTiles.Add(new WallTiles(30, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 3:
+                                    wallTiles.Add(new WallTiles(31, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 4:
+                                    wallTiles.Add(new WallTiles(33, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 5:
+                                    wallTiles.Add(new WallTiles(34, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 6:
+                                    wallTiles.Add(new WallTiles(35, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 7:
+                                    wallTiles.Add(new WallTiles(36, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 8:
+                                    wallTiles.Add(new WallTiles(37, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                default:
+                                    wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+
+                            }
+                            wallTiles[wallCount].mapPoint = new int[] { y, x };
+                            //wallTiles[wallCount].mapPoint = num;
+                            wallCount++;
+                            if (WallIndexes.Contains(num) == false)
+                            {
+                                WallIndexes.Add(num);
+                            }
+                        }
+                        else if (num == 11) //enemy
+                        {
+                            if (enemySpawns.Contains(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight))) == false)
+                            {
+                                enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight)));
+                                enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            }
+
+                            floorTiles.Add(new FloorTiles(38, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (EnemyIndexes.Contains(num) == false)
+                                EnemyIndexes.Add(num);
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            //skullTiles[skullCount].mapPoint = new int[] { y, x };
+                            //skullCount++;
+                        }
+                        else if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19) //Floors
+                        {
+                            switch (num)
+                            {
+                                case 9:
+                                    floorTiles.Add(new FloorTiles(38, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                default:
+                                    floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+
+                            }
+                            //floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (FloorIndexes.Contains(num) == false)
+                                FloorIndexes.Add(num);
+
+                            ExitDoor = new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size);
+                        }
+
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
+                    }
+                }
+                //width = dMaps[i].GetLength(1);
+                //height = dMaps[i].GetLength(0);
+            }
+        }
+        private void BuildDungeon3(List<int[,]> maps, List<int[,]> yMaps, List<int[,]> dMaps, int size, int screenWidth, int screenHeight, List<Vector2> xPoints, List<Vector2> yPoints, List<Vector2> diagPoints)
+        {
+            for (int i = 0; i < maps.Count; i++)
+            {
+                rows.Add(maps[i].GetLength(0));
+                cols.Add(maps[i].GetLength(1));
+                int levelInX = (int)xPoints[i].X;
+                for (int y = 0; y < maps[i].GetLength(0); y++)
+                {
+                    for (int x = 0; x < maps[i].GetLength(1); x++)
+                    {
+                        int num = maps[i][y, x];
+
+                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8)//Walls
+                        {
+                            //wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+
+                            switch (num)
+                            {
+                                case 10:
+                                    wallTiles.Add(new WallTiles(49, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 1:
+                                    wallTiles.Add(new WallTiles(41, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 2:
+                                    wallTiles.Add(new WallTiles(43, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 3:
+                                    wallTiles.Add(new WallTiles(40, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 4:
+                                    wallTiles.Add(new WallTiles(42, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 5:
+                                    wallTiles.Add(new WallTiles(46, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 6:
+                                    wallTiles.Add(new WallTiles(47, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 7:
+                                    wallTiles.Add(new WallTiles(44, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                case 8:
+                                    wallTiles.Add(new WallTiles(45, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+
+                            }
+
+                            wallTiles[wallCount].mapPoint = new[] { y, x };
+                            wallCount++;
+                            if (WallIndexes.Contains(num) == false)
+                            {
+                                WallIndexes.Add(num);
+                            }
+                        }
+                        if (num == 11) //enemy
+                        {
+                            if (enemySpawns.Contains(new Vector2((levelInX * screenWidth) + (x * size), y * size)) == false)
+                            {
+                                enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), y * size));
+                            }
+
+                            floorTiles.Add(new FloorTiles(48, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorCount++;
+                            if (EnemyIndexes.Contains(num) == false)
+                                EnemyIndexes.Add(num);
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            //skullTiles[skullCount].mapPoint = new int[] { y, x };
+                            //skullCount++;
+                        }
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19) //Floors
+                        {
+                            switch (num)
+                            {
+                                case 9:
+                                    floorTiles.Add(new FloorTiles(48, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    break;
+
+                            }
+                            //floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            floorCount++;
+                            if (FloorIndexes.Contains(num) == false)
+                                FloorIndexes.Add(num);
+
+                            if (num == 12)
+                            {
+                                ExitDoor = new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size);
+                            }
+                        }
+
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
+                    }
+                }
+                //width = maps[i].GetLength(1);
+                //height = maps[i].GetLength(0);
+            }
+
+            for (int i = 0; i < yMaps.Count; i++)
+            {
+                rows.Add(yMaps[i].GetLength(0));
+                cols.Add(yMaps[i].GetLength(1));
+
+                int levelInY = (int)yPoints[i].Y;
+                for (int x = 0; x < cols[i]; x++)
+                {
+                    for (int y = 0; y < yMaps[i].GetLength(0); y++)
+                    {
+                        int num = yMaps[i][y, x];
+
+                        if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
+                        {
+                            //wallTiles.Add(new WallTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            switch (num)
+                            {
+                                case 10:
+                                    wallTiles.Add(new WallTiles(49, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 1:
+                                    wallTiles.Add(new WallTiles(41, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 2:
+                                    wallTiles.Add(new WallTiles(43, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 3:
+                                    wallTiles.Add(new WallTiles(40, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 4:
+                                    wallTiles.Add(new WallTiles(42, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 5:
+                                    wallTiles.Add(new WallTiles(46, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 6:
+                                    wallTiles.Add(new WallTiles(47, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 7:
+                                    wallTiles.Add(new WallTiles(44, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                case 8:
+                                    wallTiles.Add(new WallTiles(45, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    wallTiles.Add(new WallTiles(num, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+
+                            }
+                            wallTiles[wallCount].mapPoint = new[] { y, x };
+                            //wallTiles[wallCount].mapPoint = num;
+                            wallCount++;
+                            if (WallIndexes.Contains(num) == false)
+                            {
+                                WallIndexes.Add(num);
+                            }
+                        }
+                        if (num == 11) //enemy
+                        {
+                            if (enemySpawns.Contains(new Vector2(x * size, (y * size) - (levelInY * screenHeight))) == false)
+                            {
+                                enemySpawns.Add(new Vector2(x * size, (y * size) - (levelInY * screenHeight)));
+                            }
+
+                            floorTiles.Add(new FloorTiles(48, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (EnemyIndexes.Contains(num) == false)
+                                EnemyIndexes.Add(num);
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            //skullTiles[skullCount].mapPoint = new int[] { y, x };
+                            //skullCount++;
+                        }
+                        if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19) //Floors
+                        {
+                            switch (num)
+                            {
+                                case 9:
+                                    floorTiles.Add(new FloorTiles(48, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+                                default:
+                                    floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size), size, size)));
+                                    break;
+
+                            }
+                            //floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (FloorIndexes.Contains(num) == false)
+                                FloorIndexes.Add(num);
+
+                            if (num == 12)
+                            {
+                                ExitDoor = new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size);
+                            }
+                        }
+
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
+                    }
+                }
+                //width = yMaps[i].GetLength(1);
+                //height = yMaps[i].GetLength(0);
+            }
+
+
+            for (int i = 0; i < dMaps.Count; i++)
+            {
+                rows.Add(dMaps[i].GetLength(0));
+                cols.Add(dMaps[i].GetLength(1));
+
+                for (int y = 0; y < dMaps[i].GetLength(0); y++)
+                {
+                    for (int x = 0; x < dMaps[i].GetLength(1); x++)
+                    {
+                        int num = dMaps[i][y, x];
+                        int levelInX = (int)diagPoints[i].X;
+                        int levelInY = (int)diagPoints[i].Y;
+
+
+                        if (num == 0)
+                        {
+                            slamTiles.Add(new TopDown.SlamTiles(9, new Rectangle((levelInX * screenWidth) + (x * size),
+                                (y * size) - (levelInY * screenHeight), size, size)));
+                            slamTiles[slamTiles.Count - 1].mapPoint = new int[] { y, x };
+                            if (SlamIndexes.Contains(num) == false)
+                                SlamIndexes.Add(num);
+                        }
+
+                        else if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls
+                        {
+
+                            switch (num)
+                            {
+                                case 10:
+                                    wallTiles.Add(new WallTiles(49, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 1:
+                                    wallTiles.Add(new WallTiles(41, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 2:
+                                    wallTiles.Add(new WallTiles(43, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 3:
+                                    wallTiles.Add(new WallTiles(40, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 4:
+                                    wallTiles.Add(new WallTiles(42, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 5:
+                                    wallTiles.Add(new WallTiles(46, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 6:
+                                    wallTiles.Add(new WallTiles(47, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 7:
+                                    wallTiles.Add(new WallTiles(44, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                case 8:
+                                    wallTiles.Add(new WallTiles(45, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                default:
+                                    wallTiles.Add(new WallTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+
+                            }
+                            wallTiles[wallCount].mapPoint = new int[] { y, x };
+                            //wallTiles[wallCount].mapPoint = num;
+                            wallCount++;
+                            if (WallIndexes.Contains(num) == false)
+                            {
+                                WallIndexes.Add(num);
+                            }
+                        }
+                        else if (num == 11) //enemy
+                        {
+                            if (enemySpawns.Contains(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight))) == false)
+                            {
+                                enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight)));
+                                enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            }
+
+                            floorTiles.Add(new FloorTiles(48, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (EnemyIndexes.Contains(num) == false)
+                                EnemyIndexes.Add(num);
+                            //skullTiles.Add(new SkullTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            //skullTiles[skullCount].mapPoint = new int[] { y, x };
+                            //skullCount++;
+                        }
+                        else if (num == 9 || num == 12 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19) //Floors
+                        {
+                            switch (num)
+                            {
+                                case 9:
+                                    floorTiles.Add(new FloorTiles(48, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+                                default:
+                                    floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    break;
+
+                            }
+                            //floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles[floorCount].mapPoint = new int[] { y, x };
+                            //floorTiles[floorCount].mapPoint = num;
+                            floorCount++;
+                            if (FloorIndexes.Contains(num) == false)
+                                FloorIndexes.Add(num);
+
+                            ExitDoor = new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size);
+                        }
+
+                        width = (x + 1) * size;
+                        height = (y + 1) * size;
+                    }
+                }
+                //width = dMaps[i].GetLength(1);
+                //height = dMaps[i].GetLength(0);
+            }
+        }
         public int[,] GenerateMap(string filePath)
         {
             if (System.IO.File.Exists(filePath))

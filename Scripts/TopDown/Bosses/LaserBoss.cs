@@ -1693,6 +1693,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
     class BossRect
     {
+        public float health = 6;
         public bool hasWall;
         public PossibleJumpSide jumpSide;
         public float jumpForce;

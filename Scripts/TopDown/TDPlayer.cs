@@ -25,7 +25,7 @@ namespace AUTO_Matic.TopDown
         public Vector2 velocity;
         GamePadButtons currButtons;
         GamePadButtons prevButtons;
-        public int bossRoom = 4;
+        public int bossRoom = 1;
         bool lockDir = false;
         Vector2 startPos;
 
@@ -233,11 +233,11 @@ namespace AUTO_Matic.TopDown
         float bulletMaxX = 10f;
         float bulletMaxY = 10f;
         bool isShootDelay = false;
-        float shootDelay = .8f;//In seconds
+        float shootDelay = .3f;//In seconds
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = 1.2f;
-        public float bulletTravelDist = 64 * 6;
+        public float bulletTravelDist = 64 * 4;
         #endregion
 
 
@@ -252,6 +252,8 @@ namespace AUTO_Matic.TopDown
             this.bounds = bounds;
             this.content = Content;
             ChangeAnimation();
+            iShootDelay = shootDelay;
+            shootDelay = 0;
         }
 
         public void GenerateMap(bool xLevel, bool yLevel, bool dLevel)
@@ -385,7 +387,7 @@ namespace AUTO_Matic.TopDown
             switch(playerState)
             {
                 case PlayerState.Movement:
-                    Input(enemies);
+                    Input(enemies, gameTime);
                     if (levelInX >= 1 && levelInY >= 1)
                     {
                         foreach (WallTiles tile in map.WallTiles)
@@ -735,7 +737,7 @@ namespace AUTO_Matic.TopDown
             animManager.Update(gameTime, new Vector2(rectangle.X, rectangle.Y - (64 - rectangle.Height)));
         }
 
-        private void Input(List<TDEnemy> enemies)
+        private void Input(List<TDEnemy> enemies, GameTime gameTime)
         {
             if(kb.IsKeyDown(Keys.LeftShift) && prevKb.IsKeyDown(Keys.LeftShift))
             {
@@ -796,24 +798,32 @@ namespace AUTO_Matic.TopDown
             {
                 velocity.Y = 0;
             }
-
-            if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
+            shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
             {
-                switch(shootDir)
+               
+
+                if(shootDelay <= 0)
                 {
-                    case "up":
-                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
-                        break;
-                    case "down":
-                        bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
-                        break;
-                    case "left":
-                        bullets.Add(new Bullet(new Vector2(rectangle.Left, rectangle.Y + (rectangle.Height/2)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                        break;
-                    case "right":
-                        bullets.Add(new Bullet(new Vector2(rectangle.Right, rectangle.Y + (rectangle.Height / 2)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                        break;
+                    switch (shootDir)
+                    {
+                        case "up":
+                            bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
+                            break;
+                        case "down":
+                            bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
+                            break;
+                        case "left":
+                            bullets.Add(new Bullet(new Vector2(rectangle.Left, rectangle.Y + (rectangle.Height / 2)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                            break;
+                        case "right":
+                            bullets.Add(new Bullet(new Vector2(rectangle.Right, rectangle.Y + (rectangle.Height / 2)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                            break;
+                    }
+
+                    shootDelay = iShootDelay;
                 }
+               
                 
             }
 

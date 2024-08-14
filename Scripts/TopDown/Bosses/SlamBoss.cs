@@ -13,13 +13,15 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
     class SlamBoss
     {
         List<GroundLoc> slamLocs = new List<GroundLoc>();
-        Rectangle bossRect;
+        public Rectangle bossRect;
 
         int slameTimeMin = 5;
         int slamTimeMax = 10;
 
         float slamDelay = 5;
         float iSlamDelay;
+
+        public float health = 8;
 
         Random rand = new Random();
 
@@ -315,20 +317,20 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                    new Vector2(bossRect.Center.X, bossRect.Center.Y);
                 angle = (float)Math.Atan2(targetDir.Y, targetDir.X);
 
-                Vector2 bossPos = new Vector2(bossRect.Center.X - tdPlayer.rectangle.Width / 2, bossRect.Center.Y - tdPlayer.rectangle.Height / 2);
+                Vector2 bossPos = new Vector2(bossRect.Center.X, bossRect.Center.Y);
 
                 float bulletSpeedX = (float)Math.Cos((double)angle) * 2;
                 float bulletSpeedY = (float)Math.Sin((double)angle) * 2;
 
                 //bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
                 #region BurstShot
-                bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
+                bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
                     content, true, bulletTravelDist, true, bulletSpeedY));
 
-                bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y), bulletSpeedX * 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
+                bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX * 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
                content, true, bulletTravelDist, true, bulletSpeedY * 1.5f));
 
-                bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y), bulletSpeedX / 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
+                bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX / 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
               content, true, bulletTravelDist, true, bulletSpeedY / 1.5f));
                 #endregion
 
@@ -438,15 +440,18 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
         public void Draw(SpriteBatch spriteBatch)
         {
-
-            foreach (GroundLoc loc in slamLocs)
+            if (slamReady)
             {
-                for (int i = 0; i < loc.slamTiles.Count; i++)
-                {
-                    spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile0"), loc.slamTiles[i].Rectangle, Color.White);
-                }
-
+                spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), slam.rect.Bounds, Color.White * .25f);
             }
+            //foreach (GroundLoc loc in slamLocs)
+            //{
+            //    for (int i = 0; i < loc.slamTiles.Count; i++)
+            //    {
+            //        spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile0"), loc.slamTiles[i].Rectangle, Color.White);
+            //    }
+
+            //}
             spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), bossRect, Color.White);
 
             for(int i = 0; i < bullets.Count; i++)
@@ -454,10 +459,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 bullets[i].Draw(spriteBatch);
             }
     
-            if(slamReady)
-            {
-                slam.Draw(spriteBatch, content);
-            }
+           
 
         }
 

@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using AUTO_Matic.Scripts;
+using AUTO_Matic.Scripts.Effects;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -25,6 +27,8 @@ namespace AUTO_Matic.SideScroll
         PlayerStates prevPlayerState;
         bool groundPound = false;
         public bool killEnemy = false;
+
+        ParticleManager particles = new ParticleManager();
 
         #region Fields
         float dashHelperBuffer = 10f;
@@ -109,15 +113,24 @@ namespace AUTO_Matic.SideScroll
         float bulletMaxX = 15f;
         float bulletMaxY = 0;
         bool isShootDelay = false;
-        float shootDelay = .8f;//In seconds
+        float shootDelay = .3f;//In seconds
+        float pistolDelay = .85f;
+        float burstDelay = .65f;
+        float shotGunDelay = 1.85f;
+        float laserDelay = 2f;
+        float bombDelay = 1f;
+
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = .65f;
         float bulletTravelDist = 64 * 3;
         WeaponWheel weaponWheel;
+        int selectedWeapon = 0;
 
-        enum WeaponType { Pistol, Shotgun, Laser, Burst}
-        WeaponType currWeapon = WeaponType.Shotgun;
+        List<Bomb> bombs = new List<Bomb>();
+        List<Explosion> explosions = new List<Explosion>();
+        enum WeaponType { Pistol, Shotgun, Laser, Burst, Bomb}
+        WeaponType currWeapon = WeaponType.Pistol;
         #endregion
 
         #region Jumping
@@ -457,6 +470,10 @@ namespace AUTO_Matic.SideScroll
             weaponWheel = new WeaponWheel(this, 24);
             isCollidingRight = false;
             isCollidingLeft = false;
+            iShootDelay = pistolDelay;
+            shootDelay = 0;
+            bombs.Clear();
+            particles.Initialize(content.Load<Texture2D>("Textures/white"));
         }
 
         public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies, bool fade = false)
@@ -541,7 +558,7 @@ namespace AUTO_Matic.SideScroll
                     accel = Math.Abs((prevVel.Length() - Velocity.Length())) / changeInTime;
                 }
                 force = mass * Acceleration;
-
+                
                 switch (playerState)
                 {
                     #region Movement
@@ -715,6 +732,47 @@ namespace AUTO_Matic.SideScroll
                 {
                     for (int i = bullets.Count - 1; i >= 0; i--)
                     {
+                     
+                        if (currWeapon == WeaponType.Burst)
+                        {
+                            for(int j = i - 1; j >= 0; j--)
+                            {
+                                if(bullets[j].rect.Intersects(bullets[i].rect))
+                                {
+                                    if (bullets[j].maxSpeed.X > 0)
+                                        bullets[j].maxSpeed.X = bulletMaxX / 10;
+                                    else
+                                        bullets[j].maxSpeed.X = -bulletMaxX / 10;
+                                }
+                                else
+                                {
+                                    if (bullets[j].maxSpeed.X > 0)
+                                        bullets[j].maxSpeed.X = bulletMaxX;
+                                    else
+                                        bullets[j].maxSpeed.X = -bulletMaxX;
+                                }
+                            }
+                        }
+                        else if(currWeapon == WeaponType.Laser)
+                        {
+                            for (int j = i - 1; j >= 0; j--)
+                            {
+                                if (bullets[j].rect.Intersects(bullets[i].rect))
+                                {
+                                    if (bullets[j].maxSpeed.X > 0)
+                                        bullets[j].maxSpeed.X = bulletMaxX / 5;
+                                    else
+                                        bullets[j].maxSpeed.X = -bulletMaxX / 5;
+                                }
+                                else
+                                {
+                                    if (bullets[j].maxSpeed.X > 0)
+                                        bullets[j].maxSpeed.X = bulletMaxX;
+                                    else
+                                        bullets[j].maxSpeed.X = -bulletMaxX;
+                                }
+                            }
+                        }
                         bullets[i].Update();
                         if (bullets[i].delete)
                         {
@@ -735,6 +793,26 @@ namespace AUTO_Matic.SideScroll
                     }
                 }
 
+                for(int i = bombs.Count - 1; i >= 0; i--)
+                {
+                    bombs[i].Update(gameTime, gravity, enemies);
+
+                    if(bombs[i].delete)
+                    {
+                        explosions.Add(new Explosion(bombs[i].circle, 1, (int)(bombs[i].circle.Bounds.Width * 2.5f)));
+
+                        int radiusDif = explosions[explosions.Count - 1].maxSize - explosions[explosions.Count - 1].rect.Radius;
+
+                        particles.MakeExplosion(explosions[explosions.Count - 1].rect.Bounds,
+                               new Circle(new Vector2(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif,
+                               explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif), explosions[explosions.Count - 1].maxSize / 2),
+                               20);
+
+                        bombs.RemoveAt(i);
+                    }
+                }
+
+                particles.Update(gameTime);
                 //switch (playerState)
                 //{
                 //    case PlayerStates.Movement:
@@ -1428,8 +1506,9 @@ namespace AUTO_Matic.SideScroll
                 {
                     velocity.Y += fallSpeed;
                 }
+                shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                if(kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter)|| currControllerBtn.X == ButtonState.Pressed && prevControllerBtn.X == ButtonState.Released)
+                if (kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) && shootDelay<= 0|| currControllerBtn.X == ButtonState.Pressed && prevControllerBtn.X == ButtonState.Released && shootDelay <= 0)
                 {
                     if(animManager.isRight)
                     {
@@ -1445,7 +1524,7 @@ namespace AUTO_Matic.SideScroll
                                 break;
 
                             case WeaponType.Shotgun:
-                                bulletTravelDist = 64 * 1f;
+                                bulletTravelDist = 64 * 1.5f;
                                 bulletSpeed = 3.5f * 2;
 
                                 //Top 
@@ -1461,6 +1540,33 @@ namespace AUTO_Matic.SideScroll
                                    position.Y + playerRect.Height / 1.5f), bulletSpeed,
                                    new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed/3));
                                 break;
+                            case WeaponType.Burst:
+
+                                bulletSpeed = 3.5f;
+                                bulletTravelDist = 64 * 3.5f;
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                  (position.Y + playerRect.Height / 1.5f)), bulletSpeed,
+                                  new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
+                                }
+                                break;
+                            case WeaponType.Bomb:
+                                bulletSpeed = 3.5f;
+                                bombs.Add(new Bomb(new Circle(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                  (position.Y + playerRect.Height /2f)), 9), bulletSpeed, -bulletSpeed * 5f, content));
+                                break;
+                            case WeaponType.Laser:
+                                bulletSpeed = 4.5f;
+                                bulletTravelDist = 64 * 4f;
+                                for (int i = 0; i < 8; i++)
+                                {
+                                    bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                  (position.Y + playerRect.Height / 1.5f)), bulletSpeed,
+                                  new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
+                                }
+                                break;
+
 
 
                         }
@@ -1482,21 +1588,47 @@ namespace AUTO_Matic.SideScroll
                                 bulletSpeed = 3.5f * 2;
 
                                 //Top 
-                                bullets.Add(new Bullet(new Vector2(position.X + (18/2),
+                                bullets.Add(new Bullet(new Vector2(position.X - (18/2),
                                    (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
                                    new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 3));
                                 //Center
-                                bullets.Add(new Bullet(new Vector2(position.X + (18/2),
+                                bullets.Add(new Bullet(new Vector2(position.X - (18/2),
                                    position.Y + playerRect.Height / 1.5f), -bulletSpeed,
                                    new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                                 //Bottom
-                                bullets.Add(new Bullet(new Vector2(position.X + (18/2),
+                                bullets.Add(new Bullet(new Vector2(position.X - (18/2),
                                    position.Y + playerRect.Height / 1.5f), -bulletSpeed,
                                    new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 3));
+                                break;
+                            case WeaponType.Burst:
+                                bulletSpeed = 3.5f;
+                                bulletTravelDist = 64 * 3f;
+                                for (int i = 0; i < 3; i++)
+                                {
+                                    bullets.Add(new Bullet(new Vector2(position.X - (18 / 2),
+                                  (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
+                                  new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
+                                }
+                                break;
+                            case WeaponType.Bomb:
+                                bulletSpeed = 3.5f;
+                                bombs.Add(new Bomb(new Circle(new Vector2(position.X - (18 / 2),
+                                    (position.Y + playerRect.Height / 2f)), 9), -bulletSpeed, -bulletSpeed * 5f, content));
+                                break;
+                            case WeaponType.Laser:
+                                bulletSpeed = 4.5f;
+                                bulletTravelDist = 64 * 4f;
+                                for (int i = 0; i < 8; i++)
+                                {
+                                    bullets.Add(new Bullet(new Vector2(position.X - (18 / 2),
+                                  (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
+                                  new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
+                                }
                                 break;
                         }
                         
                     }
+                    shootDelay = iShootDelay;
                     
                 }
                
@@ -1514,13 +1646,88 @@ namespace AUTO_Matic.SideScroll
             //Weapon Wheel actions
             if(weaponWheel.active)
             {
-                if(kb.IsKeyDown(Keys.NumPad2))
+                if(kb.IsKeyDown(Keys.Right) && prevKb.IsKeyUp(Keys.Right))
                 {
-                    currWeapon = WeaponType.Shotgun;            
+                    
+                    if (selectedWeapon == 0)
+                    {
+                        currWeapon = WeaponType.Burst;
+                        selectedWeapon = 2;
+
+                        shootDelay = burstDelay;
+                        iShootDelay = shootDelay;
+
+                    }
+                    else if (selectedWeapon == 1)
+                    {
+                        currWeapon = WeaponType.Pistol;
+                        selectedWeapon = 0;
+
+
+                        shootDelay = pistolDelay;
+                        iShootDelay = shootDelay;
+                    }
+
+
                 }
-                else if(kb.IsKeyDown(Keys.NumPad5))
+                else if(kb.IsKeyDown(Keys.Left) && prevKb.IsKeyUp(Keys.Left))
                 {
-                    currWeapon = WeaponType.Pistol;
+                    if (selectedWeapon == 2)
+                    {
+                        currWeapon = WeaponType.Pistol;
+                        selectedWeapon = 0;
+
+                        shootDelay = pistolDelay;
+                        iShootDelay = shootDelay;
+                    }
+                    else if (selectedWeapon == 0)
+                    {
+                        currWeapon = WeaponType.Laser;
+                        selectedWeapon = 1;
+
+                        shootDelay = laserDelay;
+                        iShootDelay = shootDelay;
+                    }
+                }
+                else if(kb.IsKeyDown(Keys.Up) && prevKb.IsKeyUp(Keys.Up))
+                {
+                    if (selectedWeapon == 0)
+                    {
+                        currWeapon = WeaponType.Bomb;
+                        selectedWeapon = 3;
+
+                        shootDelay = bombDelay;
+                        iShootDelay = shootDelay;
+
+                    }
+                    else if (selectedWeapon == 4)
+                    {
+                        currWeapon = WeaponType.Pistol;
+                        selectedWeapon = 0;
+
+                        shootDelay = pistolDelay;
+                        iShootDelay = shootDelay;
+                    }
+                }
+                else if(kb.IsKeyDown(Keys.Down) && prevKb.IsKeyUp(Keys.Down))
+                {
+                    if (selectedWeapon == 0)
+                    {
+                        currWeapon = WeaponType.Shotgun;
+                        selectedWeapon = 4;
+
+                        shootDelay = shotGunDelay;
+                        iShootDelay = shootDelay;
+
+                    }
+                    else if (selectedWeapon == 3)
+                    {
+                        currWeapon = WeaponType.Pistol;
+                        selectedWeapon = 0;
+
+                        shootDelay = pistolDelay;
+                        iShootDelay = shootDelay;
+                    }
                 }
             }
             prevKb = kb;
@@ -1913,12 +2120,24 @@ namespace AUTO_Matic.SideScroll
                 bullet.Draw(spriteBatch);
             }
 
+            foreach(Bomb bomb in bombs)
+            {
+                bomb.Draw(spriteBatch);
+            }
+
+            particles.Draw(spriteBatch);
+
             if(weaponWheel.active)
             {
-                foreach(WeaponSlot slot in weaponWheel.WeaponSlots)
+                for(int i = 0; i < weaponWheel.WeaponSlots.Count; i++)
                 {
-                    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), slot.rect, Color.White * .35f);
+                    if (selectedWeapon == i)
+                        spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), weaponWheel.WeaponSlots[i].rect, Color.Blue * .35f);
+                    else
+                        spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), weaponWheel.WeaponSlots[i].rect, Color.White * .35f);
+
                 }
+                   
             }
         }
     }
@@ -1952,14 +2171,18 @@ namespace AUTO_Matic.SideScroll
         }
         public void Update(SSPlayer player)
         {
+  
+
             WeaponSlots[0].rect = new Rectangle(player.playerRect.Center.X - size / 2,
-               player.playerRect.Center.Y - size, size, size);
+               (int)(player.playerRect.Center.Y - (size * 3f)), size, size); //Center
             WeaponSlots[1].rect = new Rectangle(WeaponSlots[0].rect.X - (size + 2),
-                WeaponSlots[0].rect.Y, size, size);
+                WeaponSlots[0].rect.Y, size, size);//Left
             WeaponSlots[2].rect = new Rectangle(WeaponSlots[0].rect.Right + 2,
-                WeaponSlots[0].rect.Y, size, size);
+                WeaponSlots[0].rect.Y, size, size);//Right
             WeaponSlots[3].rect = new Rectangle(WeaponSlots[0].rect.X,
-                WeaponSlots[0].rect.Y - (size + 2), size, size);
+                WeaponSlots[0].rect.Y - (size + 2), size, size);//Top
+            WeaponSlots[4].rect = new Rectangle(player.playerRect.Center.X - size / 2,
+                WeaponSlots[0].rect.Bottom + 2, size, size);//Bottom
         }
     }
 
@@ -1967,5 +2190,38 @@ namespace AUTO_Matic.SideScroll
     {
         public Rectangle rect;
         public Texture2D texture;
+    }
+
+    class Explosion
+    {
+        public Circle rect;
+        public int growthRate;
+        public int maxSize;
+        //public ParticleManager particles;
+
+        public Explosion(Circle rect, int rate, int max)
+        {
+            this.rect = rect;
+            growthRate = rate;
+            maxSize = max;
+            //particles.CreateEffect(20);
+        }
+
+        public void Update(GameTime gameTime)
+        {
+            if (rect.Radius < maxSize)
+            {
+                rect.Radius += growthRate;
+                rect.Position = new Vector2(rect.Bounds.X - growthRate, rect.Bounds.Y - growthRate);
+            }
+
+
+
+        }
+
+        public void Draw(SpriteBatch spriteBatch, ContentManager content)
+        {
+            //spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect.Bounds, Color.FloralWhite * .25f);
+        }
     }
 }

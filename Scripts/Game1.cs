@@ -34,7 +34,8 @@ namespace AUTO_Matic
         int dropRateTD = 55;
         float healAmount = 1.5f;
 
-        Rectangle LeaveDungeon;
+        Rectangle LeaveDungeon = Rectangle.Empty;
+        bool closeDoor = false;
 
         public enum Scenes { TitleScreen, InGame, Exit }
         public Scenes currScene = Scenes.InGame;
@@ -85,6 +86,7 @@ namespace AUTO_Matic
         #region TopDown
         TopDownMap tdMap;
         TDPlayer tdPlayer;
+
         public List<Vector2> BoundIndexes = new List<Vector2>();
         int pixelBits = 64;
         List<TDEnemy> tdEnemies = new List<TDEnemy>();
@@ -144,6 +146,8 @@ namespace AUTO_Matic
         Rectangle tdPrevBounds = Rectangle.Empty;
         MapBuilder mapBuilder;
         FinalBoss finalBoss;
+
+        Vector2 savedDoorY = Vector2.One;
 
         int dungeonNum = 0;
 
@@ -238,8 +242,8 @@ namespace AUTO_Matic
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if (currScene == Scenes.InGame)
             {
-                StartNewGame();
-                //LoadFinalBoss();
+                //StartNewGame();
+                LoadFinalBoss();
             }
 
            
@@ -369,7 +373,26 @@ namespace AUTO_Matic
             }
             else if(isBoss && tdPlayer.bossRoom < levelCount)
             {
-                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 19 + ".txt";
+                string filePath;
+                switch (dungeonNum)
+                {
+                    case 0:
+                        filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 99 + ".txt";
+                        break;
+                    case 1:
+                        filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 19 + ".txt";
+                        break;
+                    case 2:
+                        filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 19 + ".txt";
+                        break;
+                    case 3:
+                        filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 19 + ".txt";
+                        break;
+                    default:
+                        filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 19 + ".txt";
+                        break;
+                }
+              
 
                 if (xLevel)
                     tdPlayer.PosXLevels.xLevels.Add(tdMap.GenerateMap(filePath));
@@ -388,7 +411,7 @@ namespace AUTO_Matic
                      new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
                 int[,] mapDims = (tdMap.GenerateMap(filePath));
 
-                //LeaveDungeon = new Rectangle(currBounds.X + currBounds.Width/2, currBounds.Y + currBounds.Height/2, 64, 64);
+                
                 List<WallTiles> walls = new List<WallTiles>();
                 for (int y = 0; y < mapDims.GetLength(0); y++)
                 {
@@ -400,11 +423,28 @@ namespace AUTO_Matic
                         }
                     }
                 }
-                shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
-              //laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims, GraphicsDevice);
-               //slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
+
+                switch(dungeonNum)
+                {
+                    case 0:
+                        shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
+                        break;
+                    case 1:
+                        slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
+                        break;
+                    case 2:
+                        bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer, GraphicsDevice,
+                    Content.Load<Effect>(@"Effects\Particles"), Content.Load<Texture2D>(@"Textures\white"));
+                        break;
+                    case 3:
+                        laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims, GraphicsDevice);
+                        break;
+                }
+
+                //laserBoss = new LaserBoss(currBounds, Content, tdMap, mapDims, GraphicsDevice);
+                //
                 //bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer, GraphicsDevice, 
-                //    Content.Load<Effect>(@"Effects\Particles"), Content.Load<Texture2D>(@"Textures\white"));
+                //   Content.Load<Effect>(@"Effects\Particles"), Content.Load<Texture2D>(@"Textures\white"));
 
                 //for(int i = 0; i <= 4; i++)
                 //{
@@ -432,7 +472,7 @@ namespace AUTO_Matic
 
             SetDungeonNum();
 
-            tdPlayer = new TDPlayer(this, 64, 200, 200);
+            tdPlayer = new TDPlayer(this, 64, 2, 2);
             tdMap = new TopDownMap();
             //Boss = new Rectangle();
             levelCount = 0;
@@ -495,13 +535,14 @@ namespace AUTO_Matic
         private void SetDungeonNum()
         {
             DungeonEntrance entrance = dungeons[0];
-
+            //dungeonNum = 2;
             for (int i = 1; i < dungeons.Count; i++)
             {
                 if (MathHelper.Distance(entrance.Rectangle.X, ssPlayer.Rectangle.X) >
                     MathHelper.Distance(dungeons[i].Rectangle.X, ssPlayer.Rectangle.X))
                 {
                     dungeonNum = i;
+                    entrance = dungeons[i];
                 }
             }
         }
@@ -535,7 +576,7 @@ namespace AUTO_Matic
                 SideTileMap.playerSpawns[0].Y - (64 * 2.5f)), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
             ssCamera.Zoom = 1f;
 
-            finalBoss = new FinalBoss(SideTileMap.enemySpawns[0], Content);
+            finalBoss = new FinalBoss(SideTileMap.enemySpawns[0], Content, GraphicsDevice);
             
             //ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont);
             //ssCamera.Zoom = 1.25f;
@@ -575,7 +616,7 @@ namespace AUTO_Matic
             this.IsMouseVisible = false;
             Tile.Content = Content;
 
-            string filePath = Content.RootDirectory + "/SideScroll/Maps/Map3.txt";
+            string filePath = Content.RootDirectory + "/SideScroll/Maps/Map1.txt";
 
             //dungeons.Add(SideTileMap.DungeonEntrances[0]);
             //for (int j = 1; j < SideTileMap.DungeonEntrances.Count; j++)
@@ -624,19 +665,21 @@ namespace AUTO_Matic
                     //closest = SideTileMap.DungeonEntrances[i];
                     if (!dungeons.Contains(SideTileMap.DungeonEntrances[i]))
                     {
+                        closest = SideTileMap.DungeonEntrances[i];
+                        furthest = SideTileMap.DungeonEntrances[i];
                         for (int j = 0; j < SideTileMap.DungeonEntrances.Count; j++)
                         {
                             if (!dungeons.Contains(SideTileMap.DungeonEntrances[j]))
                             {
-                                if (SideTileMap.DungeonEntrances[i].Rectangle.X < SideTileMap.DungeonEntrances[j].Rectangle.X)
-                                {
-                                    closest = SideTileMap.DungeonEntrances[i];
-                                }
-                                else if (SideTileMap.DungeonEntrances[i].Rectangle.X > SideTileMap.DungeonEntrances[j].Rectangle.X)
+                                if (closest.Rectangle.X > SideTileMap.DungeonEntrances[j].Rectangle.X)
                                 {
                                     closest = SideTileMap.DungeonEntrances[j];
-                                    //furthest = SideTileMap.DungeonEntrances[]
                                 }
+                                //else if (SideTileMap.DungeonEntrances[i].Rectangle.X > SideTileMap.DungeonEntrances[j].Rectangle.X)
+                                //{
+                                //    closest = SideTileMap.DungeonEntrances[j];
+                                //    //furthest = SideTileMap.DungeonEntrances[]
+                                //}
                                 else if (furthest.Rectangle.X < SideTileMap.DungeonEntrances[j].Rectangle.X)
                                 {
                                     furthest = SideTileMap.DungeonEntrances[j];
@@ -819,9 +862,20 @@ namespace AUTO_Matic
                                         }
 
                                     }
+                                   
+                                }
+                                if (updateDoor)
+                                {
+                                    UpdateDoor(topIndex, bottomIndex);
                                 }
 
                             }
+                            else if (updateDoor)
+                            {
+                                UpdateDoor(topIndex, bottomIndex);
+                            }
+                            else if (closeDoor)
+                                CloseDoor(topIndex, bottomIndex);
                             else
                             {
                                 dont = false;
@@ -1164,27 +1218,11 @@ namespace AUTO_Matic
                                 camera.Update(CameraPos());
                                 if (kb.IsKeyDown(Keys.J) || tdPlayer.rectangle.Intersects(LeaveDungeon))//Switching back to sidescroll
                                 {
-                                    GameState = GameStates.SideScroll;
-                                    //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
-                                    graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
-                                    graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
-
-                                    //graphics.HardwareModeSwitch = false;
-                                    //graphics.IsFullScreen = true;
-                                    graphics.ApplyChanges();
-
-                                    List<Texture2D> healthbars = new List<Texture2D>();
-                                    for (int i = 0; i < 6; i++)
-                                    {
-                                        healthbars.Add(Content.Load<Texture2D>(@"SideScroll\HealthBar\RoboHealthBar" + i));
-                                    }
-
-                                    UIHelper.HealthBar = healthbars;
-                                    UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
+                                    ChangeToSideScroll();
                                     //Camera position not updated
                                 }
-                               
-                               
+
+
                                 if (tdEnemies.Count != 0)
                                 {
                                     bool hardBreak = false;
@@ -1325,23 +1363,86 @@ namespace AUTO_Matic
                                 //}
                                 if (startBoss)
                                 {
-                                    #region ShotGunBoss
-                                    shotGunBoss.Update(gameTime, tdPlayer, tdMap);
-                                    for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                    switch(dungeonNum)
                                     {
-                                        if (shotGunBoss != null && tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
-                                        {
-                                            shotGunBoss.Health -= tdPlayer.bulletDmg;
-                                            tdPlayer.bullets.RemoveAt(i);
-                                        }
+                                        case 0:
+                                            #region ShotGunBoss
+                                            shotGunBoss.Update(gameTime, tdPlayer, tdMap);
+                                            if (shotGunBoss.Health <= 0 && LeaveDungeon == Rectangle.Empty)
+                                            {
+                                                LeaveDungeon = new Rectangle(camera.viewport.Bounds.X + camera.viewport.Bounds.Width / 2, 
+                                                    camera.viewport.Bounds.Y + camera.viewport.Bounds.Height / 2, 64, 64);
+                                                ChangeToSideScroll();
+                                            }
+                                         
+                                            for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                            {
+                                                if (shotGunBoss != null && tdPlayer.bullets[i].rect.Intersects(shotGunBoss.worldRect))
+                                                {
+                                                    shotGunBoss.Health -= tdPlayer.bulletDmg;
+                                                    tdPlayer.bullets.RemoveAt(i);
+                                                }
+                                            }
+                                         
+                                            #endregion
+                                            break;
+                                        case 1:
+
+                                            slamBoss.Update(gameTime, tdPlayer, tdMap);
+                                            if (slamBoss.health <= 0)
+                                            {
+                                                LeaveDungeon = new Rectangle(camera.viewport.Bounds.X + camera.viewport.Bounds.Width / 2,
+                                                    camera.viewport.Bounds.Y + camera.viewport.Bounds.Height / 2, 64, 64);
+                                                slamBoss.bossRect.X = 0;
+                                                ChangeToSideScroll();
+                                            }
+                                            
+
+                                            break;
+                                        case 2:
+                                            bombBoss.Update(gameTime, tdMap, tdPlayer);
+
+                                            if (bombBoss.health <= 0)
+                                            {
+                                                LeaveDungeon = new Rectangle(camera.viewport.Bounds.X + camera.viewport.Bounds.Width / 2,
+                                                    camera.viewport.Bounds.Y + camera.viewport.Bounds.Height / 2, 64, 64);
+                                                bombBoss.bossRect.X = 0;
+                                                ChangeToSideScroll();
+                                            }
+                                            
+                                               
+
+                                            break;
+                                        case 3:
+                                            laserBoss.Update(gameTime, tdPlayer, tdMap);
+
+                                            int deadBosses = 0;
+                                            foreach(BossRect boss in laserBoss.bossRects)
+                                            {
+                                                if(boss.health <= 0)
+                                                {
+                                                    boss.rect.X = 0;
+                                                    deadBosses++;
+                                                }
+                                            }
+
+                                            if(deadBosses >= 3)
+                                            {
+                                                LeaveDungeon = new Rectangle(camera.viewport.Bounds.X + camera.viewport.Bounds.Width / 2,
+                                                camera.viewport.Bounds.Y + camera.viewport.Bounds.Height / 2, 64, 64);
+                                                laserBoss.bossRects.Clear();
+                                                ChangeToSideScroll();
+                                            }
+                                                
+                                            break;
                                     }
-                                    #endregion
+                                   
 
                                     #region LaserBoss
-                                    //laserBoss.Update(gameTime, tdPlayer, tdMap);
+                                  
                                     #endregion
                                     #region BombBoss
-                                   //bombBoss.Update(gameTime, tdMap, tdPlayer);
+                                    //bombBoss.Update(gameTime, tdMap, tdPlayer);
                                     #endregion
                                     #region SlamBoss
                                     //slamBoss.Update(gameTime, tdPlayer, tdMap);
@@ -1524,6 +1625,27 @@ namespace AUTO_Matic
             base.Update(gameTime);
         }
 
+        private void ChangeToSideScroll()
+        {
+            GameState = GameStates.SideScroll;
+            //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
+            graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
+            graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
+
+            //graphics.HardwareModeSwitch = false;
+            //graphics.IsFullScreen = true;
+            graphics.ApplyChanges();
+
+            List<Texture2D> healthbars = new List<Texture2D>();
+            for (int i = 0; i < 6; i++)
+            {
+                healthbars.Add(Content.Load<Texture2D>(@"SideScroll\HealthBar\RoboHealthBar" + i));
+            }
+
+            UIHelper.HealthBar = healthbars;
+            UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
+        }
+
         private Rectangle CheckForTiles(Rectangle worldRect)
         {
             for (int i = 0; i < SideTileMap.GroundTiles.Count - 1; i++)
@@ -1591,9 +1713,10 @@ namespace AUTO_Matic
             bottomIndex = bottomTileIndex;
             topIndex = topTileIndex;
 
-            //updateDoor = true;
+            updateDoor = true;
             prevGameState = GameState;
             doorTrans = true;
+            savedDoorY = new Vector2(SideTileMap.TopDoorTiles[topIndex].Rectangle.Top, SideTileMap.BottomDoorTiles[bottomIndex].Rectangle.Top);
             if(ssPlayer.animManager.isRight)
             {
                 updatedPos = new Vector2(SideTileMap.BottomDoorTiles[bottomIndex].Rectangle.Right + ssPlayer.playerRect.Width / 2,
@@ -1611,19 +1734,35 @@ namespace AUTO_Matic
 
         void UpdateDoor(int topTile, int bottomTile)
         {
-            //SideTileMap.TopDoorTiles[topTile].setY((SideTileMap.TopDoorTiles[topTile].Rectangle.Y - doorOpenSpeed));
-            //SideTileMap.BottomDoorTiles[bottomTile].setY((SideTileMap.BottomDoorTiles[bottomTile].Rectangle.Y + doorOpenSpeed));
+            SideTileMap.TopDoorTiles[topTile].setY((SideTileMap.TopDoorTiles[topTile].Rectangle.Y - doorOpenSpeed));
+            SideTileMap.BottomDoorTiles[bottomTile].setY((SideTileMap.BottomDoorTiles[bottomTile].Rectangle.Y + doorOpenSpeed));
 
-            //if (MathHelper.Distance(SideTileMap.TopDoorTiles[topTile].Rectangle.Bottom, SideTileMap.BottomDoorTiles[bottomTile].Rectangle.Top) > pixelBits * 2)
-            //{
-            //    updateDoor = false;
+            if (MathHelper.Distance(SideTileMap.TopDoorTiles[topTile].Rectangle.Bottom, SideTileMap.BottomDoorTiles[bottomTile].Rectangle.Top) > pixelBits * 2)
+            {
+                updateDoor = false;
 
-            //    SideTileMap.TopDoorTiles.Remove(SideTileMap.TopDoorTiles[topTile]);
-            //    SideTileMap.BottomDoorTiles.Remove(SideTileMap.BottomDoorTiles[bottomTile]);
-            //    dont = false;   
-            //}
+                //SideTileMap.TopDoorTiles[topTile].active = false;
+                //SideTileMap.BottomDoorTiles[bottomTile].active = false;
+                //dont = false;
 
-            
+                closeDoor = true;
+            }
+
+
+        }
+
+        void CloseDoor(int topTile, int bottomTile)
+        {
+            SideTileMap.TopDoorTiles[topTile].setY((SideTileMap.TopDoorTiles[topTile].Rectangle.Y + doorOpenSpeed));
+            SideTileMap.BottomDoorTiles[bottomTile].setY((SideTileMap.BottomDoorTiles[bottomTile].Rectangle.Y - doorOpenSpeed));
+
+            if(SideTileMap.TopDoorTiles[topTile].Rectangle.Bottom - 1 >= SideTileMap.BottomDoorTiles[bottomTile].Rectangle.Top)
+            {
+                closeDoor = false;
+
+                SideTileMap.TopDoorTiles[topTile].setY(savedDoorY.X);
+                SideTileMap.BottomDoorTiles[bottomTile].setY(savedDoorY.Y);
+            }
         }
         /// <summary>
         /// This is called when the game should draw itself.
@@ -1777,20 +1916,44 @@ namespace AUTO_Matic
                                 shotGunBoss.Draw(spriteBatch);
 
                                 Window.Title = " ";
-                                //float[] angles = new float[laserBoss.bossRects.Count];
-                                #region LaserBoss
-                                //for (int i = 0; i < laserBoss.bossRects.Count; i++)
-                                //{
-                                //    //angles[i] = laserBoss.bossRects[i].angle;
-                                //    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
+                                switch(dungeonNum)
+                                {
+                                    case 0:
+                                        if (shotGunBoss != null)
+                                            shotGunBoss.Draw(spriteBatch);
+                                        break;
+                                    case 1:
+                                        slamBoss.Draw(spriteBatch);
+                                        break;
+                                    case 2:
+                                        bombBoss.Draw(spriteBatch);
+                                        break;
+                                    case 3:
+                                        for (int i = 0; i < laserBoss.bossRects.Count; i++)
+                                        {
+                                            //angles[i] = laserBoss.bossRects[i].angle;
+                                            Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
 
-                                //}
-                                //laserBoss.Draw(spriteBatch);
-                                #endregion
-                                //`bombBoss.Draw(spriteBatch);
-                                //Window.Title = "Angle: " + bombBoss.angle;
-                                //slamBoss.Draw(spriteBatch);
-                                //Window.Title = "Angle: " + slamBoss.angle;
+                                        }
+                                        laserBoss.Draw(spriteBatch);
+                                        break;
+                                }
+                                if (LeaveDungeon != Rectangle.Empty)
+                                    spriteBatch.Draw(Content.Load<Texture2D>("TopDown/MapTiles/Tile15"), LeaveDungeon, Color.White);
+                                //float[] angles = new float[laserBoss.bossRects.Count];
+                                    #region LaserBoss
+                                    //for (int i = 0; i < laserBoss.bossRects.Count; i++)
+                                    //{
+                                    //    //angles[i] = laserBoss.bossRects[i].angle;
+                                    //    Window.Title += "Boss" + i + ": " + laserBoss.bossRects[i].angle;
+
+                                    //}
+                                    //laserBoss.Draw(spriteBatch);
+                                    #endregion
+                                    //bombBoss.Draw(spriteBatch);
+                                    //Window.Title = "Angle: " + bombBoss.angle;
+                                    //slamBoss.Draw(spriteBatch);
+                                    //Window.Title = "Angle: " + slamBoss.angle;
                                 foreach (HealthDrop health in bossHealthDrops)
                                 {
                                     health.Draw(spriteBatch);

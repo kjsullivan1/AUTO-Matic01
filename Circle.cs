@@ -55,8 +55,8 @@ namespace AUTO_Matic
             double x2 = rect.X;
             double y2 = rect.Y;
 
-            double distance = Math.Abs(Math.Sqrt(Math.Pow((x2 - x1), 2) + Math.Pow((y2 - y1), 2)));
-            if (distance <= Radius + rect.Width)
+            double num = (Bounds.Center.ToVector2() - rect.Center.ToVector2()).Length();
+            if (num <= Radius + rect.Width/2)
             {
                 return true;
             }
