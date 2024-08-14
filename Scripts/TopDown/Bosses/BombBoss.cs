@@ -243,6 +243,17 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             for (int i = bullets.Count - 1; i >= 0; i--)
             {
                 bullets[i].Update();
+
+                if(bullets[i].rect.Intersects(tdPlayer.rectangle))
+                {
+                    if(!tdPlayer.damaged)
+                    {
+                        //tdPlayer.damaged = true;
+                        tdPlayer.Health -= bulletDmg;
+                    }
+                    bullets[i].delete = true;
+                }
+
                 if (bullets[i].delete)
                 {
                     explosions.Add(new Explosion(new Circle(new Vector2(bullets[i].rect.X, bullets[i].rect.Y), bullets[i].rect.Width),
@@ -262,6 +273,13 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             for (int i = explosions.Count - 1; i >= 0; i--)
             {
                 explosions[i].Update(gameTime);
+
+                if(explosions[i].rect.Intersects(tdPlayer.rectangle) && !tdPlayer.damaged)
+                {
+                    //tdPlayer.damaged = true;
+                    tdPlayer.Health -= bulletDmg;
+                }
+
                 if (explosions[i].rect.Radius >= explosions[i].maxSize)
                 {
                     //particles.CreateEffect(20);
@@ -269,6 +287,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     explosions.RemoveAt(i);
                     
                 }
+
+
             }
             particles.Update(gameTime);
             #endregion

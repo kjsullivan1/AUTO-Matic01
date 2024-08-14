@@ -147,13 +147,21 @@ namespace AUTO_Matic.TopDown
         public string shootDir = "right";
         float health = 5;
         public bool damaged = false;
+
+        public int redFrames = 4;
+        public int redCount = 0;
+        int whiteFrames = 120;
+        int whiteCount = 0;
+
         public float Health
         {
             get { return health; }
             set {
-                damaged = true;
-                health = value;
-                if(health <= 0)
+                if(value < health && playerState != PlayerState.Dash)
+                    damaged = true;
+                if(playerState != PlayerState.Dash)
+                    health = value;
+                if (health <= 0)
                 {
                     
                     
@@ -233,7 +241,7 @@ namespace AUTO_Matic.TopDown
         float bulletMaxX = 10f;
         float bulletMaxY = 10f;
         bool isShootDelay = false;
-        float shootDelay = .3f;//In seconds
+        float shootDelay = .15f;//In seconds
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = 1.2f;
@@ -1387,33 +1395,33 @@ namespace AUTO_Matic.TopDown
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            //if (damaged)
-            //{
-            //    if (redCount <= whiteCount || redCount == 0 && whiteCount == 0)
-            //    {
-            //        animManager.Draw(spriteBatch, Color.Red);
-            //        redCount++;
-            //    }
-            //    if (whiteCount < redCount)
-            //    {
-            //        animManager.Draw(spriteBatch, Color.White * .5f);
-            //        whiteCount++;
-            //    }
-            //    if (whiteCount == whiteFrames)
-            //    {
-            //        damaged = false;
-            //        whiteCount = 0;
-            //        redCount = 0;
-            //    }
-            //}
-            //else
-            //{
-            //    animManager.Draw(spriteBatch, Color.White);
-            //}
+            if (damaged)
+            {
+                if (redCount <= whiteCount || redCount == 0 && whiteCount == 0)
+                {
+                    animManager.Draw(spriteBatch, Color.White);
+                    redCount+=3;
+                }
+                if (whiteCount < redCount)
+                {
+                    animManager.Draw(spriteBatch, Color.White * .25f);
+                    whiteCount++;
+                }
+                if (whiteCount == whiteFrames)
+                {
+                    damaged = false;
+                    whiteCount = 0;
+                    redCount = 0;
+                }
+            }
+            else
+            {
+                animManager.Draw(spriteBatch, Color.White);
+            }
 
             spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"), MeleeHitbox, Color.White);
             //spriteBatch.Draw(texture, rectangle, Color.White);
-            animManager.Draw(spriteBatch, Color.White);
+            //animManager.Draw(spriteBatch, Color.White);
 
             foreach(Bullet bullet in bullets)
             {

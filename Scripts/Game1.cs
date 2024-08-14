@@ -242,8 +242,8 @@ namespace AUTO_Matic
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if (currScene == Scenes.InGame)
             {
-                //StartNewGame();
-                LoadFinalBoss();
+                StartNewGame();
+                //LoadFinalBoss();
             }
 
            
@@ -383,10 +383,10 @@ namespace AUTO_Matic
                         filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 19 + ".txt";
                         break;
                     case 2:
-                        filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 19 + ".txt";
+                        filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 69 + ".txt";
                         break;
                     case 3:
-                        filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 19 + ".txt";
+                        filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 69 + ".txt";
                         break;
                     default:
                         filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 19 + ".txt";
@@ -430,7 +430,7 @@ namespace AUTO_Matic
                         shotGunBoss = new ShotGunBoss(currBounds, 240, 240, Content, walls, currBounds, tdMap);
                         break;
                     case 1:
-                        slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims);
+                        slamBoss = new SlamBoss(currBounds, Content, tdMap, mapDims, walls);
                         break;
                     case 2:
                         bombBoss = new BombBoss(currBounds, Content, tdMap, mapDims, tdPlayer, GraphicsDevice,
@@ -472,7 +472,7 @@ namespace AUTO_Matic
 
             SetDungeonNum();
 
-            tdPlayer = new TDPlayer(this, 64, 2, 2);
+            tdPlayer = new TDPlayer(this, 64, 200, 200);
             tdMap = new TopDownMap();
             //Boss = new Rectangle();
             levelCount = 0;
@@ -535,7 +535,7 @@ namespace AUTO_Matic
         private void SetDungeonNum()
         {
             DungeonEntrance entrance = dungeons[0];
-            //dungeonNum = 2;
+            // dungeonNum = 3;
             for (int i = 1; i < dungeons.Count; i++)
             {
                 if (MathHelper.Distance(entrance.Rectangle.X, ssPlayer.Rectangle.X) >
@@ -639,18 +639,18 @@ namespace AUTO_Matic
             int k = 1;
             for(int i = 0; i < SideTileMap.enemySpawns.Count - 1; i++)
             {
-                flyingEnemies.Add(new FlyingEnemy(Content, 5, SideTileMap.enemySpawns[i]));
-                //if (k == 1)
-                //    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
-                //else if (k == 2)
-                //{
-                //    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], false));
-                //}
-                //else if (k == 3)
-                //{
-                //    flyingEnemies.Add(new FlyingEnemy(Content, 5, SideTileMap.enemySpawns[i]));
-                //    k = 0;
-                //}
+                //flyingEnemies.Add(new FlyingEnemy(Content, 5, SideTileMap.enemySpawns[i]));
+                if (k == 1)
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
+                else if (k == 2)
+                {
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], false));
+                }
+                else if (k == 3)
+                {
+                    //flyingEnemies.Add(new FlyingEnemy(Content, 5, SideTileMap.enemySpawns[i]));
+                    k = 0;
+                }
 
                 k++;
 
@@ -999,6 +999,7 @@ namespace AUTO_Matic
                                     if (healthDrops[i].rect.Intersects(ssPlayer.playerRect))
                                     {
                                         ssPlayer.Health += healAmount;
+                                        
                                         healthDrops.RemoveAt(i);
 
                                     }
@@ -1417,16 +1418,16 @@ namespace AUTO_Matic
                                             laserBoss.Update(gameTime, tdPlayer, tdMap);
 
                                             int deadBosses = 0;
-                                            foreach(BossRect boss in laserBoss.bossRects)
+                                            for(int i = laserBoss.bossRects.Count - 1; i >=0; i--)
                                             {
-                                                if(boss.health <= 0)
+                                                if(laserBoss.bossRects[i].health <= 0)
                                                 {
-                                                    boss.rect.X = 0;
+                                                    laserBoss.bossRects.RemoveAt(i);
                                                     deadBosses++;
                                                 }
                                             }
 
-                                            if(deadBosses >= 3)
+                                            if(laserBoss.bossRects.Count == 0)
                                             {
                                                 LeaveDungeon = new Rectangle(camera.viewport.Bounds.X + camera.viewport.Bounds.Width / 2,
                                                 camera.viewport.Bounds.Y + camera.viewport.Bounds.Height / 2, 64, 64);
@@ -1476,10 +1477,7 @@ namespace AUTO_Matic
                                 //        }
                                 //    }
                                 //}
-                                if (tdPlayer.damaged)
-                                {
-                                    UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)tdPlayer.Health);
-                                }
+                                UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)tdPlayer.Health);
                             }
                            
                             break;

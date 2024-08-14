@@ -34,11 +34,23 @@ namespace AUTO_Matic.SideScroll
         Vector2 TargetPos; //Position of where the GOTO targets 
         public float health = 5;
         public bool dead = false;
+        bool damaged = false;
+
+        public int redFrames = 4;
+        public int redCount = 0;
+        int whiteFrames = 45;
+        int whiteCount = 0;
         public float Health
         {
             get { return health; }
-            set { health = value; 
-                if(health <= 0)
+            set { 
+                if(value < health && !damaged)
+                {
+                    damaged = true;
+                    health = value;
+                }
+               
+                if (health <= 0)
                 {
                     dead = true;
                 }
@@ -719,7 +731,8 @@ namespace AUTO_Matic.SideScroll
                         goTo = false;
                         if (player.blockBottom || blockLeft && !blockBottom|| blockRight && !blockBottom)
                         {
-                            enemyState = EnemyStates.Jumping;  //Calculate and determine possible jumps
+                            if(!isShoot)
+                                enemyState = EnemyStates.Jumping;  //Calculate and determine possible jumps
                             break;
                         }
                         else
@@ -1437,17 +1450,41 @@ namespace AUTO_Matic.SideScroll
 
         public void Draw(SpriteBatch spriteBatch)
         {
-           
-            
+
+
             //tRect.X += tRect.Width/5;
-            spriteBatch.Draw(texture, enemyRect, Color.White);
+            if (damaged)
+            {
+                if (redCount <= whiteCount || redCount == 0 && whiteCount == 0)
+                {
+                    animManager.Draw(spriteBatch, Color.White);
+                    redCount += 3;
+                }
+                if (whiteCount < redCount)
+                {
+                    animManager.Draw(spriteBatch, Color.White * .25f);
+                    whiteCount++;
+                }
+                if (whiteCount == whiteFrames)
+                {
+                    damaged = false;
+                    whiteCount = 0;
+                    redCount = 0;
+                }
+            }
+            else
+            {
+                animManager.Draw(spriteBatch, Color.White);
+            }
+
+            //spriteBatch.Draw(texture, enemyRect, Color.White);
             //spriteBatch.Draw(texture, HitBox, Color.BlueViolet);
             foreach (Bullet bullet in bullets)
             {
                 bullet.Draw(spriteBatch);
             }
 
-            animManager.Draw(spriteBatch, Color.White);
+            //animManager.Draw(spriteBatch, Color.White);
             //foreach (Rectangle rect in vision)
             //{
             //    spriteBatch.Draw(visionTxture, rect, Color.White * .25f);

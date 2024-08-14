@@ -157,7 +157,7 @@ namespace AUTO_Matic.Scripts.TopDown
         bool respawn = false;
         float iRespawnDelay = 1.75f;
         List<FloorTiles> floors = new List<FloorTiles>();
-        float slamDmg = 2.5f;
+        float slamDmg = 1.5f;
 
         ParticleManager particleManager = new ParticleManager();
         
@@ -219,10 +219,10 @@ namespace AUTO_Matic.Scripts.TopDown
                     
                     bossRect = new Rectangle(((bounds.X + bounds.Width / 2) - width / 2), (((bounds.Y + bounds.Height / 2) - height / 2)), width, height);
 
-                    targetDir = new Vector2(tdPlayer.rectangle.X, tdPlayer.rectangle.Y) - new Vector2(bossRect.X, bossRect.Y);
+                    targetDir = new Vector2(tdPlayer.rectangle.X, tdPlayer.rectangle.Y) - new Vector2(bossRect.Center.X, bossRect.Center.Y);
                     angle = (float)Math.Atan2(targetDir.Y, targetDir.X); //sub by 90 if problems occur
 
-                    ShootShotgun(tdPlayer, angle);
+                    ShootShotgun(tdPlayer, turretAngle);
 
                     #region BrokenAngle
                   //  float angle = (float)Math.Atan2(targetDir.Y, targetDir.X);
@@ -259,7 +259,12 @@ namespace AUTO_Matic.Scripts.TopDown
                     bullets[i].Update();
                     if (bullets[i].rect.Intersects(tdPlayer.rectangle))
                     {
-                        tdPlayer.Health -= bulletDmg;
+                        if (!tdPlayer.damaged)
+                        {
+                            //tdPlayer.damaged = true;
+                            tdPlayer.Health -= bulletDmg;
+                        }
+                       
                         bullets.RemoveAt(i);
                         break;
                     }
@@ -329,7 +334,10 @@ namespace AUTO_Matic.Scripts.TopDown
                     else
                     {
                         slamWave = false;
-                        slamDelay = iSlamDelay;
+
+
+                        slamDelay = RandFloat(1, 3);
+                        //slamDelay = iSlamDelay;
                         slam = new Circle(new Vector2(bossRect.X + bossRect.Width / 2, bossRect.Y + bossRect.Height / 2), 2);
 
                         respawn = true;
@@ -382,7 +390,12 @@ namespace AUTO_Matic.Scripts.TopDown
                 {
                     moveBack = true;
 
-                    tdPlayer.Health -= slamDmg;
+                    if(!tdPlayer.damaged)
+                    {
+                        //tdPlayer.damaged = true;
+                        tdPlayer.Health -= slamDmg;
+                    }
+                 
                 }
             }
             if (slam.Bounds.TouchTopOf(tdPlayer.rectangle))
@@ -396,7 +409,11 @@ namespace AUTO_Matic.Scripts.TopDown
                 {
                     moveBack = true;
 
-                    tdPlayer.Health -= slamDmg;
+                    if (!tdPlayer.damaged)
+                    {
+                        //tdPlayer.damaged = true;
+                        tdPlayer.Health -= slamDmg;
+                    }
                 }
             }
 
@@ -411,7 +428,11 @@ namespace AUTO_Matic.Scripts.TopDown
                 {
                     moveBack = true;
 
-                    tdPlayer.Health -= slamDmg;
+                    if (!tdPlayer.damaged)
+                    {
+                        //tdPlayer.damaged = true;
+                        tdPlayer.Health -= slamDmg;
+                    }
                 }
             }
             if (slam.Bounds.TouchLeftOf(tdPlayer.rectangle))
@@ -425,7 +446,11 @@ namespace AUTO_Matic.Scripts.TopDown
                 {
                     moveBack = true;
 
-                    tdPlayer.Health -= slamDmg;
+                    if (!tdPlayer.damaged)
+                    {
+                        //tdPlayer.damaged = true;
+                        tdPlayer.Health -= slamDmg;
+                    }
                 }
             }
            // moveBack = false;

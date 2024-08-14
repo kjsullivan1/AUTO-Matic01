@@ -120,9 +120,15 @@ namespace AUTO_Matic.SideScroll
         float laserDelay = 2f;
         float bombDelay = 1f;
 
+
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = .65f;
+        float pistolDmg = .65f;
+        float shotGunDmg = 1.6f;
+        float burstDmg = .8f;
+        float bombDmg = 2.25f;
+        float laserDmg = 1.45f;
         float bulletTravelDist = 64 * 3;
         WeaponWheel weaponWheel;
         int selectedWeapon = 0;
@@ -809,6 +815,26 @@ namespace AUTO_Matic.SideScroll
                                20);
 
                         bombs.RemoveAt(i);
+                    }
+                }
+
+                for(int i =explosions.Count - 1; i >=0; i--)
+                {
+                    explosions[i].Update(gameTime);
+
+                    for(int j = enemies.Count - 1; j >= 0; j--)
+                    {
+                        if (explosions[i].rect.Intersects(enemies[j].enemyRect))
+                            enemies[j].Health -= bulletDmg;
+                    }
+                    
+
+                    if (explosions[i].rect.Radius >= explosions[i].maxSize)
+                    {
+                        //particles.CreateEffect(20);
+
+                        explosions.RemoveAt(i);
+
                     }
                 }
 
@@ -1518,7 +1544,7 @@ namespace AUTO_Matic.SideScroll
                                 bulletTravelDist = 64 * 3;
                                 bulletSpeed = 3.5f;
 
-                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2), 
+                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width, 
                                     position.Y + playerRect.Height / 1.5f), bulletSpeed, 
                                     new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                                 break;
@@ -1528,15 +1554,15 @@ namespace AUTO_Matic.SideScroll
                                 bulletSpeed = 3.5f * 2;
 
                                 //Top 
-                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                    (position.Y + playerRect.Height / 1.5f)), bulletSpeed,
                                    new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed/3));
                                 //Center
-                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                    position.Y + playerRect.Height / 1.5f), bulletSpeed,
                                    new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                                 //Bottom
-                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                    position.Y + playerRect.Height / 1.5f), bulletSpeed,
                                    new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed/3));
                                 break;
@@ -1546,14 +1572,14 @@ namespace AUTO_Matic.SideScroll
                                 bulletTravelDist = 64 * 3.5f;
                                 for (int i = 0; i < 3; i++)
                                 {
-                                    bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                    bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                   (position.Y + playerRect.Height / 1.5f)), bulletSpeed,
                                   new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
                                 }
                                 break;
                             case WeaponType.Bomb:
                                 bulletSpeed = 3.5f;
-                                bombs.Add(new Bomb(new Circle(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                bombs.Add(new Bomb(new Circle(new Vector2(position.X + playerRect.Width,
                                   (position.Y + playerRect.Height /2f)), 9), bulletSpeed, -bulletSpeed * 5f, content));
                                 break;
                             case WeaponType.Laser:
@@ -1561,7 +1587,7 @@ namespace AUTO_Matic.SideScroll
                                 bulletTravelDist = 64 * 4f;
                                 for (int i = 0; i < 8; i++)
                                 {
-                                    bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width + (18 / 2),
+                                    bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                   (position.Y + playerRect.Height / 1.5f)), bulletSpeed,
                                   new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
                                 }
@@ -1579,7 +1605,7 @@ namespace AUTO_Matic.SideScroll
                             case WeaponType.Pistol:
                                 bulletTravelDist = 64 * 3;
                                 bulletSpeed = 3.5f;
-                                bullets.Add(new Bullet(new Vector2(position.X - (18 / 2), 
+                                bullets.Add(new Bullet(new Vector2(position.X/* - (18 / 2)*/, 
                                     position.Y + playerRect.Height / 1.5f), -bulletSpeed, 
                                     new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                                 break;
@@ -1588,15 +1614,15 @@ namespace AUTO_Matic.SideScroll
                                 bulletSpeed = 3.5f * 2;
 
                                 //Top 
-                                bullets.Add(new Bullet(new Vector2(position.X - (18/2),
+                                bullets.Add(new Bullet(new Vector2(position.X /*- (18/2)*/,
                                    (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
                                    new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 3));
                                 //Center
-                                bullets.Add(new Bullet(new Vector2(position.X - (18/2),
+                                bullets.Add(new Bullet(new Vector2(position.X /*- (18/2)*/,
                                    position.Y + playerRect.Height / 1.5f), -bulletSpeed,
                                    new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                                 //Bottom
-                                bullets.Add(new Bullet(new Vector2(position.X - (18/2),
+                                bullets.Add(new Bullet(new Vector2(position.X /*- (18/2)*/,
                                    position.Y + playerRect.Height / 1.5f), -bulletSpeed,
                                    new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 3));
                                 break;
@@ -1605,14 +1631,14 @@ namespace AUTO_Matic.SideScroll
                                 bulletTravelDist = 64 * 3f;
                                 for (int i = 0; i < 3; i++)
                                 {
-                                    bullets.Add(new Bullet(new Vector2(position.X - (18 / 2),
+                                    bullets.Add(new Bullet(new Vector2(position.X /*- (18 / 2)*/,
                                   (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
                                   new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
                                 }
                                 break;
                             case WeaponType.Bomb:
                                 bulletSpeed = 3.5f;
-                                bombs.Add(new Bomb(new Circle(new Vector2(position.X - (18 / 2),
+                                bombs.Add(new Bomb(new Circle(new Vector2(position.X/* - (18 / 2)*/,
                                     (position.Y + playerRect.Height / 2f)), 9), -bulletSpeed, -bulletSpeed * 5f, content));
                                 break;
                             case WeaponType.Laser:
@@ -1620,7 +1646,7 @@ namespace AUTO_Matic.SideScroll
                                 bulletTravelDist = 64 * 4f;
                                 for (int i = 0; i < 8; i++)
                                 {
-                                    bullets.Add(new Bullet(new Vector2(position.X - (18 / 2),
+                                    bullets.Add(new Bullet(new Vector2(position.X /*- (18 / 2)*/,
                                   (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
                                   new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
                                 }
@@ -1654,6 +1680,7 @@ namespace AUTO_Matic.SideScroll
                         currWeapon = WeaponType.Burst;
                         selectedWeapon = 2;
 
+                        bulletDmg = burstDmg;
                         shootDelay = burstDelay;
                         iShootDelay = shootDelay;
 
@@ -1663,7 +1690,7 @@ namespace AUTO_Matic.SideScroll
                         currWeapon = WeaponType.Pistol;
                         selectedWeapon = 0;
 
-
+                        bulletDmg = pistolDmg;
                         shootDelay = pistolDelay;
                         iShootDelay = shootDelay;
                     }
@@ -1677,6 +1704,7 @@ namespace AUTO_Matic.SideScroll
                         currWeapon = WeaponType.Pistol;
                         selectedWeapon = 0;
 
+                        bulletDmg = pistolDmg;
                         shootDelay = pistolDelay;
                         iShootDelay = shootDelay;
                     }
@@ -1685,6 +1713,7 @@ namespace AUTO_Matic.SideScroll
                         currWeapon = WeaponType.Laser;
                         selectedWeapon = 1;
 
+                        bulletDmg = laserDmg;
                         shootDelay = laserDelay;
                         iShootDelay = shootDelay;
                     }
@@ -1696,6 +1725,7 @@ namespace AUTO_Matic.SideScroll
                         currWeapon = WeaponType.Bomb;
                         selectedWeapon = 3;
 
+                        bulletDmg = bombDmg;
                         shootDelay = bombDelay;
                         iShootDelay = shootDelay;
 
@@ -1705,6 +1735,7 @@ namespace AUTO_Matic.SideScroll
                         currWeapon = WeaponType.Pistol;
                         selectedWeapon = 0;
 
+                        bulletDmg = pistolDmg;
                         shootDelay = pistolDelay;
                         iShootDelay = shootDelay;
                     }
@@ -1716,6 +1747,7 @@ namespace AUTO_Matic.SideScroll
                         currWeapon = WeaponType.Shotgun;
                         selectedWeapon = 4;
 
+                        bulletDmg = shotGunDmg;
                         shootDelay = shotGunDelay;
                         iShootDelay = shootDelay;
 
@@ -1725,6 +1757,7 @@ namespace AUTO_Matic.SideScroll
                         currWeapon = WeaponType.Pistol;
                         selectedWeapon = 0;
 
+                        bulletDmg = pistolDmg;
                         shootDelay = pistolDelay;
                         iShootDelay = shootDelay;
                     }

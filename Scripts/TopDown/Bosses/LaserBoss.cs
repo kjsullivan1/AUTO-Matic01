@@ -698,6 +698,8 @@ namespace AUTO_Matic.Scripts.TopDown
                         }
 
 
+                       
+
                         if (boss.chargeTime <= 0 && boss.fireTime < 0)
                         {
                             boss.lingerTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -803,9 +805,30 @@ namespace AUTO_Matic.Scripts.TopDown
                             boss.bullets[i].delete = true;
                         }
                     }
+
+                    if(boss.bullets[i].rect.Intersects(tdPlayer.rectangle))
+                    {
+                        if(!tdPlayer.damaged)
+                        {
+                            //tdPlayer.damaged = true;
+                            tdPlayer.Health -= boss.bulletDmg;
+                        }
+                        boss.bullets[i].delete = true;
+                    
+                    }
+
                     if(boss.bullets[i].delete)
                     {
                         boss.bullets.RemoveAt(i);
+                    }
+                }
+
+                for(int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                {
+                    if(tdPlayer.bullets[i].rect.Intersects(boss.rect))
+                    {
+                        boss.health -= tdPlayer.bulletDmg;
+                        tdPlayer.bullets[i].delete = true;
                     }
                 }
             }
@@ -1693,7 +1716,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
     class BossRect
     {
-        public float health = 6;
+        public float health = 10;
         public bool hasWall;
         public PossibleJumpSide jumpSide;
         public float jumpForce;
@@ -1710,6 +1733,7 @@ namespace AUTO_Matic.Scripts.TopDown
         public List<Bullet> bullets = new List<Bullet>();
         public Rectangle destRect;
         public float lingerTime;
+        public float bulletDmg = .65f;
 
         public int chargeTimeMax = 4;
         public int chargeTimeMin = 1;

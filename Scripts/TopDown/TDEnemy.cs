@@ -144,10 +144,10 @@ namespace AUTO_Matic.Scripts.TopDown
         float bulletMaxX = 10f;
         float bulletMaxY = 10f;
         bool isShootDelay = false;
-        float shootDelay = 1.5f;//In seconds
+        float shootDelay = 1.85f;//In seconds
         float iShootDelay;
         bool startShoot = false;
-        public float bulletDmg = .75f;
+        public float bulletDmg = .55f;
         public float bulletTravelDist = 64 *5;
         Texture2D visionTxture;
         Texture2D line;
@@ -338,7 +338,7 @@ namespace AUTO_Matic.Scripts.TopDown
             rectangle = new Rectangle((int)position.X, (int)position.Y, tileSize, tileSize);
 
             Vector2 targetDir = new Vector2(playerRect.rectangle.X, playerRect.rectangle.Y) - position;
-            float angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X))); //sub by 90 if problems occur
+            float angle = (float)Math.Atan2(targetDir.Y, targetDir.X); //sub by 90 if problems occur
             destRect = new Rectangle(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2,
                   distForm(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2),
                   new Vector2(playerRect.rectangle.X + playerRect.rectangle.Width / 2, playerRect.rectangle.Y + playerRect.rectangle.Height)), 1);
@@ -1475,60 +1475,64 @@ namespace AUTO_Matic.Scripts.TopDown
 
                         if (shootDelay <= 0)
                         {
+                            float bulletSpeedX = (float)Math.Cos((double)angle) * 8;
+                            float bulletSpeedY = (float)Math.Sin((double)angle) * 8;
 
-                            if (angle <= 205 && angle >= 165) //Fire left
-                            {
-                                bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height / 2 - 15 / 2), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                                //angleOfLine = 179;
-                            }
-                            else if (angle >= 345 || angle <= 15) //Fire right
-                            {
-                                bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y + rectangle.Height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                                //angleOfLine = 0;
-                            }
-                            else if (angle > 15 && angle < 75) // upRight
-                            {
-                                if (position.Y < playerRect.rectangle.Y)
-                                {
-                                    bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y + rectangle.Height), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                                    //angleOfLine = 45;
-                                }
-                                else
-                                {
-                                    bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y), bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                                    //angleOfLine = -45;
-                                }
+                            bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y), bulletSpeedX,
+                                new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
+                            //    if (angle <= 205 && angle >= 165) //Fire left
+                            //    {
+                            //        bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height / 2 - 15 / 2), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                            //        //angleOfLine = 179;
+                            //    }
+                            //    else if (angle >= 345 || angle <= 15) //Fire right
+                            //    {
+                            //        bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y + rectangle.Height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                            //        //angleOfLine = 0;
+                            //    }
+                            //    else if (angle > 15 && angle < 75) // upRight
+                            //    {
+                            //        if (position.Y < playerRect.rectangle.Y)
+                            //        {
+                            //            bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y + rectangle.Height), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+                            //            //angleOfLine = 45;
+                            //        }
+                            //        else
+                            //        {
+                            //            bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y), bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+                            //            //angleOfLine = -45;
+                            //        }
 
-                            }
-                            else if (angle >= 75 && angle <= 105)//Up
-                            {
-                                if (position.Y < playerRect.rectangle.Y)
-                                {
-                                    bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width / 2, position.Y + rectangle.Height), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
-                                    //angleOfLine = -80;
-                                }
-                                else
-                                {
-                                    bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width / 2 - 15 / 2, position.Y), 0, new Vector2(0, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
-                                    //angleOfLine = 80;
-                                }
+                            //    }
+                            //    else if (angle >= 75 && angle <= 105)//Up
+                            //    {
+                            //        if (position.Y < playerRect.rectangle.Y)
+                            //        {
+                            //            bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width / 2, position.Y + rectangle.Height), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
+                            //            //angleOfLine = -80;
+                            //        }
+                            //        else
+                            //        {
+                            //            bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width / 2 - 15 / 2, position.Y), 0, new Vector2(0, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
+                            //            //angleOfLine = 80;
+                            //        }
 
-                            }
-                            else if (angle > 105 && angle < 165)//Up and left
-                            {
-                                if (position.Y < playerRect.rectangle.Y)
-                                {
-                                    bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                                    //angleOfLine = 140;
-                                }
-                                else
-                                {
-                                    bullets.Add(new Bullet(new Vector2(position.X, position.Y), -bulletSpeed, new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                                    //angleOfLine = -140;
-                                }
+                            //    }
+                            //    else if (angle > 105 && angle < 165)//Up and left
+                            //    {
+                            //        if (position.Y < playerRect.rectangle.Y)
+                            //        {
+                            //            bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
+                            //            //angleOfLine = 140;
+                            //        }
+                            //        else
+                            //        {
+                            //            bullets.Add(new Bullet(new Vector2(position.X, position.Y), -bulletSpeed, new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
+                            //            //angleOfLine = -140;
+                            //        }
 
-                            }
-                            shootDelay = iShootDelay;
+                            //    }
+                            shootDelay = RandFloat(1,3);
                         }
 
 
@@ -1566,7 +1570,11 @@ namespace AUTO_Matic.Scripts.TopDown
                     }
                     if (bullets[i].rect.Intersects(playerRect.rectangle))
                     {
-                        playerRect.Health -= bulletDmg;
+                        if(!playerRect.damaged)
+                        {
+                            playerRect.Health -= bulletDmg;
+                        }
+                      
                         bullets.RemoveAt(i);
                         break;
                     }
@@ -3628,7 +3636,18 @@ namespace AUTO_Matic.Scripts.TopDown
 
         }
 
-
+        public float RandFloat(int min, int max)
+        {
+            Random r = new Random();
+            float decimalNumber;
+            string beforePoint = r.Next(min, max).ToString();//number before decimal point
+            string afterPoint = r.Next(0, 10).ToString();
+            string afterPoint2 = r.Next(0, 10).ToString();
+            string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
+                                                          //string secondDP = r.Next(0, 9).ToString();//2nd decimal point
+            string combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
+            return decimalNumber = float.Parse(combined);
+        }
 
         int distForm(Vector2 pos1, Vector2 pos2)
         {
