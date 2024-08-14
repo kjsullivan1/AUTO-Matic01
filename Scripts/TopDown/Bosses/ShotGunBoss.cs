@@ -606,6 +606,10 @@ namespace AUTO_Matic.Scripts.TopDown
         }
         public void Draw(SpriteBatch spriteBatch)
         {
+            foreach (FloorTiles tile in floors)
+            {
+                tile.Draw(spriteBatch);
+            }
             particleManager.Draw(spriteBatch);
             if (Health > 0)
             {
@@ -619,10 +623,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 }
             }
 
-            foreach(FloorTiles tile in floors)
-            {
-                tile.Draw(spriteBatch);
-            }
+        
            
       
            //spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"),slam.Position, slam.Bounds, Color.White * .5f);

@@ -56,6 +56,7 @@ namespace AUTO_Matic.SideScroll
         Vector2 controllerMoveDir;
         GamePadButtons currControllerBtn;
         GamePadButtons prevControllerBtn;
+        GamePadDPad prevDpad;
 
         float health = 5f;
         public int redFrames = 4;
@@ -123,12 +124,12 @@ namespace AUTO_Matic.SideScroll
 
         float iShootDelay;
         bool startShoot = false;
-        public float bulletDmg = .65f;
-        float pistolDmg = .65f;
-        float shotGunDmg = 1.6f;
-        float burstDmg = .8f;
+        public float bulletDmg = .85f;
+        float pistolDmg = .85f;
+        float shotGunDmg = 1.75f;
+        float burstDmg = 1.35f;
         float bombDmg = 2.25f;
-        float laserDmg = 1.45f;
+        float laserDmg = 1.65f;
         float bulletTravelDist = 64 * 3;
         WeaponWheel weaponWheel;
         int selectedWeapon = 0;
@@ -780,21 +781,21 @@ namespace AUTO_Matic.SideScroll
                             }
                         }
                         bullets[i].Update();
+                        foreach (SSEnemy enemy in enemies)
+                        {
+                            if (bullets[i].rect.Intersects(enemy.enemyRect))
+                            {
+                                enemy.Health -= bulletDmg;
+                                bullets[i].delete = true;
+                                break;
+                            }
+                        }
                         if (bullets[i].delete)
                         {
                             bullets.RemoveAt(i);
                             break;
                         }
-                        foreach (SSEnemy enemy in enemies)
-                        {
-                            if (bullets[i].rect.TouchBottomOf(enemy.enemyRect) || bullets[i].rect.TouchTopOf(enemy.enemyRect)
-                            || bullets[i].rect.TouchLeftOf(enemy.enemyRect) || bullets[i].rect.TouchRightOf(enemy.enemyRect))
-                            {
-                                enemy.Health -= bulletDmg;
-                                bullets.RemoveAt(i);
-                                break;
-                            }
-                        }
+                       
 
                     }
                 }
@@ -1668,11 +1669,12 @@ namespace AUTO_Matic.SideScroll
             {
                 weaponWheel.active = false;
             }
-
+            
             //Weapon Wheel actions
             if(weaponWheel.active)
             {
-                if(kb.IsKeyDown(Keys.Right) && prevKb.IsKeyUp(Keys.Right))
+                if(kb.IsKeyDown(Keys.Right) && prevKb.IsKeyUp(Keys.Right) ||
+                    GamePad.GetState(0).DPad.Right == ButtonState.Pressed && prevDpad.Right == ButtonState.Released)
                 {
                     
                     if (selectedWeapon == 0)
@@ -1697,7 +1699,8 @@ namespace AUTO_Matic.SideScroll
 
 
                 }
-                else if(kb.IsKeyDown(Keys.Left) && prevKb.IsKeyUp(Keys.Left))
+                else if(kb.IsKeyDown(Keys.Left) && prevKb.IsKeyUp(Keys.Left) ||
+                    GamePad.GetState(0).DPad.Left == ButtonState.Pressed && prevDpad.Left == ButtonState.Released)
                 {
                     if (selectedWeapon == 2)
                     {
@@ -1718,7 +1721,8 @@ namespace AUTO_Matic.SideScroll
                         iShootDelay = shootDelay;
                     }
                 }
-                else if(kb.IsKeyDown(Keys.Up) && prevKb.IsKeyUp(Keys.Up))
+                else if(kb.IsKeyDown(Keys.Up) && prevKb.IsKeyUp(Keys.Up) ||
+                    GamePad.GetState(0).DPad.Up == ButtonState.Pressed && prevDpad.Up == ButtonState.Released)
                 {
                     if (selectedWeapon == 0)
                     {
@@ -1740,7 +1744,8 @@ namespace AUTO_Matic.SideScroll
                         iShootDelay = shootDelay;
                     }
                 }
-                else if(kb.IsKeyDown(Keys.Down) && prevKb.IsKeyUp(Keys.Down))
+                else if(kb.IsKeyDown(Keys.Down) && prevKb.IsKeyUp(Keys.Down) ||
+                    GamePad.GetState(0).DPad.Down == ButtonState.Pressed && prevDpad.Down == ButtonState.Released)
                 {
                     if (selectedWeapon == 0)
                     {
@@ -1765,6 +1770,7 @@ namespace AUTO_Matic.SideScroll
             }
             prevKb = kb;
             prevControllerBtn = currControllerBtn;
+            prevDpad = GamePad.GetState(0).DPad;
         }
 
         public void Collision(Rectangle newRect /*int xOffset, int yOffset, int levelInX, int levelInY, Rectangle bounds*/, bool isEnemy = false)

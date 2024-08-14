@@ -25,7 +25,7 @@ namespace AUTO_Matic.TopDown
         public Vector2 velocity;
         GamePadButtons currButtons;
         GamePadButtons prevButtons;
-        public int bossRoom = 1;
+        public int bossRoom = 10;
         bool lockDir = false;
         Vector2 startPos;
 
@@ -798,11 +798,11 @@ namespace AUTO_Matic.TopDown
                     
             }
 
-            if(kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D))
+            if(kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D) && controllerMoveDir.X == 0)
             {
                 velocity.X = 0;
             }
-            if(kb.IsKeyUp(Keys.S) && kb.IsKeyUp(Keys.W))
+            if(kb.IsKeyUp(Keys.S) && kb.IsKeyUp(Keys.W) && controllerMoveDir.Y == 0)
             {
                 velocity.Y = 0;
             }

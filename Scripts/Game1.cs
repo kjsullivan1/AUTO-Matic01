@@ -469,7 +469,7 @@ namespace AUTO_Matic
         {
             healthDrops.Clear();
             GameState = GameStates.TopDown;
-
+            //tdMap.dMapDims.Clear();
             SetDungeonNum();
 
             tdPlayer = new TDPlayer(this, 64, 200, 200);
@@ -535,22 +535,25 @@ namespace AUTO_Matic
         private void SetDungeonNum()
         {
             DungeonEntrance entrance = dungeons[0];
-            // dungeonNum = 3;
-            for (int i = 1; i < dungeons.Count; i++)
-            {
-                if (MathHelper.Distance(entrance.Rectangle.X, ssPlayer.Rectangle.X) >
-                    MathHelper.Distance(dungeons[i].Rectangle.X, ssPlayer.Rectangle.X))
-                {
-                    dungeonNum = i;
-                    entrance = dungeons[i];
-                }
-            }
+            dungeonNum = 3;
+            //for (int i = 1; i < dungeons.Count; i++)
+            //{
+            //    if (MathHelper.Distance(entrance.Rectangle.X, ssPlayer.Rectangle.X) >
+            //        MathHelper.Distance(dungeons[i].Rectangle.X, ssPlayer.Rectangle.X))
+            //    {
+            //        dungeonNum = i;
+            //        entrance = dungeons[i];
+            //    }
+            //}
         }
 
         public void LoadFinalBoss()
         {
             healthDrops.Clear();
             string filePath = Content.RootDirectory + "/SideScroll/Maps/Map19.txt";
+            SideTileMap.WallTiles.Clear();
+            SideTileMap.GroundTiles.Clear();
+            SideTileMap.PlatformTiles.Clear();
             SideTileMap.LoadMap(filePath);
             
             flyingEnemies.Clear();
@@ -1432,7 +1435,7 @@ namespace AUTO_Matic
                                                 LeaveDungeon = new Rectangle(camera.viewport.Bounds.X + camera.viewport.Bounds.Width / 2,
                                                 camera.viewport.Bounds.Y + camera.viewport.Bounds.Height / 2, 64, 64);
                                                 laserBoss.bossRects.Clear();
-                                                ChangeToSideScroll();
+                                                LoadFinalBoss();
                                             }
                                                 
                                             break;
