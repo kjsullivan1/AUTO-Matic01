@@ -22,7 +22,7 @@ namespace AUTO_Matic.SideScroll
         enum PilotAnimStates { Walking, Idle}
         PilotAnimStates pilotAnimState = PilotAnimStates.Idle;
 
-        public enum PlayerStates { Movement, Shooting, Jumping, Dashing, Pilot}
+        public enum PlayerStates { Movement, Shooting, Jumping, Dashing, Pilot, Knockback}
         public PlayerStates playerState = PlayerStates.Movement;
         PlayerStates prevPlayerState;
         bool groundPound = false;
@@ -35,7 +35,7 @@ namespace AUTO_Matic.SideScroll
         float collisionOffsetX = 20f;
         float collisionInputCooldown = .25f;
         int pixelSize = 64;
-        Vector2 position = Vector2.Zero;
+        public Vector2 position = Vector2.Zero;
         Vector2 prevVel = Vector2.Zero;
         public Vector2 velocity = Vector2.Zero;
         public Rectangle playerRect;
@@ -45,6 +45,7 @@ namespace AUTO_Matic.SideScroll
         public bool isFalling = false;
         public bool isCollidingRight = false;
         public bool isCollidingLeft = false;
+        public bool isCollidingDown = false;
         Game1 game;
         KeyboardState prevKb;
         public bool blockBottom = false;
@@ -66,6 +67,9 @@ namespace AUTO_Matic.SideScroll
         public bool damaged = false;
 
         public List<Rectangle> breakTiles = new List<Rectangle>();
+        public float knockBackX;
+        public float knockBackY;
+        float gravX = 0;
         public float Health
         {
             get
@@ -199,7 +203,7 @@ namespace AUTO_Matic.SideScroll
                 {
                     pos = new Vector2(maxRunSpeed, pos.Y);
                 }
-                if(pos.X > maxAirSpeed && velocity.Y != 0 && playerState != PlayerStates.Dashing)
+                if(pos.X > maxAirSpeed && velocity.Y != 0 && playerState != PlayerStates.Dashing && !isCollidingDown)
                 {
                     pos = new Vector2(maxAirSpeed, pos.Y);
                 }
@@ -218,7 +222,7 @@ namespace AUTO_Matic.SideScroll
                 {
                     pos = new Vector2(-maxRunSpeed, pos.Y);
                 }
-                if (pos.X < -maxAirSpeed && velocity.Y != 0 && playerState != PlayerStates.Dashing)
+                if (pos.X < -maxAirSpeed && velocity.Y != 0 && playerState != PlayerStates.Dashing && !isCollidingDown)
                 {
                     pos = new Vector2(-maxAirSpeed, pos.Y);
                 }
@@ -708,6 +712,41 @@ namespace AUTO_Matic.SideScroll
                         playerState = PlayerStates.Movement;
 
                         break;
+                    #endregion
+                    #region Knockback
+                    case PlayerStates.Knockback:
+                        if (gravX == 0)
+                        {
+                            velocity = new Vector2(knockBackX, knockBackY);
+                            if (knockBackX > 0)
+                                gravX = -1;
+                            else
+                                gravX = 1;
+                        }
+
+                        foreach(WallTile wall in SideTileMap.WallTiles)
+                        {
+                            if(playerRect.Intersects(wall.Rectangle))
+                            {
+                                gravX = 0;
+                                playerState = PlayerStates.Movement;
+                            }
+                        }
+                        foreach(GroundTile ground in SideTileMap.GroundTiles)
+                        {
+                            if(playerRect.Intersects(ground.Rectangle))
+                            {
+                                gravX = 0;
+                                playerState = PlayerStates.Movement;
+                            }
+                        }
+
+                        if(!damaged)
+                        {
+                            gravX = 0;
+                            playerState = PlayerStates.Movement;
+                        }
+                        break;
                         #endregion
                 }
 
@@ -786,6 +825,8 @@ namespace AUTO_Matic.SideScroll
                             if (bullets[i].rect.Intersects(enemy.enemyRect))
                             {
                                 enemy.Health -= bulletDmg;
+                                ApplyKnockback(enemy);
+
                                 bullets[i].delete = true;
                                 break;
                             }
@@ -806,7 +847,7 @@ namespace AUTO_Matic.SideScroll
 
                     if(bombs[i].delete)
                     {
-                        explosions.Add(new Explosion(bombs[i].circle, 1, (int)(bombs[i].circle.Bounds.Width * 2.5f)));
+                        explosions.Add(new Explosion(bombs[i].circle, 2, (int)(bombs[i].circle.Bounds.Width * 2.5f)));
 
                         int radiusDif = explosions[explosions.Count - 1].maxSize - explosions[explosions.Count - 1].rect.Radius;
 
@@ -826,7 +867,11 @@ namespace AUTO_Matic.SideScroll
                     for(int j = enemies.Count - 1; j >= 0; j--)
                     {
                         if (explosions[i].rect.Intersects(enemies[j].enemyRect))
+                        {
                             enemies[j].Health -= bulletDmg;
+                            ApplyKnockback(enemies[j]);
+                        }
+                           
                     }
                     
 
@@ -848,6 +893,36 @@ namespace AUTO_Matic.SideScroll
                 //}
             }
 
+        }
+
+        private void ApplyKnockback(SSEnemy enemy)
+        {
+            enemy.prevState = enemy.enemyState;
+            enemy.enemyState = SSEnemy.EnemyStates.Knockback;
+
+            switch (currWeapon)
+            {
+                case WeaponType.Pistol:
+                    enemy.knockBackX = 5;
+                    enemy.knockBackY = -3;
+                    break;
+                case WeaponType.Shotgun:
+                    enemy.knockBackX = 8;
+                    enemy.knockBackY = -3;
+                    break;
+                case WeaponType.Laser:
+                    enemy.knockBackX = 2;
+                    enemy.knockBackY = -3;
+                    break;
+                case WeaponType.Burst:
+                    enemy.knockBackX = 6.5f;
+                    enemy.knockBackY = -3;
+                    break;
+                case WeaponType.Bomb:
+                    enemy.knockBackX = 7;
+                    enemy.knockBackY = -6;
+                    break;
+            }
         }
 
         private void BecomePilot()
@@ -1432,6 +1507,7 @@ namespace AUTO_Matic.SideScroll
                     if (InteractionBox.Intersects(doorTile.Rectangle))
                     {
                         game.OpenDoor(doorTile.Rectangle);
+                        
                         isCollidingLeft = false;
                         isCollidingRight = false;
                     }
@@ -1440,7 +1516,13 @@ namespace AUTO_Matic.SideScroll
                 {
                     if(InteractionBox.Intersects(dungeonEntrance.Rectangle))
                     {
-                        game.StartDungeon();
+                        if(game.GameState == Game1.GameStates.Tutorial)
+                        {
+                            game.StartNewGame();
+                            break;
+                        }
+                        else
+                            game.StartDungeon();
                     }
                 }
                // jumpOutDelay = .75f;
@@ -1881,10 +1963,11 @@ namespace AUTO_Matic.SideScroll
                 //{
                 //    velocity.X = 0;
                 //}
+                Rectangle tempRect = new Rectangle(playerRect.X - 10, playerRect.Y, playerRect.Width + 20, playerRect.Height);
                 if (playerRect.TouchTopOf(newRect))
                 {
 
-
+                    isCollidingDown = true;
                     if (velocity.Y > 0 && playerState != PlayerStates.Dashing)
                     {
                         while (playerRect.Bottom > newRect.Top - 1)
@@ -1895,10 +1978,29 @@ namespace AUTO_Matic.SideScroll
                         }
                     }
 
-                    if(groundPound)
-                    {
-                        killEnemy = true;
+                 
 
+                    if(groundPound && tempRect.TouchTopOf(newRect))
+                    {
+                        
+                        killEnemy = true;
+                        //if (playerRect.Center.X < newRect.Center.X)
+                        //{
+                        //    velocity = new Vector2(-8, -6);
+                        //}
+                        //else if (playerRect.Center.X >= newRect.Center.X)
+                        //{
+                        //    velocity = new Vector2(8, -6);
+                        //}
+                        groundPound = false;
+                    }
+                    else if (playerRect.Center.X < newRect.Center.X)
+                    {
+                        velocity = new Vector2(-8, 0);
+                    }
+                    else if (playerRect.Center.X >= newRect.Center.X)
+                    {
+                        velocity = new Vector2(8, 0);
                     }
                 }
 

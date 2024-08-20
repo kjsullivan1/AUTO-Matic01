@@ -182,6 +182,7 @@
     <Content Include="Content\Textures\Button.png" />
     <Content Include="Content\Textures\Health.png" />
     <Content Include="Content\Textures\Red.png" />
+    <Content Include="Content\Textures\Textbox.png" />
     <Content Include="Content\Textures\Title.png" />
     <Content Include="Content\Textures\TitleCrawlBG.png" />
     <Content Include="Content\Textures\TitleScreen.png" />

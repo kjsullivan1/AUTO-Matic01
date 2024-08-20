@@ -39,16 +39,11 @@ namespace AUTO_Matic
 
             BackGroundTexture = bgTxture;
             Scale = 1;
-            
-        }
 
-        public override void Draw(SpriteBatch spriteBatch)
-        {
-          
-            if (Visible)
+            if(Text != null && Text.Length > 0 && Rect != Rectangle.Empty)
             {
                 int endOfLineX = Text.Length;
-                if(endOfLineX > Rect.Width)
+                if (endOfLineX > Rect.Width)
                 {
                     string temp = "";
                     string temp2 = temp;
@@ -56,10 +51,10 @@ namespace AUTO_Matic
                     int difference = Text.Length - temp.Length;
                     while (temp.Length < Text.Length)
                     {
-                        if(difference  > Rect.Width)
+                        if (difference > Rect.Width)
                         {
                             temp += Text.Substring(i, Rect.Width);
-                           
+
                             temp2 += Text.Substring(i, Rect.Width) + "\n";
                         }
                         else
@@ -74,14 +69,29 @@ namespace AUTO_Matic
                         difference = Text.Length - temp.Length;
 
                     }
-                   
+
 
                     Text = temp2;
                 }
+            }
+            
+
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+          
+            if (Visible)
+            {
+              
                 
                 spriteBatch.Draw(BackGroundTexture,TextureRect, color: Color.White);
-                spriteBatch.DrawString(spriteFont: Font, text: Text, position: new Vector2(Rect.X, Rect.Y) + TextOffset, color: TextTint,rotation: 0,origin: new Vector2(0,0), scale: Scale,SpriteEffects.None,layerDepth:0);
-               
+                if(Text == null)
+                    spriteBatch.DrawString(spriteFont: Font, text: "", position: new Vector2(Rect.X, Rect.Y) + TextOffset, color: TextTint, rotation: 0, origin: new Vector2(0, 0), scale: Scale, SpriteEffects.None, layerDepth: 0);
+                else
+                    spriteBatch.DrawString(spriteFont: Font, text: Text, position: new Vector2(Rect.X, Rect.Y) + TextOffset, color: TextTint, rotation: 0, origin: new Vector2(0, 0), scale: Scale, SpriteEffects.None, layerDepth: 0);
+
+
                 //Draw texture one layer back
             }
 

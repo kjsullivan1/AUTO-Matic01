@@ -121,12 +121,12 @@ namespace AUTO_Matic.Scripts.SideScroll
                 //{
                 //    center.X -= moveSpeed;
                 //}
-                if (center.Y < position.Y)
+                if ((int)center.Y < (int)position.Y && (center.Y + cameraHeight / 2) + moveSpeed < height)
                 {
                     center.Y += moveSpeed;
                     reached = false;
                 }
-                if (center.Y > position.Y)
+                if ((int)center.Y > (int)position.Y)
                 {
                     center.Y -= moveSpeed;
                     reached = false;
@@ -171,12 +171,12 @@ namespace AUTO_Matic.Scripts.SideScroll
                     center.X -= moveSpeed;
                     reached = false;
                 }
-                if (center.Y < position.Y)
+                if (center.Y < position.Y && (center.Y + 650/2) + moveSpeed < height)
                 {
                     center.Y += moveSpeedY;
                     reached = false;
                 }
-                if (center.Y > position.Y)
+                if (center.Y > position.Y && (int)((center.Y - 650/2) - moveSpeed) > 0)
                 {
                     center.Y -= moveSpeedY;
                     reached = false;
@@ -187,6 +187,7 @@ namespace AUTO_Matic.Scripts.SideScroll
                     reached = true;
                 }
 
+        
               
 
                 onBorderLeft = false;
@@ -319,13 +320,14 @@ namespace AUTO_Matic.Scripts.SideScroll
             //}
             #endregion
             transform = Matrix.CreateTranslation(new Vector3((int)-center.X, (int)-center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
-            CameraBounds = new Rectangle(new Point((int)(center.X - cameraWidth / 2), (int)(center.Y - cameraHeight/2) + 128), new Point(cameraWidth, cameraHeight));
+            CameraBounds = new Rectangle(new Point((int)(center.X - cameraWidth / 2), (int)(center.Y - cameraHeight/2) + 128), new Point(cameraWidth, height));
 
             Rectangle viewRect = CameraBounds;
             viewRect.Height = 620;
             if (viewRect.Left < min)
             {
                 center.X += moveSpeed;
+                reached = false;
                 //center.X = min + viewRect.Width / 2;
 
             }
@@ -335,20 +337,21 @@ namespace AUTO_Matic.Scripts.SideScroll
                 if (!fade)
                     CameraBounds.Y = 0;
                 //center.Y = 0;
+                reached = false;
 
             }
 
             if (viewRect.Right > width)
             {
                 center.X -= moveSpeed;
-
+                reached = false;
             }
 
-            if (viewRect.Bottom > height && dont)
+            if (viewRect.Bottom > height)
             {
                  center.Y -= moveSpeed;
                 //center.Y = height - viewRect.Height / 2;
-
+                reached = false;
             }
             //else if(position.Y + viewport.Height/2 >= height)
             //{

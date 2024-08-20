@@ -25,6 +25,7 @@ namespace AUTO_Matic
 
         List<Rectangle> savedPos = new List<Rectangle>();
 
+
         public void UIButton_Clicked(object sender, UIButtonArgs e)
         {
             string buttonName = e.ID;
@@ -450,18 +451,53 @@ namespace AUTO_Matic
         {
             if(uiElements.ContainsKey("TutorialBoxGame") == false)
             {
-                uiElements.Add("TutorialBoxGame", UIHelper.CreateTextblock("TutorialBoxGame", "" +
-                               "\n\n  Use WASD or Left Analog Stick to move" +
-                               "\n\n  Press space bar or (A) button to jump" +
-                               "\n\n  Hold down to get into shooting stance and press Enter key or (X) button to fire" +
-                               "\n\n  If you time it right while in the air, you can ground pound" +
-                               "\n\n  Press LShift key or (B) button to dash forwards" +
-                               "\n\n  The E key and (Y) button allows you to open doors and go into the dungeon" +
-                               "\n\n  Hold them to jump out and play as the pilot\n\n", (int)(dims.X + 192/2), (int)(dims.Y - 300)));
-                UIHelper.SetElementRect(uiElements["TutorialBoxGame"], new Rectangle(uiElements["TutorialBoxGame"].Position.ToPoint(), new Point(450, 600)));
-                UIHelper.SetElementBGRect(uiElements["TutorialBoxGame"], new Rectangle(uiElements["TutorialBoxGame"].Position.ToPoint(), new Point(400, 225)));
+                string[] tutorialText = new string[SideTileMap.GetTextBoxes().Count];
+                tutorialText[0] = " \n  [Space] key or (A) button to jump \n" +
+                                        "  [LShift] or (B) to dash";
+                tutorialText[1] = " \n  [W][A][S][D] keys or (L) Analog to move";
+                tutorialText[2] = " \n  [S] key or DOWN on (L) analog to get into a \n shooting stance or ground pound (Air) \n" +
+                                  " \n  Press  [Enter] or (X) button to fire";
+                tutorialText[3] = " \n  While shooting, use the ARROW keys or \n  DPAD to use the weapon wheel";
+
+                for(int i = 0; i < SideTileMap.GetTextBoxes().Count; i++)
+                {
+                    if(uiElements.ContainsKey("TutorialBox" + i) == false)
+                    {
+                        uiElements.Add("TutorialBox" + i, UIHelper.CreateTextblock("TutorialBox" + i, tutorialText[i], (int)SideTileMap.GetTextBoxes()[i].X, (int)SideTileMap.GetTextBoxes()[i].Y));
+                        UIHelper.SetElementRect(uiElements["TutorialBox" + i], new Rectangle(uiElements["TutorialBox" + i].Position.ToPoint(), new Point(128, 96)));
+                        UIHelper.SetElementBGRect(uiElements["TutorialBox" + i], new Rectangle(uiElements["TutorialBox" + i].Position.ToPoint(), new Point(215, 70)));
+                    }
+                  
+                }
+
+
+            //    uiElements.Add("TutorialBoxGame", UIHelper.CreateTextblock("TutorialBoxGame", "" +
+            //                   "\n\n  Use WASD or Left Analog Stick to move" +
+            //                   "\n\n  Press space bar or (A) button to jump" +
+            //                   "\n\n  Hold down to get into shooting stance and press Enter key or (X) button to fire" +
+            //                   "\n\n  If you time it right while in the air, you can ground pound" +
+            //                   "\n\n  Press LShift key or (B) button to dash forwards" +
+            //                   "\n\n  The E key and (Y) button allows you to open doors and go into the dungeon" +
+            //                   "\n\n  Hold them to jump out and play as the pilot\n\n", (int)(dims.X + 192/2), (int)(dims.Y - 300)));
+            //    UIHelper.SetElementRect(uiElements["TutorialBoxGame"], new Rectangle(uiElements["TutorialBoxGame"].Position.ToPoint(), new Point(450, 600)));
+            //    UIHelper.SetElementBGRect(uiElements["TutorialBoxGame"], new Rectangle(uiElements["TutorialBoxGame"].Position.ToPoint(), new Point(400, 225)));
             }
            
+        }
+
+        public void CreateInteractUI(Point pos)
+        {
+            uiElements.Add("InteractBox", UIHelper.CreateTextblock("InteractBox", "\n\n    " +
+                "[E] or (Y)", pos.X, pos.Y));
+            UIHelper.SetElementRect(uiElements["InteractBox"], new Rectangle(uiElements["InteractBox"].Position.ToPoint(), new Point(64, 64)));
+            UIHelper.SetElementBGRect(uiElements["InteractBox"], new Rectangle(uiElements["InteractBox"].Position.ToPoint(), new Point(64, 64)));
+        }
+
+        public void RemoveInteractUI()
+        {
+            if(uiElements.ContainsKey("InteractBox"))
+                uiElements.Remove("InteractBox");
+
         }
 
         public void Draw(SpriteBatch spriteBatch)

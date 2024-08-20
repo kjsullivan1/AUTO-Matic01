@@ -38,9 +38,9 @@ namespace AUTO_Matic
         bool closeDoor = false;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.TitleScreen;
+        public Scenes currScene = Scenes.InGame;
 
-        public enum GameStates { SideScroll, TopDown, Paused, FinalBoss}
+        public enum GameStates { Tutorial, SideScroll, TopDown, Paused, FinalBoss}
         public GameStates GameState = GameStates.SideScroll;
         GameStates prevGameState;
 
@@ -151,6 +151,9 @@ namespace AUTO_Matic
 
         int dungeonNum = 0;
 
+        Rectangle interactActive = Rectangle.Empty;
+        float groundPoundX = 16;
+        float groundPoundY = -6;
        
 
         class Door
@@ -242,8 +245,10 @@ namespace AUTO_Matic
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if (currScene == Scenes.InGame)
             {
-                StartNewGame();
+                LoadTutorial();
+                //StartNewGame();
                 //LoadFinalBoss();
+                
             }
 
            
@@ -547,6 +552,81 @@ namespace AUTO_Matic
             }
         }
 
+        public void LoadTutorial()
+        {
+            healthDrops.Clear();
+            string filePath = Content.RootDirectory + "/SideScroll/Maps/Map0.txt";
+            SideTileMap.WallTiles.Clear();
+            SideTileMap.GroundTiles.Clear();
+            SideTileMap.PlatformTiles.Clear();
+            SideTileMap.playerSpawns.Clear();
+            SideTileMap.enemySpawns.Clear();
+            SideTileMap.DungeonEntrances.Clear();
+            SideTileMap.TopDoorTiles.Clear();
+            SideTileMap.BottomDoorTiles.Clear();
+            SideTileMap.BackgroundTiles.Clear();
+            SideTileMap.LoadMap(filePath);
+
+            flyingEnemies.Clear();
+            enemies.Clear();
+            enemies.Clear();
+            int k = 1;
+            for (int i = 0; i < SideTileMap.enemySpawns.Count; i++)
+            {
+                //flyingEnemies.Add(new FlyingEnemy(Content, 5, SideTileMap.enemySpawns[i]));
+                if (k == 1)
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
+                else if (k == 2)
+                {
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], false));
+                    k = 0;
+                }
+                else if (k == 3)
+                {
+                    //flyingEnemies.Add(new FlyingEnemy(Content, 5, SideTileMap.enemySpawns[i]));
+                    k = 0;
+                }
+
+                k++;
+            }
+                //Add final boss here 
+                graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
+            graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
+
+            //graphics.HardwareModeSwitch = false;
+            //graphics.IsFullScreen = true;
+            graphics.ApplyChanges();
+            //maxShootRate = shootRate;
+            //camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2));
+            //camera.Zoom = .5f;
+            ssPlayer = new SSPlayer(this, 64);
+            ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
+
+            //ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
+            ssPlayer.Health = 5;
+            UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
+            UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
+            ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(SideTileMap.playerSpawns[0].X/* + (64 * 10.5f)*/,
+                SideTileMap.playerSpawns[0].Y /*- (64 * 2.5f)*/), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
+            //ssCamera.Zoom = 1f;
+
+            //finalBoss = new FinalBoss(SideTileMap.enemySpawns[0], Content, GraphicsDevice);
+
+            //ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont);
+            ssCamera.Zoom = .5f;
+            // ssCamera.Position = ssPlayer.Position;
+            //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
+
+            GameState = GameStates.Tutorial;
+            prevGameState = GameState;
+            GameState = GameStates.Paused;
+
+            UIHelper.SetElementVisibility("MainMenu", false, UIManager.uiElements);
+            UIHelper.SetElementVisibility("Settings", false, UIManager.uiElements);
+            UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
+
+        }
+
         public void LoadFinalBoss()
         {
             healthDrops.Clear();
@@ -598,6 +678,16 @@ namespace AUTO_Matic
 
         public void StartNewGame()
         {
+            SideTileMap.WallTiles.Clear();
+            SideTileMap.GroundTiles.Clear();
+            SideTileMap.PlatformTiles.Clear();
+            SideTileMap.playerSpawns.Clear();
+            SideTileMap.enemySpawns.Clear();
+            SideTileMap.DungeonEntrances.Clear();
+            SideTileMap.TopDoorTiles.Clear();
+            SideTileMap.BottomDoorTiles.Clear();
+            SideTileMap.BackgroundTiles.Clear();
+
 
             graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
             graphics.PreferredBackBufferHeight = 1080;/*(int)(graphics.PreferredBackBufferHeight * 1.5f);*/
@@ -708,13 +798,16 @@ namespace AUTO_Matic
             ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0,0),
                 (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
             ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
-            //ssCamera.Zoom = .5f;
+            fadePos = SideTileMap.playerSpawns[0];
+            ssCamera.Zoom = .5f;
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
-           
+            GameState = GameStates.SideScroll;
             prevGameState = GameState;
             GameState = GameStates.Paused;
-           
+
+            UIHelper.SetElementVisibility("TutorialBox", false, UIManager.uiElements);
+
         }
 
         public void TakeDamage()
@@ -828,19 +921,72 @@ namespace AUTO_Matic
             KeyboardState kb = Keyboard.GetState();
             
             moveDir = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left;
-            switch(currScene)
+            switch (currScene)
             {
                 case Scenes.TitleScreen:
                     Menus(kb);
                     break;
                 case Scenes.InGame:
-                    
-                    switch(GameState)
+
+                    switch (GameState)
                     {
+                        #region Tutorial
+                        case GameStates.Tutorial:
+                            soundManager.Update(gameTime);
+                            Rectangle worldRect = new Rectangle(ssCamera.CameraBounds.X - (750 / 2), ssCamera.CameraBounds.Y - (950 / 2), ssCamera.CameraBounds.Width + 750, ssCamera.CameraBounds.Height + 950);
+                            worldRect = CheckForTiles(worldRect); //Checks if tiles are in range to be added back
+
+                            if (fade || doorTrans)
+                            {
+
+
+
+                                ssCamera.Update(fadePos, dont, fade);
+
+                                ssPlayer.Update(gameTime, Gravity, enemies, true);
+                                if (fade)
+                                {
+                                    foreach (BottomDoorTile door in SideTileMap.BottomDoorTiles)
+                                    {
+                                        float num = MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X);
+                                        if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) < 64 * 8 && ssPlayer.Y/64 == door.Rectangle.Y/64)
+                                        {
+                                            dont = true; //dont move camera
+                                        }
+                                        else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 8 ||
+                                            ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 8)
+                                        {
+                                            if (dont)
+                                                dont = false;
+                                        }
+
+                                    }
+
+                                }
+                                if (updateDoor)
+                                {
+                                    UpdateDoor(topIndex, bottomIndex);
+                                    //ssCamera.Update(fadePos, dont, fade);
+                                }
+                             
+
+                            }
+                            //else if (closeDoor)
+                            //{
+                            //    ssCamera.Update(fadePos, dont, fade);
+                            //    CloseDoor(topIndex, bottomIndex);
+                            //}
+                            else
+                            {
+                                SideScrollPhysics(gameTime, kb, worldRect);
+
+                            }
+                            break;
+                        #endregion
                         #region SideScroll
                         case GameStates.SideScroll: //Default
                             soundManager.Update(gameTime);
-                            Rectangle worldRect = new Rectangle(ssCamera.CameraBounds.X - (750 / 2), ssCamera.CameraBounds.Y - (950 / 2), ssCamera.CameraBounds.Width + 750, ssCamera.CameraBounds.Height + 950);
+                            worldRect = new Rectangle(ssCamera.CameraBounds.X - (750 / 2), ssCamera.CameraBounds.Y - (950 / 2), ssCamera.CameraBounds.Width + 750, ssCamera.CameraBounds.Height + 950);
                             worldRect = CheckForTiles(worldRect); //Checks if tiles are in range to be added back
 
                             if (fade || doorTrans)
@@ -881,256 +1027,7 @@ namespace AUTO_Matic
                                 CloseDoor(topIndex, bottomIndex);
                             else
                             {
-                                dont = false;
-
-                                foreach (BottomDoorTile door in SideTileMap.BottomDoorTiles)
-                                {
-
-                                    float num = MathHelper.Distance(ssPlayer.playerRect.Center.X, door.Rectangle.Center.X);
-                                    if (ssCamera.CameraBounds.Contains(door.Rectangle) && num < 64 * 12/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
-                                    {
-
-                                        dont = true;
-                                    }
-                                    else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 12
-                                            /*|| ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 10*/)
-                                    {
-
-                                        dont = false;
-                                    }
-                                }
-
-                                foreach (TopDoorTile door in SideTileMap.TopDoorTiles)
-                                {
-
-                                    float num = MathHelper.Distance(ssPlayer.playerRect.Center.X, door.Rectangle.Center.X);
-                                    if (ssCamera.CameraBounds.Contains(door.Rectangle) && num < 64 * 12/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
-                                    {
-
-                                        dont = true;
-                                    }
-                                    else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 12
-                                            /*|| ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 10*/)
-                                    {
-
-                                        dont = false;
-                                    }
-                                }
-
-                                if (dont == false && canChange)
-                                {
-                                    ssCamera.min = 0;
-                                }
-
-
-                                if (ssPlayer.isPilot)
-                                {
-                                    ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y - (60 - ssPlayer.playerRect.Height)), dont, fade);
-                                }
-                                else
-                                {
-                                    ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
-                                }
-
-
-
-
-
-                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point(ssCamera.CameraBounds.X + 20,
-                                   ssCamera.CameraBounds.Y + 20), new Point(0, 0)));
-
-
-
-                                if (kb.IsKeyDown(Keys.P) || ssPlayer.Health <= 0 || ssPlayer.playerRect.Y > SideTileMap.GetWorldDims().Y)//Reset Pos
-                                {
-                                    StartNewGame();
-                                    ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
-
-                                }
-                                if (ssPlayer.damaged)
-                                {
-                                    UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
-                                }
-                                if (updateDoor)
-                                {
-                                    UpdateDoor(topIndex, bottomIndex);
-                                }
-                                ssPlayer.Update(gameTime, Gravity, enemies);
-
-
-                                for (int i = enemies.Count - 1; i >= 0; i--)
-                                {
-                                    if (worldRect.Intersects(enemies[i].enemyRect) || enemies[i].enemyState != SSEnemy.EnemyStates.Idle)
-                                    {
-                                        enemies[i].Update(gameTime, Gravity, ssPlayer, this);
-                                        for (int j = i + 1; j < enemies.Count; j++)
-                                        {
-                                            if (enemies[i].enemyRect.Intersects(enemies[j].enemyRect) && worldRect.Intersects(enemies[j].enemyRect))
-                                            {
-                                                if (enemies[i].velocity.X == enemies[j].velocity.X)
-                                                    enemies[i].velocity.X /= 2;
-                                                else
-                                                {
-                                                    if (enemies[i].velocity.X != enemies[i].maxRunSpeed || enemies[i].velocity.X != -enemies[i].maxRunSpeed)
-                                                    {
-                                                        if (enemies[i].velocity.X < 0)
-                                                            enemies[i].velocity.X = -enemies[i].maxRunSpeed;
-                                                        else if (enemies[i].velocity.X > 0)
-                                                            enemies[i].velocity.X = enemies[i].maxRunSpeed;
-
-                                                    }
-                                                }
-
-                                            }
-
-                                        }
-
-                                        if (enemies[i].dead)
-                                        {
-                                            if (rand.Next(0, 101) < dropRateSS)
-                                            {
-                                                healthDrops.Add(new HealthDrop(enemies[i].enemyRect));
-                                            }
-                                            enemies.RemoveAt(i);
-                                        }
-                                    }
-
-                                }
-
-                                for (int i = healthDrops.Count - 1; i >= 0; i--)
-                                {
-                                    if (healthDrops[i].rect.Intersects(ssPlayer.playerRect))
-                                    {
-                                        ssPlayer.Health += healAmount;
-                                        
-                                        healthDrops.RemoveAt(i);
-
-                                    }
-                                }
-                                //foreach(SSEnemy enemy in enemies)
-                                //{
-                                //    enemy.Update(gameTime, Gravity, ssPlayer, this);
-                                //}
-                                //enemy.Update(gameTime, Gravity, ssPlayer);
-
-                                ssPlayer.blockBottom = false;
-
-                                //ssPlayer.isColliding = false;
-
-                                foreach (GroundTile tile in SideTileMap.GroundTiles)
-                                {
-                                    ssPlayer.Collision(tile.Rectangle);
-                                    if (ssPlayer.isCollidingRight == true &&
-                                    ssPlayer.isCollidingLeft == true)
-                                    {
-                                        ssPlayer.isCollidingRight = false;
-                                        ssPlayer.isCollidingLeft = false;
-                                    }
-
-                                    //bool trueBreak = false;
-                                    //foreach (Rectangle breakables in ssPlayer.breakTiles)
-                                    //{
-                                    //    if (breakables == tile.Rectangle)
-                                    //    {
-                                    //        destroyedGround.Add(tile);
-                                    //        SideTileMap.GroundTiles.Remove(tile);
-                                    //        ssPlayer.breakTiles.Remove(breakables);
-                                    //        respawnDelay = respawnDelaySet;
-                                    //        trueBreak = true;
-                                    //        break;
-                                    //    }
-                                    //}
-                                    //if (trueBreak)
-                                    //    break;
-                                }
-
-                                foreach (PlatformTile tile1 in SideTileMap.PlatformTiles)
-                                {
-                                    ssPlayer.Collision(tile1.Rectangle);
-                                    //bool trueBreak = false;
-                                    //foreach (Rectangle breakables in ssPlayer.breakTiles)
-                                    //{
-                                    //    if (breakables == tile1.Rectangle)
-                                    //    {
-                                    //        destroyedPlatfroms.Add(tile1);
-                                    //        SideTileMap.PlatformTiles.Remove(tile1);
-                                    //        ssPlayer.breakTiles.Remove(breakables);
-                                    //        respawnDelay = respawnDelaySet;
-                                    //        trueBreak = true;
-                                    //        break;
-                                    //    }
-                                    //}
-                                    //if (trueBreak)
-                                    //    break;
-                                }
-
-                                //if (respawnDelay > 0 && destroyedGround.Count != 0)
-                                //{
-                                //    respawnDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                                //    if (respawnDelay <= 0)
-                                //    {
-                                //        SideTileMap.GroundTiles.Add(destroyedGround[0]);
-                                //        destroyedGround.Remove(destroyedGround[0]);
-                                //        respawnDelay = respawnDelaySet;
-                                //    }
-                                //}
-
-                                //if (respawnDelay > 0 && destroyedPlatfroms.Count != 0)
-                                //{
-                                //    respawnDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                                //    if (respawnDelay <= 0)
-                                //    {
-                                //        SideTileMap.PlatformTiles.Add(destroyedPlatfroms[0]);
-                                //        destroyedPlatfroms.Remove(destroyedPlatfroms[0]);
-                                //        respawnDelay = respawnDelaySet;
-                                //    }
-                                //}
-
-
-
-                                foreach (SSEnemy enemy in enemies)
-                                {
-                                    ssPlayer.Collision(enemy.enemyRect, true);
-                                    if (ssPlayer.killEnemy)
-                                    {
-                                        enemies.Remove(enemy);
-                                        ssPlayer.killEnemy = false;
-                                        break;
-                                    }
-                                }
-
-                                foreach (TopDoorTile tile in SideTileMap.TopDoorTiles)
-                                {
-                                    ssPlayer.Collision(tile.Rectangle);
-                                    if (ssPlayer.isCollidingRight == true &&
-                                   ssPlayer.isCollidingLeft == true)
-                                    {
-                                        ssPlayer.isCollidingRight = false;
-                                        ssPlayer.isCollidingLeft = false;
-                                    }
-
-                                }
-                                foreach (BottomDoorTile tile in SideTileMap.BottomDoorTiles)
-                                {
-                                    ssPlayer.Collision(tile.Rectangle);
-                                    if (ssPlayer.isCollidingRight == true &&
-                                   ssPlayer.isCollidingLeft == true)
-                                    {
-                                        ssPlayer.isCollidingRight = false;
-                                        ssPlayer.isCollidingLeft = false;
-                                    }
-
-                                }
-
-                                foreach (WallTile tile2 in SideTileMap.WallTiles)
-                                {
-                                    ssPlayer.Collision(tile2.Rectangle);
-                                }
-                                if (ssPlayer.blockBottom == false && ssPlayer.playerState != SSPlayer.PlayerStates.Jumping)
-                                {
-                                    ssPlayer.isFalling = true;
-
-                                }
+                                SideScrollPhysics(gameTime, kb, worldRect);
                                 if (kb.IsKeyDown(Keys.RightShift))
                                 {
                                     GameState = GameStates.TopDown;
@@ -1487,9 +1384,9 @@ namespace AUTO_Matic
                         #endregion
                         #region Paused
                         case GameStates.Paused:
-                            if(prevGameState == GameStates.SideScroll)
+                            if(prevGameState == GameStates.SideScroll || prevGameState == GameStates.Tutorial)
                             {
-                                if (fadePos == Vector2.Zero)
+                                if (fadePos == Vector2.Zero )
                                 {
                                     fadePos = SideTileMap.playerSpawns[0];
                                 }
@@ -1626,6 +1523,284 @@ namespace AUTO_Matic
             base.Update(gameTime);
         }
 
+        private void SideScrollPhysics(GameTime gameTime, KeyboardState kb, Rectangle worldRect)
+        {
+            dont = false;
+
+            foreach (BottomDoorTile door in SideTileMap.BottomDoorTiles)
+            {
+
+                float num = MathHelper.Distance(ssPlayer.playerRect.Center.X, door.Rectangle.Center.X);
+                if (ssCamera.CameraBounds.Contains(door.Rectangle) && num < 64 * 12/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
+                {
+
+                    dont = true;
+                }
+                else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 12
+                        /*|| ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 10*/)
+                {
+
+                    dont = false;
+                }
+
+                if(new Rectangle(door.Rectangle.X - 64, door.Rectangle.Y, door.Rectangle.Width, door.Rectangle.Height).Contains(ssPlayer.playerRect) && interactActive == Rectangle.Empty)
+                {
+                    UIManager.CreateInteractUI(new Point(ssPlayer.playerRect.Center.X - 32, ssPlayer.playerRect.Y- 64));
+                    interactActive = new Rectangle(door.Rectangle.X - 64, door.Rectangle.Y, door.Rectangle.Width, door.Rectangle.Height);
+                    UIHelper.SetElementVisibility("InteractBox", true, UIManager.uiElements);
+                }
+                else if(new Rectangle(door.Rectangle.Right, door.Rectangle.Y, door.Rectangle.Width, door.Rectangle.Height).Contains(ssPlayer.playerRect) && interactActive == Rectangle.Empty)
+                {
+                    UIManager.CreateInteractUI(new Point(ssPlayer.playerRect.Center.X - 32, ssPlayer.playerRect.Y - 64));
+                    interactActive = new Rectangle(door.Rectangle.Right, door.Rectangle.Y, door.Rectangle.Width, door.Rectangle.Height);
+                    UIHelper.SetElementVisibility("InteractBox", true, UIManager.uiElements);
+                }
+                else if(interactActive.Contains(ssPlayer.playerRect) == false)
+                {
+                    UIManager.RemoveInteractUI();
+                    interactActive = Rectangle.Empty;
+                    UIHelper.SetElementVisibility("InteractBox", false, UIManager.uiElements);
+                }
+            }
+
+            foreach (TopDoorTile door in SideTileMap.TopDoorTiles)
+            {
+
+                float num = MathHelper.Distance(ssPlayer.playerRect.Center.X, door.Rectangle.Center.X);
+                if (ssCamera.CameraBounds.Contains(door.Rectangle) && num < 64 * 12/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
+                {
+
+                    dont = true;
+                }
+                else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 12
+                        /*|| ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 10*/)
+                {
+
+                    dont = false;
+                }
+            }
+
+            if (dont == false && canChange)
+            {
+                ssCamera.min = 0;
+            }
+
+
+            if (ssPlayer.isPilot)
+            {
+                ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y - (60 - ssPlayer.playerRect.Height)), dont, fade);
+            }
+            else
+            {
+                ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
+            }
+
+            UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point(ssCamera.CameraBounds.X + 20,
+             ssCamera.CameraBounds.Y + 20), new Point(0, 0)));
+
+
+
+            if (kb.IsKeyDown(Keys.P) || ssPlayer.Health <= 0 || ssPlayer.playerRect.Y > SideTileMap.GetWorldDims().Y)//Reset Pos
+            {
+                if (GameState == GameStates.SideScroll)
+                    StartNewGame();
+                else if (GameState == GameStates.Tutorial)
+                    LoadTutorial();
+                //StartNewGame();
+                ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
+                fadePos = SideTileMap.playerSpawns[0];
+            }
+            if (ssPlayer.damaged)
+            {
+                UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
+            }
+            if (updateDoor)
+            {
+                UpdateDoor(topIndex, bottomIndex);
+            }
+            ssPlayer.Update(gameTime, Gravity, enemies);
+
+
+            for (int i = enemies.Count - 1; i >= 0; i--)
+            {
+                if (worldRect.Intersects(enemies[i].enemyRect) || enemies[i].enemyState != SSEnemy.EnemyStates.Idle)
+                {
+                    enemies[i].Update(gameTime, Gravity, ssPlayer, this, new Vector2(groundPoundX, groundPoundY));
+                    for (int j = i + 1; j < enemies.Count; j++)
+                    {
+                        if (enemies[i].enemyRect.Intersects(enemies[j].enemyRect) && worldRect.Intersects(enemies[j].enemyRect))
+                        {
+                            if (enemies[i].velocity.X == enemies[j].velocity.X)
+                                enemies[i].velocity.X /= 2;
+                            else
+                            {
+                                if (enemies[i].velocity.X != enemies[i].maxRunSpeed || enemies[i].velocity.X != -enemies[i].maxRunSpeed)
+                                {
+                                    if (enemies[i].velocity.X < 0)
+                                        enemies[i].velocity.X = -enemies[i].maxRunSpeed;
+                                    else if (enemies[i].velocity.X > 0)
+                                        enemies[i].velocity.X = enemies[i].maxRunSpeed;
+
+                                }
+                            }
+
+                        }
+
+                    }
+
+                    if (enemies[i].dead)
+                    {
+                        if (rand.Next(0, 101) < dropRateSS)
+                        {
+                            healthDrops.Add(new HealthDrop(enemies[i].enemyRect));
+                        }
+                        enemies.RemoveAt(i);
+                    }
+                }
+
+            }
+
+            for (int i = healthDrops.Count - 1; i >= 0; i--)
+            {
+                if (healthDrops[i].rect.Intersects(ssPlayer.playerRect))
+                {
+                    ssPlayer.Health += healAmount;
+
+                    healthDrops.RemoveAt(i);
+
+                }
+            }
+            //foreach(SSEnemy enemy in enemies)
+            //{
+            //    enemy.Update(gameTime, Gravity, ssPlayer, this);
+            //}
+            //enemy.Update(gameTime, Gravity, ssPlayer);
+
+            ssPlayer.blockBottom = false;
+
+            //ssPlayer.isColliding = false;
+
+            foreach (GroundTile tile in SideTileMap.GroundTiles)
+            {
+                ssPlayer.Collision(tile.Rectangle);
+                if (ssPlayer.isCollidingRight == true &&
+                ssPlayer.isCollidingLeft == true)
+                {
+                    ssPlayer.isCollidingRight = false;
+                    ssPlayer.isCollidingLeft = false;
+                }
+
+                //bool trueBreak = false;
+                //foreach (Rectangle breakables in ssPlayer.breakTiles)
+                //{
+                //    if (breakables == tile.Rectangle)
+                //    {
+                //        destroyedGround.Add(tile);
+                //        SideTileMap.GroundTiles.Remove(tile);
+                //        ssPlayer.breakTiles.Remove(breakables);
+                //        respawnDelay = respawnDelaySet;
+                //        trueBreak = true;
+                //        break;
+                //    }
+                //}
+                //if (trueBreak)
+                //    break;
+            }
+
+            foreach (PlatformTile tile1 in SideTileMap.PlatformTiles)
+            {
+                ssPlayer.Collision(tile1.Rectangle);
+                //bool trueBreak = false;
+                //foreach (Rectangle breakables in ssPlayer.breakTiles)
+                //{
+                //    if (breakables == tile1.Rectangle)
+                //    {
+                //        destroyedPlatfroms.Add(tile1);
+                //        SideTileMap.PlatformTiles.Remove(tile1);
+                //        ssPlayer.breakTiles.Remove(breakables);
+                //        respawnDelay = respawnDelaySet;
+                //        trueBreak = true;
+                //        break;
+                //    }
+                //}
+                //if (trueBreak)
+                //    break;
+            }
+
+            //if (respawnDelay > 0 && destroyedGround.Count != 0)
+            //{
+            //    respawnDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //    if (respawnDelay <= 0)
+            //    {
+            //        SideTileMap.GroundTiles.Add(destroyedGround[0]);
+            //        destroyedGround.Remove(destroyedGround[0]);
+            //        respawnDelay = respawnDelaySet;
+            //    }
+            //}
+
+            //if (respawnDelay > 0 && destroyedPlatfroms.Count != 0)
+            //{
+            //    respawnDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //    if (respawnDelay <= 0)
+            //    {
+            //        SideTileMap.PlatformTiles.Add(destroyedPlatfroms[0]);
+            //        destroyedPlatfroms.Remove(destroyedPlatfroms[0]);
+            //        respawnDelay = respawnDelaySet;
+            //    }
+            //}
+
+
+            ssPlayer.isCollidingDown = false;
+            foreach (SSEnemy enemy in enemies)
+            {
+                ssPlayer.Collision(enemy.enemyRect, true);
+                if (ssPlayer.killEnemy && enemy.enemyState != SSEnemy.EnemyStates.Knockback)
+                {
+                    enemy.prevState = enemy.enemyState;
+                    enemy.enemyState = SSEnemy.EnemyStates.Knockback;
+
+      
+                    //enemies.Remove(enemy);
+                    //ssPlayer.killEnemy = false;
+                   
+                    break;
+                }
+            }
+
+            foreach (TopDoorTile tile in SideTileMap.TopDoorTiles)
+            {
+                ssPlayer.Collision(tile.Rectangle);
+                if (ssPlayer.isCollidingRight == true &&
+               ssPlayer.isCollidingLeft == true)
+                {
+                    ssPlayer.isCollidingRight = false;
+                    ssPlayer.isCollidingLeft = false;
+                }
+
+            }
+            foreach (BottomDoorTile tile in SideTileMap.BottomDoorTiles)
+            {
+                ssPlayer.Collision(tile.Rectangle);
+                if (ssPlayer.isCollidingRight == true &&
+               ssPlayer.isCollidingLeft == true)
+                {
+                    ssPlayer.isCollidingRight = false;
+                    ssPlayer.isCollidingLeft = false;
+                }
+
+            }
+
+            foreach (WallTile tile2 in SideTileMap.WallTiles)
+            {
+                ssPlayer.Collision(tile2.Rectangle);
+            }
+            if (ssPlayer.blockBottom == false && ssPlayer.playerState != SSPlayer.PlayerStates.Jumping)
+            {
+                ssPlayer.isFalling = true;
+
+            }
+        }
+
         private void ChangeToSideScroll()
         {
             GameState = GameStates.SideScroll;
@@ -1693,6 +1868,7 @@ namespace AUTO_Matic
 
         public void OpenDoor(Rectangle bottomTile)
         {
+            UIManager.RemoveInteractUI();
             //Find top door
             int bottomTileIndex = 0;
             int topTileIndex = 0;
@@ -1728,7 +1904,16 @@ namespace AUTO_Matic
                 updatedPos = new Vector2(SideTileMap.BottomDoorTiles[bottomIndex].Rectangle.Left - ssPlayer.playerRect.Width - 20,
                    SideTileMap.BottomDoorTiles[bottomIndex].Rectangle.Top + (SideTileMap.BottomDoorTiles[bottomIndex].Rectangle.Height - ssPlayer.playerRect.Height));
             }
-            minChange = SideTileMap.BottomDoorTiles[bottomIndex].Rectangle.X;
+
+            if(GameState == GameStates.Tutorial)
+            {
+                minChange = SideTileMap.BottomDoorTiles[0].Rectangle.X;
+            }
+            else if(GameState == GameStates.SideScroll)
+            {
+                minChange = SideTileMap.BottomDoorTiles[bottomIndex].Rectangle.X;
+            }
+           
             dont = false;
             fadePos = ssCamera.Position;
         }
@@ -1784,7 +1969,7 @@ namespace AUTO_Matic
                     spriteBatch.End();
                     break;
                 case Scenes.InGame:
-                    if(GameState == GameStates.SideScroll)
+                    if(GameState == GameStates.SideScroll || GameState == GameStates.Tutorial)
                     {
                         if(fade)
                         {
@@ -1793,7 +1978,8 @@ namespace AUTO_Matic
                             {
                                 iRate = 1;
                                 fade = false;
-                                startGame = true;
+                                if(GameState == GameStates.Tutorial)
+                                    startGame = true;
                             }
                             
                             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, ssCamera.transform);
@@ -1816,10 +2002,19 @@ namespace AUTO_Matic
                                 
                                 if(ssPlayer.animManager.isRight)
                                 {
-                                    
-                                    ssCamera.center.X += ssCamera.CameraBounds.Width;
-                                    ssCamera.min = (int)((ssCamera.center.X - 64) - ssCamera.CameraBounds.Width / 2);
-                                    canChange = true;
+                                    if(GameState == GameStates.Tutorial)
+                                    {
+                                        ssCamera.min = SideTileMap.BottomDoorTiles[0].Rectangle.X;
+                                        ssCamera.center.X += ssCamera.CameraBounds.Width;
+                                        
+                                    }
+                                    else if(GameState == GameStates.SideScroll)
+                                    {
+                                        ssCamera.center.X += ssCamera.CameraBounds.Width;
+                                        ssCamera.min = (int)((ssCamera.center.X - 64) - ssCamera.CameraBounds.Width / 2);
+                                        canChange = true;
+                                    }
+                                   
                                 }
                                 else if(ssPlayer.animManager.isLeft)
                                 {
@@ -1827,8 +2022,22 @@ namespace AUTO_Matic
                                     ssCamera.min = 0;
                                 }
                                
-                                ssPlayer.playerRect = new Rectangle((int)updatedPos.X, (int)updatedPos.Y, ssPlayer.playerRect.Width, ssPlayer.playerRect.Height);
-                                ssPlayer.Position = updatedPos;
+                                if(GameState == GameStates.SideScroll)
+                                {
+                                    ssPlayer.playerRect = new Rectangle((int)updatedPos.X, (int)updatedPos.Y, ssPlayer.playerRect.Width, ssPlayer.playerRect.Height);
+                                    ssPlayer.Position = updatedPos;
+                                }
+                                else if(GameState == GameStates.Tutorial)
+                                {
+                                    ssPlayer.playerRect = new Rectangle((int)ssPlayer.Position.X + 160, SideTileMap.BottomDoorTiles[0].Rectangle.Y,
+                                  ssPlayer.playerRect.Width, ssPlayer.playerRect.Height);
+                                    ssPlayer.Position = new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y);
+
+                                    ssCamera.center.Y = ssPlayer.playerRect.Y;
+                                    //ssCamera.center.X += ssCamera.CameraBounds.Width/1.75f;
+                                    fadePos = new Vector2(SideTileMap.BottomDoorTiles[0].Rectangle.X + ssCamera.CameraBounds.Width/2, ssPlayer.playerRect.Y);
+                                }
+                              
                                
 
 
@@ -1844,12 +2053,12 @@ namespace AUTO_Matic
                         }
                         else
                         {
-                            if(startGame)
+                            if (startGame)
                             {
                                 UIManager.CreateTutorialUI(SideTileMap.playerSpawns[0], this);
                                 UIHelper.SetElementVisibility("Tutorial", true, UIManager.uiElements);
                                 startGame = false;
-                              
+
                             }
                             //UIManager.CreateTutorialUI(SideTileMap.playerSpawns[0], this);
                             //UIHelper.SetElementVisibility("Tutorial", true, UIManager.uiElements);

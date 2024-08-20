@@ -1215,7 +1215,7 @@ namespace AUTO_Matic.TopDown
                             switch (num)
                             {
                                 case 10:
-                                    wallTiles.Add(new WallTiles(49, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    wallTiles.Add(new WallTiles(48, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                                     break;
                                 case 1:
                                     wallTiles.Add(new WallTiles(41, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
@@ -1261,7 +1261,7 @@ namespace AUTO_Matic.TopDown
                                 enemySpawns.Add(new Vector2((levelInX * screenWidth) + (x * size), y * size));
                             }
 
-                            floorTiles.Add(new FloorTiles(48, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                            floorTiles.Add(new FloorTiles(49, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
                             enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                             floorCount++;
@@ -1276,7 +1276,7 @@ namespace AUTO_Matic.TopDown
                             switch (num)
                             {
                                 case 9:
-                                    floorTiles.Add(new FloorTiles(48, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
+                                    floorTiles.Add(new FloorTiles(49, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
                                     break;
                                 default:
                                     floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size), size, size)));
@@ -1321,7 +1321,7 @@ namespace AUTO_Matic.TopDown
                             switch (num)
                             {
                                 case 10:
-                                    wallTiles.Add(new WallTiles(49, new Rectangle((x * size), (y * size), size, size)));
+                                    wallTiles.Add(new WallTiles(48, new Rectangle((x * size), (y * size), size, size)));
                                     break;
                                 case 1:
                                     wallTiles.Add(new WallTiles(41, new Rectangle((x * size), (y * size), size, size)));
@@ -1367,7 +1367,7 @@ namespace AUTO_Matic.TopDown
                                 enemySpawns.Add(new Vector2(x * size, (y * size) - (levelInY * screenHeight)));
                             }
 
-                            floorTiles.Add(new FloorTiles(48, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles.Add(new FloorTiles(49, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
                             enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             //floorTiles[floorCount].mapPoint = num;
@@ -1383,7 +1383,7 @@ namespace AUTO_Matic.TopDown
                             switch (num)
                             {
                                 case 9:
-                                    floorTiles.Add(new FloorTiles(48, new Rectangle((x * size), (y * size), size, size)));
+                                    floorTiles.Add(new FloorTiles(49, new Rectangle((x * size), (y * size), size, size)));
                                     break;
                                 default:
                                     floorTiles.Add(new FloorTiles(num, new Rectangle((x * size), (y * size), size, size)));
@@ -1441,7 +1441,7 @@ namespace AUTO_Matic.TopDown
                             switch (num)
                             {
                                 case 10:
-                                    wallTiles.Add(new WallTiles(49, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    wallTiles.Add(new WallTiles(48, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                                     break;
                                 case 1:
                                     wallTiles.Add(new WallTiles(41, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
@@ -1488,7 +1488,7 @@ namespace AUTO_Matic.TopDown
                                 enemySpawnPoints.Add(new EnemySpawn(new int[] { y, x }, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             }
 
-                            floorTiles.Add(new FloorTiles(48, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                            floorTiles.Add(new FloorTiles(49, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                             floorTiles[floorCount].mapPoint = new int[] { y, x };
 
                             //floorTiles[floorCount].mapPoint = num;
@@ -1504,7 +1504,7 @@ namespace AUTO_Matic.TopDown
                             switch (num)
                             {
                                 case 9:
-                                    floorTiles.Add(new FloorTiles(48, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
+                                    floorTiles.Add(new FloorTiles(49, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                                     break;
                                 default:
                                     floorTiles.Add(new FloorTiles(num, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));

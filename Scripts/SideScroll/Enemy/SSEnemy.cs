@@ -18,7 +18,7 @@ namespace AUTO_Matic.SideScroll
         enum AnimationStates { Walking, Idle, Death, Jump, Shoot}
         AnimationStates animState = AnimationStates.Idle;
 
-        public enum EnemyStates { Idle, GoTo, Attacking,Jumping, Falling}
+        public enum EnemyStates { Idle, GoTo, Attacking,Jumping, Falling, Knockback}
         public EnemyStates enemyState = EnemyStates.Idle;
         public EnemyStates prevState;
 
@@ -38,8 +38,13 @@ namespace AUTO_Matic.SideScroll
 
         public int redFrames = 4;
         public int redCount = 0;
-        int whiteFrames = 45;
+        int whiteFrames = 30;
         int whiteCount = 0;
+
+        public float knockBackX;
+        public float knockBackY;
+
+        float gravX;
         public float Health
         {
             get { return health; }
@@ -529,7 +534,7 @@ namespace AUTO_Matic.SideScroll
             }
         }
 
-        public void Update(GameTime gameTime, Vector2 gravity, SSPlayer player, Game1 game)
+        public void Update(GameTime gameTime, Vector2 gravity, SSPlayer player, Game1 game, Vector2 knockbackForce)
         {
             //Reset and clear 
             this.gravity = gravity;
@@ -671,12 +676,12 @@ namespace AUTO_Matic.SideScroll
                                     if (enemyRect.Right < player.playerRect.X /*&& MathHelper.Distance(enemyRect.Right, player.playerRect.Left) > attackOffsetFromPlayer*/)
                                     {
                                         TargetPos = new Vector2(player.playerRect.X, enemyRect.Y); //Keep Y to only set the X coordinate...Y handled seperately
-                                        outOfRange = true;
+                                        outOfRange = false;
                                     }
                                     else if (enemyRect.Left > player.playerRect.X + player.playerRect.Width /*&& MathHelper.Distance(enemyRect.Left, player.playerRect.Right) > attackOffsetFromPlayer*/)
                                     {
                                         TargetPos = new Vector2(player.playerRect.X + player.playerRect.Width, enemyRect.Y);
-                                        outOfRange = true;
+                                        outOfRange = false;
                                     }
                                    
                                 }
@@ -787,7 +792,7 @@ namespace AUTO_Matic.SideScroll
                                 velocity.X = 0;
                             }
                         }
-                        else if(blockBottom)
+                        else if(blockBottom && !isShoot)
                         {
                             if (MathHelper.Distance(enemyRect.Left, player.playerRect.Right) < attackOffsetFromPlayer)
                             {
@@ -811,7 +816,7 @@ namespace AUTO_Matic.SideScroll
                                 velocity.X = 0;
                             }
                         }
-                        else if(blockBottom)
+                        else if(blockBottom && !isShoot)
                         {
                             if (MathHelper.Distance(enemyRect.Right, player.playerRect.Left) < attackOffsetFromPlayer)
                             {
@@ -854,7 +859,12 @@ namespace AUTO_Matic.SideScroll
                         enemyState = EnemyStates.Idle;
                         break;
                     }
-                    GoTo();
+
+                    if(enemyState == EnemyStates.GoTo)
+                    {
+                        GoTo();
+                    }
+                   
 
 
                     break;
@@ -1185,14 +1195,27 @@ namespace AUTO_Matic.SideScroll
                             if (player.playerRect.Intersects(HitBox) || player.playerRect.Intersects(enemyRect))
                             {
                                 player.Health -= meleeDmg;
+                                player.playerState = SSPlayer.PlayerStates.Knockback;
+                                if (enemyRect.Center.X < player.playerRect.Center.X)
+                                    player.knockBackX = 5;
+                                else
+                                    player.knockBackX = -5;
+                                player.knockBackY = -3;
+                                player.playerRect.Y -= 2;
+                                player.position.Y -= 2;
                             }
 
                             attackDelay = attackDelayMax;
                         }
                     }
-                   
-                    prevState = EnemyStates.Attacking;
-                    enemyState = EnemyStates.GoTo;
+
+                    if (MathHelper.Distance(enemyRect.Center.X, player.playerRect.Center.X) > attackOffsetFromPlayer)
+                    {
+                        prevState = EnemyStates.Attacking;
+                        enemyState = EnemyStates.GoTo;
+                    }
+
+
                     break;
                 #endregion
                 #region Falling
@@ -1330,18 +1353,114 @@ namespace AUTO_Matic.SideScroll
                     }
                         break;
                 #endregion
+                #region Knockback
+                case EnemyStates.Knockback:
+                    
+                    if (player.killEnemy)
+                    {
+                        if (player.playerRect.Center.X < enemyRect.Center.X)
+                        {
+                            velocity = new Vector2(knockbackForce.X, knockbackForce.Y);
+                            enemyRect.Y -= 2;
+                            position.Y -= 2;
+
+                            gravX = -1;
+                        }
+                        else
+                        {
+                            velocity = new Vector2(-knockbackForce.X, knockbackForce.Y);
+                            enemyRect.Y -= 2;
+                            position.Y -= 2;
+                            gravX = 1;
+                        }
+                    }
+                    else if(gravX == 0)
+                    {
+
+                        if (player.playerRect.Center.X < enemyRect.Center.X)
+                        {
+                            velocity = new Vector2(knockBackX, knockBackY);
+                            enemyRect.Y -= 2;
+                            position.Y -= 2;
+
+                            gravX = -1;
+                        }
+                        else
+                        {
+                            velocity = new Vector2(-knockBackX, knockBackY);
+                            enemyRect.Y -= 2;
+                            position.Y -= 2;
+                            gravX = 1;
+                        }
+                    }
+
+                    //if (gravX == 0)
+                    //{
+                    //    if (player.playerRect.Center.X < enemyRect.Center.X)
+                    //    {
+                    //        velocity = new Vector2(knockbackForce.X / 2, knockbackForce.Y);
+                    //        enemyRect.Y -= 2;
+                    //        position.Y -= 2;
+
+                    //        gravX = -1;
+                    //    }
+                    //    else
+                    //    {
+                    //        velocity = new Vector2(-knockbackForce.X / 2, knockbackForce.Y);
+                    //        enemyRect.Y -= 2;
+                    //        position.Y -= 2;
+                    //        gravX = 1;
+                    //    }
+                    //}
+
+                    player.killEnemy = false;
+                    foreach(GroundTile tile in SideTileMap.GroundTiles)
+                    {
+                        if(enemyRect.TouchTopOf(tile.Rectangle))
+                        {
+                            enemyState = EnemyStates.GoTo;
+                            gravX = 0;
+                        }
+                    }
+                    foreach(WallTile tile in SideTileMap.WallTiles)
+                    {
+                        if (enemyRect.Intersects(tile.Rectangle))
+                        {
+                            enemyState = EnemyStates.GoTo;
+                            gravX = 0;
+                        }
+                    }
+                    foreach(PlatformTile tile in SideTileMap.PlatformTiles)
+                    {
+                        if (enemyRect.Intersects(tile.Rectangle))
+                        {
+                            enemyState = EnemyStates.GoTo;
+                            gravX = 0;
+                        }
+                    }
+
+                    if(!damaged)
+                    {
+                        enemyState = EnemyStates.GoTo;
+                        gravX = 0;
+                    }
+
+
+                    break;
+                #endregion
             }
 
             if (isFalling) //Only add gravity if falling
             {
                 velocity.Y += gravity.Y;
+                velocity.X += gravX;
             }
             
-            if(velocity.X > 0 && velocity.X > maxRunSpeed)//Going right and velocity checks
+            if(velocity.X > 0 && velocity.X > maxRunSpeed && enemyState != EnemyStates.Knockback)//Going right and velocity checks
             {
                 velocity.X = maxRunSpeed;
             }
-            if(velocity.X < 0 && velocity.X < -maxRunSpeed)//Going left and velocity checks
+            if(velocity.X < 0 && velocity.X < -maxRunSpeed && enemyState != EnemyStates.Knockback)//Going left and velocity checks
             {
                 velocity.X = -maxRunSpeed;
             }
@@ -1388,6 +1507,14 @@ namespace AUTO_Matic.SideScroll
                         if(bullets[i].rect.Intersects(player.playerRect))
                         {
                             player.Health -= bulletDmg;
+                            player.playerState = SSPlayer.PlayerStates.Knockback;
+                            if (enemyRect.Center.X < player.playerRect.Center.X)
+                                player.knockBackX = 1;
+                            else
+                                player.knockBackX = -1;
+                            player.knockBackY = -1;
+                            player.playerRect.Y -= 2;
+                            player.position.Y -= 2;
                             bullets.RemoveAt(i);
                         }
                         else if(bullets[i].delete)
@@ -1462,7 +1589,7 @@ namespace AUTO_Matic.SideScroll
                 }
                 if (whiteCount < redCount)
                 {
-                    animManager.Draw(spriteBatch, Color.White * .25f);
+                    animManager.Draw(spriteBatch, Color.Red);
                     whiteCount++;
                 }
                 if (whiteCount == whiteFrames)

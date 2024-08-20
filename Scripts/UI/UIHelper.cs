@@ -86,14 +86,11 @@ namespace AUTO_Matic
                 case "MainMenuBackground":
                     UITextBlock e = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, MainMenuBG);
                     return e;
-                case "TutorialBoxGame":
-                    UITextBlock f = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, text, Color.Black, TutorialTexture);
-                    return f;
                 case "MainMenuTitle":
                     UITextBlock g = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, "", Color.White, MenuTitle);
                     return g;
                 default:
-                    UITextBlock b = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, CrawlFont, text, Color.White, CrawlBgTxture);
+                    UITextBlock b = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, text, Color.Black, TutorialTexture);
                     return b;
 
 

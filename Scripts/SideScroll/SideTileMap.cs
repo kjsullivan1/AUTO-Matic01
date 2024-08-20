@@ -37,6 +37,7 @@ namespace AUTO_Matic
         public static List<int> PlatformIndexes = new List<int>();//List of the indexes of the platform tiles
         public static List<RepeatBackground> repeatBG = new List<RepeatBackground>();
         public static List<FlyingEnemy> flyingEnemies = new List<FlyingEnemy>();
+        public static List<Vector2> Textboxes = new List<Vector2>();
 
         
 
@@ -59,6 +60,11 @@ namespace AUTO_Matic
         public static List<FlyingEnemy> GetFlyingEnemies()
         {
             return flyingEnemies;
+        }
+
+        public static List<Vector2> GetTextBoxes()
+        {
+            return Textboxes;
         }
 
         public static List<PlatformTile> PlatformTiles
@@ -152,6 +158,8 @@ namespace AUTO_Matic
             enemySpawns.Clear();
             playerSpawns.Clear();
             dungeonEntrances.Clear();
+            wallTiles.Clear();
+
 
             int count = 0;//Repeat background are 4 tiles long so must make every 4
             int count2 = 0;//Repeat is 2 tiles tall so must make every 2
@@ -178,9 +186,14 @@ namespace AUTO_Matic
 
                     //}
 
-                    if (num == 1)
+                    //if (num == 1)
+                    //{
+                    //    backgroundTiles.Add(new BackgroundTile(num,new Rectangle(x * size, y * size, size, size)));
+                    //}
+                    if(num == 0)
                     {
-                        backgroundTiles.Add(new BackgroundTile(num,new Rectangle(x * size, y * size, size, size)));
+                        Textboxes.Add(new Vector2(x * size, y * size));
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                     }
                     else if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19 || num == 20|| num ==21 || num ==22 || num ==23)
                     {
@@ -213,7 +226,7 @@ namespace AUTO_Matic
                     {
                         if (num == 26)
                         {
-                            //backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                            backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         }
 
                         if (y == 0)//If at the top of the map
@@ -236,36 +249,36 @@ namespace AUTO_Matic
                         }
                        
                     }
-                    //if(num == 1) //Background
-                    //{
-                    //    backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
-                    //    if (BackgroundIndexes.Contains(num) == false)
-                    //        BackgroundIndexes.Add(num);
-                    //}
+                    else if(num == 1) //Background
+                    {
+                        backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
+                        if (BackgroundIndexes.Contains(num) == false)
+                            BackgroundIndexes.Add(num);
+                    }
                     else if(num == 9 || num == 12)//Top of doors
                     {
-                       // backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
                         topDoorTiles.Add(new TopDoorTile(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     else if(num == 8 || num == 11)//Bottom doors
                     {
-                        //backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         bottomDoorTiles.Add(new BottomDoorTile(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     else if(num == 25) //Enemy spawns
                     {
                         enemySpawns.Add(new Vector2(x * size, y * size));
-                        //backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                     }
                     else if(num == 7)//Dungeon entrance
                     {
-                        //backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                         dungeonEntrances.Add(new DungeonEntrance(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     else if(num == 24)//Player spawn
                     {
                         playerSpawns.Add(new Vector2(x * size, y * size));
-                        //backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                     }
 
 
