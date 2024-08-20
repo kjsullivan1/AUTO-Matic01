@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AUTO_Matic.TopDown;
 using Microsoft.Xna.Framework.Content;
 using AUTO_Matic.SideScroll;
+using AUTO_Matic.Scripts.Effects;
 
 namespace AUTO_Matic.Scripts.SideScroll.Enemy
 {
@@ -27,6 +28,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         float moveSpeed = 5.5f;
         Vector2 startPos;
 
+        ParticleManager particles;
         List<ShootingLocs> shootLocs = new List<ShootingLocs>();
         List<Vector2> goToLocs = new List<Vector2>(); //locations the shootLocs will goTo
         float returnDelay = .75f;
@@ -149,6 +151,8 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             this.content = content;
             line = new Texture2D(graphics, 1, 1, false, SurfaceFormat.Color);
             line.SetData(new[] { Color.White });
+            particles = new ParticleManager();
+            particles.Initialize(content.Load<Texture2D>(@"Textures\white"));
             //iAutoDelay = autoShootDelay;
             int mod = 48;
 
@@ -214,15 +218,19 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                     {
                         case 0:
                             chosenWeapon = "Shotgun";
+                            bulletDmg = 1.5f;
                             break;
                         case 1:
                             chosenWeapon = "Laser";
+                            bulletDmg = 2.2f;
                             break;
                         case 2:
                             chosenWeapon = "Auto";
+                            bulletDmg = 1.25f;
                             break;
                         case 3:
                             chosenWeapon = "Bomb";
+                            bulletDmg = 3.1f;
                             break;
                     }
                     bossState = BossStates.SpinToPlace;
@@ -377,7 +385,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 #endregion
                 #region Attack
                 case BossStates.Attack:
-                    Vector2 targetDir = new Vector2(ssPlayer.Rectangle.X, ssPlayer.Rectangle.Y) - new Vector2(bossRect.X, bossRect.Y);
+                    Vector2 targetDir = new Vector2(ssPlayer.playerRect.Center.X, ssPlayer.playerRect.Center.Y) - new Vector2(bossRect.Center.X, bossRect.Center.Y);
                     angle = (float)Math.Atan2(targetDir.Y, targetDir.X); //sub by 90 if problems occur
                     bossPos = new Vector2(bossRect.Center.X - ssPlayer.Rectangle.Width / 2,
                        bossRect.Center.Y - ssPlayer.Rectangle.Height / 2);
@@ -396,6 +404,8 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                             {
                                 bossState = BossStates.Return;
                                 destRect = Rectangle.Empty;
+                                fireTime = .75f;
+                                chargeTime = 4;
                             }
                                
                             //stopRotate = false;
@@ -488,9 +498,10 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 if(bullets[i].rect.Intersects(ssPlayer.Rectangle))
                 {
                     bullets[i].delete = true;
+                    DamagePlayer(ssPlayer);
                 }
 
-                if(bullets[i].delete)
+                if (bullets[i].delete)
                 {
                     bullets.RemoveAt(i);
                 }
@@ -502,13 +513,21 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 if(bombs[i].rect.Intersects(ssPlayer.Rectangle))
                 {
                     bombs[i].delete = true;
+                    DamagePlayer(ssPlayer);
                 }
 
                 if(bombs[i].delete)
                 {
-                    explosions.Add(new Explosion(new Circle(new Vector2(bombs[i].rect.X, bombs[i].rect.Y), bombs[i].rect.Width),
+                    explosions.Add(new Explosion(new Circle(new Vector2(bombs[i].rect.Center.X, bombs[i].rect.Center.Y), bombs[i].rect.Width),
                          3, (int)(bombs[i].rect.Width * 2.5f)));
+
+                    int radiusDif = explosions[explosions.Count - 1].maxSize - explosions[explosions.Count - 1].rect.Radius;
+                    particles.MakeExplosion(explosions[explosions.Count - 1].rect.Bounds,
+                           new Circle(new Vector2(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif,
+                           explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif), explosions[explosions.Count - 1].maxSize / 2),
+                           20);
                     bombs.RemoveAt(i);
+                 
                 }
             }
 
@@ -520,8 +539,54 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                     explosions.RemoveAt(i);
                 }
             }
+            particles.Update(gameTime);
 
+        }
 
+        private void DamagePlayer(SSPlayer ssPlayer)
+        {
+            ssPlayer.Health -= bulletDmg;
+            ssPlayer.playerState = SSPlayer.PlayerStates.Knockback;
+            switch (chosenWeapon)
+            {
+                case "Shotgun":
+
+                    if (bossRect.Center.X < ssPlayer.playerRect.Center.X)
+                        ssPlayer.knockBackX = 5;
+                    else
+                        ssPlayer.knockBackX = -5;
+                    ssPlayer.knockBackY = -3;
+                    ssPlayer.playerRect.Y -= 2;
+                    ssPlayer.position.Y -= 2;
+                    break;
+                case "Laser":
+                    if (bossRect.Center.X < ssPlayer.playerRect.Center.X)
+                        ssPlayer.knockBackX = 5;
+                    else
+                        ssPlayer.knockBackX = -5;
+                    ssPlayer.knockBackY = -1;
+                    ssPlayer.playerRect.Y -= 2;
+                    ssPlayer.position.Y -= 2;
+                    break;
+                case "Auto":
+                    if (bossRect.Center.X < ssPlayer.playerRect.Center.X)
+                        ssPlayer.knockBackX = 5;
+                    else
+                        ssPlayer.knockBackX = -5;
+                    ssPlayer.knockBackY = -2;
+                    ssPlayer.playerRect.Y -= 2;
+                    ssPlayer.position.Y -= 2;
+                    break;
+                case "Bomb":
+                    if (bossRect.Center.X < ssPlayer.playerRect.Center.X)
+                        ssPlayer.knockBackX = 7;
+                    else
+                        ssPlayer.knockBackX = -7;
+                    ssPlayer.knockBackY = -5;
+                    ssPlayer.playerRect.Y -= 2;
+                    ssPlayer.position.Y -= 2;
+                    break;
+            }
         }
 
         private void ShootShotgun(SSPlayer ssPlayer, float angle)
@@ -957,7 +1022,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         {
            
                 //shootDelay = iShootDelay;
-                bulletTravelDist = DistForm(ssPlayer.Rectangle.Center.ToVector2(), bossRect.Center.ToVector2()) - bossRect.Width;
+                bulletTravelDist = DistForm(ssPlayer.Rectangle.Center.ToVector2(), bossRect.Center.ToVector2()) + bossRect.Width;
 
             //Vector2 bossPos = new Vector2(bossRect.Center.X - ssPlayer.playerRect.Width / 2, bossRect.Center.Y - ssPlayer.playerRect.Height / 2);
 
@@ -1263,19 +1328,21 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
             int size = 64;
             chargeTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (playerRect.playerRect.Center.X > bossRect.Center.X)
-            {
-                destRect = new Rectangle(bossRect.Center.X, bossRect.Center.Y - 28 / 2,
-                   distForm(new Vector2(bossRect.Center.X, bossRect.Center.Y),
-                   new Vector2(playerRect.playerRect.Center.X, playerRect.playerRect.Center.Y)), 28);
-            }
-            else
-            {
-                destRect = new Rectangle(bossRect.Center.X, bossRect.Center.Y + 28 / 2,
-                   distForm(new Vector2(bossRect.Center.X, bossRect.Center.Y),
-                   new Vector2(playerRect.playerRect.Center.X, playerRect.playerRect.Center.Y)), 28);
-            }
-
+            //if (playerRect.playerRect.Center.Y > bossRect.Center.Y)
+            //{
+            //    destRect = new Rectangle(bossRect.Center.X, bossRect.Center.Y - 28 / 2,
+            //       distForm(new Vector2(bossRect.Center.X, bossRect.Center.Y),
+            //       new Vector2(playerRect.playerRect.Center.X, playerRect.playerRect.Center.Y)), 28);
+            //}
+            //else
+            //{
+            //    destRect = new Rectangle(bossRect.Center.X, bossRect.Center.Y + 28 / 2,
+            //       distForm(new Vector2(bossRect.Center.X, bossRect.Center.Y),
+            //       new Vector2(playerRect.playerRect.Center.X, playerRect.playerRect.Center.Y)), 28);
+            //}
+            destRect = new Rectangle(bossRect.Center.X, bossRect.Center.Y,
+                  distForm(new Vector2(bossRect.Center.X, bossRect.Center.Y),
+                  new Vector2(playerRect.playerRect.Center.X, playerRect.playerRect.Center.Y)), 28);
             if (chargeTime <= 0 && fireTime >= 0)
             {
 
@@ -1283,7 +1350,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 float bulletSpeedX = (float)Math.Cos((double)angle) * 8;
                 float bulletSpeedY = (float)Math.Sin((double)angle) * 8;
                 bullets.Add(new Bullet(new Vector2(destRect.X, destRect.Y), bulletSpeedX,
-                    new Vector2(bulletSpeedX, bulletSpeedY), content, true, bounds.Width, true, bulletSpeedY, size: 30));
+                    new Vector2(bulletSpeedX, bulletSpeedY), content, true, bounds.Width, true, bulletSpeedY, size: 20));
 
 
 
@@ -1487,14 +1554,14 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            for(int i = 0; i < TopWall.Count; i++)
-            {
-                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), TopWall[i], Color.Black);
-            }
-            for (int i = 0; i < SideWall.Count; i++)
-            {
-                spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), SideWall[i], Color.Black);
-            }
+            //for(int i = 0; i < TopWall.Count; i++)
+            //{
+            //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), TopWall[i], Color.Black);
+            //}
+            //for (int i = 0; i < SideWall.Count; i++)
+            //{
+            //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), SideWall[i], Color.Black);
+            //}
 
             spriteBatch.Draw(content.Load<Texture2D>("SideScroll/Animations/FinalBoss/MonoBoss"), bossRect, Color.White);
 
@@ -1534,6 +1601,8 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             {
                 explosions[i].Draw(spriteBatch, content);
             }
+
+            particles.Draw(spriteBatch);
         }
         int DistForm(Vector2 pos1, Vector2 pos2)
         {

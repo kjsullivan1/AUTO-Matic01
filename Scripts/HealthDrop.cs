@@ -15,7 +15,7 @@ namespace AUTO_Matic.Scripts
 
         public HealthDrop(Rectangle positionRect)
         {
-            rect = new Rectangle((positionRect.X + positionRect.Width / 2) - texture.Width / 2, (positionRect.Y + positionRect.Height / 2) - texture.Height / 2, texture.Width, texture.Height);
+            rect = new Rectangle((positionRect.X + positionRect.Width / 2) - texture.Width / 2, (positionRect.Y + positionRect.Height / 2), 28, 28);
         }
 
         public void Draw(SpriteBatch spriteBatch)

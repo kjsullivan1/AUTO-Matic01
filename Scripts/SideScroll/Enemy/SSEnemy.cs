@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AUTO_Matic.SideScroll.Enemy;
+using AUTO_Matic.Scripts;
 
 namespace AUTO_Matic.SideScroll
 {
@@ -22,6 +23,8 @@ namespace AUTO_Matic.SideScroll
         public EnemyStates enemyState = EnemyStates.Idle;
         public EnemyStates prevState;
 
+        public HealthBar healthBar;
+
         #region Fields
         public Vector2 bounds;//The bounds of how much the AI can move left and right
         int pixelSize = 64;
@@ -34,7 +37,7 @@ namespace AUTO_Matic.SideScroll
         Vector2 TargetPos; //Position of where the GOTO targets 
         public float health = 5;
         public bool dead = false;
-        bool damaged = false;
+        public bool damaged = false;
 
         public int redFrames = 4;
         public int redCount = 0;
@@ -53,6 +56,7 @@ namespace AUTO_Matic.SideScroll
                 {
                     damaged = true;
                     health = value;
+                    
                 }
                
                 if (health <= 0)
@@ -212,8 +216,16 @@ namespace AUTO_Matic.SideScroll
             this.isShoot = isShoot;
             attackDelayMax = attackDelay;
             maxShootDelay = shootDelay;
-            if(isShoot)
+            if (isShoot)
+            {
                 attackOffsetFromPlayer = 64 * 3;
+                health = 3;
+            }
+            else
+                health = 4;
+               
+
+            healthBar = new HealthBar(new Rectangle((int)enemyRect.Center.X, (int)enemyRect.Y - 8, enemyRect.Width, 5), manager, health);
 
             animState = AnimationStates.Walking;
             ChangeAnimation();
@@ -248,7 +260,7 @@ namespace AUTO_Matic.SideScroll
         public List<Bullet> bullets = new List<Bullet>();
         float bulletSpeed = 5;
         float bulletDmg = 1f;
-        float shootDelay = .8f;
+        float shootDelay = 1.2f;
         float maxShootDelay;
         float bulletTravelDist = 64 * 4;
         Vector2 maxBulletSpeed = new Vector2(15, 15);
@@ -268,6 +280,7 @@ namespace AUTO_Matic.SideScroll
         bool outOfRange = false;
         bool cantReach = true;
         float waitTime = .75f;
+        bool launch = false;
         Rectangle HitBox
         {
             get
@@ -595,6 +608,7 @@ namespace AUTO_Matic.SideScroll
 
             switch(enemyState)
             {
+                #region Idle
                 case EnemyStates.Idle:
                     //Waits for player to enter vision
                     if(animState != AnimationStates.Idle)
@@ -660,6 +674,8 @@ namespace AUTO_Matic.SideScroll
                    
                     velocity.X = 0;
                     break;
+                #endregion
+                #region GoTo
                 case EnemyStates.GoTo:
                     //bool outOfSight = true;
                     if (!goTo) //If not forced to into goTo
@@ -786,8 +802,8 @@ namespace AUTO_Matic.SideScroll
                         {
                             if (MathHelper.Distance(enemyRect.Left, player.playerRect.Right) < attackOffsetFromPlayer)
                             {
-                                attackLeft = true;
-                                attackRight = false;
+                                //attackLeft = true;
+                                //attackRight = false;
                                 enemyState = EnemyStates.Attacking;
                                 velocity.X = 0;
                             }
@@ -810,8 +826,8 @@ namespace AUTO_Matic.SideScroll
                         {
                             if (MathHelper.Distance(enemyRect.Right, player.playerRect.Left) > attackOffsetFromPlayer)
                             {
-                                attackLeft = false;
-                                attackRight = true;
+                                //attackLeft = false;
+                                //attackRight = true;
                                 enemyState = EnemyStates.Attacking;
                                 velocity.X = 0;
                             }
@@ -868,6 +884,7 @@ namespace AUTO_Matic.SideScroll
 
 
                     break;
+                #endregion
                 #region Jump
                 case EnemyStates.Jumping: //This is just a caculation to determine if they can jump from current position
                     if(prevState != EnemyStates.Jumping /*|| player.playerRect.Bottom < enemyRect.Top && player.velocity.Y >= 0 && onPlatform*/)
@@ -1167,23 +1184,27 @@ namespace AUTO_Matic.SideScroll
                 case EnemyStates.Attacking:
                     if(isShoot) //Is a shooting type enemy
                     {
-                        if(attackLeft)
+                        if(enemyRect.Center.X > player.playerRect.Center.X)
                         {
                             if(shootDelay <= 0)  //If can shooot shoot to the left
                             {
                                 bullets.Add(new Bullet(new Vector2(enemyRect.Left, enemyRect.Y + enemyRect.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed.X, maxBulletSpeed.Y), content, true, bulletTravelDist));
                                 shootDelay = maxShootDelay;
                             }
-                                
+                            animManager.isRight = true;
+                            animManager.isLeft = false;
+
                         }
-                        if(attackRight) 
+                        else if(enemyRect.Center.X <= player.playerRect.Center.X) 
                         {
                             if(shootDelay <= 0)//If delay is over, shoot right
                             {
                                 bullets.Add(new Bullet(new Vector2(enemyRect.Right, enemyRect.Y + enemyRect.Height / 2), bulletSpeed, maxBulletSpeed, content, true, bulletTravelDist));
                                 shootDelay = maxShootDelay;
                             }
-                            
+                
+                            animManager.isLeft = true;
+                            animManager.isRight = false;
                         }
                        
                     }
@@ -1355,9 +1376,10 @@ namespace AUTO_Matic.SideScroll
                 #endregion
                 #region Knockback
                 case EnemyStates.Knockback:
-                    
+                   
                     if (player.killEnemy)
                     {
+                        launch = true;
                         if (player.playerRect.Center.X < enemyRect.Center.X)
                         {
                             velocity = new Vector2(knockbackForce.X, knockbackForce.Y);
@@ -1373,6 +1395,7 @@ namespace AUTO_Matic.SideScroll
                             position.Y -= 2;
                             gravX = 1;
                         }
+                        
                     }
                     else if(gravX == 0)
                     {
@@ -1416,19 +1439,24 @@ namespace AUTO_Matic.SideScroll
                     player.killEnemy = false;
                     foreach(GroundTile tile in SideTileMap.GroundTiles)
                     {
+
                         if(enemyRect.TouchTopOf(tile.Rectangle))
                         {
                             enemyState = EnemyStates.GoTo;
-                            gravX = 0;
+                            gravX = 0; 
+                            launch = false;
                         }
+                        
                     }
                     foreach(WallTile tile in SideTileMap.WallTiles)
                     {
                         if (enemyRect.Intersects(tile.Rectangle))
                         {
                             enemyState = EnemyStates.GoTo;
-                            gravX = 0;
+                            gravX = 0;       
+                            launch = false;
                         }
+                        Collision(tile.Rectangle);
                     }
                     foreach(PlatformTile tile in SideTileMap.PlatformTiles)
                     {
@@ -1436,10 +1464,18 @@ namespace AUTO_Matic.SideScroll
                         {
                             enemyState = EnemyStates.GoTo;
                             gravX = 0;
+                            launch = false;
                         }
+                        else if(enemyRect.TouchTopOf(tile.Rectangle))
+                        {
+                            enemyState = EnemyStates.GoTo;
+                            gravX = 0;
+                            launch = false;
+                        }
+                        
                     }
 
-                    if(!damaged)
+                    if(!damaged && !launch)
                     {
                         enemyState = EnemyStates.GoTo;
                         gravX = 0;
@@ -1495,9 +1531,12 @@ namespace AUTO_Matic.SideScroll
                 enemyRect = new Rectangle((int)position.X, (int)position.Y, 20, 48);
                 animManager.Update(gameTime, new Vector2(position.X - enemyRect.Width, position.Y - enemyRect.Height / 3));
             }
-           
+            if(isShoot)
+                healthBar.Update(new Point(enemyRect.X + healthBar.maxWidth / 2, enemyRect.Y - 4));
+            else
+                healthBar.Update(new Point(enemyRect.X + 6, enemyRect.Y - 4));
 
-            if(isShoot) //Update bullets
+            if (isShoot) //Update bullets
             {
                 if(bullets.Count != 0)
                 {
@@ -1535,6 +1574,7 @@ namespace AUTO_Matic.SideScroll
                 
                 animManager.isLeft = true;
                 animManager.isRight = false;
+
             }
             
        
@@ -1598,6 +1638,7 @@ namespace AUTO_Matic.SideScroll
                     whiteCount = 0;
                     redCount = 0;
                 }
+                 healthBar.Draw(spriteBatch);
             }
             else
             {
@@ -1611,6 +1652,8 @@ namespace AUTO_Matic.SideScroll
                 bullet.Draw(spriteBatch);
             }
 
+
+           
             //animManager.Draw(spriteBatch, Color.White);
             //foreach (Rectangle rect in vision)
             //{
@@ -1682,7 +1725,25 @@ namespace AUTO_Matic.SideScroll
                
             }
 
-            if(enemyRect.TouchLeftOf(newRect))//enemy is colliding to the right
+            if (enemyRect.TouchBottomOf(newRect)) //Colliding Top or touching bottom of tile
+            {
+                while (enemyRect.Top < newRect.Bottom)
+                {
+                    position.Y += 1;
+                    enemyRect.Y = (int)position.Y;
+                }
+
+                if (velocity.Y < 0)
+                {
+                    velocity.Y = 0;
+                }
+                if (!isFalling)
+                {
+                    isFalling = true;
+                }
+            }
+
+            if (enemyRect.TouchLeftOf(newRect))//enemy is colliding to the right
             {
                 blockRight = true;
                 
@@ -1692,7 +1753,7 @@ namespace AUTO_Matic.SideScroll
                     enemyRect.X = (int)position.X;
                 }
 
-                position.X += -Velocity.X;
+                //position.X += -Velocity.X;
                 enemyRect.X = (int)position.X;
             }
 
@@ -1706,27 +1767,11 @@ namespace AUTO_Matic.SideScroll
                     enemyRect.X = (int)position.X;
                 }
 
-                position.X += -Velocity.X;
+                //position.X += -Velocity.X;
                 enemyRect.X = (int)position.X;
             }
 
-            if(enemyRect.TouchBottomOf(newRect)) //Colliding Top or touching bottom of tile
-            {
-                while(enemyRect.Top < newRect.Bottom)
-                {
-                    position.Y += 1;
-                    enemyRect.Y = (int)position.Y;
-                }
-
-                if(velocity.Y < 0)
-                {
-                    velocity.Y = 0;
-                }
-                if(!isFalling)
-                {
-                    isFalling = true;
-                }
-            }
+           
         }
 
         Vector2 TestCollision(Vector2 startPos, Rectangle tile, Vector2 goalPos, Vector2 tempVel, bool isPlatforms) //Same as collisions but restructured for the TestJump()

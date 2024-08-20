@@ -154,8 +154,8 @@ namespace AUTO_Matic
         Rectangle interactActive = Rectangle.Empty;
         float groundPoundX = 16;
         float groundPoundY = -6;
-       
 
+        Point healthDropDims = new Point(28, 28);
         class Door
         {
             BottomDoorTile bottomDoor;
@@ -368,10 +368,10 @@ namespace AUTO_Matic
                      new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
                 int[,] mapDims = (tdMap.GenerateMap(filePath));
 
-                healthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, currBounds.Y + 64 * 2, 64, 64)));
-                healthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
-                healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
-                healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y) + 64 * 2, 64, 64)));
+                healthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, currBounds.Y + 64 * 2, healthDropDims.X, healthDropDims.X)));
+                healthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, (currBounds.Y + currBounds.Height) - 64 * 3, healthDropDims.X, healthDropDims.X)));
+                healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y + currBounds.Height) - 64 * 3, healthDropDims.X, healthDropDims.X)));
+                healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y) + 64 * 2, healthDropDims.X, healthDropDims.X)));
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
                     tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points, dungeonNum);
 
@@ -455,10 +455,10 @@ namespace AUTO_Matic
                 //{
 
                 //}
-                bossHealthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, currBounds.Y + 64 * 2, 64, 64)));
-                bossHealthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
-                bossHealthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y + currBounds.Height) - 64 * 3, 64, 64)));
-                bossHealthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y) + 64 * 2, 64, 64)));
+                bossHealthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, currBounds.Y + 64 * 2, healthDropDims.X, healthDropDims.X)));
+                bossHealthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, (currBounds.Y + currBounds.Height) - 64 * 3, healthDropDims.X, healthDropDims.X)));
+                bossHealthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y + currBounds.Height) - 64 * 3, healthDropDims.X, healthDropDims.X)));
+                bossHealthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y) + 64 * 2, healthDropDims.X, healthDropDims.X)));
                 if (GameState == GameStates.Paused)
                     GameState = GameStates.Paused;
                 startBoss = true;
@@ -613,7 +613,7 @@ namespace AUTO_Matic
             //finalBoss = new FinalBoss(SideTileMap.enemySpawns[0], Content, GraphicsDevice);
 
             //ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont);
-            ssCamera.Zoom = .5f;
+           // ssCamera.Zoom = .5f;
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
 
@@ -630,7 +630,7 @@ namespace AUTO_Matic
         public void LoadFinalBoss()
         {
             healthDrops.Clear();
-            string filePath = Content.RootDirectory + "/SideScroll/Maps/Map19.txt";
+            string filePath = Content.RootDirectory + "/SideScroll/Maps/Map2.txt";
             SideTileMap.WallTiles.Clear();
             SideTileMap.GroundTiles.Clear();
             SideTileMap.PlatformTiles.Clear();
@@ -647,17 +647,17 @@ namespace AUTO_Matic
             //graphics.IsFullScreen = true;
             graphics.ApplyChanges();
             //maxShootRate = shootRate;
-            camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2));
-            camera.Zoom = .75f;
+            //camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2));
+            //camera.Zoom = .75f;
             ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
 
             //ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
             ssPlayer.Health = 5;
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
             UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
-            ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(SideTileMap.playerSpawns[0].X + (64 * 10.5f), 
-                SideTileMap.playerSpawns[0].Y - (64 * 2.5f)), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
-            ssCamera.Zoom = 1f;
+            ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(SideTileMap.playerSpawns[0].X + (64 * 18f), 
+                SideTileMap.playerSpawns[0].Y - (64 * 15f)), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
+            ssCamera.Zoom = 1.22f;
 
             finalBoss = new FinalBoss(SideTileMap.enemySpawns[0], Content, GraphicsDevice);
             
@@ -799,7 +799,7 @@ namespace AUTO_Matic
                 (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
             ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
             fadePos = SideTileMap.playerSpawns[0];
-            ssCamera.Zoom = .5f;
+            //ssCamera.Zoom = .5f;
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
             GameState = GameStates.SideScroll;
@@ -1420,8 +1420,18 @@ namespace AUTO_Matic
                             }
                             else if(prevGameState == GameStates.FinalBoss)
                             {
-                                fade = true;
-                                GameState = GameStates.FinalBoss;
+                                ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X + (64 * 11.5f), SideTileMap.playerSpawns[0].Y - (64 * 5.25f)), dont, fade);
+                                //ssPlayer.Update(gameTime, -ssPlayer.velocity, enemies);
+                                if (ssCamera.reached == false)
+                                {
+                                    black = true;
+                                }
+                                else if (ssCamera.reached)
+                                {
+                                    GameState = prevGameState;
+                                    fade = true;
+                                    //soundManager.PlaySound();
+                                }
                             }
                             break;
                         case GameStates.FinalBoss:
@@ -1436,11 +1446,14 @@ namespace AUTO_Matic
                             else
                             {
                                 SideTileMap.RepeatBG.Clear();
-                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point(ssCamera.CameraBounds.X + 20,
-                                ssCamera.CameraBounds.Y + 20), new Point(0, 0)));
+                                UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point(40,
+                                60), new Point(0, 0)));
                                 ssPlayer.Update(gameTime, Gravity, enemies);
-                                ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X + (64 * 10.5f), SideTileMap.playerSpawns[0].Y - (64 * 2.5f)), false, fade);
+                                ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X + (64 * 11.5f), SideTileMap.playerSpawns[0].Y - (64 * 5.25f)), false, fade);
 
+
+                                if(ssPlayer.damaged)
+                                    UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
                                 #region Collisions
                                 ssPlayer.blockBottom = false;
 
@@ -1501,8 +1514,9 @@ namespace AUTO_Matic
                                     ssPlayer.isFalling = true;
 
                                 }
+                                #endregion
                             }
-                            #endregion
+                            
 
                             finalBoss.Update(gameTime, ssPlayer);
                             break;
@@ -1652,7 +1666,7 @@ namespace AUTO_Matic
                     {
                         if (rand.Next(0, 101) < dropRateSS)
                         {
-                            healthDrops.Add(new HealthDrop(enemies[i].enemyRect));
+                            healthDrops.Add(new HealthDrop(new Rectangle(enemies[i].enemyRect.X, enemies[i].enemyRect.Y, healthDropDims.X, healthDropDims.X)));
                         }
                         enemies.RemoveAt(i);
                     }

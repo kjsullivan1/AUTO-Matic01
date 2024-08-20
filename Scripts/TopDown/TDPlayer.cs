@@ -150,7 +150,7 @@ namespace AUTO_Matic.TopDown
 
         public int redFrames = 4;
         public int redCount = 0;
-        int whiteFrames = 120;
+        int whiteFrames = 45;
         int whiteCount = 0;
 
         public float Health
@@ -747,7 +747,8 @@ namespace AUTO_Matic.TopDown
 
         private void Input(List<TDEnemy> enemies, GameTime gameTime)
         {
-            if(kb.IsKeyDown(Keys.LeftShift) && prevKb.IsKeyDown(Keys.LeftShift))
+            if(kb.IsKeyDown(Keys.LeftShift) && prevKb.IsKeyDown(Keys.LeftShift) ||
+                currButtons.LeftShoulder == ButtonState.Pressed && prevButtons.LeftShoulder == ButtonState.Pressed)
             {
                 lockDir = true;//!lockDir
             }
@@ -835,7 +836,7 @@ namespace AUTO_Matic.TopDown
                 
             }
 
-            if(kb.IsKeyDown(Keys.LeftShift) && prevKb.IsKeyUp(Keys.LeftShift) || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released)
+            if(kb.IsKeyDown(Keys.Space) && prevKb.IsKeyUp(Keys.Space) || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released)
             {
                 playerState = PlayerState.Dash;
                 startPos = position;
@@ -1404,7 +1405,7 @@ namespace AUTO_Matic.TopDown
                 }
                 if (whiteCount < redCount)
                 {
-                    animManager.Draw(spriteBatch, Color.White * .25f);
+                    animManager.Draw(spriteBatch, Color.Red * .25f);
                     whiteCount++;
                 }
                 if (whiteCount == whiteFrames)

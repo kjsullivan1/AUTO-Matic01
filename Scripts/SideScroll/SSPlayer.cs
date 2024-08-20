@@ -824,7 +824,10 @@ namespace AUTO_Matic.SideScroll
                         {
                             if (bullets[i].rect.Intersects(enemy.enemyRect))
                             {
+                                if (!enemy.damaged)
+                                    enemy.healthBar.RecieveDamage(bulletDmg);
                                 enemy.Health -= bulletDmg;
+                                
                                 ApplyKnockback(enemy);
 
                                 bullets[i].delete = true;
@@ -868,7 +871,11 @@ namespace AUTO_Matic.SideScroll
                     {
                         if (explosions[i].rect.Intersects(enemies[j].enemyRect))
                         {
+                            if (enemies[j].damaged == false)
+                                enemies[j].healthBar.RecieveDamage(bulletDmg);
                             enemies[j].Health -= bulletDmg;
+                 
+
                             ApplyKnockback(enemies[j]);
                         }
                            
@@ -2007,7 +2014,39 @@ namespace AUTO_Matic.SideScroll
 
             }
 
-                if (playerRect.TouchLeftOf(newRect, isPilot))
+            if (playerRect.TouchBottomOf(newRect))
+            {
+
+                if (isFalling || playerState == PlayerStates.Jumping)
+                {
+                    while (playerRect.Top < newRect.Bottom)
+                    {
+                        velocity.Y = 0;
+                        position.Y += .01f;
+                        playerRect.Y = (int)position.Y;
+                    }
+
+                    prevKb = Keyboard.GetState();
+                }
+                else
+                {
+                    while (playerRect.Top < newRect.Bottom)
+                    {
+                        velocity.Y = 0;
+                        position.Y += .01f;
+                        playerRect.Y = (int)position.Y;
+                    }
+                }
+
+
+
+                //position.Y += -(velocity.Y);
+
+                //blockBottom = false;
+                isCollidingRight = true;
+            }
+
+            if (playerRect.TouchLeftOf(newRect, isPilot))
             {
                 while (playerRect.Right > newRect.Left)
                 {
@@ -2162,37 +2201,6 @@ namespace AUTO_Matic.SideScroll
            
 
            
-            if (playerRect.TouchBottomOf(newRect))
-            {
-
-                if (isFalling || playerState == PlayerStates.Jumping)
-                {
-                    while (playerRect.Top < newRect.Bottom)
-                    {
-                        velocity.Y = 0;
-                        position.Y += .01f;
-                        playerRect.Y = (int)position.Y;
-                    }
-
-                    prevKb = Keyboard.GetState();
-                }
-                else
-                {
-                    while (playerRect.Top < newRect.Bottom)
-                    {
-                        velocity.Y = 0;
-                        position.Y += .01f;
-                        playerRect.Y = (int)position.Y;
-                    }
-                }
-
-
-
-                //position.Y += -(velocity.Y);
-
-                //blockBottom = false;
-                isCollidingRight = true;
-            }
 
             if (animManager.isLeft && !isPilot)
             {
@@ -2234,12 +2242,12 @@ namespace AUTO_Matic.SideScroll
             {
                 if(redCount <= whiteCount || redCount == 0 && whiteCount == 0)
                 {
-                    animManager.Draw(spriteBatch, Color.Red);
+                    animManager.Draw(spriteBatch, Color.White);
                     redCount++;
                 }
                 if(whiteCount < redCount)
                 {
-                    animManager.Draw(spriteBatch, Color.White * .5f);
+                    animManager.Draw(spriteBatch, Color.Red * .5f);
                     whiteCount++;
                 }
                 if(whiteCount == whiteFrames)
