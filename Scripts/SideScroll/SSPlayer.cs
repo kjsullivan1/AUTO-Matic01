@@ -50,6 +50,10 @@ namespace AUTO_Matic.SideScroll
         KeyboardState prevKb;
         public bool blockBottom = false;
 
+        public bool coyote = false;
+        public float coyoteTime = .0834f;
+        public float coyoteTimeMax = .0834f;
+
         float moveSpeed = 2.15f;
         float iMoveSpeed;
         float iMaxRunSpeed;
@@ -59,7 +63,7 @@ namespace AUTO_Matic.SideScroll
         GamePadButtons prevControllerBtn;
         GamePadDPad prevDpad;
 
-        float health = 5f;
+        float health = 10f;
         public int redFrames = 4;
         public int redCount = 0;
         int whiteFrames = 10;
@@ -87,9 +91,9 @@ namespace AUTO_Matic.SideScroll
                 health = value;
                 if (health <= 0)
                     health = 0;
-                if(health >= 5)
+                if(health >= 10)
                 {
-                    health = 5;
+                    health = 10;
                 }
             }
         }
@@ -688,7 +692,6 @@ namespace AUTO_Matic.SideScroll
                         }
                         break;
                     #endregion
-
                     #region Shooting
                     case PlayerStates.Shooting:
                         if (animManager.GetCurrFrame().X >= animManager.GetSheetSize().X - 1)
@@ -1345,14 +1348,7 @@ namespace AUTO_Matic.SideScroll
                             if (animState != AnimationStates.Walking && animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Walking;
-                                if (isPilot)
-                                {
-                                    ChangeAnimation(true);
-                                }
-                                else
-                                {
-                                    ChangeAnimation();
-                                }
+                                ChangeAnimation(isPilot);
                             }
 
                             if (Velocity.X + -friction < 0)
@@ -1442,6 +1438,7 @@ namespace AUTO_Matic.SideScroll
                                 if (velocity.X > 0)
                                     velocity.X = 0;
                             }
+
 
 
                         }
@@ -1624,7 +1621,7 @@ namespace AUTO_Matic.SideScroll
                 }
                 shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                if (kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) && shootDelay<= 0|| currControllerBtn.X == ButtonState.Pressed && prevControllerBtn.X == ButtonState.Released && shootDelay <= 0)
+                if (kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) && shootDelay <= 0|| currControllerBtn.X == ButtonState.Pressed && prevControllerBtn.X == ButtonState.Released && shootDelay <= 0)
                 {
                     if(animManager.isRight)
                     {
@@ -1872,7 +1869,7 @@ namespace AUTO_Matic.SideScroll
             {
                 if (playerRect.TouchTopOf(newRect))
                 {
-
+                    coyoteTime = coyoteTimeMax;
 
                     if (velocity.Y > 0 && playerState != PlayerStates.Dashing)
                     {

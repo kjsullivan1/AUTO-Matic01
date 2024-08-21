@@ -15,8 +15,9 @@ namespace AUTO_Matic.Scripts
     {
         public Circle circle;
         Vector2 velocity;
-        float terminalVel = 12;
+        float terminalVel = 20;
         float maxSpeedX = 10;
+        bool slow = false;
         float moveSpeed;
         Vector2 position;
         ParticleManager particles;
@@ -39,12 +40,37 @@ namespace AUTO_Matic.Scripts
 
         public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies)
         {
-            velocity += new Vector2(moveSpeed, gravity.Y);
+            if (!slow)
+                velocity += new Vector2(moveSpeed, gravity.Y);
+            else if (velocity.X < 0 && slow)
+            {
+                velocity += new Vector2(.175f, gravity.Y);
+                if (velocity.X >= 0)
+                    velocity.X = 0;
+            }
+            else if (velocity.X > 0 && slow)
+            {
+                velocity += new Vector2(-.175f, gravity.Y);
+                if (velocity.X <= 0)
+                    velocity.X = 0;
+            }
+            else
+            {
+                velocity.Y += gravity.Y;
+            }
+               
 
             if (velocity.X > maxSpeedX && velocity.X > 0)
+            {
                 velocity.X = maxSpeedX;
+                slow = true;
+            }    
             else if (velocity.X < maxSpeedX && velocity.X < 0)
+            {
                 velocity.X = maxSpeedX;
+                slow = true;
+            }
+               
 
             if (velocity.Y > terminalVel)
                 velocity.Y = terminalVel;

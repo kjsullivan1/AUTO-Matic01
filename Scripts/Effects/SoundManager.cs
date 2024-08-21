@@ -48,7 +48,7 @@ namespace AUTO_Matic.Scripts.Effects
             {
                 if (soundList[i].IsLooped)
                 {
-
+                    
                 }
                 else
                 {

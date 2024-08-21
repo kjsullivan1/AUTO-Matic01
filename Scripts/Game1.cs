@@ -205,7 +205,7 @@ namespace AUTO_Matic
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             List<Texture2D> healthbars = new List<Texture2D>();
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i <= 10; i++)
             {
                 healthbars.Add(Content.Load<Texture2D>(@"SideScroll\HealthBar\RoboHealthBar" + i));
             }
@@ -245,8 +245,8 @@ namespace AUTO_Matic
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if (currScene == Scenes.InGame)
             {
-                LoadTutorial();
-                //StartNewGame();
+                //LoadTutorial();
+                StartNewGame();
                 //LoadFinalBoss();
                 
             }
@@ -525,7 +525,7 @@ namespace AUTO_Matic
             //mapBuilder.Start(75, tdMap, currBounds);
 
             List<Texture2D> healthbars = new List<Texture2D>();
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i <= 10; i++)
             {
                 healthbars.Add(Content.Load<Texture2D>(@"SideScroll\HealthBar\PilotHealthBar" + i));
             }
@@ -603,7 +603,7 @@ namespace AUTO_Matic
             ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
 
             //ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
-            ssPlayer.Health = 5;
+            ssPlayer.Health = 10;
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
             UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
             ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(SideTileMap.playerSpawns[0].X/* + (64 * 10.5f)*/,
@@ -652,7 +652,7 @@ namespace AUTO_Matic
             ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
 
             //ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
-            ssPlayer.Health = 5;
+            ssPlayer.Health = 10;
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
             UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
             ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(SideTileMap.playerSpawns[0].X + (64 * 18f), 
@@ -792,7 +792,7 @@ namespace AUTO_Matic
             //camera.Zoom = 1.35f;
 
             ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0]);
-            ssPlayer.Health = 5;
+            ssPlayer.Health = 10;
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
             UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
             ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0,0),
@@ -1511,7 +1511,15 @@ namespace AUTO_Matic
                                 }
                                 if (ssPlayer.blockBottom == false && ssPlayer.playerState != SSPlayer.PlayerStates.Jumping)
                                 {
-                                    ssPlayer.isFalling = true;
+                                    ssPlayer.coyoteTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                                    if (ssPlayer.coyoteTime <= 0)
+                                    {
+                                        ssPlayer.isFalling = true;
+                                        ssPlayer.coyoteTime = ssPlayer.coyoteTimeMax;
+                                        ssPlayer.coyote = false;
+                                    }
+
 
                                 }
                                 #endregion
@@ -1810,9 +1818,18 @@ namespace AUTO_Matic
             }
             if (ssPlayer.blockBottom == false && ssPlayer.playerState != SSPlayer.PlayerStates.Jumping)
             {
-                ssPlayer.isFalling = true;
+                ssPlayer.coyoteTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (ssPlayer.coyoteTime <= 0)
+                {
+                    ssPlayer.isFalling = true;
+                    ssPlayer.coyoteTime = ssPlayer.coyoteTimeMax;
+                    ssPlayer.coyote = false;
+                }
 
             }
+            double framerate = (1 / gameTime.ElapsedGameTime.TotalSeconds);
+         
         }
 
         private void ChangeToSideScroll()
@@ -1827,7 +1844,7 @@ namespace AUTO_Matic
             graphics.ApplyChanges();
 
             List<Texture2D> healthbars = new List<Texture2D>();
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i <= 10; i++)
             {
                 healthbars.Add(Content.Load<Texture2D>(@"SideScroll\HealthBar\RoboHealthBar" + i));
             }

@@ -145,7 +145,7 @@ namespace AUTO_Matic.TopDown
         TopDownMap map;
         Rectangle bounds;
         public string shootDir = "right";
-        float health = 5;
+        float health = 10;
         public bool damaged = false;
 
         public int redFrames = 4;
@@ -168,9 +168,9 @@ namespace AUTO_Matic.TopDown
                     health = 0;
                 }
 
-                if(health >= 5)
+                if(health >= 10)
                 {
-                    health = 5;
+                    health = 10;
                 }
             }
         }
