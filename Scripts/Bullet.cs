@@ -31,8 +31,63 @@ namespace AUTO_Matic
         public bool delete = false;
 
 
+        #region Animations
+        public bool isPlayer = false;
+
+        ContentManager content;
+        public AnimationManager animManager;
+        Texture2D texture;
+        Point FrameSize;//Size of frame
+        Point CurrFrame;//Location of currFram on the sheet
+        Point SheetSize;//num of frames.xy
+        int fpms;
+        public AnimationManager animManagerRobo;
+        Texture2D textureRobo;
+        Point FrameSizeRobo;//Size of frame
+        Point CurrFrameRobo;//Location of currFram on the sheet
+        Point SheetSizeRobo;//num of frames.xy
+        int fpmsRobo;
+
+        public void ChangeAnimation()
+        {
+
+            if (!isPlayer)
+            {
+                texture = content.Load<Texture2D>("SideScroll/Animations/EnergyBlast");
+                FrameSize = new Point(64, 64);
+                CurrFrame = new Point(3, 0);
+                SheetSize = new Point(10, 1);
+                fpms = 60;
+            }
+            else if (isPlayer)
+            {
+                texture = content.Load<Texture2D>("SideScroll/Animations/EnergyBlast");
+                FrameSize = new Point(64, 64);
+                CurrFrame = new Point(3, 0);
+                SheetSize = new Point(10, 1);
+                fpms = 60;
+            }
+
+            bool isRight = true, isLeft = false, isUp = false, isDown = false;
+            if (animManager != null)
+            {
+                isRight = animManager.isRight;
+                isLeft = animManager.isLeft;
+                isUp = animManager.isUp;
+                isDown = animManager.isDown;
+            }
+
+            animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, position);
+
+            animManager.isRight = isRight;
+            animManager.isLeft = isLeft;
+            animManager.isUp = isUp;
+            animManager.isDown = isDown;
+        }
+        #endregion
+
         public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content, bool isX, float travelDist,
-            bool isY = false, float speedY = 0, float angle = 0, int size = 14)
+            bool isY = false, float speedY = 0, float angle = 0, int size = 14, bool isPlayer = false)
         {
             position = pos;
             startPos = pos;
@@ -46,15 +101,18 @@ namespace AUTO_Matic
             this.angle = angle;
             width = size;
             height = size;
+            this.content = content;
+            this.isPlayer = isPlayer;
+            ChangeAnimation();  
         }
 
-        public void Update()
+        public void Update(GameTime gameTime)
         {
             if(shootX && shootY)
             {
                 if(angle != 0)
                 {
-                    velocity += bulletSpeed * angle;
+                    velocity += bulletSpeed /** angle*/;
                 }
                 else
                 {
@@ -90,15 +148,37 @@ namespace AUTO_Matic
                 delete = true;
             }
             rect = new Rectangle((int)position.X, (int)position.Y, width, height);
+            animManager.Update(gameTime, new Vector2(position.X, position.Y - 28));
+
+            if(bulletSpeed.X < 0)
+            {
+                animManager.isLeft = true;
+                animManager.isRight = false;
+            }
+            else if(bulletSpeed.X > 0)
+            {
+                animManager.isRight = true;
+                animManager.isLeft = false;
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), Color.White);
+            //spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), Color.White);
+            if(isPlayer)
+                animManager.Draw(spriteBatch, Color.White, angle, rect);
+            else
+                animManager.Draw(spriteBatch, Color.White);
+
+
         }
         public void Draw(SpriteBatch spriteBatch, Color color)
         {
-            spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), color);
+            //spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), color);
+            if(isPlayer)
+                animManager.Draw(spriteBatch, color, angle,rect);
+            else
+                animManager.Draw(spriteBatch, color);
         }
 
         public float Distance(Vector2 pos1, Vector2 pos2)

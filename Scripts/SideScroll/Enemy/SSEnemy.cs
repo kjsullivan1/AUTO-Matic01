@@ -1542,7 +1542,7 @@ namespace AUTO_Matic.SideScroll
                 {
                     for (int i = bullets.Count - 1; i >= 0; i--)
                     {
-                        bullets[i].Update();
+                        bullets[i].Update(gameTime);
                         if(bullets[i].rect.Intersects(player.playerRect))
                         {
                             player.Health -= bulletDmg;

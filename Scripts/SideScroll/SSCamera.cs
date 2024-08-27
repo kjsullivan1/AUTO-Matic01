@@ -41,7 +41,8 @@ namespace AUTO_Matic.Scripts.SideScroll
         }
 
         public Rectangle CameraBounds;
-       
+
+        public Rectangle ViewRect;
 
         public Vector2 position
         {
@@ -353,6 +354,8 @@ namespace AUTO_Matic.Scripts.SideScroll
                 //center.Y = height - viewRect.Height / 2;
                 reached = false;
             }
+
+            ViewRect = viewRect;
             //else if(position.Y + viewport.Height/2 >= height)
             //{
 

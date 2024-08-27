@@ -59,6 +59,7 @@
     <Compile Include="Circle.cs" />
     <Compile Include="Scripts\AnimationManager.cs" />
     <Compile Include="Scripts\Bomb.cs" />
+    <Compile Include="Scripts\BossHealthBar.cs" />
     <Compile Include="Scripts\Bullet.cs" />
     <Compile Include="Scripts\Camera.cs" />
     <Compile Include="Scripts\Effects\ParticleManager.cs" />
@@ -105,6 +106,7 @@
   <ItemGroup>
     <Content Include="Content\Audio\Level0Side.mp3" />
     <Content Include="Content\Audio\Shoot.mp3" />
+    <Content Include="Content\SideScroll\Animations\Bullet.png" />
     <Content Include="Content\SideScroll\Animations\DroneEnemy.png" />
     <Content Include="Content\SideScroll\Animations\EnergyBlast.png" />
     <Content Include="Content\SideScroll\Animations\FinalBoss\BossGun.png" />
@@ -194,6 +196,11 @@
     <Content Include="Content\SideScroll\MapTiles\Tile9.png" />
     <Content Include="Content\Textures\Bullet.png" />
     <Content Include="Content\Textures\Button.png" />
+    <Content Include="Content\Textures\DashIcons\DashIcon0.png" />
+    <Content Include="Content\Textures\DashIcons\DashIcon1.png" />
+    <Content Include="Content\Textures\DashIcons\DashIcon2.png" />
+    <Content Include="Content\Textures\DashIcons\DashIcon3.png" />
+    <Content Include="Content\Textures\DashIcons\DashIcon4.png" />
     <Content Include="Content\Textures\Health.png" />
     <Content Include="Content\Textures\Red.png" />
     <Content Include="Content\Textures\Textbox.png" />
@@ -218,6 +225,27 @@
     <Content Include="Content\TopDown\Animations\ShotgunBossBase.png" />
     <Content Include="Content\TopDown\Animations\ShotGunBossTurret.png" />
     <Content Include="Content\TopDown\Animations\TankTopDown.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth0.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth1.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth10.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth11.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth12.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth13.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth14.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth15.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth16.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth17.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth18.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth19.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth2.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth20.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth3.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth4.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth5.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth6.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth7.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth8.png" />
+    <Content Include="Content\TopDown\BossHealthBar\BossHealth9.png" />
     <Content Include="Content\TopDown\Maps\Map.txt" />
     <Content Include="Content\TopDown\Maps\Map0.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -402,7 +430,16 @@
     <Content Include="Content\TopDown\MapTiles\Tile5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile59.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\TopDown\MapTiles\Tile6.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile60.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TopDown\MapTiles\Tile61.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\TopDown\MapTiles\Tile7.png">

@@ -16,6 +16,7 @@ namespace AUTO_Matic.Scripts.TopDown
         Rectangle bossRect;
         ContentManager content;
         Rectangle turretRect;
+        BossHealthBar healthBar;
 
         #region Animations
         enum AnimationStates { Idle, Shoot, Slam}
@@ -147,17 +148,21 @@ namespace AUTO_Matic.Scripts.TopDown
         int growthRate = 2;
         int maxSize = 300;
         bool slamWave = false;
-        float health = 25f;
+        float health = 20f;
         int currWidthMod = 1;
         public bool moveBack;
         float slamDelay = 1.15f;
         float respawnDelay = 1.75f;
         float iSlamDelay;
+        float randomSlamDelay;
+        int randSlamMin = 6;
+        int randSlamMax = 18;
         List<Rectangle> walls = new List<Rectangle>();
         bool respawn = false;
         float iRespawnDelay = 1.75f;
         List<FloorTiles> floors = new List<FloorTiles>();
         float slamDmg = 1.5f;
+
 
         ParticleManager particleManager = new ParticleManager();
         
@@ -167,8 +172,10 @@ namespace AUTO_Matic.Scripts.TopDown
             set
             {
                 health = value;
+               
                 if (health <= 0)
                     health = 0;
+                healthBar.ChangeHealth(health);
             }
         }
 
@@ -197,8 +204,10 @@ namespace AUTO_Matic.Scripts.TopDown
             }
             particleManager.Initialize(content.Load<Texture2D>(@"Textures\white"));
             particleManager.SetParticles(800);
+            healthBar = new BossHealthBar(new Rectangle(worldRect.X, worldRect.Y - 286, worldRect.Width, (int)(worldRect.Height /3.5f)), content);
             ChangeAnimationTurret();
             ChangeAnimationBase();
+            randomSlamDelay = RandFloat(randSlamMin, randSlamMax);
         }
 
         public void Update(GameTime gameTime, TDPlayer tdPlayer, TopDownMap tdMap)
@@ -256,7 +265,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
                 for (int i = bullets.Count - 1; i >= 0; i--)
                 {
-                    bullets[i].Update();
+                    bullets[i].Update(gameTime);
                     if (bullets[i].rect.Intersects(tdPlayer.rectangle))
                     {
                         if (!tdPlayer.damaged)
@@ -293,6 +302,18 @@ namespace AUTO_Matic.Scripts.TopDown
 
                 //walls.Clear();
                 moveBack = false;
+            }
+
+            if(!slamWave)
+                randomSlamDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+
+            if (randomSlamDelay <= 0 && !slamWave)
+            {
+                slamWave = true;
+                moveBack = false;
+
+                randomSlamDelay = RandFloat(randSlamMin, randSlamMax);
             }
 
             if(slamWave)
@@ -468,6 +489,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 animManagerTurret.Update(gameTime, new Vector2(worldRect.Center.X, worldRect.Center.Y));
 
             animManagerBase.Update(gameTime, new Vector2(worldRect.X - 8, worldRect.Y));
+            healthBar.Update(new Point(worldRect.X, worldRect.Y - 100));
         }
 
         private void ShootShotgun(TDPlayer tdPlayer, float angle)
@@ -484,14 +506,14 @@ namespace AUTO_Matic.Scripts.TopDown
             float bulletDownSpeedY = (float)Math.Sin((double)angle + .15f) * bulletSpeed;
 
             bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
-                content, true, bulletTravelDist, true, bulletSpeedY));
+                content, true, bulletTravelDist, true, bulletSpeedY, isPlayer: true, angle: angle));
 
             bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletUpSpeedX, new Vector2(bulletUpSpeedX, bulletUpSpeedY),
-             content, true, bulletTravelDist, true, bulletUpSpeedY));
+             content, true, bulletTravelDist, true, bulletUpSpeedY, isPlayer: true, angle: angle));
 
 
             bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletDownSpeedX, new Vector2(bulletDownSpeedX, bulletDownSpeedY),
-             content, true, bulletTravelDist, true, bulletDownSpeedY));
+             content, true, bulletTravelDist, true, bulletDownSpeedY, isPlayer: true, angle: angle));
 
 
             //if (angle < 18 || angle >= 155)//Right
@@ -623,7 +645,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 }
             }
 
-        
+            healthBar.Draw(spriteBatch);
            
       
            //spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"),slam.Position, slam.Bounds, Color.White * .5f);

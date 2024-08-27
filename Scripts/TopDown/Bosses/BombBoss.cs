@@ -98,6 +98,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         WallSide LeftWalls;
         List<WallTiles> JumpWalls = new List<WallTiles>();
         List<Explosion> explosions = new List<Explosion>();
+        bool locChange = false;
+        float locChangeDelay;
         #endregion
 
         int sizeMod = 2;
@@ -231,22 +233,42 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         #endregion
         public void Update(GameTime gameTime, TopDownMap tdMap, TDPlayer tdPlayer)
         {
-            Vector2 targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2) -
-                           new Vector2(bossRect.Center.X, bossRect.Center.Y);
-            angle =(float)Math.Atan2(targetDir.Y, targetDir.X);
-            rotateAngle =(float)Math.Atan2(targetDir.Y, targetDir.X);
-            shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if(locChange)
+            {
+                locChangeDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            #region Shoot&Explosion
-            LaunchBomb(tdPlayer);
+                if (locChangeDelay <= 0)
+                    locChange = false;
+            }
+            else
+            {
+                Vector2 targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2) -
+                          new Vector2(bossRect.Center.X, bossRect.Center.Y);
+                angle = (float)Math.Atan2(targetDir.Y, targetDir.X);
+                rotateAngle = (float)Math.Atan2(targetDir.Y, targetDir.X);
+                shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+
+                #region Shoot&Explosion
+                LaunchBomb(tdPlayer);
+
+               
+
+              
+               // particles.Update(gameTime);
+                #endregion
+
+                
+            
+            }
 
             for (int i = bullets.Count - 1; i >= 0; i--)
             {
-                bullets[i].Update();
+                bullets[i].Update(gameTime);
 
-                if(bullets[i].rect.Intersects(tdPlayer.rectangle))
+                if (bullets[i].rect.Intersects(tdPlayer.rectangle))
                 {
-                    if(!tdPlayer.damaged)
+                    if (!tdPlayer.damaged)
                     {
                         //tdPlayer.damaged = true;
                         tdPlayer.Health -= bulletDmg;
@@ -263,7 +285,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                     particles.MakeExplosion(explosions[explosions.Count - 1].rect.Bounds,
                            new Circle(new Vector2(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif,
-                           explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif), explosions[explosions.Count - 1].maxSize/2),
+                           explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif), explosions[explosions.Count - 1].maxSize / 2),
                            20);
 
                     bullets.RemoveAt(i);
@@ -274,7 +296,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             {
                 explosions[i].Update(gameTime);
 
-                if(explosions[i].rect.Intersects(tdPlayer.rectangle) && !tdPlayer.damaged)
+                if (explosions[i].rect.Intersects(tdPlayer.rectangle) && !tdPlayer.damaged)
                 {
                     //tdPlayer.damaged = true;
                     tdPlayer.Health -= bulletDmg;
@@ -283,16 +305,14 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 if (explosions[i].rect.Radius >= explosions[i].maxSize)
                 {
                     //particles.CreateEffect(20);
-                    
+
                     explosions.RemoveAt(i);
-                    
+
                 }
 
 
             }
-            particles.Update(gameTime);
-            #endregion
-            
+
             for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
             {
                 if (tdPlayer.bullets[i].rect.Intersects(bossRect))
@@ -301,6 +321,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     tdPlayer.bullets.RemoveAt(i);
                 }
             }
+
             particles.Update(gameTime);
             if (health == 16)
             {
@@ -636,6 +657,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         private void ChangeLoc()
         {
             bool done = false;
+            locChange = true;
+            locChangeDelay = RandFloat(5, 9);
             while (!done)
             {
 
@@ -715,9 +738,10 @@ bossRect.Width, bossRect.Height);
             //spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), bossRect, Color.White);
             //
             //ChangeAnimation();
-            animManager.Draw(spriteBatch, Color.White, rotateAngle, bossRect);
+            if(!locChange)
+                animManager.Draw(spriteBatch, Color.White, rotateAngle, bossRect);
 
-            for(int i = 0; i < bullets.Count; i++)
+            for (int i = 0; i < bullets.Count; i++)
             {
                 bullets[i].Draw(spriteBatch);
             }
@@ -836,6 +860,19 @@ bossRect.Width, bossRect.Height);
             int num = (int)Math.Sqrt(Math.Pow(pos2.X - pos1.X, 2) + Math.Pow(pos2.Y - pos1.Y, 2));
             return num;
 
+        }
+
+        public float RandFloat(int min, int max)
+        {
+            Random r = new Random();
+            float decimalNumber;
+            string beforePoint = r.Next(min, max).ToString();//number before decimal point
+            string afterPoint = r.Next(0, 10).ToString();
+            string afterPoint2 = r.Next(0, 10).ToString();
+            string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
+                                                          //string secondDP = r.Next(0, 9).ToString();//2nd decimal point
+            string combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
+            return decimalNumber = float.Parse(combined);
         }
     }
 

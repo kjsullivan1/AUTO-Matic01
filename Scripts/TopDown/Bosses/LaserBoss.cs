@@ -175,6 +175,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     }
                 }
             }
+            List<Color> pickedColors = new List<Color>();
             for (int i = 0; i < 3; i++)
             {
                 while(true)
@@ -182,32 +183,32 @@ namespace AUTO_Matic.Scripts.TopDown
                     int num = rand.Next(0, 4);
                     if (!TopWalls.isUsed && num == 0)
                     {
-                        bossRects.Add(new BossRect(TopWalls, worldRect, "top", content));
+                        bossRects.Add(new BossRect(TopWalls, worldRect, "top", content, pickedColors));
                         TopWalls.isUsed = true;
                        
                         break;
                     }
                     else if (!RightWalls.isUsed && num == 1)
                     {
-                        bossRects.Add(new BossRect(RightWalls, worldRect, "right", content));
+                        bossRects.Add(new BossRect(RightWalls, worldRect, "right", content, pickedColors));
                         RightWalls.isUsed = true;
                         break;
                     }
                     else if (!BottomWalls.isUsed && num == 2)
                     {
-                        bossRects.Add(new BossRect(BottomWalls, worldRect, "bottom", content));
+                        bossRects.Add(new BossRect(BottomWalls, worldRect, "bottom", content, pickedColors));
                         BottomWalls.isUsed = true;
                         break;
                     }
                     else if (!LeftWalls.isUsed && num == 3)
                     {
-                        bossRects.Add(new BossRect(LeftWalls, worldRect, "left", content));
+                        bossRects.Add(new BossRect(LeftWalls, worldRect, "left", content, pickedColors));
                         LeftWalls.isUsed = true;
                         break;
                     }
                     else if(i > 3)
                     {
-                        bossRects.Add(new BossRect(RightWalls, worldRect, "right", content));
+                        bossRects.Add(new BossRect(RightWalls, worldRect, "right", content, pickedColors));
                         RightWalls.isUsed = true;
                         break;
                     }
@@ -797,7 +798,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
                 for(int i = boss.bullets.Count - 1; i >= 0; i--)
                 {
-                    boss.bullets[i].Update();
+                    boss.bullets[i].Update(gameTime);
                     foreach(WallTiles wall in tdMap.WallTiles)
                     {
                         if(boss.bullets[i].rect.Intersects(wall.Rectangle))
@@ -828,9 +829,12 @@ namespace AUTO_Matic.Scripts.TopDown
                     if(tdPlayer.bullets[i].rect.Intersects(boss.rect))
                     {
                         boss.health -= tdPlayer.bulletDmg;
+                        boss.healthBar.RecieveDamage(tdPlayer.bulletDmg);
                         tdPlayer.bullets[i].delete = true;
                     }
                 }
+
+                boss.healthBar.Update(new Point(boss.rect.X, boss.rect.Y - 20));
             }
         }
 
@@ -1301,160 +1305,25 @@ namespace AUTO_Matic.Scripts.TopDown
                 //Sets up 4 unique colors
                 foreach(BossRect boss in bossRects)
                 {
-                    if(i == 0)
+                    boss.animManager.Draw(spriteBatch, boss.color, boss.rotateAngle, boss.rect);
+                    if (boss.chargeTime > 0 && boss.state == BossRect.BossState.Fire)
                     {
-                        //spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.White);
-                        boss.animManager.Draw(spriteBatch, Color.PaleVioletRed, boss.rotateAngle, boss.rect);
-                       
-                        if (boss.chargeTime > 0 && boss.state == BossRect.BossState.Fire)
-                        {
 
-                            spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.White, rotation: boss.rotateAngle);
-                            //foreach (Rectangle rect in boss.bulletRects)
-                            //{
-                            //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
-                            //}
-                        }
-                        else
-                        {
-                            for(int j = 0; j < boss.bullets.Count; j++)
-                            {
-                                boss.bullets[j].Draw(spriteBatch, Color.Blue);
-                            }
-                        }
-                        //else if (boss.chargeTime <= 0 && boss.lingerTime > 0)
+                        spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.White, rotation: boss.rotateAngle);
+                        //foreach (Rectangle rect in boss.bulletRects)
                         //{
-                        //    spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.Blue, rotation: boss.rotateAngle);
-                        //    //foreach (Rectangle rect in boss.bulletRects)
-                        //    //{
-                        //    //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.Blue);
-                        //    //}
+                        //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
                         //}
-                       
-                        i++;
-                    }
-                    else if(i ==1)
-                    {
-                        boss.animManager.Draw(spriteBatch, Color.LawnGreen, boss.rotateAngle, boss.rect);
-                        if (boss.chargeTime > 0 && boss.state == BossRect.BossState.Fire)
-                        {
-
-                            spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.White, rotation: boss.rotateAngle);
-                            //foreach (Rectangle rect in boss.bulletRects)
-                            //{
-                            //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
-                            //}
-                        }
-                        else
-                        {
-                            for (int j = 0; j < boss.bullets.Count; j++)
-                            {
-                                boss.bullets[j].Draw(spriteBatch, Color.Blue);
-                            }
-                        }
-                        //else if (boss.chargeTime <= 0 && boss.lingerTime > 0)
-                        //{
-                        //    spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.Blue, rotation: boss.rotateAngle);
-                        //    //foreach (Rectangle rect in boss.bulletRects)
-                        //    //{
-                        //    //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.Blue);
-                        //    //}
-                        //}
-
-                        i++;
-                    }
-                    else if(i == 2)
-                    {
-                        boss.animManager.Draw(spriteBatch, Color.CornflowerBlue, boss.rotateAngle, boss.rect);
-                        if (boss.chargeTime > 0 && boss.state == BossRect.BossState.Fire)
-                        {
-
-                            spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.White, rotation: boss.rotateAngle);
-                            //foreach (Rectangle rect in boss.bulletRects)
-                            //{
-                            //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
-                            //}
-                        }
-                        else
-                        {
-                            for (int j = 0; j < boss.bullets.Count; j++)
-                            {
-                                boss.bullets[j].Draw(spriteBatch, Color.Blue);
-                            }
-                        }
-                        //else if (boss.chargeTime <= 0 && boss.lingerTime > 0)
-                        //{
-                        //    spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.Blue, rotation: boss.rotateAngle);
-                        //    //foreach (Rectangle rect in boss.bulletRects)
-                        //    //{
-                        //    //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.Blue);
-                        //    //}
-                        //}
-
-                        i++;
-                    }
-                    else if(i == 3)
-                    {
-                        //spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.DarkGreen);
-                        boss.animManager.Draw(spriteBatch, Color.DarkGreen, boss.rotateAngle, boss.rect);
-                        if (boss.chargeTime > 0 && boss.state == BossRect.BossState.Fire)
-                        {
-
-                            spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.White, rotation: boss.rotateAngle);
-                            //foreach (Rectangle rect in boss.bulletRects)
-                            //{
-                            //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
-                            //}
-                        }
-                        else
-                        {
-                            for (int j = 0; j < boss.bullets.Count; j++)
-                            {
-                                boss.bullets[j].Draw(spriteBatch, Color.Blue);
-                            }
-                        }
-                        //else if (boss.chargeTime <= 0 && boss.lingerTime > 0)
-                        //{
-                        //    spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.Blue, rotation: boss.rotateAngle);
-                        //    //foreach (Rectangle rect in boss.bulletRects)
-                        //    //{
-                        //    //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.Blue);
-                        //    //}
-                        //}
-                        i++;
                     }
                     else
                     {
-                        spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), boss.rect, Color.ForestGreen);
-                        if (boss.chargeTime > 0 && boss.state == BossRect.BossState.Fire)
+                        for (int j = 0; j < boss.bullets.Count; j++)
                         {
-
-                            spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.White, rotation: boss.rotateAngle);
-                            //foreach (Rectangle rect in boss.bulletRects)
-                            //{
-                            //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
-                            //}
+                            boss.bullets[j].Draw(spriteBatch, Color.Blue);
                         }
-                        else
-                        {
-                            for (int j = 0; j < boss.bullets.Count; j++)
-                            {
-                                boss.bullets[j].Draw(spriteBatch, Color.Blue);
-                            }
-                        }
-                        //else if (boss.chargeTime <= 0 && boss.lingerTime > 0)
-                        //{
-                        //    spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.Blue, rotation: boss.rotateAngle);
-                        //    //foreach (Rectangle rect in boss.bulletRects)
-                        //    //{
-                        //    //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.Blue);
-                        //    //}
-                        //}
-
-                        i++;
                     }
-                  
-                    
+
+                    boss.healthBar.Draw(spriteBatch);
                 }
              
               
@@ -1510,7 +1379,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 float bulletSpeedX = (float)Math.Cos((double)angle) * 8;
                 float bulletSpeedY = (float)Math.Sin((double)angle) * 8;
                 boss.bullets.Add(new Bullet(new Vector2(boss.destRect.X, boss.destRect.Y), bulletSpeedX,
-                    new Vector2(bulletSpeedX, bulletSpeedY), content, true, bounds.Width, true, bulletSpeedY, size: 30));
+                    new Vector2(bulletSpeedX, bulletSpeedY), content, true, bounds.Width, true, bulletSpeedY, size: 30, isPlayer: true, angle: angle));
 
 
 
@@ -1755,6 +1624,8 @@ namespace AUTO_Matic.Scripts.TopDown
         public BossState state = BossState.Idle;
         public BossState prevState = BossState.Idle;
 
+        public HealthBar healthBar;
+
         #region Animations
 
         public enum AnimationStates { Idle, Shoot }
@@ -1767,6 +1638,8 @@ namespace AUTO_Matic.Scripts.TopDown
         Point SheetSize;//num of frames.xy
         int fpms;
         ContentManager content;
+        public Color color;
+        Random rand = new Random();
 
         public void ChangeAnimation()
         {
@@ -1805,7 +1678,7 @@ namespace AUTO_Matic.Scripts.TopDown
             animManager.isDown = isDown;
         }
         #endregion
-        public BossRect(PossibleJumpSide side, Rectangle rect, string s, ContentManager content)
+        public BossRect(PossibleJumpSide side, Rectangle rect, string s, ContentManager content, List<Color> pickedColors)
         {
             this.content = content;
             hasWall = false;
@@ -1817,6 +1690,50 @@ namespace AUTO_Matic.Scripts.TopDown
             chargeTime = RandFloat(chargeTimeMin, chargeTimeMax);
             ChangeAnimation();
             iFireTime = fireTime;
+            healthBar = new HealthBar(new Rectangle(rect.X, rect.Y - 10, rect.Width, 5), content, health);
+
+            bool picked = false;
+
+            while(!picked)
+            {
+                switch (rand.Next(0, 3))
+                {
+                    case 0:
+                        if(pickedColors.Contains(Color.PaleVioletRed) == false)
+                        {
+                            color = Color.PaleVioletRed;
+                            picked = true;
+                            pickedColors.Add(Color.PaleVioletRed);
+                        }
+                     
+                        break;
+                    case 1:
+                        if (pickedColors.Contains(Color.LawnGreen) == false)
+                        {
+                            color = Color.LawnGreen;
+                            picked = true;
+                            pickedColors.Add(Color.LawnGreen);
+                        }
+                        break;
+                    case 2:
+                        if (pickedColors.Contains(Color.CornflowerBlue) == false)
+                        {
+                            color = Color.CornflowerBlue;
+                            picked = true;
+                            pickedColors.Add(Color.CornflowerBlue);
+                        }
+                        break;
+                    case 3:
+                        if (pickedColors.Contains(Color.DarkGreen) == false)
+                        {
+                            color = Color.DarkGreen;
+                            picked = true;
+                            pickedColors.Add(Color.DarkGreen);
+                        }
+                        break;
+                }
+            }
+           
         }
 
         public float RandFloat(int min, int max)

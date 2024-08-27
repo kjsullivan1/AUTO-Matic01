@@ -40,6 +40,8 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         Point CurrFrame;//Location of currFram on the sheet
         Point SheetSize;//num of frames.xy
         int fpms;
+
+        BossHealthBar healthBar;
         public void ChangeAnimation()
         {
             //switch (animState)
@@ -126,18 +128,23 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         //PossibleJumpSide RightWalls;
         //PossibleJumpSide LeftWalls;
         List<WallTiles> JumpWalls = new List<WallTiles>();
+        float burstDelay = .05f;
         #endregion
 
         int sizeMod = 2;
         float health = 20;
+        bool damaged = false;
+        float dmgTime = .25f;
         public float Health
         {
             get { return health; }
             set
             {
                 health = value;
+                damaged = false;
                 if (health <= 0)
                     health = 0;
+                healthBar.ChangeHealth(health);
             }
         }
 
@@ -192,6 +199,9 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             }
 
             bounds = new Rectangle(TopWall[TopWall.Count - 1].X, TopWall[TopWall.Count - 1].Y, 1980 * 2, 1980 * 2);
+
+            healthBar = new BossHealthBar(new Rectangle(bounds.Center.X - (int)(bounds.Width / 2.6f), bounds.Y + 60, bounds.Width / 5, (int)(bossRect.Height / 2.75f)), content);
+
         }
         #endregion
         
@@ -214,7 +224,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                         useTopWall = false;
                     }
                     //Next choose the weapon type 
-                    switch (random.Next(0,4))
+                    switch (random.Next(2,3))
                     {
                         case 0:
                             chosenWeapon = "Shotgun";
@@ -413,11 +423,12 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                         case "Auto":
 
                             autoShootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                            if(autoShotCount < maxAutoShots && autoShootDelay <= 0)
+                           
+                            if (autoShotCount < maxAutoShots && autoShootDelay <= 0)
                             {
+                                burstDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                                 autoShotCount++;
-                                FireSemiAuto(ssPlayer, angle);
+                                FireSemiAuto(ssPlayer, angle, gameTime);
                                 autoShootDelay = iAutoDelay;
                             }
                             else if(autoShotCount >= maxAutoShots)
@@ -493,7 +504,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
             for (int i = bullets.Count - 1; i >= 0; i--)
             {
-                bullets[i].Update();
+                bullets[i].Update(gameTime);
 
                 if(bullets[i].rect.Intersects(ssPlayer.Rectangle))
                 {
@@ -508,7 +519,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             }
             for(int i = bombs.Count - 1; i >= 0; i--)
             {
-                bombs[i].Update();
+                bombs[i].Update(gameTime);
 
                 if(bombs[i].rect.Intersects(ssPlayer.Rectangle))
                 {
@@ -539,7 +550,35 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                     explosions.RemoveAt(i);
                 }
             }
+
+            for(int i = ssPlayer.bullets.Count - 1; i >= 0; i--)
+            {
+                if(ssPlayer.bullets[i].rect.Intersects(bossRect) && !damaged)
+                {
+                    Health -= ssPlayer.bulletDmg;
+                    ssPlayer.bullets[i].delete = true;
+                }
+            }
+
+            for(int i = ssPlayer.bombs.Count - 1; i >= 0; i--)
+            {
+                if(ssPlayer.bombs[i].circle.Intersects(bossRect) && !damaged)
+                {
+                    Health -= ssPlayer.bulletDmg;
+                    ssPlayer.bombs[i].delete = true;
+                }
+            }
+
+            if (damaged)
+                dmgTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if(dmgTime <= 0)
+            {
+                damaged = false;
+                dmgTime = .25f;
+            }
+
             particles.Update(gameTime);
+            healthBar.Update(new Point(healthBar.rect.X, healthBar.rect.Y));
 
         }
 
@@ -587,6 +626,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                     ssPlayer.position.Y -= 2;
                     break;
             }
+          
         }
 
         private void ShootShotgun(SSPlayer ssPlayer, float angle)
@@ -601,14 +641,14 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             float bulletDownSpeedY = (float)Math.Sin((double)angle + .15f) * bulletSpeed;
 
             bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
-                content, true, bulletTravelDist, true, bulletSpeedY));
+                content, true, bulletTravelDist, true, bulletSpeedY,isPlayer: true, angle: angle));
 
             bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletUpSpeedX, new Vector2(bulletUpSpeedX, bulletUpSpeedY),
-             content, true, bulletTravelDist, true, bulletUpSpeedY));
+             content, true, bulletTravelDist, true, bulletUpSpeedY, isPlayer: true, angle: angle));
 
 
             bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletDownSpeedX, new Vector2(bulletDownSpeedX, bulletDownSpeedY),
-             content, true, bulletTravelDist, true, bulletDownSpeedY));
+             content, true, bulletTravelDist, true, bulletDownSpeedY, isPlayer: true, angle: angle));
 
             //if (angle < 18 || angle >= 155)//Right
             //{
@@ -884,7 +924,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             }
         }
 
-        private void FireSemiAuto(SSPlayer ssPlayer, float angle)
+        private void FireSemiAuto(SSPlayer ssPlayer, float angle, GameTime gameTime)
         {
 
             //shootDelay = iShootDelay;
@@ -902,17 +942,35 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
             float bulletSpeedX = (float)Math.Cos((double)angle) * 2;
             float bulletSpeedY = (float)Math.Sin((double)angle) * 2;
+           
+            
+            if(burstDelay <= 0)
+            {
+                #region BurstShot
+                bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
+                    content, true, bulletTravelDist, true, bulletSpeedY, angle: angle, isPlayer: true));
+
+                bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX * 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
+               content, true, bulletTravelDist, true, bulletSpeedY * 1.5f, angle: angle, isPlayer: true));
+
+                bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX / 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
+              content, true, bulletTravelDist, true, bulletSpeedY / 1.5f, angle: angle, isPlayer: true));
+                #endregion
+                burstDelay = .05f;
+            }
+
+
 
             //bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
-        
-            bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
-                content, true, bulletTravelDist, true, bulletSpeedY));
 
-            bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX * 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
-           content, true, bulletTravelDist, true, bulletSpeedY * 1.5f));
+            //  bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
+            //      content, true, bulletTravelDist, true, bulletSpeedY, isPlayer: true, angle: angle));
 
-            bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX / 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
-          content, true, bulletTravelDist, true, bulletSpeedY / 1.5f));
+            //  bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX * 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
+            // content, true, bulletTravelDist, true, bulletSpeedY * 1.5f, isPlayer: true, angle: angle));
+
+            //  bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX / 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
+            //content, true, bulletTravelDist, true, bulletSpeedY / 1.5f, isPlayer: true, angle: angle));
 
             //if (angle < 16 || angle >= 155)//Right
             //{
@@ -1350,7 +1408,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 float bulletSpeedX = (float)Math.Cos((double)angle) * 8;
                 float bulletSpeedY = (float)Math.Sin((double)angle) * 8;
                 bullets.Add(new Bullet(new Vector2(destRect.X, destRect.Y), bulletSpeedX,
-                    new Vector2(bulletSpeedX, bulletSpeedY), content, true, bounds.Width, true, bulletSpeedY, size: 20));
+                    new Vector2(bulletSpeedX, bulletSpeedY), content, true, bounds.Width, true, bulletSpeedY, size: 20, isPlayer: true, angle: angle));
 
 
 
@@ -1562,7 +1620,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             //{
             //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), SideWall[i], Color.Black);
             //}
-
+            healthBar.Draw(spriteBatch);
             spriteBatch.Draw(content.Load<Texture2D>("SideScroll/Animations/FinalBoss/MonoBoss"), bossRect, Color.White);
 
             foreach(ShootingLocs loc in shootLocs)
@@ -1601,8 +1659,9 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             {
                 explosions[i].Draw(spriteBatch, content);
             }
-
+            
             particles.Draw(spriteBatch);
+         
         }
         int DistForm(Vector2 pos1, Vector2 pos2)
         {
@@ -1610,6 +1669,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             return num;
 
         }
+        
     }
 
     class ShootingLocs

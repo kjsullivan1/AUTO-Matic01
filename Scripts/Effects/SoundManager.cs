@@ -26,12 +26,17 @@ namespace AUTO_Matic.Scripts.Effects
             soundInstance.IsLooped = canLoop;
         }
 
-        public void AddSound(string effectName, bool canLoop)
+        public void AddSound(string effectName, bool canLoop, float pitch = -1001100)
         {
             sound = content.Load<Microsoft.Xna.Framework.Audio.SoundEffect>(@"Audio\" + effectName);
             soundInstance = sound.CreateInstance();
             soundInstance.IsLooped = canLoop;
-
+            
+            if(pitch != -1001100)
+            {
+                soundInstance.Pitch = pitch;
+            }
+            
         }
 
 

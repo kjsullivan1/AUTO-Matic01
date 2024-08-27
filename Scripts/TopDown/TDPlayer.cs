@@ -25,7 +25,7 @@ namespace AUTO_Matic.TopDown
         public Vector2 velocity;
         GamePadButtons currButtons;
         GamePadButtons prevButtons;
-        public int bossRoom = 10;
+        public int bossRoom = 2;
         bool lockDir = false;
         Vector2 startPos;
 
@@ -251,6 +251,7 @@ namespace AUTO_Matic.TopDown
 
         float dashDistance = 64 * 2.75f;
         float dashSpeed = 12f;
+        Vector2 dashVelocity;
 
         public void Load(ContentManager Content, Rectangle bounds)
         {
@@ -264,6 +265,34 @@ namespace AUTO_Matic.TopDown
             shootDelay = 0;
         }
 
+        public int DashIndex()//Returns the index needed for the dash icon    0: Full, 1: Empty, 2+ Growing rate
+        {
+            int index = 0;
+
+            if (playerState != PlayerState.Dash)
+            {
+                
+            }
+            else if(playerState == PlayerState.Dash && dashVelocity != Vector2.Zero)
+            {
+               
+                float percent = //This is because of lazy coding before, since I never truly kept track of velocity I have to create them as I go: Giving birth to dashVelocity!
+                    DistForm(startPos, new Vector2(rectangle.X, rectangle.Y))/ 
+                    DistForm(startPos, new Vector2(startPos.X + (dashDistance * dashVelocity.X), startPos.Y + (dashDistance * dashVelocity.Y)));
+
+                if (percent < 15)
+                    index = 1;
+                else if (percent <= 40)
+                    index = 2;
+                else if (percent <= 65)
+                    index = 3;
+                else
+                    index = 4;
+
+            }
+
+            return index;
+        }
         public void GenerateMap(bool xLevel, bool yLevel, bool dLevel)
         {
 
@@ -537,6 +566,8 @@ namespace AUTO_Matic.TopDown
                             if(MathHelper.Distance(startPos.Y, position.Y) < dashDistance)
                             {
                                 position.Y -= dashSpeed;
+                                dashVelocity.Y = -1;
+                                dashVelocity.X = 0;
                             }
                             else
                             {
@@ -547,6 +578,8 @@ namespace AUTO_Matic.TopDown
                             if (MathHelper.Distance(startPos.Y, position.Y) < dashDistance)
                             {
                                 position.Y += dashSpeed;
+                                dashVelocity.Y = 1;
+                                dashVelocity.X = 0;
                             }
                             else
                             {
@@ -557,6 +590,8 @@ namespace AUTO_Matic.TopDown
                             if (MathHelper.Distance(startPos.X, position.X) < dashDistance)
                             {
                                 position.X += dashSpeed;
+                                dashVelocity.X = 1;
+                                dashVelocity.Y = 0;
                             }
                             else
                             {
@@ -567,6 +602,8 @@ namespace AUTO_Matic.TopDown
                             if (MathHelper.Distance(startPos.X, position.X) < dashDistance)
                             {
                                 position.X -= dashSpeed;
+                                dashVelocity.X = -1;
+                                dashVelocity.Y = 0;
                             }
                             else
                             {
@@ -723,7 +760,7 @@ namespace AUTO_Matic.TopDown
             {
                 for (int i = bullets.Count - 1; i >= 0; i--)
                 {
-                    bullets[i].Update();
+                    bullets[i].Update(gameTime);
                     if (bullets[i].delete)
                     {
                         bullets.RemoveAt(i);
@@ -1420,7 +1457,7 @@ namespace AUTO_Matic.TopDown
                 animManager.Draw(spriteBatch, Color.White);
             }
 
-            spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"), MeleeHitbox, Color.White);
+            //spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"), MeleeHitbox, Color.White);
             //spriteBatch.Draw(texture, rectangle, Color.White);
             //animManager.Draw(spriteBatch, Color.White);
 
@@ -1429,6 +1466,11 @@ namespace AUTO_Matic.TopDown
                 bullet.Draw(spriteBatch);
             }
         }
+        int DistForm(Vector2 pos1, Vector2 pos2)
+        {
+            int num = (int)Math.Sqrt(Math.Pow(pos2.X - pos1.X, 2) + Math.Pow(pos2.Y - pos1.Y, 2));
+            return num;
 
+        }
     }
 }

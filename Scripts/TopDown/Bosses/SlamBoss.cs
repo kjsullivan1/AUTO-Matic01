@@ -43,6 +43,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         List<FloorTiles> floors = new List<FloorTiles>();
 
         #region Animations
+        enum AnimationStates { Idle, Slam}
         AnimationManager animManager;
         Texture2D texture;
         Point FrameSize;//Size of frame
@@ -426,7 +427,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
             for(int i = bullets.Count - 1; i >= 0; i--)
             {
-                bullets[i].Update();
+                bullets[i].Update(gameTime);
 
                 if(bullets[i].rect.Intersects(tdPlayer.rectangle))
                 {
@@ -499,13 +500,13 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 //bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
                 #region BurstShot
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
-                    content, true, bulletTravelDist, true, bulletSpeedY));
+                    content, true, bulletTravelDist, true, bulletSpeedY, angle: angle, isPlayer: true));
 
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX * 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
-               content, true, bulletTravelDist, true, bulletSpeedY * 1.5f));
+               content, true, bulletTravelDist, true, bulletSpeedY * 1.5f, angle: angle, isPlayer: true));
 
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX / 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
-              content, true, bulletTravelDist, true, bulletSpeedY / 1.5f));
+              content, true, bulletTravelDist, true, bulletSpeedY / 1.5f, angle: angle, isPlayer: true));
                 #endregion
 
                 //if (angle < 16 || angle >= 155)//Right

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AUTO_Matic.Scripts.Effects;
 
 namespace AUTO_Matic.SideScroll
 {
@@ -17,18 +18,19 @@ namespace AUTO_Matic.SideScroll
         ContentManager content;
 
         //Player States
-        enum AnimationStates { Walking, Death, Idle, Jump, Shoot, Dash}
+        enum AnimationStates { Walking, Death, Idle, Jump, Shoot, Dash }
         AnimationStates animState = AnimationStates.Idle;
         enum PilotAnimStates { Walking, Idle}
         PilotAnimStates pilotAnimState = PilotAnimStates.Idle;
 
-        public enum PlayerStates { Movement, Shooting, Jumping, Dashing, Pilot, Knockback}
+        public enum PlayerStates { Movement, Shooting, Jumping, Dashing, Pilot, Knockback }
         public PlayerStates playerState = PlayerStates.Movement;
         PlayerStates prevPlayerState;
         bool groundPound = false;
         public bool killEnemy = false;
 
         ParticleManager particles = new ParticleManager();
+        SoundManager sounds;
 
         #region Fields
         float dashHelperBuffer = 10f;
@@ -142,7 +144,7 @@ namespace AUTO_Matic.SideScroll
         WeaponWheel weaponWheel;
         int selectedWeapon = 0;
 
-        List<Bomb> bombs = new List<Bomb>();
+        public List<Bomb> bombs = new List<Bomb>();
         List<Explosion> explosions = new List<Explosion>();
         enum WeaponType { Pistol, Shotgun, Laser, Burst, Bomb}
         WeaponType currWeapon = WeaponType.Pistol;
@@ -489,6 +491,8 @@ namespace AUTO_Matic.SideScroll
             shootDelay = 0;
             bombs.Clear();
             particles.Initialize(content.Load<Texture2D>("Textures/white"));
+
+            sounds = new SoundManager("Shoot", Content, false);
         }
 
         public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies, bool fade = false)
@@ -822,7 +826,7 @@ namespace AUTO_Matic.SideScroll
                                 }
                             }
                         }
-                        bullets[i].Update();
+                        bullets[i].Update(gameTime);
                         foreach (SSEnemy enemy in enemies)
                         {
                             if (bullets[i].rect.Intersects(enemy.enemyRect))
@@ -856,6 +860,7 @@ namespace AUTO_Matic.SideScroll
                         explosions.Add(new Explosion(bombs[i].circle, 2, (int)(bombs[i].circle.Bounds.Width * 2.5f)));
 
                         int radiusDif = explosions[explosions.Count - 1].maxSize - explosions[explosions.Count - 1].rect.Radius;
+
 
                         particles.MakeExplosion(explosions[explosions.Count - 1].rect.Bounds,
                                new Circle(new Vector2(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif,
@@ -895,6 +900,7 @@ namespace AUTO_Matic.SideScroll
                 }
 
                 particles.Update(gameTime);
+                sounds.Update(gameTime);
                 //switch (playerState)
                 //{
                 //    case PlayerStates.Movement:
@@ -907,32 +913,40 @@ namespace AUTO_Matic.SideScroll
 
         private void ApplyKnockback(SSEnemy enemy)
         {
-            enemy.prevState = enemy.enemyState;
-            enemy.enemyState = SSEnemy.EnemyStates.Knockback;
-
-            switch (currWeapon)
+            if(enemy.enemyState == SSEnemy.EnemyStates.Knockback)
             {
-                case WeaponType.Pistol:
-                    enemy.knockBackX = 5;
-                    enemy.knockBackY = -3;
-                    break;
-                case WeaponType.Shotgun:
-                    enemy.knockBackX = 8;
-                    enemy.knockBackY = -3;
-                    break;
-                case WeaponType.Laser:
-                    enemy.knockBackX = 2;
-                    enemy.knockBackY = -3;
-                    break;
-                case WeaponType.Burst:
-                    enemy.knockBackX = 6.5f;
-                    enemy.knockBackY = -3;
-                    break;
-                case WeaponType.Bomb:
-                    enemy.knockBackX = 7;
-                    enemy.knockBackY = -6;
-                    break;
+
             }
+            else
+            {
+                enemy.prevState = enemy.enemyState;
+                enemy.enemyState = SSEnemy.EnemyStates.Knockback;
+
+                switch (currWeapon)
+                {
+                    case WeaponType.Pistol:
+                        enemy.knockBackX = 5;
+                        enemy.knockBackY = -3;
+                        break;
+                    case WeaponType.Shotgun:
+                        enemy.knockBackX = 8;
+                        enemy.knockBackY = -3;
+                        break;
+                    case WeaponType.Laser:
+                        enemy.knockBackX = 2;
+                        enemy.knockBackY = -3;
+                        break;
+                    case WeaponType.Burst:
+                        enemy.knockBackX = 6.5f;
+                        enemy.knockBackY = -3;
+                        break;
+                    case WeaponType.Bomb:
+                        enemy.knockBackX = 7;
+                        enemy.knockBackY = -6;
+                        break;
+                }
+            }
+            
         }
 
         private void BecomePilot()
@@ -1633,25 +1647,32 @@ namespace AUTO_Matic.SideScroll
 
                                 bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width, 
                                     position.Y + playerRect.Height / 1.5f), bulletSpeed, 
-                                    new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                    new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
+
+                                sounds.AddSound("Shoot", false);
+                                sounds.PlaySound();
                                 break;
 
                             case WeaponType.Shotgun:
                                 bulletTravelDist = 64 * 1.5f;
                                 bulletSpeed = 3.5f * 2;
-
+                                sounds.AddSound("Shoot", false, -1);
+                                sounds.PlaySound();
                                 //Top 
                                 bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                    (position.Y + playerRect.Height / 1.5f)), bulletSpeed,
-                                   new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed/3));
+                                   new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed/3, isPlayer: true));
+                              
                                 //Center
                                 bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                    position.Y + playerRect.Height / 1.5f), bulletSpeed,
-                                   new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                   new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
+                               
                                 //Bottom
                                 bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                    position.Y + playerRect.Height / 1.5f), bulletSpeed,
-                                   new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed/3));
+                                   new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed/3, isPlayer: true));
+                               
                                 break;
                             case WeaponType.Burst:
 
@@ -1661,7 +1682,9 @@ namespace AUTO_Matic.SideScroll
                                 {
                                     bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                   (position.Y + playerRect.Height / 1.5f)), bulletSpeed,
-                                  new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
+                                  new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
+                                    sounds.AddSound("Shoot", false, -.5f);
+                                    sounds.PlaySound();
                                 }
                                 break;
                             case WeaponType.Bomb:
@@ -1676,7 +1699,9 @@ namespace AUTO_Matic.SideScroll
                                 {
                                     bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                   (position.Y + playerRect.Height / 1.5f)), bulletSpeed,
-                                  new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
+                                  new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
+                                    sounds.AddSound("Shoot", false, .5f);
+                                    sounds.PlaySound();
                                 }
                                 break;
 
@@ -1695,23 +1720,33 @@ namespace AUTO_Matic.SideScroll
                                 bullets.Add(new Bullet(new Vector2(position.X/* - (18 / 2)*/, 
                                     position.Y + playerRect.Height / 1.5f), -bulletSpeed, 
                                     new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                sounds.AddSound("Shoot", false);
+                                sounds.PlaySound();
                                 break;
                             case WeaponType.Shotgun:
                                 bulletTravelDist = 64 * 1.5f;
                                 bulletSpeed = 3.5f * 2;
 
+                                sounds.AddSound("Shoot", false, -.1f);
+                                sounds.PlaySound();
+
                                 //Top 
                                 bullets.Add(new Bullet(new Vector2(position.X /*- (18/2)*/,
                                    (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
                                    new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 3));
+                                
                                 //Center
                                 bullets.Add(new Bullet(new Vector2(position.X /*- (18/2)*/,
                                    position.Y + playerRect.Height / 1.5f), -bulletSpeed,
                                    new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                //sounds.AddSound("Shoot", false, -1);
+                                //sounds.PlaySound();
                                 //Bottom
                                 bullets.Add(new Bullet(new Vector2(position.X /*- (18/2)*/,
                                    position.Y + playerRect.Height / 1.5f), -bulletSpeed,
                                    new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 3));
+                                //sounds.AddSound("Shoot", false, -1);
+                                //sounds.PlaySound();
                                 break;
                             case WeaponType.Burst:
                                 bulletSpeed = 3.5f;
@@ -1721,6 +1756,8 @@ namespace AUTO_Matic.SideScroll
                                     bullets.Add(new Bullet(new Vector2(position.X /*- (18 / 2)*/,
                                   (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
                                   new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
+                                    sounds.AddSound("Shoot", false, -.5f);
+                                    sounds.PlaySound();
                                 }
                                 break;
                             case WeaponType.Bomb:
@@ -1736,6 +1773,8 @@ namespace AUTO_Matic.SideScroll
                                     bullets.Add(new Bullet(new Vector2(position.X /*- (18 / 2)*/,
                                   (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
                                   new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
+                                    sounds.AddSound("Shoot", false, .5f);
+                                    sounds.PlaySound();
                                 }
                                 break;
                         }
@@ -2272,6 +2311,7 @@ namespace AUTO_Matic.SideScroll
             }
 
             particles.Draw(spriteBatch);
+         
 
             if(weaponWheel.active)
             {
@@ -2285,6 +2325,33 @@ namespace AUTO_Matic.SideScroll
                 }
                    
             }
+        }
+
+        public int DashIndex()//Returns the index needed for the dash icon    0: Full, 1: Empty, 2+ Growing rate
+        {
+            int index = 0;
+
+            if(canDash)
+            {
+
+            }
+            else
+            {
+                float percent = dashCoolDown/dashCoolDownMax * 100;
+
+
+                if (percent <= 15)
+                    index = 1;
+                else if (percent <= 40)
+                    index = 2;
+                else if (percent <= 65)
+                    index = 3;
+                else
+                    index = 4;
+                
+            }
+
+            return index;
         }
     }
 

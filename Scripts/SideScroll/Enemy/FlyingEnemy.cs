@@ -536,7 +536,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         {
             for (int i = bullets.Count - 1; i >= 0; i--)
             {
-                bullets[i].Update();
+                bullets[i].Update(gameTime);
                 if (bullets[i].delete || player.playerRect.Contains(bullets[i].rect.Center))
                 {
                     explosions.Add(new Explosion(new Circle(new Vector2(bullets[i].rect.X, bullets[i].rect.Y), bullets[i].rect.Width),

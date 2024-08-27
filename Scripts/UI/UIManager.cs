@@ -77,7 +77,7 @@ namespace AUTO_Matic
             }
         }
 
-        public void UpdateTextBlock(string keyWord)
+        public void UpdateTextBlock(string keyWord, Rectangle currBounds, int bossRooms = 0)
         {
             switch(keyWord)
             {
@@ -100,6 +100,17 @@ namespace AUTO_Matic
                     //StreamReader sr1 = new StreamReader(Directory.GetCurrentDirectory() + "/TextFiles/MainMenuTitle.txt");
                     string text1 = "";
                     UIHelper.SetElementText(uiElements[keyWord], text1);
+                    break;
+                case "BossRoomCounter":
+                    UIHelper.SetElementText(uiElements[keyWord], "\n\n          " + (bossRooms - 1) + " / "+ UIHelper.DungeonLevels + " Rooms Completed");
+
+                    UIHelper.SetElementBGRect(uiElements[keyWord], new Rectangle(currBounds.Right - 290, currBounds.Top + 30,
+                        UIHelper.GetElementBGRect(uiElements[keyWord]).Width, UIHelper.GetElementBGRect(uiElements[keyWord]).Height));
+
+                    UIHelper.SetElementRect(uiElements[keyWord], new Rectangle(currBounds.Right - 290, currBounds.Top + 30,
+                      UIHelper.GetElementBGRect(uiElements[keyWord]).Width, UIHelper.GetElementBGRect(uiElements[keyWord]).Height));
+
+
                     break;
 
             }
@@ -431,6 +442,14 @@ namespace AUTO_Matic
             UIHelper.SetElementRect(uiElements["HealthBar"], new Rectangle(uiElements["HealthBar"].Position.ToPoint(), new Point(1280, 512)));
             UIHelper.SetElementBGRect(uiElements["HealthBar"], new Rectangle(uiElements["HealthBar"].Position.ToPoint(), new Point(1280/6, 512/6)));
 
+            uiElements.Add("DashIcon", UIHelper.CreateTextblock("DashIcon", "", 64, 64));
+            UIHelper.SetElementRect(uiElements["DashIcon"], new Rectangle(uiElements["DashIcon"].Position.ToPoint(), new Point(128, 128)));
+            UIHelper.SetElementBGRect(uiElements["DashIcon"], new Rectangle(uiElements["DashIcon"].Position.ToPoint(), new Point(128, 128)));
+
+            uiElements.Add("BossRoomCounter", UIHelper.CreateTextblock("BossRoomCounter", "\n\n          0/10 Rooms Complete", 0,0));
+            UIHelper.SetElementRect(uiElements["BossRoomCounter"], new Rectangle(uiElements["BossRoomCounter"].Position.ToPoint(), new Point(128, 96)));
+            UIHelper.SetElementBGRect(uiElements["BossRoomCounter"], new Rectangle(uiElements["BossRoomCounter"].Position.ToPoint(), new Point(215, 70)));
+
             //uiElements.Add("p2Rotation", UIHelper.CreateTextblock("p2Rotation", "x", 580, 120));
             //uiElements.Add("p2Elevation", UIHelper.CreateTextblock("p2Elevation", "x", 580, 135));
             //uiElements.Add("p2PowerUp", UIHelper.CreateButton("p2PowerUp", "P+", 505, 5));
@@ -485,18 +504,33 @@ namespace AUTO_Matic
            
         }
 
-        public void CreateInteractUI(Point pos)
+        public void CreateInteractUI(Point pos, bool bossCount = false)
         {
-            uiElements.Add("InteractBox", UIHelper.CreateTextblock("InteractBox", "\n\n    " +
+            if(!uiElements.ContainsKey("InteractBox"))
+            {
+                uiElements.Add("InteractBox", UIHelper.CreateTextblock("InteractBox", "\n\n    " +
                 "[E] or (Y)", pos.X, pos.Y));
-            UIHelper.SetElementRect(uiElements["InteractBox"], new Rectangle(uiElements["InteractBox"].Position.ToPoint(), new Point(64, 64)));
-            UIHelper.SetElementBGRect(uiElements["InteractBox"], new Rectangle(uiElements["InteractBox"].Position.ToPoint(), new Point(64, 64)));
+                UIHelper.SetElementRect(uiElements["InteractBox"], new Rectangle(uiElements["InteractBox"].Position.ToPoint(), new Point(64, 64)));
+                UIHelper.SetElementBGRect(uiElements["InteractBox"], new Rectangle(uiElements["InteractBox"].Position.ToPoint(), new Point(64, 64)));
+            }
+            
+
+            if(bossCount && !uiElements.ContainsKey("InteractBoxBossWarning"))
+            {
+                uiElements.Add("InteractBoxBossWarning", UIHelper.CreateTextblock("InteractBoxBossWarning", "\n\n            There is still a boss in the area",
+               pos.X - (int)(215 / 2), pos.Y - (int)(70 * 1.5f)));
+                UIHelper.SetElementRect(uiElements["InteractBoxBossWarning"], new Rectangle(uiElements["InteractBoxBossWarning"].Position.ToPoint(), new Point(128, 96)));
+                UIHelper.SetElementBGRect(uiElements["InteractBoxBossWarning"], new Rectangle(uiElements["InteractBoxBossWarning"].Position.ToPoint(), new Point(215, 70)));
+            }
+           
         }
 
         public void RemoveInteractUI()
         {
             if(uiElements.ContainsKey("InteractBox"))
                 uiElements.Remove("InteractBox");
+            if (uiElements.ContainsKey("InteractBoxBossWarning"))
+                uiElements.Remove("InteractBoxBossWarning");
 
         }
 

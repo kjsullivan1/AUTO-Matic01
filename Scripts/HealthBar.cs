@@ -11,9 +11,9 @@ namespace AUTO_Matic.Scripts
 {
     class HealthBar
     {
-        ContentManager content;
-        Rectangle rect;
-        float health;
+        public ContentManager content;
+        public Rectangle rect;
+        public float health;
         public float maxHealth;
         public int maxWidth;
 

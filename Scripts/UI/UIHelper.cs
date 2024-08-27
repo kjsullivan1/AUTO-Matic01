@@ -28,8 +28,10 @@ namespace AUTO_Matic
         public static Texture2D CrawlBgTxture;
         public static Texture2D MenuTitle;
         public static List<Texture2D> HealthBar;
+        public static List<Texture2D> DashIcon;
         public static Texture2D MainMenuBG;
         public static Rectangle Bounds;
+        public static int DungeonLevels;
 
         public static UIButton CreateButton(string id, string text, int x, int y)//ButtonTexture Width and Height need to change
         {
@@ -89,6 +91,9 @@ namespace AUTO_Matic
                 case "MainMenuTitle":
                     UITextBlock g = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, "", Color.White, MenuTitle);
                     return g;
+                case "DashIcon":
+                    UITextBlock f = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, DashIcon[0]);
+                    return f;
                 default:
                     UITextBlock b = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, text, Color.Black, TutorialTexture);
                     return b;
@@ -144,6 +149,12 @@ namespace AUTO_Matic
                 ((UITextBlock)uiElement).BackGroundTexture = HealthBar[index];
         }
 
+        public static void ChangeDashIcon(UIWidget uiElement, int index)
+        {
+            if(uiElement is UITextBlock)
+                ((UITextBlock)uiElement).BackGroundTexture = DashIcon[index];
+        }
+
         public static void SetElementRect(UIWidget uiElement, Rectangle rect)
         {
             if (uiElement is UITextBlock)
@@ -155,7 +166,7 @@ namespace AUTO_Matic
             if (uiElement is UITextBlock)
                 ((UITextBlock)uiElement).TextureRect = rect;
         }
-        public static void UpdateHealthBar(UIWidget uiElement, Rectangle bounds)
+        public static void UpdatePlayerUI(UIWidget uiElement, Rectangle bounds)
         {
             if (uiElement is UITextBlock)
             {
@@ -166,7 +177,7 @@ namespace AUTO_Matic
             }
                
         }
-
+   
         public static void UpdateHealthBarX(UIWidget uiElement, int xPos)
         {
             if (uiElement is UITextBlock)
