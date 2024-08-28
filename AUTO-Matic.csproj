@@ -104,7 +104,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Audio\BossTheme.mp3" />
+    <Content Include="Content\Audio\FinalBossTheme.mp3" />
     <Content Include="Content\Audio\Level0Side.mp3" />
+    <Content Include="Content\Audio\Level2Side.mp3" />
     <Content Include="Content\Audio\Shoot.mp3" />
     <Content Include="Content\SideScroll\Animations\Bullet.png" />
     <Content Include="Content\SideScroll\Animations\DroneEnemy.png" />
@@ -142,6 +145,7 @@
     <Content Include="Content\SideScroll\HealthBar\RoboHealthBar7.png" />
     <Content Include="Content\SideScroll\HealthBar\RoboHealthBar8.png" />
     <Content Include="Content\SideScroll\HealthBar\RoboHealthBar9.png" />
+    <Content Include="Content\SideScroll\Maps\Map1%281%29.txt" />
     <Content Include="Content\SideScroll\Maps\Map19.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -187,9 +191,42 @@
     <Content Include="Content\SideScroll\MapTiles\Tile26.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\SideScroll\MapTiles\Tile27.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile28.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile29.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile3.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile30.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile31.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile32.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile33.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile34.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile35.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile36.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile37.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile38.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile39.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile4.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile40.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile41.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile42.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile43.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile44.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile45.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile46.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile47.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile48.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile49.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile5.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile50.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile51.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile52.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile53.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile54.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile55.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile56.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile57.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile58.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile59.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile6.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile7.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile8.png" />
@@ -224,6 +261,7 @@
     <Content Include="Content\TopDown\Animations\PilotUpWalk.png" />
     <Content Include="Content\TopDown\Animations\ShotgunBossBase.png" />
     <Content Include="Content\TopDown\Animations\ShotGunBossTurret.png" />
+    <Content Include="Content\TopDown\Animations\SlimeBurstBoss.png" />
     <Content Include="Content\TopDown\Animations\TankTopDown.png" />
     <Content Include="Content\TopDown\BossHealthBar\BossHealth0.png" />
     <Content Include="Content\TopDown\BossHealthBar\BossHealth1.png" />

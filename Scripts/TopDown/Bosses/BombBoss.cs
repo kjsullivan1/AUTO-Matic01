@@ -17,14 +17,14 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         ContentManager content;
         Random rand = new Random();
         ParticleManager particles;
-
+        float dmgResistance = 1.15f;
         enum BossStates {Shoot};
 
         #region Animations
 
         enum AnimationStates { Idle, Shoot}
         AnimationStates animState = AnimationStates.Idle;
-        
+        BossHealthBar healthBar;
         AnimationManager animManager;
         Texture2D texture;
         Point FrameSize;//Size of frame
@@ -84,7 +84,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         float shootDelay = 1f;//In seconds
         float iShootDelay;
         bool startShoot = false;
-        public float bulletDmg = 1.5f;
+        public float bulletDmg = 2.25f;
         public float bulletTravelDist = 64 * 8;
         Texture2D visionTxture;
         int width;
@@ -132,7 +132,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             particles = new ParticleManager();
             particles.Initialize(explosionTexture);
             SetWalls(tdMap, map);
-            
+            healthBar = new BossHealthBar(new Rectangle(bossRect.X, bossRect.Y - 32, bossRect.Width, bossRect.Height / 3), content);
             bool left = false, top = false, right = false, bottom = false;
             if(MathHelper.Distance(RightWalls.walls[0].Rectangle.X, tdPlayer.rectangle.Center.X) >  
                 MathHelper.Distance(LeftWalls.walls[0].Rectangle.Right, tdPlayer.rectangle.Center.X))
@@ -337,6 +337,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             {
                 health--;
                 ChangeLoc();
+                
             }
             else if (health <= 0)
             {
@@ -344,6 +345,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             }
 
             animManager.Update(gameTime, bossRect.Center.ToVector2());
+            healthBar.Update(new Point(bossRect.X, bossRect.Y - 32));
+            healthBar.ChangeHealth(health);
         }
 
         private void LaunchBomb(TDPlayer tdPlayer)
@@ -746,6 +749,7 @@ bossRect.Width, bossRect.Height);
                 bullets[i].Draw(spriteBatch);
             }
 
+            healthBar.Draw(spriteBatch);
             for(int i = 0; i < explosions.Count; i++)
             {
                 explosions[i].Draw(spriteBatch, content);

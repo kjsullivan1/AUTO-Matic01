@@ -39,7 +39,21 @@ namespace AUTO_Matic.Scripts.Effects
             
         }
 
+        public void ClearSounds()
+        {
 
+            StopCurrSounds();
+            soundList.Clear();
+           
+        }
+
+        public void StopCurrSounds()
+        {
+            for(int i = 0; i < soundList.Count; i++)
+            {
+                soundList[i].Stop();
+            }
+        }
 
         public void PlaySound()
         {

@@ -759,11 +759,13 @@ namespace AUTO_Matic.TopDown
 
                         if (num == 0)
                         {
+                           
                             slamTiles.Add(new TopDown.SlamTiles(9, new Rectangle((levelInX * screenWidth) + (x * size),
                                 (y * size) - (levelInY * screenHeight), size, size)));
                             slamTiles[slamTiles.Count - 1].mapPoint = new int[] { y, x };
                             if (SlamIndexes.Contains(num) == false)
                                 SlamIndexes.Add(num);
+                            floorTiles.Add(new FloorTiles(27, new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size)));
                         }
 
                         else if (num == 10 || num == 1 || num == 2 || num == 3 || num == 4 || num == 5 || num == 6 || num == 7 || num == 8 || num == 10)//Walls

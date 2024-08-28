@@ -241,7 +241,7 @@ namespace AUTO_Matic.TopDown
         float bulletMaxX = 10f;
         float bulletMaxY = 10f;
         bool isShootDelay = false;
-        float shootDelay = .15f;//In seconds
+        float shootDelay = .35f;//In seconds
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = 1.2f;

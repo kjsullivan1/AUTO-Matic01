@@ -1536,6 +1536,7 @@ namespace AUTO_Matic.SideScroll
                     {
                         if(game.GameState == Game1.GameStates.Tutorial)
                         {
+                            game.prevGameState = Game1.GameStates.Tutorial;
                             game.StartNewGame();
                             break;
                         }

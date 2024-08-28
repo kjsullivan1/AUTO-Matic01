@@ -36,7 +36,7 @@ namespace AUTO_Matic.Scripts.TopDown
         float iShootDelay;
         float chargeTime;
         bool startShoot = false;
-        public float bulletDmg = 1.5f;
+        public float bulletDmg = 2f;
         public float bulletTravelDist = 64 * 8;
         Texture2D visionTxture;
         int width;
@@ -828,8 +828,8 @@ namespace AUTO_Matic.Scripts.TopDown
                 {
                     if(tdPlayer.bullets[i].rect.Intersects(boss.rect))
                     {
-                        boss.health -= tdPlayer.bulletDmg;
-                        boss.healthBar.RecieveDamage(tdPlayer.bulletDmg);
+                        boss.health -= tdPlayer.bulletDmg / boss.dmgResistance;
+                        boss.healthBar.RecieveDamage(tdPlayer.bulletDmg / boss.dmgResistance);
                         tdPlayer.bullets[i].delete = true;
                     }
                 }
@@ -1586,6 +1586,7 @@ namespace AUTO_Matic.Scripts.TopDown
     class BossRect
     {
         public float health = 10;
+        public float dmgResistance;
         public bool hasWall;
         public PossibleJumpSide jumpSide;
         public float jumpForce;
@@ -1693,6 +1694,7 @@ namespace AUTO_Matic.Scripts.TopDown
             healthBar = new HealthBar(new Rectangle(rect.X, rect.Y - 10, rect.Width, 5), content, health);
 
             bool picked = false;
+            dmgResistance = RandFloat(1, 2);
 
             while(!picked)
             {

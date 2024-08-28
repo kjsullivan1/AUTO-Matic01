@@ -1479,7 +1479,7 @@ namespace AUTO_Matic.Scripts.TopDown
                             float bulletSpeedY = (float)Math.Sin((double)angle) * 8;
 
                             bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y), bulletSpeedX,
-                                new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
+                                new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY, angle:angle));
                             //    if (angle <= 205 && angle >= 165) //Fire left
                             //    {
                             //        bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height / 2 - 15 / 2), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
@@ -1532,7 +1532,7 @@ namespace AUTO_Matic.Scripts.TopDown
                             //        }
 
                             //    }
-                            shootDelay = RandFloat(1,3);
+                            shootDelay = RandFloat(2,4);
                         }
 
 
@@ -3641,7 +3641,7 @@ namespace AUTO_Matic.Scripts.TopDown
             Random r = new Random();
             float decimalNumber;
             string beforePoint = r.Next(min, max).ToString();//number before decimal point
-            string afterPoint = r.Next(0, 10).ToString();
+            string afterPoint = r.Next(5, 10).ToString();
             string afterPoint2 = r.Next(0, 10).ToString();
             string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
                                                           //string secondDP = r.Next(0, 9).ToString();//2nd decimal point

@@ -17,6 +17,7 @@ namespace AUTO_Matic.Scripts.TopDown
         ContentManager content;
         Rectangle turretRect;
         BossHealthBar healthBar;
+        public float dmgResistance = 1.75f;
 
         #region Animations
         enum AnimationStates { Idle, Shoot, Slam}
@@ -132,7 +133,7 @@ namespace AUTO_Matic.Scripts.TopDown
         float shootDelay = 1.45f;//In seconds
         float iShootDelay;
         bool startShoot = false;
-        public float bulletDmg = .7f;
+        public float bulletDmg = 1.75f;
         public float bulletTravelDist = 64 * 15;
         Texture2D visionTxture;
         int width;
@@ -161,7 +162,7 @@ namespace AUTO_Matic.Scripts.TopDown
         bool respawn = false;
         float iRespawnDelay = 1.75f;
         List<FloorTiles> floors = new List<FloorTiles>();
-        float slamDmg = 1.5f;
+        float slamDmg = 2.5f;
 
 
         ParticleManager particleManager = new ParticleManager();

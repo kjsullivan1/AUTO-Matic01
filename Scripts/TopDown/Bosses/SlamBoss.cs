@@ -25,7 +25,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         float slamDelay = 5;
         float iSlamDelay;
 
-        public float health = 30;
+        public float health = 20;
 
         Random rand = new Random();
 
@@ -35,6 +35,9 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         bool moveBack = false;
         float slamDmg = 1.5f;
 
+        BossHealthBar healthBar;
+        float dmgResistance = 2f;
+
         enum BossState { SetStats, Shoot, Slam}
         BossState state = BossState.SetStats;
 
@@ -43,7 +46,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         List<FloorTiles> floors = new List<FloorTiles>();
 
         #region Animations
-        enum AnimationStates { Idle, Slam}
+        enum AnimationStates { Idle, Slam, Shoot}
+        AnimationStates animState = AnimationStates.Idle;
         AnimationManager animManager;
         Texture2D texture;
         Point FrameSize;//Size of frame
@@ -52,46 +56,46 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         int fpms;
         public void ChangeAnimation()
         {
-            //switch (animState)
-            //{
-            //    case AnimationStates.Idle:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerIdle");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(6, 1);
-            //        fpms = 120;
-            //        break;
-            //    case AnimationStates.Walking:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerWalk");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(8, 1);
-            //        fpms = 120;
-            //        break;
-            //    case AnimationStates.Shooting:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerShoot");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(4, 1);
-            //        fpms = 95;
-            //        break;
-            //}
+            switch (animState)
+            {
+                case AnimationStates.Idle:
+                    texture = content.Load<Texture2D>("TopDown/Animations/SlimeBurstBoss");
+                    FrameSize = new Point(192, 192);
+                    CurrFrame = new Point(0, 0);
+                    SheetSize = new Point(1, 1);
+                    fpms = 120;
+                    break;
+                case AnimationStates.Slam:
+                    texture = content.Load<Texture2D>("TopDown/Animations/PlayerWalk");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(0, 0);
+                    SheetSize = new Point(8, 1);
+                    fpms = 120;
+                    break;
+                case AnimationStates.Shoot:
+                    texture = content.Load<Texture2D>("TopDown/Animations/SlimeBurstBoss");
+                    FrameSize = new Point(192, 192);
+                    CurrFrame = new Point(0, 0);
+                    SheetSize = new Point(11, 1);
+                    fpms = 120;
+                    break;
+            }
 
-            //bool isRight = true, isLeft = false, isUp = false, isDown = false;
-            //if (animManager != null)
-            //{
-            //    isRight = animManager.isRight;
-            //    isLeft = animManager.isLeft;
-            //    isUp = animManager.isUp;
-            //    isDown = animManager.isDown;
-            //}
+            bool isRight = true, isLeft = false, isUp = false, isDown = false;
+            if (animManager != null)
+            {
+                isRight = animManager.isRight;
+                isLeft = animManager.isLeft;
+                isUp = animManager.isUp;
+                isDown = animManager.isDown;
+            }
 
-            //animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, Position);
+            animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, new Vector2(bossRect.X, bossRect.Y));
 
-            //animManager.isRight = isRight;
-            //animManager.isLeft = isLeft;
-            //animManager.isUp = isUp;
-            //animManager.isDown = isDown;
+            animManager.isRight = isRight;
+            animManager.isLeft = isLeft;
+            animManager.isUp = isUp;
+            animManager.isDown = isDown;
         }
         #endregion
 
@@ -133,6 +137,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             int width = 64 * sizeMod;
             int height = 64 * sizeMod;
             bossRect = new Rectangle(((currBounds.X + currBounds.Width / 2) - width / 2), (((currBounds.Y + currBounds.Height / 2) - height / 2)), width, height);
+            healthBar = new BossHealthBar(new Rectangle(bossRect.X, bossRect.Y - 286, bossRect.Width, (int)(bossRect.Height / 3.5f)), content);
             //worldRect = new Rectangle(((rect.X + rect.Width / 2) - size / 2), (((rect.Y + rect.Height / 2) - size / 2)), size, size);
             //Gain the slam locs
             foreach (SlamTiles tile in tdMap.SlamTiles)
@@ -209,6 +214,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
             }
 
+            ChangeAnimation();
+
             //int locNum = 4;
             //for(int i = 0; i < slamLocs[locNum].slamTiles.Count; i++)
             //{
@@ -220,11 +227,18 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
         public void Update(GameTime gameTime, TDPlayer tdPlayer, TopDownMap tdMap)
         {
+            if(animState == AnimationStates.Shoot && animManager.GetCurrFrame().X == animManager.GetSheetSize().X)
+            {
+                animState = AnimationStates.Idle;
+                ChangeAnimation();
+            }
+
             switch(state)
             {
                 case BossState.SetStats:
                     slamDelay = RandFloat(slameTimeMin, slamTimeMax);
                     state = BossState.Shoot;
+                   
                     respawnDelay = slamDelay / 2;
                     airTimeDelay = RandFloat(airTimeMin, airTimeMax);
                     break;
@@ -457,7 +471,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             {
                 if (tdPlayer.bullets[i].rect.Intersects(bossRect))
                 {
-                    health -= tdPlayer.bulletDmg;
+                    health -= tdPlayer.bulletDmg / dmgResistance;
+                    healthBar.RecieveDamage(tdPlayer.bulletDmg /dmgResistance);
                     tdPlayer.bullets[i].delete = true;
                 }
                    
@@ -480,12 +495,19 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     respawnWalls = false;
                 }
             }
+
+            animManager.Update(gameTime, new Vector2(bossRect.X, bossRect.Y));
+            healthBar.Update(new Point(bossRect.X, bossRect.Y - 32));
         }
 
         private void FireSemiAuto(TDPlayer tdPlayer)
         {
             if (shootDelay <= 0)
             {
+                animState = AnimationStates.Shoot;
+                //animManager.StopLoop();
+                ChangeAnimation();
+
                 shootDelay = iShootDelay;
 
                 Vector2 targetDir = new Vector2(tdPlayer.rectangle.X + tdPlayer.rectangle.Width / 2, tdPlayer.rectangle.Y + tdPlayer.rectangle.Height / 2) -
@@ -615,6 +637,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
         public void Draw(SpriteBatch spriteBatch)
         {
+
             foreach (FloorTiles tile in floors)
             {
                 tile.Draw(spriteBatch);
@@ -623,6 +646,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             {
                 spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), slam.rect.Bounds, Color.White * .25f);
             }
+
+            healthBar.Draw(spriteBatch);
             //foreach (GroundLoc loc in slamLocs)
             //{
             //    for (int i = 0; i < loc.slamTiles.Count; i++)
@@ -631,7 +656,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             //    }
 
             //}
-            spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), bossRect, Color.White);
+            //spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), bossRect, Color.White);
+            animManager.Draw(spriteBatch, Color.White);
 
             for(int i = 0; i < bullets.Count; i++)
             {

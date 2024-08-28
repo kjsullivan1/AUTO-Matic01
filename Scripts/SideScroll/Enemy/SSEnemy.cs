@@ -1188,7 +1188,7 @@ namespace AUTO_Matic.SideScroll
                         {
                             if(shootDelay <= 0)  //If can shooot shoot to the left
                             {
-                                bullets.Add(new Bullet(new Vector2(enemyRect.Left, enemyRect.Y + enemyRect.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed.X, maxBulletSpeed.Y), content, true, bulletTravelDist));
+                                bullets.Add(new Bullet(new Vector2(enemyRect.Left + 14, enemyRect.Y + enemyRect.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed.X, maxBulletSpeed.Y), content, true, bulletTravelDist));
                                 shootDelay = maxShootDelay;
                             }
                             animManager.isRight = true;
@@ -1199,7 +1199,7 @@ namespace AUTO_Matic.SideScroll
                         {
                             if(shootDelay <= 0)//If delay is over, shoot right
                             {
-                                bullets.Add(new Bullet(new Vector2(enemyRect.Right, enemyRect.Y + enemyRect.Height / 2), bulletSpeed, maxBulletSpeed, content, true, bulletTravelDist));
+                                bullets.Add(new Bullet(new Vector2(enemyRect.Right - 14, enemyRect.Y + enemyRect.Height / 2), bulletSpeed, maxBulletSpeed, content, true, bulletTravelDist));
                                 shootDelay = maxShootDelay;
                             }
                 

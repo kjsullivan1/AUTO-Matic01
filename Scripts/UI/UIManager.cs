@@ -71,7 +71,7 @@ namespace AUTO_Matic
                     UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
                     UIHelper.SetElementVisibility("LoadGame", false, uiElements);
                     UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
-                    game.StartNewGame();
+                    game.LoadTutorial();
                     break;
               
             }
@@ -83,7 +83,15 @@ namespace AUTO_Matic
             {
                 case "TitleCrawl":
                     //StreamReader sr = new StreamReader(Directory.GetCurrentDirectory() + "/TextFiles/TitleCrawl.txt");
-                    string text = "This is the text crawl kjdashgflkjaswhfuksehfjkashdfjashdfkjahsfdkjhaskjdfhsakjfhjksahfjsdhfjkashdfjkhasgjkfhasdkfhasjkdfhjaskhdfjkashdfjkashdfkjashdfkjashdflkjhaskljdfhaskjdhfakjshdfkjashdfjkashdfkjdashfkjashfkjshadjkfhaskjdfhaskjhdfkjashdfkjashfjkahskjfdhaskjdfhaskjdfhkjashfdlkjashlkfsdhfkjashdfkjahlsdfkjhasjdfkhaslkdjfhaskjdfhkalsjdhfkjashdfjkashdfkjashdlfk";
+
+                    //string text = "In the 31st century, humanities reach has greatly expanded amongst the stars. " +
+                    //    "With massive colonies suspended in space with millions of inhabitants. None of these structures is more " +
+                    //    "immaculate than that of Nuton – 6, a beacon of research and hope for tomorrow equipped with its own advanced A.I. named M.O.N.O., " +
+                    //    "managing each of the four primary quadrants of the facility, through its secondary access modules. However, one day when everything " +
+                    //    "seemed calm the AI robotic co-habitants of the satellite went haywire forcing everyone off the colony… or almost everyone?";
+
+                    string text = " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSomehow, there is an unsupported character that is being used in our crawl\n text and it is currently Out Of Order.\n We apologize for SpriteFont's lack of " +
+                        "support on basic grammatical characters";
                     UIHelper.SetElementText(uiElements[keyWord], text);
                     if(UIHelper.GetElementBGRect(uiElements[keyWord]).Bottom > 0)
                     {

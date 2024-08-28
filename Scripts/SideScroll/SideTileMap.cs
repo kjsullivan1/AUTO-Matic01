@@ -39,6 +39,8 @@ namespace AUTO_Matic
         public static List<FlyingEnemy> flyingEnemies = new List<FlyingEnemy>();
         public static List<Vector2> Textboxes = new List<Vector2>();
 
+        //int backgroundIndex = 1;
+
         
 
         //public static List<EmptyTile> EmptyTiles
@@ -166,10 +168,10 @@ namespace AUTO_Matic
           
             for (int y = 0; y < map.GetLength(0); y++)
             {
-                
+
                 for (int x = 0; x < map.GetLength(1); x++)
                 {
-                    
+
                     int num = map[y, x];
                     int num2 = 0;
                     if (y != 0)
@@ -190,15 +192,23 @@ namespace AUTO_Matic
                     //{
                     //    backgroundTiles.Add(new BackgroundTile(num,new Rectangle(x * size, y * size, size, size)));
                     //}
-                    if(num == 0)
+                    if (num == 0)
                     {
                         Textboxes.Add(new Vector2(x * size, y * size));
                         backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
                     }
-                    else if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 || num == 17 || num == 18 || num == 19 || num == 20|| num ==21 || num ==22 || num ==23)
+                    else if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 ||
+                        num == 17 || num == 18 || num == 19 || num == 20 || num == 21 || num == 22 || num == 23 || num == 46 || num == 47 || num == 52 || num == 53
+                        || num == 33 || num == 34 || num == 27 || num == 32 || num == 36 || num == 40 || num == 41 || num == 43 || num == 49 || num == 54 || num == 55
+                        || num == 37 || num == 56 || num == 29 || num == 28 || num == 30 || num == 45 || num == 42 || num == 48 || num == 44 || num == 45 
+                        || num == 51 || num == 38 || num == 50)
                     {
                         //If at the top of the map
                      
+                        if(num >= 27 && num < 35 || num == 36 )
+                        {
+                            backgroundTiles.Add(new BackgroundTile(35, new Rectangle(x * size, y * size, size, size)));
+                        }
 
                         if (y==0)
                         {
@@ -226,7 +236,7 @@ namespace AUTO_Matic
                     {
                         if (num == 26)
                         {
-                            backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                            backgroundTiles.Add(new BackgroundTile(map[y + 1,x], new Rectangle(x * size, y * size, size, size)));
                         }
 
                         if (y == 0)//If at the top of the map
@@ -249,7 +259,7 @@ namespace AUTO_Matic
                         }
                        
                     }
-                    else if(num == 1) //Background
+                    else if(num == 1 || num == 35 || num == 39 || num == 58) //Background
                     {
                         backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
                         if (BackgroundIndexes.Contains(num) == false)
@@ -257,28 +267,34 @@ namespace AUTO_Matic
                     }
                     else if(num == 9 || num == 12)//Top of doors
                     {
-                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
+                       if(x <= 0)
+                            backgroundTiles.Add(new BackgroundTile(map[y, x + 1], new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
+                       else
+                            backgroundTiles.Add(new BackgroundTile(map[y, x - 1], new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
                         topDoorTiles.Add(new TopDoorTile(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     else if(num == 8 || num == 11)//Bottom doors
                     {
-                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        if (x <= 0)
+                            backgroundTiles.Add(new BackgroundTile(map[y, x + 1], new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
+                        else
+                            backgroundTiles.Add(new BackgroundTile(map[y, x - 1], new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
                         bottomDoorTiles.Add(new BottomDoorTile(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     else if(num == 25) //Enemy spawns
                     {
                         enemySpawns.Add(new Vector2(x * size, y * size));
-                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
                     }
-                    else if(num == 7)//Dungeon entrance
+                    else if(num == 57)//Dungeon entrance
                     {
-                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
                         dungeonEntrances.Add(new DungeonEntrance(num, new Rectangle(x * size, y * size, size, size)));
                     }
                     else if(num == 24)//Player spawn
                     {
                         playerSpawns.Add(new Vector2(x * size, y * size));
-                        backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+                        backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
                     }
 
 

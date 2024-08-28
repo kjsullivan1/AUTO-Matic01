@@ -33,6 +33,7 @@ namespace AUTO_Matic
 
         #region Animations
         public bool isPlayer = false;
+        public bool isBoss = false;
 
         ContentManager content;
         public AnimationManager animManager;
@@ -51,7 +52,7 @@ namespace AUTO_Matic
         public void ChangeAnimation()
         {
 
-            if (!isPlayer)
+            if (isPlayer || isBoss)
             {
                 texture = content.Load<Texture2D>("SideScroll/Animations/EnergyBlast");
                 FrameSize = new Point(64, 64);
@@ -59,14 +60,15 @@ namespace AUTO_Matic
                 SheetSize = new Point(10, 1);
                 fpms = 60;
             }
-            else if (isPlayer)
+            else if (!isPlayer)
             {
-                texture = content.Load<Texture2D>("SideScroll/Animations/EnergyBlast");
+                texture = content.Load<Texture2D>("SideScroll/Animations/Bullet");
                 FrameSize = new Point(64, 64);
-                CurrFrame = new Point(3, 0);
-                SheetSize = new Point(10, 1);
+                CurrFrame = new Point(1, 0);
+                SheetSize = new Point(1, 1);
                 fpms = 60;
             }
+           
 
             bool isRight = true, isLeft = false, isUp = false, isDown = false;
             if (animManager != null)
@@ -87,7 +89,7 @@ namespace AUTO_Matic
         #endregion
 
         public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content, bool isX, float travelDist,
-            bool isY = false, float speedY = 0, float angle = 0, int size = 14, bool isPlayer = false)
+            bool isY = false, float speedY = 0, float angle = 0, int size = 14, bool isPlayer = false, bool isBoss = false)
         {
             position = pos;
             startPos = pos;
@@ -103,6 +105,7 @@ namespace AUTO_Matic
             height = size;
             this.content = content;
             this.isPlayer = isPlayer;
+            this.isBoss = isBoss;
             ChangeAnimation();  
         }
 
@@ -148,9 +151,13 @@ namespace AUTO_Matic
                 delete = true;
             }
             rect = new Rectangle((int)position.X, (int)position.Y, width, height);
-            animManager.Update(gameTime, new Vector2(position.X, position.Y - 28));
+            
+            if(isPlayer)
+                animManager.Update(gameTime, new Vector2(position.X, position.Y - 28));
+            else
+                animManager.Update(gameTime, new Vector2(position.X, position.Y));
 
-            if(bulletSpeed.X < 0)
+            if (bulletSpeed.X < 0)
             {
                 animManager.isLeft = true;
                 animManager.isRight = false;
@@ -165,10 +172,7 @@ namespace AUTO_Matic
         public void Draw(SpriteBatch spriteBatch)
         {
             //spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), Color.White);
-            if(isPlayer)
-                animManager.Draw(spriteBatch, Color.White, angle, rect);
-            else
-                animManager.Draw(spriteBatch, Color.White);
+            animManager.Draw(spriteBatch, Color.White, angle, rect);
 
 
         }
