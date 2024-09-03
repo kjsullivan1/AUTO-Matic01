@@ -224,7 +224,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                         useTopWall = false;
                     }
                     //Next choose the weapon type 
-                    switch (random.Next(2,3))
+                    switch (random.Next(0,4))
                     {
                         case 0:
                             chosenWeapon = "Shotgun";

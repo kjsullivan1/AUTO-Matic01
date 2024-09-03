@@ -1795,103 +1795,137 @@ namespace AUTO_Matic.SideScroll
             {
                 weaponWheel.active = false;
             }
-            
+
+            Vector2 RightStick = GamePad.GetState(0).ThumbSticks.Right;
+
             //Weapon Wheel actions
             if(weaponWheel.active)
             {
                 if(kb.IsKeyDown(Keys.Right) && prevKb.IsKeyUp(Keys.Right) ||
-                    GamePad.GetState(0).DPad.Right == ButtonState.Pressed && prevDpad.Right == ButtonState.Released)
+                    RightStick.X > 0 )
                 {
-                    
-                    if (selectedWeapon == 0)
-                    {
-                        currWeapon = WeaponType.Burst;
-                        selectedWeapon = 2;
+                    currWeapon = WeaponType.Burst;
+                    selectedWeapon = 2;
 
-                        bulletDmg = burstDmg;
-                        shootDelay = burstDelay;
-                        iShootDelay = shootDelay;
+                    bulletDmg = burstDmg;
+                    shootDelay = burstDelay;
+                    iShootDelay = shootDelay;
+                    //if (selectedWeapon == 0)
+                    //{
+                    //    currWeapon = WeaponType.Burst;
+                    //    selectedWeapon = 2;
 
-                    }
-                    else if (selectedWeapon == 1)
-                    {
-                        currWeapon = WeaponType.Pistol;
-                        selectedWeapon = 0;
+                    //    bulletDmg = burstDmg;
+                    //    shootDelay = burstDelay;
+                    //    iShootDelay = shootDelay;
 
-                        bulletDmg = pistolDmg;
-                        shootDelay = pistolDelay;
-                        iShootDelay = shootDelay;
-                    }
+                    //}
+                    //else if (selectedWeapon == 1)
+                    //{
+                    //    currWeapon = WeaponType.Pistol;
+                    //    selectedWeapon = 0;
+
+                    //    bulletDmg = pistolDmg;
+                    //    shootDelay = pistolDelay;
+                    //    iShootDelay = shootDelay;
+                    //}
 
 
                 }
                 else if(kb.IsKeyDown(Keys.Left) && prevKb.IsKeyUp(Keys.Left) ||
-                    GamePad.GetState(0).DPad.Left == ButtonState.Pressed && prevDpad.Left == ButtonState.Released)
+                    RightStick.X < 0)
                 {
-                    if (selectedWeapon == 2)
-                    {
-                        currWeapon = WeaponType.Pistol;
-                        selectedWeapon = 0;
+                    //if (selectedWeapon == 2)
+                    //{
+                    //    currWeapon = WeaponType.Pistol;
+                    //    selectedWeapon = 0;
 
-                        bulletDmg = pistolDmg;
-                        shootDelay = pistolDelay;
-                        iShootDelay = shootDelay;
-                    }
-                    else if (selectedWeapon == 0)
-                    {
-                        currWeapon = WeaponType.Laser;
-                        selectedWeapon = 1;
+                    //    bulletDmg = pistolDmg;
+                    //    shootDelay = pistolDelay;
+                    //    iShootDelay = shootDelay;
+                    //}
+                    //else if (selectedWeapon == 0)
+                    //{
+                    //    currWeapon = WeaponType.Laser;
+                    //    selectedWeapon = 1;
 
-                        bulletDmg = laserDmg;
-                        shootDelay = laserDelay;
-                        iShootDelay = shootDelay;
-                    }
+                    //    bulletDmg = laserDmg;
+                    //    shootDelay = laserDelay;
+                    //    iShootDelay = shootDelay;
+                    //}
+                    currWeapon = WeaponType.Laser;
+                    selectedWeapon = 1;
+
+                    bulletDmg = laserDmg;
+                    shootDelay = laserDelay;
+                    iShootDelay = shootDelay;
                 }
                 else if(kb.IsKeyDown(Keys.Up) && prevKb.IsKeyUp(Keys.Up) ||
-                    GamePad.GetState(0).DPad.Up == ButtonState.Pressed && prevDpad.Up == ButtonState.Released)
+                   RightStick.Y > 0)
                 {
-                    if (selectedWeapon == 0)
-                    {
-                        currWeapon = WeaponType.Bomb;
-                        selectedWeapon = 3;
+                    currWeapon = WeaponType.Bomb;
+                    selectedWeapon = 3;
 
-                        bulletDmg = bombDmg;
-                        shootDelay = bombDelay;
-                        iShootDelay = shootDelay;
+                    bulletDmg = bombDmg;
+                    shootDelay = bombDelay;
+                    iShootDelay = shootDelay;
+                    //if (selectedWeapon == 0)
+                    //{
+                    //    currWeapon = WeaponType.Bomb;
+                    //    selectedWeapon = 3;
 
-                    }
-                    else if (selectedWeapon == 4)
-                    {
-                        currWeapon = WeaponType.Pistol;
-                        selectedWeapon = 0;
+                    //    bulletDmg = bombDmg;
+                    //    shootDelay = bombDelay;
+                    //    iShootDelay = shootDelay;
 
-                        bulletDmg = pistolDmg;
-                        shootDelay = pistolDelay;
-                        iShootDelay = shootDelay;
-                    }
+                    //}
+                    //else if (selectedWeapon == 4)
+                    //{
+                    //    currWeapon = WeaponType.Pistol;
+                    //    selectedWeapon = 0;
+
+                    //    bulletDmg = pistolDmg;
+                    //    shootDelay = pistolDelay;
+                    //    iShootDelay = shootDelay;
+                    //}
                 }
                 else if(kb.IsKeyDown(Keys.Down) && prevKb.IsKeyUp(Keys.Down) ||
-                    GamePad.GetState(0).DPad.Down == ButtonState.Pressed && prevDpad.Down == ButtonState.Released)
+                    RightStick.Y < 0)
                 {
-                    if (selectedWeapon == 0)
-                    {
-                        currWeapon = WeaponType.Shotgun;
-                        selectedWeapon = 4;
+                    //if (selectedWeapon == 0)
+                    //{
+                    //    currWeapon = WeaponType.Shotgun;
+                    //    selectedWeapon = 4;
 
-                        bulletDmg = shotGunDmg;
-                        shootDelay = shotGunDelay;
-                        iShootDelay = shootDelay;
+                    //    bulletDmg = shotGunDmg;
+                    //    shootDelay = shotGunDelay;
+                    //    iShootDelay = shootDelay;
 
-                    }
-                    else if (selectedWeapon == 3)
-                    {
-                        currWeapon = WeaponType.Pistol;
-                        selectedWeapon = 0;
+                    //}
+                    //else if (selectedWeapon == 3)
+                    //{
+                    //    currWeapon = WeaponType.Pistol;
+                    //    selectedWeapon = 0;
 
-                        bulletDmg = pistolDmg;
-                        shootDelay = pistolDelay;
-                        iShootDelay = shootDelay;
-                    }
+                    //    bulletDmg = pistolDmg;
+                    //    shootDelay = pistolDelay;
+                    //    iShootDelay = shootDelay;
+                    //}
+                    currWeapon = WeaponType.Shotgun;
+                    selectedWeapon = 4;
+
+                    bulletDmg = shotGunDmg;
+                    shootDelay = shotGunDelay;
+                    iShootDelay = shootDelay;
+                }
+                else if(GamePad.GetState(0).IsButtonDown(Buttons.RightStick))
+                {
+                    currWeapon = WeaponType.Pistol;
+                    selectedWeapon = 0;
+
+                    bulletDmg = pistolDmg;
+                    shootDelay = pistolDelay;
+                    iShootDelay = shootDelay;
                 }
             }
             prevKb = kb;

@@ -2452,6 +2452,30 @@
 /processorParam:TextureFormat=Color
 /build:TopDown/MapTiles/Tile61.png
 
+#begin TopDown/MapTiles/Tile62.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:TopDown/MapTiles/Tile62.png
+
+#begin TopDown/MapTiles/Tile63.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:TopDown/MapTiles/Tile63.png
+
 #begin TopDown/MapTiles/Tile7.png
 /importer:TextureImporter
 /processor:TextureProcessor

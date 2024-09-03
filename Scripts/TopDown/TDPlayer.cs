@@ -33,6 +33,8 @@ namespace AUTO_Matic.TopDown
         bool melee = false;
         float meleeDelay = .75f;
         float iMeleeDelay;
+
+        string[] moveDirs = new string[2];
         
         Rectangle MeleeHitbox
         {
@@ -71,6 +73,7 @@ namespace AUTO_Matic.TopDown
         
         public void ChangeAnimation()
         {
+            bool isRight = false, isLeft = false, isUp = false, isDown = false;
             switch (animState)
             {
                 case AnimationStates.Idle:
@@ -85,18 +88,31 @@ namespace AUTO_Matic.TopDown
                     if(shootDir == "up")
                     {
                         texture = content.Load<Texture2D>("TopDown/Animations/PilotUpWalk");
+                        lockedDirection = "up";
+                        isUp = true;
+                       
                     }
                     else if(shootDir == "down")
                     {
                         texture = content.Load<Texture2D>("TopDown/Animations/PilotDownWalk");
+                        lockedDirection = "down";
+                        isDown = true;
+                       
                     }
                     else if(shootDir == "right")
                     {
                         texture = content.Load<Texture2D>("TopDown/Animations/PilotRightWalk");
+                        lockedDirection = "right";
+                        isRight = true;
+                       
+
                     }
                     else if(shootDir == "left")
                     {
                         texture = content.Load<Texture2D>("TopDown/Animations/PilotLeftWalk");
+                        lockedDirection = "left";
+                       isLeft = true;
+                        
                     }
                     FrameSize = new Point(64, 64);
                     CurrFrame = new Point(0, 0);
@@ -112,7 +128,7 @@ namespace AUTO_Matic.TopDown
                     break;
             }
 
-            bool isRight = true, isLeft = false, isUp = false, isDown = false;
+           
             if (animManager != null)
             {
                 isRight = animManager.isRight;
@@ -252,6 +268,8 @@ namespace AUTO_Matic.TopDown
         float dashDistance = 64 * 2.75f;
         float dashSpeed = 12f;
         Vector2 dashVelocity;
+
+        string lockedDirection;
 
         public void Load(ContentManager Content, Rectangle bounds)
         {
@@ -560,6 +578,9 @@ namespace AUTO_Matic.TopDown
                     }
                     break;
                 case PlayerState.Dash:
+
+                   
+
                     switch(shootDir)
                     {
                         case "up":
@@ -784,8 +805,8 @@ namespace AUTO_Matic.TopDown
 
         private void Input(List<TDEnemy> enemies, GameTime gameTime)
         {
-            if(kb.IsKeyDown(Keys.LeftShift) && prevKb.IsKeyDown(Keys.LeftShift) ||
-                currButtons.LeftShoulder == ButtonState.Pressed && prevButtons.LeftShoulder == ButtonState.Pressed)
+            if(kb.IsKeyDown(Keys.LeftShift) && prevKb.IsKeyDown(Keys.LeftShift) && playerState != PlayerState.Dash||
+                currButtons.RightShoulder == ButtonState.Pressed && prevButtons.RightShoulder == ButtonState.Pressed && playerState != PlayerState.Dash)
             {
                 lockDir = true;//!lockDir
             }
@@ -797,44 +818,87 @@ namespace AUTO_Matic.TopDown
             if (kb.IsKeyDown(Keys.D) || controllerMoveDir.X > 0 /*&& controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
             {
                 velocity.X += moveSpeed;
-                if(!lockDir && shootDir != "right")
+                if(!lockDir && shootDir != "right" || playerState == PlayerState.Dash)
                 {
                     shootDir = "right";
-
+                   
                     ChangeAnimation();
                 }
-                    
+
+                if (moveDirs[0] == null)
+                {
+                    moveDirs[0] = "right";
+                }
+                else if (moveDirs[1] == null && moveDirs[0] != "right" || moveDirs[1] != "right" && moveDirs[0] != "right")
+                {
+                    moveDirs[1] = "right";
+                }
+
             }
             if (kb.IsKeyDown(Keys.A) || controllerMoveDir.X  < 0/* && controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
             {
                 velocity.X += -moveSpeed;
-                if (!lockDir && shootDir != "left")
+                if (!lockDir && shootDir != "left" || playerState == PlayerState.Dash)
                 {
                     shootDir = "left";
+
+              
                     ChangeAnimation();
                 }
-                   
+
+                if (moveDirs[0] == null)
+                {
+                    moveDirs[0] = "left";
+                }
+                else if (moveDirs[1] == null && moveDirs[0] != "left" || moveDirs[1] != "left" && moveDirs[0] != "left")
+                {
+                    moveDirs[1] = "left";
+                }
             }
             if (kb.IsKeyDown(Keys.W) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y > 0 /*&& controllerMoveDir.X > -.6*/)
             {
                 velocity.Y += -moveSpeed;
-                if (!lockDir && shootDir != "up")
+                if (!lockDir && shootDir != "up" || playerState == PlayerState.Dash)
                 {
                     shootDir = "up";
+
                     ChangeAnimation();
                 }
-                  
+
+                if (moveDirs[0] == null)
+                {
+                    moveDirs[0] = "up";
+                }
+                else if (moveDirs[1] == null && moveDirs[0] != "up" || moveDirs[1] != "up" && moveDirs[0] != "up")
+                {
+                    moveDirs[1] = "up";
+                }
             }
             if (kb.IsKeyDown(Keys.S) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y < 0 /*&& controllerMoveDir.X > -.6*/ )
             {
                 velocity.Y += moveSpeed;
-                if (!lockDir && shootDir != "down")
+                if (!lockDir && shootDir != "down" || playerState == PlayerState.Dash)
                 {
                     shootDir = "down";
+
+                
                     ChangeAnimation();
                 }
-                    
+
+                if (moveDirs[0] == null)
+                {
+                    moveDirs[0] = "down";
+                }
+                else if (moveDirs[1] == null && moveDirs[0] != "down" || moveDirs[1] != "down" && moveDirs[0] != "down")
+                {
+                    moveDirs[1] = "down";
+                }
             }
+
+            //if(kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D) && kb.IsKeyUp(Keys.S) && kb.IsKeyUp(Keys.W))
+            //{
+            //    moveDirs = new string[2];
+            //}
 
             if(kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D) && controllerMoveDir.X == 0)
             {
@@ -847,11 +911,11 @@ namespace AUTO_Matic.TopDown
             shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
             {
-               
 
-                if(shootDelay <= 0)
+
+                if (shootDelay <= 0)
                 {
-                    switch (shootDir)
+                    switch (lockedDirection)
                     {
                         case "up":
                             bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
@@ -867,18 +931,46 @@ namespace AUTO_Matic.TopDown
                             break;
                     }
 
+
+                    //if (animManager.isUp)
+                    //    bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, 
+                    //        new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
+                    //else if(animManager.isDown)
+                    //    bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Bottom), bulletSpeed, 
+                    //        new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
+                    //else if(animManager.isLeft)
+                    //    bullets.Add(new Bullet(new Vector2(rectangle.Left, rectangle.Y + (rectangle.Height / 2)), -bulletSpeed, 
+                    //        new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                    //else if(animManager.isRight)
+                    //    bullets.Add(new Bullet(new Vector2(rectangle.Right, rectangle.Y + (rectangle.Height / 2)), bulletSpeed, 
+                    //        new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+
+
+
                     shootDelay = iShootDelay;
                 }
-               
-                
+
+
             }
 
-            if(kb.IsKeyDown(Keys.Space) && prevKb.IsKeyUp(Keys.Space) || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released)
+            if (kb.IsKeyDown(Keys.Space) && prevKb.IsKeyUp(Keys.Space) || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released)
             {
+                lockDir = false;
                 playerState = PlayerState.Dash;
+
+                if(moveDirs[1] != null)
+                {
+                    shootDir = moveDirs[1];
+                }
+                else if(moveDirs[0] != null)
+                {
+                    shootDir = moveDirs[0];
+                }
+               // nput(enemies, gameTime);
+
                 startPos = position;
             }
-
+            moveDirs = new string[2];
             if(kb.IsKeyDown(Keys.F) && prevKb.IsKeyUp(Keys.F) && meleeDelay <= 0 || currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && meleeDelay <= 0)
             {
                 meleeDelay = iMeleeDelay;

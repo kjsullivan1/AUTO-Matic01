@@ -255,7 +255,7 @@ namespace AUTO_Matic
             if (currScene == Scenes.InGame)
             {
                 //LoadTutorial();
-               StartNewGame();
+              StartNewGame();
                //LoadFinalBoss();
                 
             }
@@ -851,7 +851,7 @@ namespace AUTO_Matic
                 (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
             ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
             fadePos = SideTileMap.playerSpawns[0];
-            ssCamera.Zoom = .5f;
+           // ssCamera.Zoom = .5f;
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
             GameState = GameStates.SideScroll;
