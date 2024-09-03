@@ -2069,6 +2069,19 @@ namespace AUTO_Matic
                     {
                         openDoorCount--;
                     }
+
+                    if (openDoorCount > 1)
+                    {
+                        try
+                        {
+                            soundManager.AddSound("Level" + (dungeonNum) + "Side", true);
+                            soundManager.PlaySound();
+                        }
+                        catch
+                        {
+
+                        }
+                    }
                 }
 
                 if (GameState == GameStates.Tutorial)

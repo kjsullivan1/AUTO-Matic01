@@ -108,6 +108,7 @@
     <Content Include="Content\Audio\FinalBossTheme.mp3" />
     <Content Include="Content\Audio\Level0Side.mp3" />
     <Content Include="Content\Audio\Level2Side.mp3" />
+    <Content Include="Content\Audio\Level3Side.mp3" />
     <Content Include="Content\Audio\Shoot.mp3" />
     <Content Include="Content\SideScroll\Animations\Bullet.png" />
     <Content Include="Content\SideScroll\Animations\DroneEnemy.png" />
