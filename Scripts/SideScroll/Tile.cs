@@ -150,4 +150,15 @@ namespace AUTO_Matic
             position = new Vector2(newRect.X, newRect.Y);
         }
     }
+
+    class ControllBeacon :Tile
+    {
+        public ControllBeacon(int i , Rectangle newRect)
+        {
+            texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
+            this.Rectangle = newRect;
+            this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+            position = new Vector2(newRect.X, newRect.Y);
+        }
+    }
 }

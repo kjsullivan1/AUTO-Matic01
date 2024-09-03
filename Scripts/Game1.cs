@@ -40,7 +40,7 @@ namespace AUTO_Matic
         bool closeDoor = false;
 
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.TitleScreen;
+        public Scenes currScene = Scenes.InGame;
 
         public enum GameStates { Tutorial, SideScroll, TopDown, Paused, FinalBoss}
         public GameStates GameState = GameStates.SideScroll;
@@ -141,7 +141,6 @@ namespace AUTO_Matic
 
         List<HealthDrop> bossHealthDrops = new List<HealthDrop>();
 
-        List<FlyingEnemy> flyingEnemies = new List<FlyingEnemy>();
 
         List<FlyingControlBeacon> flyingBeacons = new List<FlyingControlBeacon>();
 
@@ -255,8 +254,8 @@ namespace AUTO_Matic
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if (currScene == Scenes.InGame)
             {
-                LoadTutorial();
-               //StartNewGame();
+                //LoadTutorial();
+               StartNewGame();
                //LoadFinalBoss();
                 
             }
@@ -382,6 +381,7 @@ namespace AUTO_Matic
                 healthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, (currBounds.Y + currBounds.Height) - 64 * 3, healthDropDims.X, healthDropDims.X)));
                 healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y + currBounds.Height) - 64 * 3, healthDropDims.X, healthDropDims.X)));
                 healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y) + 64 * 2, healthDropDims.X, healthDropDims.X)));
+
                 tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
                     tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points, dungeonNum);
 
@@ -583,7 +583,9 @@ namespace AUTO_Matic
             SideTileMap.BackgroundTiles.Clear();
             SideTileMap.LoadMap(filePath);
 
-            flyingEnemies.Clear();
+            //flyingEnemies.Clear();
+
+            flyingBeacons.Clear();
             enemies.Clear();
             enemies.Clear();
             int k = 1;
@@ -604,6 +606,11 @@ namespace AUTO_Matic
                 }
 
                 k++;
+            }
+
+            for(int i = 0; i < SideTileMap.flyingBeacons.Count;i++)
+            {
+                flyingBeacons.Add(new FlyingControlBeacon(SideTileMap.flyingBeacons[i].Rectangle, Content));
             }
                 //Add final boss here 
                 graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
@@ -653,8 +660,8 @@ namespace AUTO_Matic
             SideTileMap.GroundTiles.Clear();
             SideTileMap.PlatformTiles.Clear();
             SideTileMap.LoadMap(filePath);
-            
-            flyingEnemies.Clear();
+
+            flyingBeacons.Clear();
             enemies.Clear();
 
             soundManager.ClearSounds();
@@ -760,7 +767,7 @@ namespace AUTO_Matic
            
 
             SideTileMap.LoadMap(filePath);
-            flyingEnemies.Clear();
+            flyingBeacons.Clear();
             enemies.Clear();
             int k = 1;
             for(int i = 0; i < SideTileMap.enemySpawns.Count - 1; i++)
@@ -781,7 +788,13 @@ namespace AUTO_Matic
                 k++;
 
             }
-            SideTileMap.SetFlyingEnemies(flyingEnemies);
+
+
+            for (int i = 0; i < SideTileMap.flyingBeacons.Count; i++)
+            {
+                flyingBeacons.Add(new FlyingControlBeacon(SideTileMap.flyingBeacons[i].Rectangle, Content));
+            }
+            //SideTileMap.SetFlyingEnemies(flyingEnemies);
             DungeonEntrance closest = SideTileMap.DungeonEntrances[0];
             DungeonEntrance furthest = SideTileMap.DungeonEntrances[0];
             while (dungeons.Count < SideTileMap.DungeonEntrances.Count - 1)
@@ -838,7 +851,7 @@ namespace AUTO_Matic
                 (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
             ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
             fadePos = SideTileMap.playerSpawns[0];
-            //ssCamera.Zoom = .5f;
+            ssCamera.Zoom = .5f;
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
             GameState = GameStates.SideScroll;
@@ -1073,40 +1086,29 @@ namespace AUTO_Matic
                             else
                             {
                                 SideScrollPhysics(gameTime, kb, worldRect);
-                                //if (kb.IsKeyDown(Keys.RightShift))
-                                //{
-                                //    GameState = GameStates.TopDown;
-                                //    StartDungeon();
+                                if (kb.IsKeyDown(Keys.RightShift))
+                                {
+                                    GameState = GameStates.TopDown;
+                                    StartDungeon();
 
-                                //}
+                                }
 
                             }
 
-                            for (int i = flyingEnemies.Count - 1; i >= 0; i--)
-                            {
-                                flyingEnemies[i].Update(gameTime, Gravity, ssPlayer, SideTileMap.tileMap, ssCamera.CameraBounds);
-                            }
+                      
 
                             for(int i = flyingBeacons.Count - 1; i >= 0; i--)
                             {
-                                if(ssCamera.CameraBounds.Intersects(flyingBeacons[i].rect))
-                                {
-                                    flyingBeacons[i].Update(ssPlayer);
-
-                                    if (flyingBeacons[i].Health <= 0)
-                                    {
-                                        for (int k = flyingBeacons[i].controlledEnemies.Count - 1; k >= 0; k--)
-                                        {
-                                            for (int j = flyingEnemies.Count - 1; j >= 0; j--)
-                                            {
-                                                if (flyingEnemies[j] == flyingBeacons[i].controlledEnemies[k])
-                                                    flyingEnemies[j].health = 0;
-                                            }
-                                        }
-                                    }
-                                }
-
                                
+                                flyingBeacons[i].Update(gameTime, Gravity, ssPlayer, ssCamera.CameraBounds);
+
+                                if (flyingBeacons[i].controlledEnemies.Count == 0)
+                                {
+                                    SideTileMap.flyingBeacons[i].active = false;
+                                    flyingBeacons.RemoveAt(i);
+                                   
+                                }
+                                   
                             }
 
                             //SSCamera.Move(ssPlayer.Position);
@@ -1170,7 +1172,7 @@ namespace AUTO_Matic
                                 //camera.Update(new Vector2(camera.X, camera.Y));
                                 tdPlayer.Update(gameTime, tdMap, shotGunBoss, tdEnemies);
                                 camera.Update(CameraPos());
-                                if (/*kb.IsKeyDown(Keys.J) ||*/ tdPlayer.rectangle.Intersects(LeaveDungeon))//Switching back to sidescroll
+                                if (kb.IsKeyDown(Keys.J) || tdPlayer.rectangle.Intersects(LeaveDungeon))//Switching back to sidescroll
                                 {
                                     ChangeToSideScroll();
                                     //Camera position not updated
@@ -1700,7 +1702,7 @@ namespace AUTO_Matic
 
 
 
-            if (/*kb.IsKeyDown(Keys.P) ||*/ ssPlayer.Health <= 0 || ssPlayer.playerRect.Y > SideTileMap.GetWorldDims().Y)//Reset Pos
+            if (kb.IsKeyDown(Keys.P) || ssPlayer.Health <= 0 || ssPlayer.playerRect.Y > SideTileMap.GetWorldDims().Y)//Reset Pos
             {
                 if (GameState == GameStates.SideScroll)
                     StartNewGame(true);
@@ -2243,9 +2245,9 @@ namespace AUTO_Matic
                             {
                                 enemy.Draw(spriteBatch);
                             }
-                            foreach (FlyingEnemy enemy in flyingEnemies)
+                            foreach (FlyingControlBeacon beacon in flyingBeacons)
                             {
-                                enemy.Draw(spriteBatch);
+                                beacon.Draw(spriteBatch);
                             }
                             foreach (HealthDrop health in healthDrops)
                             {

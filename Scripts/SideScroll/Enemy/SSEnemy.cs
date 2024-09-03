@@ -387,33 +387,33 @@ namespace AUTO_Matic.SideScroll
                         animState = AnimationStates.Walking;
                         ChangeAnimation();
                     }
-                    
-                    //if(MathHelper.Distance(position.X, landingPos.X) > bounds.X && velocity.X < 0)
-                    //{
-                    //    bounds = SideTileMap.GetNumTilesOfGround((int)(position.Y / 64) + 1, (int)position.X / 64); //Recalc bounds 
-                    //    if (bounds != Vector2.Zero)
-                    //    {
-                    //        bounds *= 64;
-                    //    }
-                    //    if (landingPos.Y != position.Y)
-                    //    {
-                    //        landingPos = position;
-                    //    }
-                        
-                    //}
-                    //else if(MathHelper.Distance(position.X, landingPos.X) > bounds.Y && velocity.X > 0)
-                    //{
-                    //    bounds = SideTileMap.GetNumTilesOfGround((int)(position.Y / 64) + 1, (int)position.X / 64); //Recalc bounds 
-                    //    if (bounds != Vector2.Zero)
-                    //    {
-                    //        bounds *= 64;
-                    //    }
-                    //    if (landingPos.Y != position.Y)
-                    //    {
-                    //        landingPos = position;
-                    //    }
-                    //}
-                    //else
+
+                    if (MathHelper.Distance(position.X, landingPos.X) > bounds.X && velocity.X < 0 && isShoot)
+                    {
+                        bounds = SideTileMap.GetNumTilesOfGround((int)(position.Y / 64) + 1, (int)position.X / 64); //Recalc bounds 
+                        if (bounds != Vector2.Zero)
+                        {
+                            bounds *= 64;
+                        }
+                        if (landingPos.Y != position.Y)
+                        {
+                            landingPos = position;
+                        }
+
+                    }
+                    else if (MathHelper.Distance(position.X, landingPos.X) > bounds.Y && velocity.X > 0 && isShoot)
+                    {
+                        bounds = SideTileMap.GetNumTilesOfGround((int)(position.Y / 64) + 1, (int)position.X / 64); //Recalc bounds 
+                        if (bounds != Vector2.Zero)
+                        {
+                            bounds *= 64;
+                        }
+                        if (landingPos.Y != position.Y)
+                        {
+                            landingPos = position;
+                        }
+                    }
+                    else
                     {
                         if (position.X < TargetPos.X) //Going Right
                         {
@@ -581,6 +581,10 @@ namespace AUTO_Matic.SideScroll
                 }
             }
             
+            foreach(BottomDoorTile tile in SideTileMap.BottomDoorTiles)
+            {
+                Collision(tile.Rectangle);
+            }
 
             //Collision
             if(blockBottom) //If colliding bottom, def not falling
@@ -1376,7 +1380,10 @@ namespace AUTO_Matic.SideScroll
                 #endregion
                 #region Knockback
                 case EnemyStates.Knockback:
-                   
+
+                    if (isShoot)
+                        knockbackForce = new Vector2(knockbackForce.X / 2, knockbackForce.Y);
+
                     if (player.killEnemy)
                     {
                         launch = true;

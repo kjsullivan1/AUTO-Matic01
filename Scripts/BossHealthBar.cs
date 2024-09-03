@@ -39,6 +39,11 @@ namespace AUTO_Matic.Scripts
         public void ChangeHealth(float health)
         {
             this.health = health;
+
+            if(this.health >= maxHealth)
+            {
+                this.health = maxHealth;
+            }
         }
 
         public new void Draw(SpriteBatch spriteBatch)

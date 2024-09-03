@@ -36,7 +36,7 @@ namespace AUTO_Matic
         public static List<int> BackgroundIndexes = new List<int>();//List of indexes that contain the background tiles
         public static List<int> PlatformIndexes = new List<int>();//List of the indexes of the platform tiles
         public static List<RepeatBackground> repeatBG = new List<RepeatBackground>();
-        public static List<FlyingEnemy> flyingEnemies = new List<FlyingEnemy>();
+        public static List<ControllBeacon> flyingBeacons = new List<ControllBeacon>();
         public static List<Vector2> Textboxes = new List<Vector2>();
 
         //int backgroundIndex = 1;
@@ -55,13 +55,13 @@ namespace AUTO_Matic
             get { return repeatBG; }
         }
 
-        public static void SetFlyingEnemies(List<FlyingEnemy> enemies)
+        //public static void SetFlyingEnemies(List<FlyingEnemy> enemies)
+        //{
+        //    flyingEnemies = enemies;
+        //}
+        public static List<ControllBeacon> GetFlyingEnemies()
         {
-            flyingEnemies = enemies;
-        }
-        public static List<FlyingEnemy> GetFlyingEnemies()
-        {
-            return flyingEnemies;
+            return flyingBeacons;
         }
 
         public static List<Vector2> GetTextBoxes()
@@ -296,6 +296,11 @@ namespace AUTO_Matic
                         playerSpawns.Add(new Vector2(x * size, y * size));
                         backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
                     }
+                    else if(num == 59)
+                    {
+                        flyingBeacons.Add(new ControllBeacon(num, new Rectangle(x * size, y* size, size, size)));
+                        backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
+                    }
 
 
                     count++;
@@ -435,6 +440,10 @@ namespace AUTO_Matic
             {
                 tile.Draw(spriteBatch);
             }
+            foreach(ControllBeacon tile in flyingBeacons)
+            {
+                tile.Draw(spriteBatch);
+            }    
           
            
             

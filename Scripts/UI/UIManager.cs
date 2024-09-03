@@ -400,10 +400,10 @@ namespace AUTO_Matic
 
             ///Main Menu elements
             //Title
-            uiElements.Add("MainMenuTitle", UIHelper.CreateTextblock("MainMenuTitle", "", ((int)dims.X / 2) - (UIHelper.MenuTitle.Width / 2), //450 with UIHelper.MenuTitle.Width
-                ((int)dims.Y /2) - (int)(UIHelper.MenuTitle.Height + 50)));
+            uiElements.Add("MainMenuTitle", UIHelper.CreateTextblock("MainMenuTitle", "", ((int)dims.X / 2) - (UIHelper.MenuTitle.Width / 4), //450 with UIHelper.MenuTitle.Width
+                ((int)dims.Y /2) - (int)(UIHelper.MenuTitle.Height)));
             UIHelper.SetElementRect(uiElements["MainMenuTitle"], new Rectangle(new Point((int)(uiElements["MainMenuTitle"].Position.X + 180), (int)uiElements["MainMenuTitle"].Position.Y + 90), new Point(80, 40)));
-            UIHelper.SetElementBGRect(uiElements["MainMenuTitle"], new Rectangle((int)uiElements["MainMenuTitle"].Position.X, (int)uiElements["MainMenuTitle"].Position.Y, UIHelper.MenuTitle.Width, UIHelper.MenuTitle.Height));
+            UIHelper.SetElementBGRect(uiElements["MainMenuTitle"], new Rectangle((int)uiElements["MainMenuTitle"].Position.X, (int)uiElements["MainMenuTitle"].Position.Y, UIHelper.MenuTitle.Width /2, (int)(UIHelper.MenuTitle.Height/1.5f)));
             //Play
             uiElements.Add("MainMenuPlay", UIHelper.CreateButton("MainMenuPlay", "Play", ((int)dims.X / 2) - (200 / 2), //Multiplying the width * 2 in the Draw Method
                 UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Bottom + 20));

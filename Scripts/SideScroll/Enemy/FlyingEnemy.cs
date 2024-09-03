@@ -21,7 +21,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         enum AnimationStates { Walking, Idle, Death, Jump, Shoot }
         AnimationStates animState = AnimationStates.Walking;
 
-        public enum EnemyStates { Idle, GoTo, Attacking, Jumping, Launch }
+        public enum EnemyStates { Idle, GoTo, Attacking, Jumping, Launch, Dead }
         public EnemyStates enemyState = EnemyStates.Idle;
         public EnemyStates prevState;
 
@@ -35,11 +35,11 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         float shootDelay = 1.35f; 
         float bulletTravelDist;
         public Rectangle enemyRect;
-        float moveSpeed = .5f;
+        public float moveSpeed = .5f;
         int unblockedCount = 0;
         Vector2 pos;
         float gravResistance;
-        public float health;
+        public float health = 20;
         static int pixelSize = 64;
         Vector2 velocity = Vector2.Zero;
         float yOffset = 64 * 3; //How high from the ground 
@@ -54,6 +54,9 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         float initYPos;
         float maxSpeed = 4f;
         bool blockBottom, blockRight, blockLeft, blockTop;
+
+        FlyingControlBeacon controlBeacon;// Range that it is allowed to move
+        public bool delete = false; //Overall death
 
         private void CreateVision()
         {
@@ -212,9 +215,10 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         }
         #endregion
 
-        public FlyingEnemy(ContentManager contentManager, int visionLength, Vector2 position)
+        public FlyingEnemy(ContentManager contentManager, int visionLength, Vector2 position, FlyingControlBeacon controlBeacon)
         {
             this.visionLength = visionLength;
+            this.controlBeacon = controlBeacon;
             pos = position;
             enemyRect = new Rectangle((int)position.X, (int)position.Y, pixelSize, pixelSize);
             texture = contentManager.Load<Texture2D>(@"SideScroll/Animations/DroneEnemy");
@@ -229,6 +233,8 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             particles = new ParticleManager();
             particles.Initialize(contentManager.Load<Texture2D>(@"Textures\white"));
             
+            
+
             iShootDelay = shootDelay;
         }
 
@@ -239,6 +245,14 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             blockRight = false;
             blockTop = false;
             //yOffset = 64 * 3;
+
+            if (health == 0)
+            {
+                enemyState = EnemyStates.Dead;
+            }
+           
+             
+
             switch (enemyState)
             {
                 case EnemyStates.Idle:
@@ -271,6 +285,14 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                             enemyState = EnemyStates.Launch;
 
                         }
+                    }
+
+                    if (controlBeacon.Health < controlBeacon.MaxHealth)
+                    {
+                        velocity = new Vector2(0, -launchStr);
+                        initYPos = pos.Y;
+                        prevState = enemyState;
+                        enemyState = EnemyStates.Launch;
                     }
                     break;
                 case EnemyStates.Launch:
@@ -359,8 +381,10 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
 
                     #region Basic Movement
+                    bool canMove = false;
 
-
+                    canMove = controlBeacon.InRange(enemyRect);
+                   
                     if ((int)pos.X < (int)player.Position.X)
                     {
                         if (velocity.X < 0)
@@ -491,11 +515,15 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                         collisionRect.Y = enemyRect.Y + collisionRect.Height;
                     }
 
-                    pos += velocity;
+                    if (canMove)
+                        pos += velocity;
+                    else
+                        pos -= velocity;
                     #endregion
 
 
-                    if (groundRect.Intersects(player.playerRect) || MathHelper.Distance(enemyRect.Center.X, player.playerRect.Center.X) < attackDist)
+                    if (groundRect.Intersects(player.playerRect) && currBounds.Contains(enemyRect) ||
+                        MathHelper.Distance(enemyRect.Center.X, player.playerRect.Center.X) < attackDist && enemyRect.Center.Y < player.playerRect.Bottom)
                     {
                         enemyState = EnemyStates.Attacking;
                     }
@@ -515,6 +543,25 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                     if(MathHelper.Distance(enemyRect.Center.X, player.playerRect.Center.X) > attackDist)
                     {
                         enemyState = EnemyStates.GoTo;
+                    }
+                    break;
+                case EnemyStates.Dead:
+                    pos.Y += gravity.Y;
+
+                    foreach(GroundTile tile in SideTileMap.GroundTiles)
+                    {
+                        if(enemyRect.TouchTopOf(tile.Rectangle))
+                        {
+                            delete = true;
+                        }
+                    }
+
+                    foreach(PlatformTile  tile in SideTileMap.PlatformTiles)
+                    {
+                        if(enemyRect.TouchTopOf(tile.Rectangle))
+                        {
+                            delete = true;
+                        }
                     }
                     break;
             }
@@ -595,7 +642,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             animManager.Draw(spriteBatch, Color.White);
             //spriteBatch.Draw(texture, enemyRect, Color.White);
             //spriteBatch.Draw(texture, groundRect, Color.White);
-            spriteBatch.Draw(collisionTexture, collisionRect, Color.Blue);
+            //spriteBatch.Draw(collisionTexture, collisionRect, Color.Blue);
 
             for (int i = 0; i < bullets.Count; i++)
             {

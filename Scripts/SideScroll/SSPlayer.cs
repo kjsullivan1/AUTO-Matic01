@@ -1715,12 +1715,12 @@ namespace AUTO_Matic.SideScroll
                     {
                         switch(currWeapon)
                         {
-                            case WeaponType.Pistol:
+                            case WeaponType.Pistol: 
                                 bulletTravelDist = 64 * 3;
                                 bulletSpeed = 3.5f;
                                 bullets.Add(new Bullet(new Vector2(position.X/* - (18 / 2)*/, 
                                     position.Y + playerRect.Height / 1.5f), -bulletSpeed, 
-                                    new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                    new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
                                 sounds.AddSound("Shoot", false);
                                 sounds.PlaySound();
                                 break;
@@ -1734,18 +1734,18 @@ namespace AUTO_Matic.SideScroll
                                 //Top 
                                 bullets.Add(new Bullet(new Vector2(position.X /*- (18/2)*/,
                                    (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
-                                   new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 3));
+                                   new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 3, isPlayer: true));
                                 
                                 //Center
                                 bullets.Add(new Bullet(new Vector2(position.X /*- (18/2)*/,
                                    position.Y + playerRect.Height / 1.5f), -bulletSpeed,
-                                   new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                   new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
                                 //sounds.AddSound("Shoot", false, -1);
                                 //sounds.PlaySound();
                                 //Bottom
                                 bullets.Add(new Bullet(new Vector2(position.X /*- (18/2)*/,
                                    position.Y + playerRect.Height / 1.5f), -bulletSpeed,
-                                   new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 3));
+                                   new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 3, isPlayer: true));
                                 //sounds.AddSound("Shoot", false, -1);
                                 //sounds.PlaySound();
                                 break;
@@ -1756,7 +1756,7 @@ namespace AUTO_Matic.SideScroll
                                 {
                                     bullets.Add(new Bullet(new Vector2(position.X /*- (18 / 2)*/,
                                   (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
-                                  new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
+                                  new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
                                     sounds.AddSound("Shoot", false, -.5f);
                                     sounds.PlaySound();
                                 }
@@ -1773,7 +1773,7 @@ namespace AUTO_Matic.SideScroll
                                 {
                                     bullets.Add(new Bullet(new Vector2(position.X /*- (18 / 2)*/,
                                   (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
-                                  new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
+                                  new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
                                     sounds.AddSound("Shoot", false, .5f);
                                     sounds.PlaySound();
                                 }
