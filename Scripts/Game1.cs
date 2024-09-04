@@ -34,13 +34,15 @@ namespace AUTO_Matic
         int dropRateTD = 55;
         float healAmount = 2.25f;
         int openDoorCount = 0; //Counts how many times opened doors in the main SideScroll section
-        int bossKillCount = 0; //How many bosses defeated
+        int bossKillCount = 4; //How many bosses defeated
 
         Rectangle LeaveDungeon = Rectangle.Empty;
         bool closeDoor = false;
 
+        int MenuButtonIndex = 0;
+
         public enum Scenes { TitleScreen, InGame, Exit }
-        public Scenes currScene = Scenes.InGame;
+        public Scenes currScene = Scenes.TitleScreen;
 
         public enum GameStates { Tutorial, SideScroll, TopDown, Paused, FinalBoss}
         public GameStates GameState = GameStates.SideScroll;
@@ -110,6 +112,7 @@ namespace AUTO_Matic
         #endregion
         //SSEnemy enemy;
         SSCamera ssCamera;
+
 
         #region Paused Helpers
         bool black = true;
@@ -851,7 +854,7 @@ namespace AUTO_Matic
                 (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
             ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
             fadePos = SideTileMap.playerSpawns[0];
-           // ssCamera.Zoom = .5f;
+           ssCamera.Zoom = .5f;
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
             GameState = GameStates.SideScroll;
@@ -971,7 +974,7 @@ namespace AUTO_Matic
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GamePad.GetState(PlayerIndex.One).Buttons.BigButton == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             KeyboardState kb = Keyboard.GetState();
             
@@ -1395,7 +1398,8 @@ namespace AUTO_Matic
                                                 LeaveDungeon = new Rectangle(camera.viewport.Bounds.X + camera.viewport.Bounds.Width / 2,
                                                 camera.viewport.Bounds.Y + camera.viewport.Bounds.Height / 2, 64, 64);
                                                 laserBoss.bossRects.Clear();
-                                                LoadFinalBoss();
+                                                //LoadFinalBoss();
+                                                ChangeToSideScroll();
                                                 ssPlayer.Health = 10;
                                                 bossKillCount++;
                                             }
@@ -1526,6 +1530,8 @@ namespace AUTO_Matic
 
                                 if(ssPlayer.damaged)
                                     UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
+                                if (ssPlayer.Health <= 0)
+                                    LoadFinalBoss();
                                 #region Collisions
                                 ssPlayer.blockBottom = false;
 
@@ -1581,6 +1587,15 @@ namespace AUTO_Matic
                                 {
                                     ssPlayer.Collision(tile2.Rectangle);
                                 }
+                                foreach(TopDoorTile tile3 in SideTileMap.TopDoorTiles)
+                                {
+                                    ssPlayer.Collision(tile3.Rectangle);
+                                }
+                                foreach(BottomDoorTile tile4 in SideTileMap.BottomDoorTiles)
+                                {
+                                    ssPlayer.Collision(tile4.Rectangle);
+                                }
+
                                 if (ssPlayer.blockBottom == false && ssPlayer.playerState != SSPlayer.PlayerStates.Jumping)
                                 {
                                     ssPlayer.coyoteTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -1708,6 +1723,8 @@ namespace AUTO_Matic
                     StartNewGame(true);
                 else if (GameState == GameStates.Tutorial)
                     LoadTutorial();
+                else if (GameState == GameStates.FinalBoss)
+                    LoadFinalBoss();
                 //StartNewGame();
                 ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
                 fadePos = SideTileMap.playerSpawns[0];
@@ -1715,10 +1732,7 @@ namespace AUTO_Matic
                 soundManager.ClearSounds();
                 soundManager.AddSound("Level0Side", true);
             }
-            if (ssPlayer.damaged)
-            {
-                UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
-            }
+            UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
             if (updateDoor)
             {
                 UpdateDoor(topIndex, bottomIndex);
@@ -1943,6 +1957,7 @@ namespace AUTO_Matic
             }
 
             UIHelper.HealthBar = healthbars;
+            
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
         }
 
@@ -2057,6 +2072,8 @@ namespace AUTO_Matic
 
                         }
                     }
+                    if (bossKillCount == 4)
+                        LoadFinalBoss();
                         
 
                 }
@@ -2502,14 +2519,32 @@ namespace AUTO_Matic
                     UpdateCamera(mainMenuPos, 10);
                     UIManager.UpdateButton("MainMenu", crawlSpeed);
 
-                    if (currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released)
+                    if (currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released || 
+                        currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && MenuButtonIndex == 0)
                     {
                         MenuState = MenuStates.StartGame;
+                        MenuButtonIndex = 0;
                     }
                     if (prevButtons.B == ButtonState.Pressed && currButtons.B == ButtonState.Released)
                     {
                         MenuState = MenuStates.Settings;
                     }
+                    
+                    if(currButtons.Back == ButtonState.Pressed && prevButtons.Back == ButtonState.Released ||
+                        currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && MenuButtonIndex == 1)
+                    {
+                        Exit();
+                    }
+
+                    if(GamePad.GetState(0).DPad.Down == ButtonState.Pressed)
+                    {
+                        MenuButtonIndex = 1;
+                    }
+                    if(GamePad.GetState(0).DPad.Up == ButtonState.Pressed)
+                    {
+                        MenuButtonIndex = 0;
+                    }
+
                     break;
                 case MenuStates.StartGame:
 
@@ -2518,11 +2553,27 @@ namespace AUTO_Matic
                     UIHelper.SetElementVisibility("StartNewGame", true, UIManager.uiElements);
                     UseMouse(kb, crawlSpeed);
                     UpdateCamera(mainMenuPos, 28);
-                    if (prevButtons.Start == ButtonState.Pressed && currButtons.Start == ButtonState.Released)
+                    if (currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released ||
+                        currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && MenuButtonIndex == 0)
                     {
-                        currScene = Scenes.InGame;
-                        StartNewGame();
+                        ChangeGameState(Game1.Scenes.InGame);
+                        UIHelper.SetElementVisibility("MainMenu", false,UIManager.uiElements);
+                        UIHelper.SetElementVisibility("Settings", false,UIManager.uiElements);
+                        UIHelper.SetElementVisibility("StartNewGame", false,UIManager.uiElements);
+                        UIHelper.SetElementVisibility("LoadGame", false, UIManager.uiElements);
+                        UIHelper.SetElementVisibility("StartGameReturn", false, UIManager.uiElements);
+                        LoadTutorial();
                     }
+
+                    if (GamePad.GetState(0).DPad.Down == ButtonState.Pressed)
+                    {
+                        MenuButtonIndex = 1;
+                    }
+                    if (GamePad.GetState(0).DPad.Up == ButtonState.Pressed)
+                    {
+                        MenuButtonIndex = 0;
+                    }
+
                     break;
                 case MenuStates.Settings:
                     UIHelper.SetElementVisibility("Settings", true, UIManager.uiElements);

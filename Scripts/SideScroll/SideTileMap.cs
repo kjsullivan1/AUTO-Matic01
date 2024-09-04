@@ -38,6 +38,7 @@ namespace AUTO_Matic
         public static List<RepeatBackground> repeatBG = new List<RepeatBackground>();
         public static List<ControllBeacon> flyingBeacons = new List<ControllBeacon>();
         public static List<Vector2> Textboxes = new List<Vector2>();
+        public static List<BorderTile> BorderTiles = new List<BorderTile>();
 
         //int backgroundIndex = 1;
 
@@ -62,6 +63,11 @@ namespace AUTO_Matic
         public static List<ControllBeacon> GetFlyingEnemies()
         {
             return flyingBeacons;
+        }
+
+        public static List<BorderTile> GetBorderTiles()
+        {
+            return BorderTiles;
         }
 
         public static List<Vector2> GetTextBoxes()
@@ -300,6 +306,11 @@ namespace AUTO_Matic
                     {
                         flyingBeacons.Add(new ControllBeacon(num, new Rectangle(x * size, y* size, size, size)));
                         backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
+                    }
+                    else if(num == 99)
+                    {
+                        BorderTiles.Add(new BorderTile(num, new Rectangle(x * size, y * size, size, size)));
+                        backgroundTiles.Add(new BackgroundTile(map[y - 2, x], new Rectangle(x * size, y * size, size, size)));
                     }
 
 

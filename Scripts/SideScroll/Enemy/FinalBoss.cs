@@ -228,15 +228,15 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                     {
                         case 0:
                             chosenWeapon = "Shotgun";
-                            bulletDmg = 1.5f;
+                            bulletDmg = 1.4f;
                             break;
                         case 1:
                             chosenWeapon = "Laser";
-                            bulletDmg = 2.2f;
+                            bulletDmg = 1.2f;
                             break;
                         case 2:
                             chosenWeapon = "Auto";
-                            bulletDmg = 1.25f;
+                            bulletDmg = .75f;
                             break;
                         case 3:
                             chosenWeapon = "Bomb";
@@ -509,7 +509,8 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 if(bullets[i].rect.Intersects(ssPlayer.Rectangle))
                 {
                     bullets[i].delete = true;
-                    DamagePlayer(ssPlayer);
+                    if(!ssPlayer.damaged)
+                        DamagePlayer(ssPlayer);
                 }
 
                 if (bullets[i].delete)
@@ -524,7 +525,8 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 if(bombs[i].rect.Intersects(ssPlayer.Rectangle))
                 {
                     bombs[i].delete = true;
-                    DamagePlayer(ssPlayer);
+                    if(!ssPlayer.damaged)
+                        DamagePlayer(ssPlayer);
                 }
 
                 if(bombs[i].delete)
@@ -584,6 +586,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
         private void DamagePlayer(SSPlayer ssPlayer)
         {
+
             ssPlayer.Health -= bulletDmg;
             ssPlayer.playerState = SSPlayer.PlayerStates.Knockback;
             switch (chosenWeapon)

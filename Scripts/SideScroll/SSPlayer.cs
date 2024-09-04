@@ -88,7 +88,7 @@ namespace AUTO_Matic.SideScroll
                 {
                     damaged = true;
                 }
-                damaged = true;
+                //damaged = true;
                
                 health = value;
                 if (health <= 0)
@@ -1528,6 +1528,7 @@ namespace AUTO_Matic.SideScroll
                         
                         isCollidingLeft = false;
                         isCollidingRight = false;
+                        break;
                     }
                 }
                 foreach(DungeonEntrance dungeonEntrance in SideTileMap.DungeonEntrances)

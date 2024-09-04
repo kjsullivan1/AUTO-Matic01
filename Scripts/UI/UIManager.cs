@@ -84,23 +84,25 @@ namespace AUTO_Matic
                 case "TitleCrawl":
                     //StreamReader sr = new StreamReader(Directory.GetCurrentDirectory() + "/TextFiles/TitleCrawl.txt");
 
-                    //string text = "In the 31st century, humanities reach has greatly expanded amongst the stars. " +
-                    //    "With massive colonies suspended in space with millions of inhabitants. None of these structures is more " +
-                    //    "immaculate than that of Nuton – 6, a beacon of research and hope for tomorrow equipped with its own advanced A.I. named M.O.N.O., " +
-                    //    "managing each of the four primary quadrants of the facility, through its secondary access modules. However, one day when everything " +
-                    //    "seemed calm the AI robotic co-habitants of the satellite went haywire forcing everyone off the colony… or almost everyone?";
+                    string text = "\n\n\n\n\n\n\n  In the 31st century, humanities reach has greatly expanded amongst the stars. \n  " +
+                        "With massive colonies suspended in space with millions of inhabitants.\n  None of these structures is more" +
+                        "immaculate than that of Nuton 6, a beacon of \n  research and hope for tomorrow equipped with its own advanced A.I. named\n  M.O.N.O.," +
+                        "managing each of the four primary quadrants of the facility, through\n  its secondary access modules. However, one day when everything" +
+                        "seemed\n  calm the AI robotic cohabitants of the satellite went haywire forcing everyone\n  off the colony... or almost everyone?\n";
 
-                    string text = " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSomehow, there is an unsupported character that is being used in our crawl\n text and it is currently Out Of Order.\n We apologize for SpriteFont's lack of " +
-                        "support on basic grammatical characters";
+                    //string text = " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSomehow, there is an unsupported character that is being used in our crawl\n text and it is currently Out Of Order.\n We apologize for SpriteFont's lack of " +
+                    //    "support on basic grammatical characters";
                     UIHelper.SetElementText(uiElements[keyWord], text);
                     if(UIHelper.GetElementBGRect(uiElements[keyWord]).Bottom > 0)
                     {
+                        float yPos = UIHelper.GetElementBGRect(uiElements[keyWord]).Y - .5f;
+
                         UIHelper.SetElementBGRect(uiElements[keyWord], 
-                            new Rectangle(UIHelper.GetElementBGRect(uiElements[keyWord]).X, (int)(UIHelper.GetElementBGRect(uiElements[keyWord]).Y - 1.5f),
+                            new Rectangle(UIHelper.GetElementBGRect(uiElements[keyWord]).X, (int)(UIHelper.GetElementBGRect(uiElements[keyWord]).Y - .75f),
                             UIHelper.GetElementBGRect(uiElements[keyWord]).Width, UIHelper.GetElementBGRect(uiElements[keyWord]).Height));
 
                         UIHelper.SetElementRect(uiElements[keyWord],
-                           new Rectangle(UIHelper.GetElementRect(uiElements[keyWord]).X, (int)(UIHelper.GetElementRect(uiElements[keyWord]).Y - 1.5f),
+                           new Rectangle(UIHelper.GetElementRect(uiElements[keyWord]).X, (int)(UIHelper.GetElementRect(uiElements[keyWord]).Y - .75f),
                            UIHelper.GetElementRect(uiElements[keyWord]).Width, UIHelper.GetElementRect(uiElements[keyWord]).Height));
                     }
                     break;

@@ -32,6 +32,7 @@ namespace AUTO_Matic.Scripts.SideScroll
         Vector2 prevPos = Vector2.One;
         int count = 0;
         bool stop = false;
+        int maxHeight;
 
         int cameraWidth = 1100;
         int cameraHeight = 900;
@@ -76,6 +77,7 @@ namespace AUTO_Matic.Scripts.SideScroll
             center = startPos;
             this.width = width;
             this.height = height;
+            this.maxHeight = height;
         }
 
         public void Update(Vector2 position, bool dont, bool fade)
@@ -102,7 +104,15 @@ namespace AUTO_Matic.Scripts.SideScroll
             //    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(position.X + viewport.Width, viewport.Height / 2, 0));
             //}
             //else
-
+            height = maxHeight;
+            foreach(BorderTile tile in SideTileMap.BorderTiles)
+            {
+                if (ViewRect.TouchTopOf(tile.Rectangle))
+                {
+                    height = tile.Rectangle.Top;
+                }
+            }
+          
            
             if(dont)
             {

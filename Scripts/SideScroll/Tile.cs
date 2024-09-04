@@ -161,4 +161,15 @@ namespace AUTO_Matic
             position = new Vector2(newRect.X, newRect.Y);
         }
     }
+
+    class BorderTile :Tile
+    {
+        public BorderTile(int i, Rectangle newRect)
+        {
+            texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
+            this.Rectangle = newRect;
+            this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+            position = new Vector2(newRect.X, newRect.Y);
+        }
+    }
 }

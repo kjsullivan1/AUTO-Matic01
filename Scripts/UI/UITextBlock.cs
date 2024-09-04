@@ -18,6 +18,8 @@ namespace AUTO_Matic
         public Rectangle Rect { get; set; }
         public float Scale { get; set; }
 
+        SpriteFont font;
+
         public Texture2D BackGroundTexture { get; set; }
         public Rectangle TextureRect { get; set; }
         public UITextBlock(string id, Vector2 position, Vector2 textOffset, SpriteFont font, string text, Color textTint)
@@ -36,12 +38,13 @@ namespace AUTO_Matic
             Font = font;
             Text = text;
             TextTint = textTint;
-
+            this.font = font;
             BackGroundTexture = bgTxture;
             Scale = 1;
 
             if(Text != null && Text.Length > 0 && Rect != Rectangle.Empty)
             {
+              
                 int endOfLineX = Text.Length;
                 if (endOfLineX > Rect.Width)
                 {
@@ -75,6 +78,7 @@ namespace AUTO_Matic
                 }
             }
             
+           
 
         }
 
@@ -83,8 +87,16 @@ namespace AUTO_Matic
           
             if (Visible)
             {
-              
-                
+                //for (int i = 0; i < Text.Length; i++)
+                //{
+                //    if (font.Characters.Contains(Text[i]) == false)
+                //    {
+                //        char text = Text[i];
+                //        Text.Remove(i, 1);
+                //    }
+                     
+                //}
+
                 spriteBatch.Draw(BackGroundTexture,TextureRect, color: Color.White);
                 if(Text == null)
                     spriteBatch.DrawString(spriteFont: Font, text: "", position: new Vector2(Rect.X, Rect.Y) + TextOffset, color: TextTint, rotation: 0, origin: new Vector2(0, 0), scale: Scale, SpriteEffects.None, layerDepth: 0);
