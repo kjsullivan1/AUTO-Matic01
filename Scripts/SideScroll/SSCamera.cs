@@ -107,7 +107,7 @@ namespace AUTO_Matic.Scripts.SideScroll
             height = maxHeight;
             foreach(BorderTile tile in SideTileMap.BorderTiles)
             {
-                if (ViewRect.TouchTopOf(tile.Rectangle))
+                if (tile.Rectangle.TouchBottomOf(new Rectangle(ViewRect.Center.X - ((64 * 4))/2, ViewRect.Bottom, 64 * 4, 1)))
                 {
                     height = tile.Rectangle.Top;
                 }

@@ -46,10 +46,11 @@ namespace AUTO_Matic.Scripts.Effects
                 //particles.Add(new Particle(new Rectangle(startRect.X + startRect.Width/2, startRect.Y - 1, startRect.Width, startRect.Height), 
                 //    rand, width));
                 particles.Add(new Particle(startRect,
-                    rand, width));
+                    rand, width, ParticleEffect.Type.Explosion));
             }
 
             ParticleEffect effect;
+            effect.effectType = ParticleEffect.Type.Explosion;
             effect.particles = particles;
             effect.boundingRect = new Rectangle();
             effect.boundingCircle = new Circle(new Vector2(boundRect.Bounds.X + boundRect.Bounds.Width/2, boundRect.Bounds.Y + boundRect.Bounds.Height/2), boundRect.Radius);
@@ -57,6 +58,29 @@ namespace AUTO_Matic.Scripts.Effects
 
             particleEffects.Add(effect);
 
+
+        }
+
+        public void MakeFireSpit(Rectangle startRect, Circle boundRect, int width)
+        {
+            particles.Clear();
+
+            for (int i = 0; i < particleCount; i++)
+            {
+                //particles.Add(new Particle(new Rectangle(startRect.X + startRect.Width/2, startRect.Y - 1, startRect.Width, startRect.Height), 
+                //    rand, width));
+                particles.Add(new Particle(startRect,
+                    rand, width, ParticleEffect.Type.Pillar));
+            }
+
+            ParticleEffect effect;
+            effect.effectType = ParticleEffect.Type.Pillar;
+            effect.particles = particles;
+            effect.boundingRect = new Rectangle();
+            effect.boundingCircle = new Circle(new Vector2(boundRect.Bounds.X + boundRect.Bounds.Width / 2, boundRect.Bounds.Y + boundRect.Bounds.Height / 2), boundRect.Radius);
+            //effect.boundingCircle = boundRect;
+
+            particleEffects.Add(effect);
 
         }
         #endregion
@@ -79,22 +103,36 @@ namespace AUTO_Matic.Scripts.Effects
 
                     particleEffects[j].particles[i].rect = new Rectangle((int)particleEffects[j].particles[i].position.X, (int)particleEffects[j].particles[i].position.Y,
                        particleEffects[j].particles[i].rect.Width, particleEffects[j].particles[i].rect.Height);
-                    if(top)
+
+                    switch(particleEffects[j].effectType)
                     {
-                        if (/*!particleEffects[j].boundingRect.Contains(particleEffects[j].particles[i].position.ToPoint())*/
-                    !CollideCircleTop(particleEffects[j].boundingCircle, particleEffects[j].particles[i], tdPlayer) || particleEffects[j].particles[i].duration <= 0)
-                        {
-                            particleEffects[j].particles.RemoveAt(i);
-                        }
+                        case ParticleEffect.Type.Explosion:
+                            if (top)
+                            {
+                                if (/*!particleEffects[j].boundingRect.Contains(particleEffects[j].particles[i].position.ToPoint())*/
+                            !CollideCircleTop(particleEffects[j].boundingCircle, particleEffects[j].particles[i], tdPlayer) || particleEffects[j].particles[i].duration <= 0)
+                                {
+                                    particleEffects[j].particles.RemoveAt(i);
+                                }
+                            }
+                            else
+                            {
+                                if (/*!particleEffects[j].boundingRect.Contains(particleEffects[j].particles[i].position.ToPoint())*/
+                            !CollideCircle(particleEffects[j].boundingCircle, particleEffects[j].particles[i]) || particleEffects[j].particles[i].duration <= 0)
+                                {
+                                    particleEffects[j].particles.RemoveAt(i);
+                                }
+                            }
+                            break;
+                        case ParticleEffect.Type.Pillar:
+                            if(particleEffects[j].particles[i].duration <= 0 ||
+                                MathHelper.Distance(particleEffects[j].particles[i].startPos.Y, particleEffects[j].particles[i].position.Y) > 64)
+                            {
+                                particleEffects[j].particles.RemoveAt(i);
+                            }
+                            break;
                     }
-                    else
-                    {
-                        if (/*!particleEffects[j].boundingRect.Contains(particleEffects[j].particles[i].position.ToPoint())*/
-                    !CollideCircle(particleEffects[j].boundingCircle, particleEffects[j].particles[i]) || particleEffects[j].particles[i].duration <= 0)
-                        {
-                            particleEffects[j].particles.RemoveAt(i);
-                        }
-                    }
+                    
                 
                    
                 }
@@ -165,6 +203,9 @@ namespace AUTO_Matic.Scripts.Effects
         public List<Particle> particles;
         public Rectangle boundingRect;
         public Circle boundingCircle;
+
+        public enum Type { Explosion, Pillar}
+        public Type effectType; 
     }
 
     class Particle
@@ -175,15 +216,33 @@ namespace AUTO_Matic.Scripts.Effects
         public float duration;
         public Vector2 position;
         public Color color;
+        public Vector2 startPos;
 
-        public Particle(Rectangle rect, Random rand, int width)
+        public Particle(Rectangle rect, Random rand, int width, ParticleEffect.Type effectType)
         {
             this.rect = new Rectangle(rect.X, rect.Y, width, width);
-            velocity = new Vector2(rand.Next(-maxVel, maxVel), rand.Next(-maxVel, maxVel));
-            duration = RandExplosion(0, 2);
-            position = new Vector2(rect.X, rect.Y);
 
-            RandomColor(rand);
+            switch (effectType)
+            {
+                case ParticleEffect.Type.Explosion:
+                    
+                    velocity = new Vector2(rand.Next(-maxVel, maxVel), rand.Next(-maxVel, maxVel));
+                    duration = RandExplosion(0, 2);
+                    position = new Vector2(rect.Center.X, rect.Center.Y);
+
+                    RandomColor(rand);
+                    break;
+                case ParticleEffect.Type.Pillar:
+
+                    velocity = new Vector2(RandPillarX(), rand.Next(-maxVel, 0));
+                    duration = RandExplosion(0, 1);
+                    position = new Vector2(rect.Center.X, rect.Center.Y);
+
+                    RandomColor(rand);
+                    break;
+            }
+
+            startPos = position;
         }
 
         private void RandomColor(Random rand)
@@ -219,5 +278,41 @@ namespace AUTO_Matic.Scripts.Effects
             string combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
             return decimalNumber = float.Parse(combined);
         }
+
+        public float RandPillar(int min, int max)
+        {
+            Random r = new Random();
+            float decimalNumber;
+            string beforePoint = r.Next(0, 1).ToString();//number before decimal point
+            string afterPoint = r.Next(min, max).ToString();
+            string afterPoint2 = r.Next(0, 4).ToString();
+            string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
+                                                          //string secondDP = r.Next(0, 9).ToString();//2nd decimal point
+            string combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
+            return decimalNumber = float.Parse(combined);
+        }
+
+        public float RandPillarX()
+        {
+            Random r = new Random();
+            float decimalNumber;
+            string beforePoint = r.Next(0, 2).ToString();//number before decimal point
+            string afterPoint = r.Next(0, 10).ToString();
+            string afterPoint2 = r.Next(0, 10).ToString();
+            string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
+                                                          //string secondDP = r.Next(0, 9).ToString();//2nd decimal point
+            string combined = "";
+            if (r.Next(0,2) < 1)
+            {
+                combined = "-"+beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
+            }
+            else
+            {
+                combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
+            }
+            
+            return decimalNumber = float.Parse(combined);
+        }
+    
     }
 }

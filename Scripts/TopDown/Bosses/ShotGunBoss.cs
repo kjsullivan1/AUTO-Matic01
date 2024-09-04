@@ -347,7 +347,7 @@ namespace AUTO_Matic.Scripts.TopDown
                         //circle1.Radius += 30;
                         if (slam.Bounds.X < worldRect.X)
                         {
-                            particleManager.MakeExplosion(new Rectangle((int)worldRect.X + worldRect.Width/2, (int)worldRect.Y + worldRect.Height/2, worldRect.Width, worldRect.Height),
+                            particleManager.MakeExplosion(new Rectangle((int)worldRect.X, (int)worldRect.Y, worldRect.Width, worldRect.Height),
                                    new Circle(new Vector2(slam.Position.X + 45/2, slam.Position.Y), (int)(slam.Radius/2)), 45);
                          
                            

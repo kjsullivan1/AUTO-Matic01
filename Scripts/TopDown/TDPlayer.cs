@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AUTO_Matic.Scripts;
 using AUTO_Matic.Scripts.TopDown;
+using AUTO_Matic.Scripts.Effects;
 
 namespace AUTO_Matic.TopDown
 {
@@ -35,6 +36,21 @@ namespace AUTO_Matic.TopDown
         float iMeleeDelay;
 
         string[] moveDirs = new string[2];
+
+        bool speedBoosted = false;
+        float boostedSpeed = 0;
+        float speedBoostTime = 1.75f;
+        float iSpeedBoostTime;
+        float speedBoostInputDelay = .3f;
+        float iSpeedBoostInputDelay;
+        bool inputDelay = false;
+
+        float fireDmg = .5f;
+        float fireDmgRate = .35f;
+        float iFireDmgRate;
+        bool inDOT = false; //Is inside the DamageOverTime tile
+
+        ParticleManager particles;
         
         Rectangle MeleeHitbox
         {
@@ -281,6 +297,12 @@ namespace AUTO_Matic.TopDown
             ChangeAnimation();
             iShootDelay = shootDelay;
             shootDelay = 0;
+
+            iSpeedBoostInputDelay = speedBoostInputDelay;
+            iSpeedBoostTime = speedBoostTime;
+            iFireDmgRate = fireDmgRate;
+
+            particles = new ParticleManager();
         }
 
         public int DashIndex()//Returns the index needed for the dash icon    0: Full, 1: Empty, 2+ Growing rate
@@ -442,7 +464,7 @@ namespace AUTO_Matic.TopDown
             switch(playerState)
             {
                 case PlayerState.Movement:
-                    Input(enemies, gameTime);
+                    Input(enemies, gameTime,map);
                     if (levelInX >= 1 && levelInY >= 1)
                     {
                         foreach (WallTiles tile in map.WallTiles)
@@ -801,9 +823,10 @@ namespace AUTO_Matic.TopDown
                 }
             }
             animManager.Update(gameTime, new Vector2(rectangle.X, rectangle.Y - (64 - rectangle.Height)));
+            particles.Update(gameTime, this, true);
         }
 
-        private void Input(List<TDEnemy> enemies, GameTime gameTime)
+        private void Input(List<TDEnemy> enemies, GameTime gameTime, TopDownMap map)
         {
             if(kb.IsKeyDown(Keys.LeftShift) && prevKb.IsKeyDown(Keys.LeftShift) && playerState != PlayerState.Dash||
                 currButtons.RightShoulder == ButtonState.Pressed && prevButtons.RightShoulder == ButtonState.Pressed && playerState != PlayerState.Dash)
@@ -815,99 +838,110 @@ namespace AUTO_Matic.TopDown
                 lockDir = false;
             }
             //Else ifs for cardinal
-            if (kb.IsKeyDown(Keys.D) || controllerMoveDir.X > 0 /*&& controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
+            if(inputDelay)
             {
-                velocity.X += moveSpeed;
-                if(!lockDir && shootDir != "right" || playerState == PlayerState.Dash)
-                {
-                    shootDir = "right";
-                   
-                    ChangeAnimation();
-                }
-
-                if (moveDirs[0] == null)
-                {
-                    moveDirs[0] = "right";
-                }
-                else if (moveDirs[1] == null && moveDirs[0] != "right" || moveDirs[1] != "right" && moveDirs[0] != "right")
-                {
-                    moveDirs[1] = "right";
-                }
 
             }
-            if (kb.IsKeyDown(Keys.A) || controllerMoveDir.X  < 0/* && controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
+            else
             {
-                velocity.X += -moveSpeed;
-                if (!lockDir && shootDir != "left" || playerState == PlayerState.Dash)
+                if (kb.IsKeyDown(Keys.D) || controllerMoveDir.X > 0 /*&& controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
                 {
-                    shootDir = "left";
+                    velocity.X += moveSpeed;
+                    if (!lockDir && shootDir != "right" || playerState == PlayerState.Dash)
+                    {
+                        shootDir = "right";
 
-              
-                    ChangeAnimation();
+                        ChangeAnimation();
+                    }
+
+                    if (moveDirs[0] == null)
+                    {
+                        moveDirs[0] = "right";
+                    }
+                    else if (moveDirs[1] == null && moveDirs[0] != "right" || moveDirs[1] != "right" && moveDirs[0] != "right")
+                    {
+                        moveDirs[1] = "right";
+                    }
+
+                }
+                if (kb.IsKeyDown(Keys.A) || controllerMoveDir.X < 0/* && controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
+                {
+                    velocity.X += -moveSpeed;
+                    if (!lockDir && shootDir != "left" || playerState == PlayerState.Dash)
+                    {
+                        shootDir = "left";
+
+
+                        ChangeAnimation();
+                    }
+
+                    if (moveDirs[0] == null)
+                    {
+                        moveDirs[0] = "left";
+                    }
+                    else if (moveDirs[1] == null && moveDirs[0] != "left" || moveDirs[1] != "left" && moveDirs[0] != "left")
+                    {
+                        moveDirs[1] = "left";
+                    }
+                }
+                if (kb.IsKeyDown(Keys.W) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y > 0 /*&& controllerMoveDir.X > -.6*/)
+                {
+                    velocity.Y += -moveSpeed;
+                    if (!lockDir && shootDir != "up" || playerState == PlayerState.Dash)
+                    {
+                        shootDir = "up";
+
+                        ChangeAnimation();
+                    }
+
+                    if (moveDirs[0] == null)
+                    {
+                        moveDirs[0] = "up";
+                    }
+                    else if (moveDirs[1] == null && moveDirs[0] != "up" || moveDirs[1] != "up" && moveDirs[0] != "up")
+                    {
+                        moveDirs[1] = "up";
+                    }
+                }
+                if (kb.IsKeyDown(Keys.S) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y < 0 /*&& controllerMoveDir.X > -.6*/ )
+                {
+                    velocity.Y += moveSpeed;
+                    if (!lockDir && shootDir != "down" || playerState == PlayerState.Dash)
+                    {
+                        shootDir = "down";
+
+
+                        ChangeAnimation();
+                    }
+
+                    if (moveDirs[0] == null)
+                    {
+                        moveDirs[0] = "down";
+                    }
+                    else if (moveDirs[1] == null && moveDirs[0] != "down" || moveDirs[1] != "down" && moveDirs[0] != "down")
+                    {
+                        moveDirs[1] = "down";
+                    }
                 }
 
-                if (moveDirs[0] == null)
+                if (kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D) && controllerMoveDir.X == 0)
                 {
-                    moveDirs[0] = "left";
+                    velocity.X = 0;
                 }
-                else if (moveDirs[1] == null && moveDirs[0] != "left" || moveDirs[1] != "left" && moveDirs[0] != "left")
+                if (kb.IsKeyUp(Keys.S) && kb.IsKeyUp(Keys.W) && controllerMoveDir.Y == 0)
                 {
-                    moveDirs[1] = "left";
+                    velocity.Y = 0;
                 }
             }
-            if (kb.IsKeyDown(Keys.W) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y > 0 /*&& controllerMoveDir.X > -.6*/)
-            {
-                velocity.Y += -moveSpeed;
-                if (!lockDir && shootDir != "up" || playerState == PlayerState.Dash)
-                {
-                    shootDir = "up";
 
-                    ChangeAnimation();
-                }
-
-                if (moveDirs[0] == null)
-                {
-                    moveDirs[0] = "up";
-                }
-                else if (moveDirs[1] == null && moveDirs[0] != "up" || moveDirs[1] != "up" && moveDirs[0] != "up")
-                {
-                    moveDirs[1] = "up";
-                }
-            }
-            if (kb.IsKeyDown(Keys.S) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y < 0 /*&& controllerMoveDir.X > -.6*/ )
-            {
-                velocity.Y += moveSpeed;
-                if (!lockDir && shootDir != "down" || playerState == PlayerState.Dash)
-                {
-                    shootDir = "down";
-
-                
-                    ChangeAnimation();
-                }
-
-                if (moveDirs[0] == null)
-                {
-                    moveDirs[0] = "down";
-                }
-                else if (moveDirs[1] == null && moveDirs[0] != "down" || moveDirs[1] != "down" && moveDirs[0] != "down")
-                {
-                    moveDirs[1] = "down";
-                }
-            }
+            
 
             //if(kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D) && kb.IsKeyUp(Keys.S) && kb.IsKeyUp(Keys.W))
             //{
             //    moveDirs = new string[2];
             //}
 
-            if(kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D) && controllerMoveDir.X == 0)
-            {
-                velocity.X = 0;
-            }
-            if(kb.IsKeyUp(Keys.S) && kb.IsKeyUp(Keys.W) && controllerMoveDir.Y == 0)
-            {
-                velocity.Y = 0;
-            }
+          
             shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
             {
@@ -985,21 +1019,149 @@ namespace AUTO_Matic.TopDown
             prevKb = kb;
             prevButtons = currButtons;
 
-            if(velocity.X >= moveSpeed)
+            bool triggerEnter = false;
+            int i = 0;
+            int currFireTile = 0;
+            foreach(EnvironmentTile environmentTile in map.EnvironmentTiles)
             {
-                velocity.X = moveSpeed;
+              
+                if (new Rectangle(environmentTile.Rectangle.Center.X, environmentTile.Rectangle.Center.Y, 1,1).Intersects(rectangle) /*&& !speedBoosted*/)
+                {
+                    switch(environmentTile.effectType)
+                    {
+                        case EnvironmentTile.Type.SpeedBoost:
+                            boostedSpeed = moveSpeed * 1.75f;
+                            speedBoosted = true;
+                            inputDelay = true;
+                            switch (environmentTile.direction)
+                            {
+                                case "right":
+                                    velocity.Y = 0;
+                                    velocity.X = boostedSpeed;
+                                    break;
+                                case "left":
+                                    velocity.Y = 0;
+                                    velocity.X = -boostedSpeed;
+                                    break;
+                                case "up":
+                                    velocity.Y = -boostedSpeed;
+                                    velocity.X = 0;
+                                    break;
+                                case "down":
+                                    velocity.X = 0;
+                                    velocity.Y = boostedSpeed;
+                                    break;
+                            }
+                            break;
+                        case EnvironmentTile.Type.DamageOverTime:
+                            triggerEnter = true;
+                            currFireTile = i;
+                            if (inDOT)
+                            {
+                                
+                            }
+                            else
+                            {
+                                //triggerEnter = true;
+                                inDOT = true;
+                                fireDmgRate = iFireDmgRate;
+                            }
+                            break;
+                    }
+                }
+                i++;
             }
-            else if(velocity.X <= -moveSpeed)
+            if (!triggerEnter)
+                inDOT = false;
+
+
+
+            if(!speedBoosted)
             {
-                velocity.X = -moveSpeed;
+                if (velocity.X > moveSpeed)
+                {
+                    velocity.X = moveSpeed;
+                }
+                else if (velocity.X < -moveSpeed)
+                {
+                    velocity.X = -moveSpeed;
+                }
+                if (velocity.Y > moveSpeed)
+                {
+                    velocity.Y = moveSpeed;
+                }
+                else if (velocity.Y < -moveSpeed)
+                {
+                    velocity.Y = -moveSpeed;
+                }
+
+                if (velocity.X != 0 && velocity.Y != 0)
+                {
+                    velocity = new Vector2(velocity.X / 1.5f, velocity.Y / 1.5f);
+                }
             }
-            if(velocity.Y >= moveSpeed)
+            else if(speedBoosted)
             {
-                velocity.Y = moveSpeed;
+                
+                if (velocity.X > boostedSpeed)
+                {
+                    velocity.X = boostedSpeed;
+                }
+                else if (velocity.X < -boostedSpeed)
+                {
+                    velocity.X = -boostedSpeed;
+                }
+                if (velocity.Y > boostedSpeed)
+                {
+                    velocity.Y = boostedSpeed;
+                }
+                else if (velocity.Y < -boostedSpeed)
+                {
+                    velocity.Y = -boostedSpeed;
+                }
+
+                if(velocity.X != 0 && velocity.Y != 0)
+                {
+                    velocity = new Vector2(velocity.X / 1.5f, velocity.Y / 1.5f);
+                }
+                
+                speedBoostInputDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                speedBoostTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (speedBoostInputDelay <= 0)
+                {
+                    //speedBoostInputDelay = .25f;
+                    inputDelay = false;
+                }
+                if(speedBoostTime <= 0 || !speedBoosted)
+                {
+                    speedBoostInputDelay = iSpeedBoostInputDelay;
+                    speedBoostTime = iSpeedBoostTime;
+                    inputDelay = false;
+                    speedBoosted = false;
+                }
+               
             }
-            else if(velocity.Y <= -moveSpeed)
+           
+            if(inDOT)
             {
-                velocity.Y = -moveSpeed;
+                fireDmgRate -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if(fireDmgRate <= 0)
+                {
+                    Health -= fireDmg;
+                    fireDmgRate = iFireDmgRate;
+                    particles.MakeFireSpit(map.EnvironmentTiles[currFireTile].Rectangle,
+                        new Circle(new Vector2(map.EnvironmentTiles[currFireTile].Rectangle.Center.X, map.EnvironmentTiles[currFireTile].Rectangle.Center.Y),
+                        1), 32);
+                    //particles.MakeFireSpit(map.EnvironmentTiles[currFireTile].Rectangle,
+                    //  new Circle(new Vector2(map.EnvironmentTiles[currFireTile].Rectangle.Center.X, map.EnvironmentTiles[currFireTile].Rectangle.Center.Y),
+                    //  1), 32);
+                    //particles.MakeFireSpit(map.EnvironmentTiles[currFireTile].Rectangle,
+                    //  new Circle(new Vector2(map.EnvironmentTiles[currFireTile].Rectangle.Center.X, map.EnvironmentTiles[currFireTile].Rectangle.Center.Y),
+                    //  1), 32);
+                }
             }
 
             position += velocity;
@@ -1007,6 +1169,8 @@ namespace AUTO_Matic.TopDown
             {
 
             }
+
+           
         }
 
         public void Collision(Rectangle newRect, int xOffset, int yOffset, Rectangle bounds)
@@ -1020,8 +1184,26 @@ namespace AUTO_Matic.TopDown
 
                     rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
                 }
+                
                 isColliding = true;
                 position.Y -= moveSpeed;
+
+
+                if (speedBoosted)
+                {
+                    if (rectangle.Center.X > newRect.Center.X)
+                    {
+                        position.X += 2;
+                        rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
+                    }
+                    else
+                    {
+                        position.X -= 2;
+                        rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
+                    }
+
+                    inputDelay = false;
+                }
             }
             if(rectangle.TouchBottomOf(newRect))
             {
@@ -1032,6 +1214,22 @@ namespace AUTO_Matic.TopDown
                 }
                 position.Y += moveSpeed;
                 isColliding = true;
+
+
+                if (speedBoosted)
+                {
+                    if (rectangle.Center.X > newRect.Center.X)
+                    {
+                        position.X += 2;
+                        rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
+                    }
+                    else
+                    {
+                        position.X -= 2;
+                        rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
+                    }
+                    inputDelay = false;
+                }
             }
             if(rectangle.TouchLeftOf(newRect))
             {
@@ -1042,6 +1240,21 @@ namespace AUTO_Matic.TopDown
                 }
                 position.X -= moveSpeed;
                 isColliding = true;
+
+                if (speedBoosted)
+                {
+                    if (rectangle.Center.Y > newRect.Center.Y)
+                    {
+                        position.Y += 2;
+                        rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
+                    }
+                    else
+                    {
+                        position.Y -= 2;
+                        rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
+                    }
+                    inputDelay = false;
+                }
             }
             if(rectangle.TouchRightOf(newRect))
             {
@@ -1052,6 +1265,21 @@ namespace AUTO_Matic.TopDown
                 }
                 position.X += moveSpeed;
                 isColliding = true;
+
+                if(speedBoosted)
+                {
+                    if(rectangle.Center.Y > newRect.Center.Y)
+                    {
+                        position.Y += 2;
+                        rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
+                    }
+                    else
+                    {
+                        position.Y -= 2;
+                        rectangle = new Rectangle((int)position.X, (int)position.Y, rectangle.Width, rectangle.Height);
+                    }
+                    inputDelay = false;
+                }
             }
           
             //Border collisions
@@ -1557,6 +1785,8 @@ namespace AUTO_Matic.TopDown
             {
                 bullet.Draw(spriteBatch);
             }
+
+            particles.Draw(spriteBatch);
         }
         int DistForm(Vector2 pos1, Vector2 pos2)
         {

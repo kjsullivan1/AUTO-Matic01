@@ -37,6 +37,16 @@ namespace AUTO_Matic.TopDown
             get { return slamTiles; }
         }
 
+        private List<EnvironmentTile> environmentTiles = new List<EnvironmentTile>();
+        public List<EnvironmentTile> EnvironmentTiles
+        {
+            get { return environmentTiles; }
+        }
+        public void AddEnvironmentTile(EnvironmentTile tile)
+        {
+            environmentTiles.Add(tile);
+        }
+
 
         private int width, height;
         public List<int[,]> xMapDims = new List<int[,]>();
@@ -54,6 +64,9 @@ namespace AUTO_Matic.TopDown
         public List<int> SlamIndexes = new List<int>();
         public Rectangle ExitDoor = new Rectangle();
 
+        public int levelInX = 0;
+        public int levelInY = 0;
+        public Vector2 ScreenSize = Vector2.Zero;
       
 
         public int Width
@@ -287,7 +300,7 @@ namespace AUTO_Matic.TopDown
             floorCount = 0;
             //skullCount = 0;
             //Levels created horizontally
-
+            ScreenSize = new Vector2(screenWidth, screenHeight);
 
             for (int i = 0; i < maps.Count; i++)
             {
@@ -327,6 +340,7 @@ namespace AUTO_Matic.TopDown
 
         private void BuildDungeon0(List<int[,]> maps, List<int[,]> yMaps, List<int[,]> dMaps, int size, int screenWidth, int screenHeight, List<Vector2> xPoints, List<Vector2> yPoints, List<Vector2> diagPoints)
         {
+            #region NonDiagMaps
             for (int i = 0; i < maps.Count; i++)
             {
                 rows.Add(maps[i].GetLength(0));
@@ -451,7 +465,7 @@ namespace AUTO_Matic.TopDown
                 //height = yMaps[i].GetLength(0);
             }
 
-
+            #endregion
             for (int i = 0; i < dMaps.Count; i++)
             {
                 rows.Add(dMaps[i].GetLength(0));
@@ -462,8 +476,8 @@ namespace AUTO_Matic.TopDown
                     for (int x = 0; x < dMaps[i].GetLength(1); x++)
                     {
                         int num = dMaps[i][y, x];
-                        int levelInX = (int)diagPoints[i].X;
-                        int levelInY = (int)diagPoints[i].Y;
+                        levelInX = (int)diagPoints[i].X;
+                        levelInY = (int)diagPoints[i].Y;
 
 
                         if (num == 0)
@@ -527,6 +541,7 @@ namespace AUTO_Matic.TopDown
         }
         private void BuildDungeon1(List<int[,]> maps, List<int[,]> yMaps, List<int[,]> dMaps, int size, int screenWidth, int screenHeight, List<Vector2> xPoints, List<Vector2> yPoints, List<Vector2> diagPoints)
         {
+            #region NonDiagMaps
             for (int i = 0; i < maps.Count; i++)
             {
                 rows.Add(maps[i].GetLength(0));
@@ -742,7 +757,7 @@ namespace AUTO_Matic.TopDown
                 //height = yMaps[i].GetLength(0);
             }
 
-
+            #endregion
             for (int i = 0; i < dMaps.Count; i++)
             {
                 rows.Add(dMaps[i].GetLength(0));
@@ -753,8 +768,8 @@ namespace AUTO_Matic.TopDown
                     for (int x = 0; x < dMaps[i].GetLength(1); x++)
                     {
                         int num = dMaps[i][y, x];
-                        int levelInX = (int)diagPoints[i].X;
-                        int levelInY = (int)diagPoints[i].Y;
+                        levelInX = (int)diagPoints[i].X;
+                        levelInY = (int)diagPoints[i].Y;
 
 
                         if (num == 0)
@@ -865,6 +880,7 @@ namespace AUTO_Matic.TopDown
         }
         private void BuildDungeon2(List<int[,]> maps, List<int[,]> yMaps, List<int[,]> dMaps, int size, int screenWidth, int screenHeight, List<Vector2> xPoints, List<Vector2> yPoints, List<Vector2> diagPoints)
         {
+            #region NonDiagMaps
             for (int i = 0; i < maps.Count; i++)
             {
                 rows.Add(maps[i].GetLength(0));
@@ -1078,7 +1094,7 @@ namespace AUTO_Matic.TopDown
                 //width = yMaps[i].GetLength(1);
                 //height = yMaps[i].GetLength(0);
             }
-
+            #endregion
 
             for (int i = 0; i < dMaps.Count; i++)
             {
@@ -1090,8 +1106,8 @@ namespace AUTO_Matic.TopDown
                     for (int x = 0; x < dMaps[i].GetLength(1); x++)
                     {
                         int num = dMaps[i][y, x];
-                        int levelInX = (int)diagPoints[i].X;
-                        int levelInY = (int)diagPoints[i].Y;
+                        levelInX = (int)diagPoints[i].X;
+                        levelInY = (int)diagPoints[i].Y;
 
 
                         if (num == 0)
@@ -1199,6 +1215,7 @@ namespace AUTO_Matic.TopDown
         }
         private void BuildDungeon3(List<int[,]> maps, List<int[,]> yMaps, List<int[,]> dMaps, int size, int screenWidth, int screenHeight, List<Vector2> xPoints, List<Vector2> yPoints, List<Vector2> diagPoints)
         {
+            #region NonDiagMaps
             for (int i = 0; i < maps.Count; i++)
             {
                 rows.Add(maps[i].GetLength(0));
@@ -1412,7 +1429,7 @@ namespace AUTO_Matic.TopDown
                 //width = yMaps[i].GetLength(1);
                 //height = yMaps[i].GetLength(0);
             }
-
+            #endregion
 
             for (int i = 0; i < dMaps.Count; i++)
             {
@@ -1424,8 +1441,8 @@ namespace AUTO_Matic.TopDown
                     for (int x = 0; x < dMaps[i].GetLength(1); x++)
                     {
                         int num = dMaps[i][y, x];
-                        int levelInX = (int)diagPoints[i].X;
-                        int levelInY = (int)diagPoints[i].Y;
+                        levelInX = (int)diagPoints[i].X;
+                        levelInY = (int)diagPoints[i].Y;
 
 
                         if (num == 0)
@@ -1522,6 +1539,7 @@ namespace AUTO_Matic.TopDown
 
                             ExitDoor = new Rectangle((levelInX * screenWidth) + (x * size), (y * size) - (levelInY * screenHeight), size, size);
                         }
+                
 
                         width = (x + 1) * size;
                         height = (y + 1) * size;
@@ -1642,23 +1660,27 @@ namespace AUTO_Matic.TopDown
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            foreach (FloorTiles tile in floorTiles)
+            {
+                tile.Draw(spriteBatch);
+            }
+            foreach (SlamTiles tile in slamTiles)
+            {
+                tile.Draw(spriteBatch);
+            }
             foreach (WallTiles tile in wallTiles)
             {
                 tile.Draw(spriteBatch);
+            }
+            foreach (EnvironmentTile tile in environmentTiles)
+            {
+                tile.Draw(spriteBatch, tile.direction);
             }
             //foreach (SkullTiles tile in skullTiles)
             //{
             //    tile.Draw(spriteBatch);
             //}
-            foreach (FloorTiles tile in floorTiles)
-            {
-                tile.Draw(spriteBatch);
-            }
-
-            foreach(SlamTiles tile in slamTiles)
-            {
-                tile.Draw(spriteBatch);
-            }
+            
         }
     }
 }

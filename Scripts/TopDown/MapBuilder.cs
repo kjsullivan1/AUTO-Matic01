@@ -22,32 +22,82 @@ namespace AUTO_Matic.Scripts.TopDown
             CellMap map;
             int accuracy;
             int max;
+            string environmentDirection = "";
 
             List<MapObject> mapObjects = new List<MapObject>();
             //List<List<int[,]>> population = new List<List<int[,]>>();
-
-            enum MapEffectObjects { AddWall, AddEnemy, RemoveEnemy, RemoveWall, AddHealthDrop }
+            int numEnvironment = 0;
+            int numEnemies = 0;
+            enum MapEffectObjects { AddWall, AddEnemy, RemoveEnemy, RemoveWall, SpeedBoost, DamageOverTime }
             MapEffectObjects mapObjectEffect;
             public void ChooseEffectObject()
             {
+                bool selected = false;
+
+                while(!selected)
+                {
+                    int num = rand.Next(0, 101);
+
+                    if (num < 25 && numEnvironment < 6)
+                    {
+                        mapObjectEffect = MapEffectObjects.SpeedBoost;
+                        GetDirection();
+                        selected = true;
+                        numEnvironment++;
+                    }
+                    else if (num >= 25 && num < 50 && numEnvironment < 6)
+                    {
+                        mapObjectEffect = MapEffectObjects.DamageOverTime;
+                        GetDirection();
+                        selected = true;
+                        numEnvironment++;
+                    }
+                    else if (num >= 50 && num < 62 && numEnemies > 4)
+                    {
+                        mapObjectEffect = MapEffectObjects.RemoveEnemy;
+                        selected = true;
+                      
+                    }
+                    else if (num >= 62 && num < 75)
+                    {
+                        mapObjectEffect = MapEffectObjects.RemoveWall;
+                        selected = true;
+                    }
+                    else if (num >= 75 && num < 87 && numEnemies < 8)
+                    {
+                        mapObjectEffect = MapEffectObjects.AddEnemy;
+                        selected = true;
+                    
+                    }
+                    else
+                    {
+                        mapObjectEffect = MapEffectObjects.AddWall;
+                        selected = true;
+                    }
+                }
+              
+            }
+
+            public void GetDirection()
+            {
                 int num = rand.Next(0, 4);
-                switch (num)
+
+                switch(num)
                 {
                     case 0:
-                        mapObjectEffect = MapEffectObjects.AddWall;
+                        environmentDirection = "right";
                         break;
                     case 1:
-                        mapObjectEffect = MapEffectObjects.AddEnemy;
+                        environmentDirection = "left";
                         break;
                     case 2:
-                        mapObjectEffect = MapEffectObjects.RemoveWall;
+                        environmentDirection = "up";
                         break;
                     case 3:
-                        mapObjectEffect = MapEffectObjects.RemoveEnemy;
+                        environmentDirection = "down";
                         break;
                 }
             }
-
 
             enum MapEffectLayout { Horizontal, Vertical, Diag, None }
             MapEffectLayout mapLayoutEffect;
@@ -93,6 +143,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 max = map.map.GetLength(0) * map.map.GetLength(1);
 
                 CellMap tempMap = map;
+                numEnvironment = 0;
                 // List<Rectangle> tempRects = new List<Rectangle>();
                 //for(int y = 0; y < tempMap.map.GetLength(0); y++)
                 //{
@@ -122,6 +173,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     }
                 }
                 int affectedObjects = rand.Next(5, 9);
+                numEnemies = mapData.enemySpawnPoints.Count;
                 //int removeObjectChance = 10;
                 //mapObjectEffect = MapEffectObjects.AddWall;
 
@@ -785,6 +837,8 @@ namespace AUTO_Matic.Scripts.TopDown
                             {
                                 tempMap.map[mapObjects[pickNum].objectRects[wallNum].mapPoint[0],
                                 mapObjects[pickNum].objectRects[wallNum].mapPoint[1] + 2].num = enemyType;
+
+                                numEnemies++;
                             }
                         }
                         else if (randNum == 1) //Add enemy left
@@ -796,6 +850,8 @@ namespace AUTO_Matic.Scripts.TopDown
                             {
                                 tempMap.map[mapObjects[pickNum].objectRects[wallNum].mapPoint[0],
                                 mapObjects[pickNum].objectRects[wallNum].mapPoint[1] - 2].num = enemyType;
+
+                                numEnemies++;
                             }
                         }
                         else if (randNum == 2)//Add enemy up
@@ -807,6 +863,8 @@ namespace AUTO_Matic.Scripts.TopDown
                             {
                                 tempMap.map[mapObjects[pickNum].objectRects[wallNum].mapPoint[0] - 2,
                                 mapObjects[pickNum].objectRects[wallNum].mapPoint[1]].num = enemyType;
+
+                                numEnemies++;
                             }
                         }
                         else if(randNum == 3)//Add enemy Down
@@ -818,6 +876,8 @@ namespace AUTO_Matic.Scripts.TopDown
                             {
                                 tempMap.map[mapObjects[pickNum].objectRects[wallNum].mapPoint[0] + 2,
                                 mapObjects[pickNum].objectRects[wallNum].mapPoint[1]].num = enemyType;
+
+                                numEnemies++;
                             }
                         }
                         break;
@@ -831,6 +891,7 @@ namespace AUTO_Matic.Scripts.TopDown
                             mapData.enemySpawnPoints[enemyPick].mapPoint[1]].num = 9;
                         mapData.EnemySpawns.Remove(new Vector2(mapData.enemySpawnPoints[enemyPick].Rectangle.X,
                             mapData.enemySpawnPoints[enemyPick].Rectangle.Y));
+                        numEnemies--;
                         break;
                     #endregion
                     #region RemoveWall
@@ -843,361 +904,432 @@ namespace AUTO_Matic.Scripts.TopDown
                             mapObjects[pick].objectRects[wall].mapPoint[1]].num = 9;
                         mapData.WallTiles.Remove(new WallTiles(10, mapObjects[pick].objectRects[wall].rect));
                         break;
-                        //switch(mapObjects[pick].wallId)
-                        //{
-                        //    case "Horizontal":
-                        //        if (rand.Next(0, 101) < 50) //Choose right or left... less than 50 is left and > is right
-                        //        {
-                        //            Object FarLeft = mapObjects[pick].objectRects[0];
-                        //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //            {
-                        //                if (FarLeft.rect.X > mapObjects[pick].objectRects[k].rect.X)
-                        //                {
-                        //                    FarLeft = mapObjects[pick].objectRects[k];
-                        //                }
-                        //            }
+                    //switch(mapObjects[pick].wallId)
+                    //{
+                    //    case "Horizontal":
+                    //        if (rand.Next(0, 101) < 50) //Choose right or left... less than 50 is left and > is right
+                    //        {
+                    //            Object FarLeft = mapObjects[pick].objectRects[0];
+                    //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //            {
+                    //                if (FarLeft.rect.X > mapObjects[pick].objectRects[k].rect.X)
+                    //                {
+                    //                    FarLeft = mapObjects[pick].objectRects[k];
+                    //                }
+                    //            }
 
-                        //            if (mapData.WallIndexes.Contains(tempMap.map[FarLeft.mapPoint[0],
-                        //               FarLeft.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[FarLeft.mapPoint[0],
-                        //                FarLeft.mapPoint[1]].num = 9;
-                        //            }
-                        //        }
-                        //        else
-                        //        {
-                        //            Object farRight = mapObjects[pick].objectRects[0];
-                        //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //            {
-                        //                if (farRight.rect.X < mapObjects[pick].objectRects[k].rect.X)
-                        //                {
-                        //                    farRight = mapObjects[pick].objectRects[k];
-                        //                }
-                        //            }
+                    //            if (mapData.WallIndexes.Contains(tempMap.map[FarLeft.mapPoint[0],
+                    //               FarLeft.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[FarLeft.mapPoint[0],
+                    //                FarLeft.mapPoint[1]].num = 9;
+                    //            }
+                    //        }
+                    //        else
+                    //        {
+                    //            Object farRight = mapObjects[pick].objectRects[0];
+                    //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //            {
+                    //                if (farRight.rect.X < mapObjects[pick].objectRects[k].rect.X)
+                    //                {
+                    //                    farRight = mapObjects[pick].objectRects[k];
+                    //                }
+                    //            }
 
-                        //            if (mapData.FloorIndexes.Contains(tempMap.map[farRight.mapPoint[0],
-                        //               farRight.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[farRight.mapPoint[0],
-                        //                farRight.mapPoint[1]].num = 9;
-                        //            }
-                        //        }
-                        //        break;
-                        //    case "Vertical":
-                        //        if (rand.Next(0, 101) < 50) //Choose up or down... less than 50 is up and > is down
-                        //        {
-                        //            Object farUp = mapObjects[pick].objectRects[0];
-                        //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //            {
-                        //                if (farUp.rect.Y > mapObjects[pick].objectRects[k].rect.Y)
-                        //                {
-                        //                    farUp = mapObjects[pick].objectRects[k];
-                        //                }
-                        //            }
+                    //            if (mapData.FloorIndexes.Contains(tempMap.map[farRight.mapPoint[0],
+                    //               farRight.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[farRight.mapPoint[0],
+                    //                farRight.mapPoint[1]].num = 9;
+                    //            }
+                    //        }
+                    //        break;
+                    //    case "Vertical":
+                    //        if (rand.Next(0, 101) < 50) //Choose up or down... less than 50 is up and > is down
+                    //        {
+                    //            Object farUp = mapObjects[pick].objectRects[0];
+                    //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //            {
+                    //                if (farUp.rect.Y > mapObjects[pick].objectRects[k].rect.Y)
+                    //                {
+                    //                    farUp = mapObjects[pick].objectRects[k];
+                    //                }
+                    //            }
 
-                        //            if (mapData.FloorIndexes.Contains(tempMap.map[farUp.mapPoint[0] - 1,
-                        //               farUp.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[farUp.mapPoint[0] - 1,
-                        //                farUp.mapPoint[1]].num = 10;
-                        //            }
-                        //        }
-                        //        else
-                        //        {
-                        //            Object farDown = mapObjects[pick].objectRects[0];
-                        //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //            {
-                        //                if (farDown.rect.Y < mapObjects[pick].objectRects[k].rect.Y)
-                        //                {
-                        //                    farDown = mapObjects[pick].objectRects[k];
-                        //                }
-                        //            }
+                    //            if (mapData.FloorIndexes.Contains(tempMap.map[farUp.mapPoint[0] - 1,
+                    //               farUp.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[farUp.mapPoint[0] - 1,
+                    //                farUp.mapPoint[1]].num = 10;
+                    //            }
+                    //        }
+                    //        else
+                    //        {
+                    //            Object farDown = mapObjects[pick].objectRects[0];
+                    //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //            {
+                    //                if (farDown.rect.Y < mapObjects[pick].objectRects[k].rect.Y)
+                    //                {
+                    //                    farDown = mapObjects[pick].objectRects[k];
+                    //                }
+                    //            }
 
-                        //            if (mapData.FloorIndexes.Contains(tempMap.map[farDown.mapPoint[0] + 1,
-                        //               farDown.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[farDown.mapPoint[0] + 1,
-                        //                farDown.mapPoint[1]].num = 10;
-                        //            }
-                        //        }
-                        //        break;
-                        //    case "Diag":
-                        //        int num1 = rand.Next(0, 101);
-                        //        if (num1 < 50) //Chooses to add a diag block 1/4 chance of being in same dir, 1/4 not happening
-                        //        {
-                        //            Object chosenObj;
-                        //            if (rand.Next(0, 2) < 1)
-                        //            {
-                        //                chosenObj = mapObjects[pick].objectRects[0];//Far left
-                        //                for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //                {
-                        //                    if (chosenObj.rect.X > mapObjects[pick].objectRects[k].rect.X)
-                        //                    {
-                        //                        chosenObj = mapObjects[pick].objectRects[k];
-                        //                    }
-                        //                }
-                        //            }
-                        //            else
-                        //            {
-                        //                chosenObj = mapObjects[pick].objectRects[0];// Far Right
-                        //                for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //                {
-                        //                    if (chosenObj.rect.X < mapObjects[pick].objectRects[k].rect.X)
-                        //                    {
-                        //                        chosenObj = mapObjects[pick].objectRects[k];
-                        //                    }
-                        //                }
-                        //            }
-                        //            //Object farLeft = mapObjects[num].objectRects[0];
-                        //            //for (int k = 0; k < mapObjects[num].objectRects.Count; k++)
-                        //            //{
-                        //            //    if (farLeft.rect.X > mapObjects[num].objectRects[k].rect.X)
-                        //            //    {
-                        //            //        farLeft = mapObjects[num].objectRects[k];
-                        //            //    }
-                        //            //}
+                    //            if (mapData.FloorIndexes.Contains(tempMap.map[farDown.mapPoint[0] + 1,
+                    //               farDown.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[farDown.mapPoint[0] + 1,
+                    //                farDown.mapPoint[1]].num = 10;
+                    //            }
+                    //        }
+                    //        break;
+                    //    case "Diag":
+                    //        int num1 = rand.Next(0, 101);
+                    //        if (num1 < 50) //Chooses to add a diag block 1/4 chance of being in same dir, 1/4 not happening
+                    //        {
+                    //            Object chosenObj;
+                    //            if (rand.Next(0, 2) < 1)
+                    //            {
+                    //                chosenObj = mapObjects[pick].objectRects[0];//Far left
+                    //                for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //                {
+                    //                    if (chosenObj.rect.X > mapObjects[pick].objectRects[k].rect.X)
+                    //                    {
+                    //                        chosenObj = mapObjects[pick].objectRects[k];
+                    //                    }
+                    //                }
+                    //            }
+                    //            else
+                    //            {
+                    //                chosenObj = mapObjects[pick].objectRects[0];// Far Right
+                    //                for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //                {
+                    //                    if (chosenObj.rect.X < mapObjects[pick].objectRects[k].rect.X)
+                    //                    {
+                    //                        chosenObj = mapObjects[pick].objectRects[k];
+                    //                    }
+                    //                }
+                    //            }
+                    //            //Object farLeft = mapObjects[num].objectRects[0];
+                    //            //for (int k = 0; k < mapObjects[num].objectRects.Count; k++)
+                    //            //{
+                    //            //    if (farLeft.rect.X > mapObjects[num].objectRects[k].rect.X)
+                    //            //    {
+                    //            //        farLeft = mapObjects[num].objectRects[k];
+                    //            //    }
+                    //            //}
 
-                        //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj.mapPoint[0] - 1,
-                        //               chosenObj.mapPoint[1] - 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj.mapPoint[0] - 1,
-                        //                chosenObj.mapPoint[1] - 1].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj.mapPoint[0] + 1,
-                        //               chosenObj.mapPoint[1] - 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj.mapPoint[0] + 1,
-                        //                chosenObj.mapPoint[1] - 1].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj.mapPoint[0] - 1,
-                        //              chosenObj.mapPoint[1] + 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj.mapPoint[0] - 1,
-                        //                chosenObj.mapPoint[1] + 1].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj.mapPoint[0] + 1,
-                        //              chosenObj.mapPoint[1] + 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj.mapPoint[0] + 1,
-                        //                chosenObj.mapPoint[1] + 1].num = 10;
-                        //            }
-                        //        }
-                        //        else
-                        //        {
-                        //            Object chosenObj1;
-                        //            if (rand.Next(0, 2) < 1)
-                        //            {
-                        //                chosenObj1 = mapObjects[pick].objectRects[0];//Far up
-                        //                for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //                {
-                        //                    if (chosenObj1.rect.Y > mapObjects[pick].objectRects[k].rect.Y)
-                        //                    {
-                        //                        chosenObj1 = mapObjects[pick].objectRects[k];
-                        //                    }
-                        //                }
-                        //            }
-                        //            else
-                        //            {
-                        //                chosenObj1 = mapObjects[pick].objectRects[0];// Far down
-                        //                for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //                {
-                        //                    if (chosenObj1.rect.Y < mapObjects[pick].objectRects[k].rect.Y)
-                        //                    {
-                        //                        chosenObj1 = mapObjects[pick].objectRects[k];
-                        //                    }
-                        //                }
-                        //            }
-                        //            //Object farLeft = mapObjects[num].objectRects[0];
-                        //            //for (int k = 0; k < mapObjects[num].objectRects.Count; k++)
-                        //            //{
-                        //            //    if (farLeft.rect.X > mapObjects[num].objectRects[k].rect.X)
-                        //            //    {
-                        //            //        farLeft = mapObjects[num].objectRects[k];
-                        //            //    }
-                        //            //}
+                    //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj.mapPoint[0] - 1,
+                    //               chosenObj.mapPoint[1] - 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj.mapPoint[0] - 1,
+                    //                chosenObj.mapPoint[1] - 1].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj.mapPoint[0] + 1,
+                    //               chosenObj.mapPoint[1] - 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj.mapPoint[0] + 1,
+                    //                chosenObj.mapPoint[1] - 1].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj.mapPoint[0] - 1,
+                    //              chosenObj.mapPoint[1] + 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj.mapPoint[0] - 1,
+                    //                chosenObj.mapPoint[1] + 1].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj.mapPoint[0] + 1,
+                    //              chosenObj.mapPoint[1] + 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj.mapPoint[0] + 1,
+                    //                chosenObj.mapPoint[1] + 1].num = 10;
+                    //            }
+                    //        }
+                    //        else
+                    //        {
+                    //            Object chosenObj1;
+                    //            if (rand.Next(0, 2) < 1)
+                    //            {
+                    //                chosenObj1 = mapObjects[pick].objectRects[0];//Far up
+                    //                for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //                {
+                    //                    if (chosenObj1.rect.Y > mapObjects[pick].objectRects[k].rect.Y)
+                    //                    {
+                    //                        chosenObj1 = mapObjects[pick].objectRects[k];
+                    //                    }
+                    //                }
+                    //            }
+                    //            else
+                    //            {
+                    //                chosenObj1 = mapObjects[pick].objectRects[0];// Far down
+                    //                for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //                {
+                    //                    if (chosenObj1.rect.Y < mapObjects[pick].objectRects[k].rect.Y)
+                    //                    {
+                    //                        chosenObj1 = mapObjects[pick].objectRects[k];
+                    //                    }
+                    //                }
+                    //            }
+                    //            //Object farLeft = mapObjects[num].objectRects[0];
+                    //            //for (int k = 0; k < mapObjects[num].objectRects.Count; k++)
+                    //            //{
+                    //            //    if (farLeft.rect.X > mapObjects[num].objectRects[k].rect.X)
+                    //            //    {
+                    //            //        farLeft = mapObjects[num].objectRects[k];
+                    //            //    }
+                    //            //}
 
-                        //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj1.mapPoint[0] - 1,
-                        //               chosenObj1.mapPoint[1] - 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj1.mapPoint[0] - 1,
-                        //                chosenObj1.mapPoint[1] - 1].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj1.mapPoint[0] + 1,
-                        //               chosenObj1.mapPoint[1] - 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj1.mapPoint[0] + 1,
-                        //                chosenObj1.mapPoint[1] - 1].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj1.mapPoint[0] - 1,
-                        //              chosenObj1.mapPoint[1] + 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj1.mapPoint[0] - 1,
-                        //                chosenObj1.mapPoint[1] + 1].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj1.mapPoint[0] + 1,
-                        //              chosenObj1.mapPoint[1] + 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj1.mapPoint[0] + 1,
-                        //                chosenObj1.mapPoint[1] + 1].num = 10;
-                        //            }
-                        //        }
+                    //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj1.mapPoint[0] - 1,
+                    //               chosenObj1.mapPoint[1] - 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj1.mapPoint[0] - 1,
+                    //                chosenObj1.mapPoint[1] - 1].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj1.mapPoint[0] + 1,
+                    //               chosenObj1.mapPoint[1] - 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj1.mapPoint[0] + 1,
+                    //                chosenObj1.mapPoint[1] - 1].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj1.mapPoint[0] - 1,
+                    //              chosenObj1.mapPoint[1] + 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj1.mapPoint[0] - 1,
+                    //                chosenObj1.mapPoint[1] + 1].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj1.mapPoint[0] + 1,
+                    //              chosenObj1.mapPoint[1] + 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj1.mapPoint[0] + 1,
+                    //                chosenObj1.mapPoint[1] + 1].num = 10;
+                    //            }
+                    //        }
 
-                        //        break;
-                        //    case "LShape":
+                    //        break;
+                    //    case "LShape":
 
-                        //        Object chosenObj2;
-                        //        int num2 = rand.Next(0, 4);
-                        //        if (num2 == 0)
-                        //        {
-                        //            chosenObj2 = mapObjects[pick].objectRects[0];//Far up and right
-                        //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //            {
-                        //                if (chosenObj2.rect.Y > mapObjects[pick].objectRects[k].rect.Y ||
-                        //                    chosenObj2.rect.X < mapObjects[pick].objectRects[k].rect.X)
-                        //                {
-                        //                    chosenObj2 = mapObjects[pick].objectRects[k];
-                        //                }
-                        //            }
+                    //        Object chosenObj2;
+                    //        int num2 = rand.Next(0, 4);
+                    //        if (num2 == 0)
+                    //        {
+                    //            chosenObj2 = mapObjects[pick].objectRects[0];//Far up and right
+                    //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //            {
+                    //                if (chosenObj2.rect.Y > mapObjects[pick].objectRects[k].rect.Y ||
+                    //                    chosenObj2.rect.X < mapObjects[pick].objectRects[k].rect.X)
+                    //                {
+                    //                    chosenObj2 = mapObjects[pick].objectRects[k];
+                    //                }
+                    //            }
 
-                        //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] - 1,
-                        //               chosenObj2.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0] - 1,
-                        //                chosenObj2.mapPoint[1]].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] + 1,
-                        //               chosenObj2.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0] + 1,
-                        //                chosenObj2.mapPoint[1]].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
-                        //              chosenObj2.mapPoint[1] + 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0],
-                        //                chosenObj2.mapPoint[1] + 1].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
-                        //              chosenObj2.mapPoint[1] - 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0],
-                        //                chosenObj2.mapPoint[1] - 1].num = 10;
-                        //            }
-                        //        }
-                        //        else if (num2 == 1)
-                        //        {
-                        //            chosenObj2 = mapObjects[pick].objectRects[0];// Far down and right
-                        //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //            {
-                        //                if (chosenObj2.rect.Y < mapObjects[pick].objectRects[k].rect.Y ||
-                        //                     chosenObj2.rect.X < mapObjects[pick].objectRects[k].rect.X)
-                        //                {
-                        //                    chosenObj2 = mapObjects[pick].objectRects[k];
-                        //                }
-                        //            }
+                    //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] - 1,
+                    //               chosenObj2.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0] - 1,
+                    //                chosenObj2.mapPoint[1]].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] + 1,
+                    //               chosenObj2.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0] + 1,
+                    //                chosenObj2.mapPoint[1]].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
+                    //              chosenObj2.mapPoint[1] + 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0],
+                    //                chosenObj2.mapPoint[1] + 1].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
+                    //              chosenObj2.mapPoint[1] - 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0],
+                    //                chosenObj2.mapPoint[1] - 1].num = 10;
+                    //            }
+                    //        }
+                    //        else if (num2 == 1)
+                    //        {
+                    //            chosenObj2 = mapObjects[pick].objectRects[0];// Far down and right
+                    //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //            {
+                    //                if (chosenObj2.rect.Y < mapObjects[pick].objectRects[k].rect.Y ||
+                    //                     chosenObj2.rect.X < mapObjects[pick].objectRects[k].rect.X)
+                    //                {
+                    //                    chosenObj2 = mapObjects[pick].objectRects[k];
+                    //                }
+                    //            }
 
-                        //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] - 1,
-                        //              chosenObj2.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0] - 1,
-                        //                chosenObj2.mapPoint[1]].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] + 1,
-                        //               chosenObj2.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0] + 1,
-                        //                chosenObj2.mapPoint[1]].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
-                        //              chosenObj2.mapPoint[1] + 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0],
-                        //                chosenObj2.mapPoint[1] + 1].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
-                        //              chosenObj2.mapPoint[1] - 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0],
-                        //                chosenObj2.mapPoint[1] - 1].num = 10;
-                        //            }
-                        //        }
-                        //        else if (num2 == 2)
-                        //        {
-                        //            chosenObj2 = mapObjects[pick].objectRects[0];// Far up and left
-                        //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //            {
-                        //                if (chosenObj2.rect.Y > mapObjects[pick].objectRects[k].rect.Y ||
-                        //                     chosenObj2.rect.X > mapObjects[pick].objectRects[k].rect.X)
-                        //                {
-                        //                    chosenObj2 = mapObjects[pick].objectRects[k];
-                        //                }
-                        //            }
+                    //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] - 1,
+                    //              chosenObj2.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0] - 1,
+                    //                chosenObj2.mapPoint[1]].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] + 1,
+                    //               chosenObj2.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0] + 1,
+                    //                chosenObj2.mapPoint[1]].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
+                    //              chosenObj2.mapPoint[1] + 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0],
+                    //                chosenObj2.mapPoint[1] + 1].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
+                    //              chosenObj2.mapPoint[1] - 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0],
+                    //                chosenObj2.mapPoint[1] - 1].num = 10;
+                    //            }
+                    //        }
+                    //        else if (num2 == 2)
+                    //        {
+                    //            chosenObj2 = mapObjects[pick].objectRects[0];// Far up and left
+                    //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //            {
+                    //                if (chosenObj2.rect.Y > mapObjects[pick].objectRects[k].rect.Y ||
+                    //                     chosenObj2.rect.X > mapObjects[pick].objectRects[k].rect.X)
+                    //                {
+                    //                    chosenObj2 = mapObjects[pick].objectRects[k];
+                    //                }
+                    //            }
 
-                        //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] - 1,
-                        //              chosenObj2.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0] - 1,
-                        //                chosenObj2.mapPoint[1]].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] + 1,
-                        //               chosenObj2.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0] + 1,
-                        //                chosenObj2.mapPoint[1]].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
-                        //              chosenObj2.mapPoint[1] + 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0],
-                        //                chosenObj2.mapPoint[1] + 1].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
-                        //              chosenObj2.mapPoint[1] - 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0],
-                        //                chosenObj2.mapPoint[1] - 1].num = 10;
-                        //            }
-                        //        }
-                        //        else if (num2 == 3)
-                        //        {
-                        //            chosenObj2 = mapObjects[pick].objectRects[0];// Far down and left
-                        //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
-                        //            {
-                        //                if (chosenObj2.rect.Y < mapObjects[pick].objectRects[k].rect.Y ||
-                        //                     chosenObj2.rect.X > mapObjects[pick].objectRects[k].rect.X)
-                        //                {
-                        //                    chosenObj2 = mapObjects[pick].objectRects[k];
-                        //                }
-                        //            }
+                    //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] - 1,
+                    //              chosenObj2.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0] - 1,
+                    //                chosenObj2.mapPoint[1]].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] + 1,
+                    //               chosenObj2.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0] + 1,
+                    //                chosenObj2.mapPoint[1]].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
+                    //              chosenObj2.mapPoint[1] + 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0],
+                    //                chosenObj2.mapPoint[1] + 1].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
+                    //              chosenObj2.mapPoint[1] - 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0],
+                    //                chosenObj2.mapPoint[1] - 1].num = 10;
+                    //            }
+                    //        }
+                    //        else if (num2 == 3)
+                    //        {
+                    //            chosenObj2 = mapObjects[pick].objectRects[0];// Far down and left
+                    //            for (int k = 0; k < mapObjects[pick].objectRects.Count; k++)
+                    //            {
+                    //                if (chosenObj2.rect.Y < mapObjects[pick].objectRects[k].rect.Y ||
+                    //                     chosenObj2.rect.X > mapObjects[pick].objectRects[k].rect.X)
+                    //                {
+                    //                    chosenObj2 = mapObjects[pick].objectRects[k];
+                    //                }
+                    //            }
 
-                        //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] - 1,
-                        //              chosenObj2.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0] - 1,
-                        //                chosenObj2.mapPoint[1]].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] + 1,
-                        //               chosenObj2.mapPoint[1]].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0] + 1,
-                        //                chosenObj2.mapPoint[1]].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
-                        //              chosenObj2.mapPoint[1] + 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0],
-                        //                chosenObj2.mapPoint[1] + 1].num = 10;
-                        //            }
-                        //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
-                        //              chosenObj2.mapPoint[1] - 1].num))
-                        //            {
-                        //                tempMap.map[chosenObj2.mapPoint[0],
-                        //                chosenObj2.mapPoint[1] - 1].num = 10;
-                        //            }
-                        //        }
-                        //        break;
-                        //}
-                        //break;
+                    //            if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] - 1,
+                    //              chosenObj2.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0] - 1,
+                    //                chosenObj2.mapPoint[1]].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0] + 1,
+                    //               chosenObj2.mapPoint[1]].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0] + 1,
+                    //                chosenObj2.mapPoint[1]].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
+                    //              chosenObj2.mapPoint[1] + 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0],
+                    //                chosenObj2.mapPoint[1] + 1].num = 10;
+                    //            }
+                    //            else if (mapData.FloorIndexes.Contains(tempMap.map[chosenObj2.mapPoint[0],
+                    //              chosenObj2.mapPoint[1] - 1].num))
+                    //            {
+                    //                tempMap.map[chosenObj2.mapPoint[0],
+                    //                chosenObj2.mapPoint[1] - 1].num = 10;
+                    //            }
+                    //        }
+                    //        break;
+                    //}
+                    //break;
+                    #endregion
+                    #region SpeedBoost
+                    case MapEffectObjects.SpeedBoost:
+
+                        EnvironmentTile environmentTile = new EnvironmentTile(10, Rectangle.Empty, "");
+                        int[] selectedPoint;
+
+                        bool picked = false;
+                        while(!picked)
+                        {
+                            Cell selectedCell = tempMap.map[rand.Next(1, tempMap.map.GetLength(0)), rand.Next(1, tempMap.map.GetLength(1))];
+                            if (mapData.FloorIndexes.Contains(selectedCell.num)) //If random selection is a floor tile
+                            {
+                                picked = true;
+                                selectedPoint = selectedCell.mapPoint;
+                                if(environmentDirection == "left" || environmentDirection == "right")
+                                {
+                                    environmentTile = new EnvironmentTile(62, 
+                                        new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint[1] * 64),
+                                       (selectedPoint[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//62 is the speedBoost
+                                    environmentTile.mapPoint = selectedPoint;
+                                    mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint[0], selectedPoint[1]] = 62;
+                                }
+                                else if(environmentDirection == "up" || environmentDirection == "down")
+                                {
+                                    environmentTile = new EnvironmentTile(59,
+                                         new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint[1] * 64),
+                                       (selectedPoint[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//59 is the speedBoost
+                                    environmentTile.mapPoint = selectedPoint;
+                                    mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint[0], selectedPoint[1]] = 59;
+                                }
+                            }
+                        }
+
+                        mapData.AddEnvironmentTile(environmentTile);
+                        break;
+                    #endregion
+                    #region DamageOverTime
+                    case MapEffectObjects.DamageOverTime:
+                        EnvironmentTile environmentTile1 = new EnvironmentTile(10, Rectangle.Empty, "");
+                        int[] selectedPoint1;
+
+                        bool picked1 = false;
+                        while (!picked1)
+                        {
+                            Cell selectedCell = tempMap.map[rand.Next(1, tempMap.map.GetLength(0)), rand.Next(1, tempMap.map.GetLength(1))];
+                            if (mapData.FloorIndexes.Contains(selectedCell.num)) //If random selection is a floor tile
+                            {
+                                picked1 = true;
+                                selectedPoint1 = selectedCell.mapPoint;
+                                if (environmentDirection == "left" || environmentDirection == "right")
+                                {
+                                    environmentTile1 = new EnvironmentTile(63,
+                                       new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint1[1] * 64),
+                                       (selectedPoint1[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//62 is the speedBoost
+                                    environmentTile1.mapPoint = selectedPoint1;
+                                    mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint1[0], selectedPoint1[1]] = 63;
+                                }
+                                else if (environmentDirection == "up" || environmentDirection == "down")
+                                {
+                                    environmentTile1 = new EnvironmentTile(60,
+                                        new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint1[1] * 64),
+                                       (selectedPoint1[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//59 is the speedBoost
+                                    environmentTile1.mapPoint = selectedPoint1;
+                                    mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint1[0], selectedPoint1[1]] = 60;
+                                }
+                            }
+                        }
+                       
+                        mapData.AddEnvironmentTile(environmentTile1);
+                        break;
                         #endregion
                 }
             }

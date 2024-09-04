@@ -42,6 +42,24 @@ namespace AUTO_Matic.TopDown
         {
             spriteBatch.Draw(texture, rectangle, Color.White);
         }
+        public void Draw(SpriteBatch spriteBatch, string dir)
+        {
+            switch (dir)
+            {
+                case "right":
+                    spriteBatch.Draw(texture, rectangle, Color.White);
+                    break;
+                case "left":
+                    spriteBatch.Draw(texture, destinationRectangle: rectangle, color: Color.White, effects: SpriteEffects.FlipHorizontally);
+                    break;
+                case "up":
+                    spriteBatch.Draw(texture, rectangle, Color.White);
+                    break;
+                case "down":
+                    spriteBatch.Draw(texture, destinationRectangle: rectangle, color: Color.White, effects: SpriteEffects.FlipVertically);
+                    break;
+            }
+        }
     }
 
     class EnemySpawn :Tiles
@@ -85,6 +103,40 @@ namespace AUTO_Matic.TopDown
             this.Rectangle = newRect;
         }
     }
+
+    class EnvironmentTile : Tiles
+    {
+        public enum Type { SpeedBoost, DamageOverTime}
+        public Type effectType = Type.SpeedBoost;
+        public string direction;
+        public EnvironmentTile(int i, Rectangle newRect, string dir)
+        {
+            if(i == 62 || i == 59) //Speed Boost Tiles   //62 is facing right and 59 is facing up
+            {
+                effectType = Type.SpeedBoost;
+            }
+            else if(i == 60 || i ==  63)//Damage over time //60 faces vertical and 63 faces horizontal
+            {
+                effectType = Type.DamageOverTime;
+            }
+
+            texture = Content.Load<Texture2D>("TopDown/MapTiles/Tile" + i);
+            this.Rectangle = newRect;
+            direction = dir;
+        }
+
+           //switch(dir)
+           //     {
+           //         case "right":
+           //             break;
+           //         case "left":
+           //             break;
+           //         case "up":
+           //             break;
+           //         case "down":
+           //             break;
+           //     }
+}
 
     class PlayerSpawn :Tiles
     {
