@@ -1919,7 +1919,8 @@ namespace AUTO_Matic.SideScroll
                     shootDelay = shotGunDelay;
                     iShootDelay = shootDelay;
                 }
-                else if(GamePad.GetState(0).IsButtonDown(Buttons.RightStick))
+                else if(GamePad.GetState(0).IsButtonDown(Buttons.RightStick) ||
+                    kb.IsKeyDown(Keys.RightShift))
                 {
                     currWeapon = WeaponType.Pistol;
                     selectedWeapon = 0;

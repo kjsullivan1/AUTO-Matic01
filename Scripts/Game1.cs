@@ -1089,7 +1089,7 @@ namespace AUTO_Matic
                             else
                             {
                                 SideScrollPhysics(gameTime, kb, worldRect);
-                                if (kb.IsKeyDown(Keys.RightShift))
+                                if (kb.IsKeyDown(Keys.J))
                                 {
                                     GameState = GameStates.TopDown;
                                     StartDungeon();

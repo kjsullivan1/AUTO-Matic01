@@ -1269,27 +1269,81 @@ namespace AUTO_Matic.Scripts.TopDown
                         bool picked = false;
                         while(!picked)
                         {
-                            Cell selectedCell = tempMap.map[rand.Next(1, tempMap.map.GetLength(0)), rand.Next(1, tempMap.map.GetLength(1))];
+                            Cell selectedCell = tempMap.map[rand.Next(4, tempMap.map.GetLength(0) - 4), rand.Next(4, tempMap.map.GetLength(1) - 4)];
                             if (mapData.FloorIndexes.Contains(selectedCell.num)) //If random selection is a floor tile
                             {
-                                picked = true;
-                                selectedPoint = selectedCell.mapPoint;
-                                if(environmentDirection == "left" || environmentDirection == "right")
+
+                                int emptySpaces = 0;
+                                switch (environmentDirection)
                                 {
-                                    environmentTile = new EnvironmentTile(62, 
-                                        new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint[1] * 64),
-                                       (selectedPoint[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//62 is the speedBoost
-                                    environmentTile.mapPoint = selectedPoint;
-                                    mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint[0], selectedPoint[1]] = 62;
+                                    case "right":
+                                        for (int i = 1; i <= 3; i++)
+                                        {
+                                            if (mapData.FloorIndexes.Contains(tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1] + i].num) || mapData.EnemyIndexes.Contains(tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1] + i].num) ||
+                                                tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1]].num == 62 || tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1] + i].num == 59 ||
+                                                tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1]].num == 60 || tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1] + i].num == 63)
+                                            {
+                                                emptySpaces++;
+                                            }
+                                        }
+                                        break;
+                                    case "left":
+                                        for (int i = 1; i <= 3; i++)
+                                        {
+                                            if (mapData.FloorIndexes.Contains(tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1] - i].num) || mapData.EnemyIndexes.Contains(tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1] - i].num) ||
+                                                tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1]].num == 62 || tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1] - i].num == 59 ||
+                                                tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1]].num == 60 || tempMap.map[selectedCell.mapPoint[0], selectedCell.mapPoint[1] - i].num == 63)
+                                            {
+                                                emptySpaces++;
+                                            }
+                                        }
+                                        break;
+                                    case "up":
+                                        for (int i = 1; i <= 3; i++)
+                                        {
+                                            if (mapData.FloorIndexes.Contains(tempMap.map[selectedCell.mapPoint[0] - i, selectedCell.mapPoint[1]].num) || mapData.EnemyIndexes.Contains(tempMap.map[selectedCell.mapPoint[0] - i, selectedCell.mapPoint[1]].num) ||
+                                                tempMap.map[selectedCell.mapPoint[0] - i, selectedCell.mapPoint[1]].num == 62 || tempMap.map[selectedCell.mapPoint[0] - i, selectedCell.mapPoint[1]].num == 59 ||
+                                                tempMap.map[selectedCell.mapPoint[0] - i, selectedCell.mapPoint[1]].num == 60 || tempMap.map[selectedCell.mapPoint[0] - i, selectedCell.mapPoint[1]].num == 63)
+                                            {
+                                                emptySpaces++;
+                                            }
+                                        }
+                                        break;
+                                    case "down":
+                                        for (int i = 1; i <= 3; i++)
+                                        {
+                                            if (mapData.FloorIndexes.Contains(tempMap.map[selectedCell.mapPoint[0] + i, selectedCell.mapPoint[1]].num) || mapData.EnemyIndexes.Contains(tempMap.map[selectedCell.mapPoint[0] + i, selectedCell.mapPoint[1]].num) || 
+                                                tempMap.map[selectedCell.mapPoint[0] + i, selectedCell.mapPoint[1]].num == 62 || tempMap.map[selectedCell.mapPoint[0] + i, selectedCell.mapPoint[1]].num == 59 ||
+                                                tempMap.map[selectedCell.mapPoint[0] + i, selectedCell.mapPoint[1]].num == 60 || tempMap.map[selectedCell.mapPoint[0] + i, selectedCell.mapPoint[1]].num == 63)
+                                            {
+                                                emptySpaces++;
+                                            }
+                                        }
+                                        break;
                                 }
-                                else if(environmentDirection == "up" || environmentDirection == "down")
+                                if(emptySpaces == 3)
                                 {
-                                    environmentTile = new EnvironmentTile(59,
-                                         new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint[1] * 64),
-                                       (selectedPoint[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//59 is the speedBoost
-                                    environmentTile.mapPoint = selectedPoint;
-                                    mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint[0], selectedPoint[1]] = 59;
+                                    picked = true;
+                                    selectedPoint = selectedCell.mapPoint;
+                                    if (environmentDirection == "left" || environmentDirection == "right")
+                                    {
+                                        environmentTile = new EnvironmentTile(62,
+                                            new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint[1] * 64),
+                                           (selectedPoint[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//62 is the speedBoost
+                                        environmentTile.mapPoint = selectedPoint;
+                                        mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint[0], selectedPoint[1]] = 62;
+                                    }
+                                    else if (environmentDirection == "up" || environmentDirection == "down")
+                                    {
+                                        environmentTile = new EnvironmentTile(59,
+                                             new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint[1] * 64),
+                                           (selectedPoint[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//59 is the speedBoost
+                                        environmentTile.mapPoint = selectedPoint;
+                                        mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint[0], selectedPoint[1]] = 59;
+                                    }
                                 }
+
+                                
                             }
                         }
 
@@ -1304,27 +1358,35 @@ namespace AUTO_Matic.Scripts.TopDown
                         bool picked1 = false;
                         while (!picked1)
                         {
-                            Cell selectedCell = tempMap.map[rand.Next(1, tempMap.map.GetLength(0)), rand.Next(1, tempMap.map.GetLength(1))];
+                            Cell selectedCell = tempMap.map[rand.Next(1, tempMap.map.GetLength(0) - 1), rand.Next(1, tempMap.map.GetLength(1) - 1)];
+                            
+                            
+
                             if (mapData.FloorIndexes.Contains(selectedCell.num)) //If random selection is a floor tile
                             {
-                                picked1 = true;
-                                selectedPoint1 = selectedCell.mapPoint;
-                                if (environmentDirection == "left" || environmentDirection == "right")
-                                {
-                                    environmentTile1 = new EnvironmentTile(63,
-                                       new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint1[1] * 64),
-                                       (selectedPoint1[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//62 is the speedBoost
-                                    environmentTile1.mapPoint = selectedPoint1;
-                                    mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint1[0], selectedPoint1[1]] = 63;
-                                }
-                                else if (environmentDirection == "up" || environmentDirection == "down")
-                                {
-                                    environmentTile1 = new EnvironmentTile(60,
-                                        new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint1[1] * 64),
-                                       (selectedPoint1[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//59 is the speedBoost
-                                    environmentTile1.mapPoint = selectedPoint1;
-                                    mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint1[0], selectedPoint1[1]] = 60;
-                                }
+                               
+
+
+                              
+                                    picked1 = true;
+                                    selectedPoint1 = selectedCell.mapPoint;
+                                    if (environmentDirection == "left" || environmentDirection == "right")
+                                    {
+                                        environmentTile1 = new EnvironmentTile(63,
+                                           new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint1[1] * 64),
+                                           (selectedPoint1[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//62 is the speedBoost
+                                        environmentTile1.mapPoint = selectedPoint1;
+                                        mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint1[0], selectedPoint1[1]] = 63;
+                                    }
+                                    else if (environmentDirection == "up" || environmentDirection == "down")
+                                    {
+                                        environmentTile1 = new EnvironmentTile(60,
+                                            new Rectangle((int)(mapData.ScreenSize.X * mapData.levelInX) + (selectedPoint1[1] * 64),
+                                           (selectedPoint1[0] * 64) - (int)(mapData.ScreenSize.Y * mapData.levelInY), 64, 64), environmentDirection);//59 is the speedBoost
+                                        environmentTile1.mapPoint = selectedPoint1;
+                                        mapData.dMapDims[mapData.dMapDims.Count - 1][selectedPoint1[0], selectedPoint1[1]] = 60;
+                                    }
+                                
                             }
                         }
                        

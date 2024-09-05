@@ -46,7 +46,7 @@ namespace AUTO_Matic.TopDown
         bool inputDelay = false;
 
         float fireDmg = .5f;
-        float fireDmgRate = .35f;
+        float fireDmgRate = .15f;
         float iFireDmgRate;
         bool inDOT = false; //Is inside the DamageOverTime tile
 
