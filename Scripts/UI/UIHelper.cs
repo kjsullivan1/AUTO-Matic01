@@ -35,71 +35,98 @@ namespace AUTO_Matic
 
         public static UIButton CreateButton(string id, string text, int x, int y)//ButtonTexture Width and Height need to change
         {
-            switch(id)
+            if(id.Contains("KeyBind") || id.Contains("SwapKeys"))
             {
-                case "MainMenuPlay":
-                    UIButton b = new UIButton(id, new Vector2(x, y),
-                        new Vector2(200, 75), ButtonFont, "", Color.White, PlayGameBtn);
-                    b.Disabled = false;
-                    return b;
-                case "MainMenuExit":
-                    UIButton c = new UIButton(id, new Vector2(x, y),
-                       new Vector2(200, 75), ButtonFont, "", Color.White, ExitGameBtn);
-                    c.Disabled = false;
-                    return c;
-                case "MainMenuSetting":
-                    UIButton d = new UIButton(id, new Vector2(x, y), new Vector2(50,50),
-                        ButtonFont, "", Color.White, SettingsBtn);
-                    d.Disabled = false;
-                    return d;
-                case "StartGameReturn":
-                    UIButton e = new UIButton(id, new Vector2(x, y), new Vector2(50,50),
-                        ButtonFont, "", Color.White, ReturnBtn);
-                    e.Disabled = false;
-                    return e;
-                case "SettingsReturnBtn":
-                    UIButton f = new UIButton(id, new Vector2(x, y), new Vector2(50,50),
-                        ButtonFont, "", Color.White, ReturnBtn);
-                    f.Disabled = false;
-                    return f;
-                default:
-                    UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(200, 75), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
-                    a.Disabled = false;
-                    return a;
-                 
+                UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(45, 30), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
+                a.Disabled = false;
+                return a;
             }
+            else if(id.Contains("PauseMenu") || id.Contains("PauseMainMenu"))
+            {
+                
+                UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(75, 25), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
+                a.Disabled = false;
+                return a;
+            }
+            else
+            {
+                switch (id)
+                {
+                    case "MainMenuPlay":
+                        UIButton b = new UIButton(id, new Vector2(x, y),
+                            new Vector2(200, 75), ButtonFont, "", Color.White, PlayGameBtn);
+                        b.Disabled = false;
+                        return b;
+                    case "MainMenuExit":
+                        UIButton c = new UIButton(id, new Vector2(x, y),
+                           new Vector2(200, 75), ButtonFont, "", Color.White, ExitGameBtn);
+                        c.Disabled = false;
+                        return c;
+                    case "MainMenuSetting":
+                        UIButton d = new UIButton(id, new Vector2(x, y), new Vector2(50, 50),
+                            ButtonFont, "", Color.White, SettingsBtn);
+                        d.Disabled = false;
+                        return d;
+                    case "StartGameReturn":
+                        UIButton e = new UIButton(id, new Vector2(x, y), new Vector2(50, 50),
+                            ButtonFont, "", Color.White, ReturnBtn);
+                        e.Disabled = false;
+                        return e;
+                    case "SettingsReturnBtn":
+                        UIButton f = new UIButton(id, new Vector2(x, y), new Vector2(50, 50),
+                            ButtonFont, "", Color.White, ReturnBtn);
+                        f.Disabled = false;
+                        return f;
+                    default:
+                        UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(200, 75), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
+                        a.Disabled = false;
+                        return a;
+
+                }
+            }
+         
           
 
 
         }
         public static UITextBlock CreateTextblock(string id, string text, int x, int y)
         {
-            switch(id)
+            if(id.Contains("KeyBind"))
             {
-                case "TitleCrawl":
-                    UITextBlock a = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, CrawlFont, text, Color.White, CrawlBgTxture);
-                    return a;
-                case "SettingsMenuTitle":
-                    UITextBlock c = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, text, Color.White, CrawlBgTxture);
-                    return c;
-                case "HealthBar":
-                    UITextBlock d = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, HealthBar[HealthBar.Count - 1]);
-                    return d;
-                case "MainMenuBackground":
-                    UITextBlock e = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, MainMenuBG);
-                    return e;
-                case "MainMenuTitle":
-                    UITextBlock g = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, "", Color.White, MenuTitle);
-                    return g;
-                case "DashIcon":
-                    UITextBlock f = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, DashIcon[0]);
-                    return f;
-                default:
-                    UITextBlock b = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, text, Color.Black, TutorialTexture);
-                    return b;
-
-
+                UITextBlock b = new UITextBlock(id, new Vector2(x, y), new Vector2(3,5), TutorialFont, text, Color.Black, TutorialTexture);
+                return b;
             }
+            else
+            {
+                switch (id)
+                {
+                    case "TitleCrawl":
+                        UITextBlock a = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, CrawlFont, text, Color.White, CrawlBgTxture);
+                        return a;
+                    case "SettingsMenuTitle":
+                        UITextBlock c = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, text, Color.White, CrawlBgTxture);
+                        return c;
+                    case "HealthBar":
+                        UITextBlock d = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, HealthBar[HealthBar.Count - 1]);
+                        return d;
+                    case "MainMenuBackground":
+                        UITextBlock e = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, MainMenuBG);
+                        return e;
+                    case "MainMenuTitle":
+                        UITextBlock g = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, "", Color.White, MenuTitle);
+                        return g;
+                    case "DashIcon":
+                        UITextBlock f = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, DashIcon[0]);
+                        return f;
+                    default:
+                        UITextBlock b = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, text, Color.Black, TutorialTexture);
+                        return b;
+
+
+                }
+            }
+
+          
            
         }
         public static void SetButtonState(string keyWord, Boolean disabled, Dictionary<string, UIWidget> uiElements)
@@ -141,6 +168,12 @@ namespace AUTO_Matic
         {
             if (uiElement is UITextBlock)
                 ((UITextBlock)uiElement).Text = text;
+        }
+
+        public static void SetButtonText(UIWidget uiElement, string text)
+        {
+            if (uiElement is UIButton)
+                ((UIButton)uiElement).Text = text;
         }
 
         public static void ChangeHealthBar(UIWidget uiElement, int index)

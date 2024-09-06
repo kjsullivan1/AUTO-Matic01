@@ -89,6 +89,7 @@
     <Compile Include="Scripts\TopDown\TDRectangleHelper.cs" />
     <Compile Include="Scripts\TopDown\Tiles.cs" />
     <Compile Include="Scripts\TopDown\TopDownMap.cs" />
+    <Compile Include="Scripts\UI\KeyBinds.cs" />
     <Compile Include="Scripts\UI\UIButton.cs" />
     <Compile Include="Scripts\UI\UIButtonArgs.cs" />
     <Compile Include="Scripts\UI\UIHelper.cs" />

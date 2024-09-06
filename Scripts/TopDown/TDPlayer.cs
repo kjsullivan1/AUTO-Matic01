@@ -26,7 +26,7 @@ namespace AUTO_Matic.TopDown
         public Vector2 velocity;
         GamePadButtons currButtons;
         GamePadButtons prevButtons;
-        public int bossRoom = 10;
+        public int bossRoom = 2;
         bool lockDir = false;
         Vector2 startPos;
 
@@ -49,6 +49,8 @@ namespace AUTO_Matic.TopDown
         float fireDmgRate = .15f;
         float iFireDmgRate;
         bool inDOT = false; //Is inside the DamageOverTime tile
+
+        UIManager KeyBinds; 
 
         ParticleManager particles;
         
@@ -209,7 +211,7 @@ namespace AUTO_Matic.TopDown
         #endregion
 
         #region Constructor
-        public TDPlayer(Game1 game, int pixelSize, int levelInX, int levelInY)
+        public TDPlayer(Game1 game, int pixelSize, int levelInX, int levelInY, UIManager uiManager)
         {
             this.game = game;
             this.pixelSize = pixelSize - 12;
@@ -230,6 +232,8 @@ namespace AUTO_Matic.TopDown
             PosYLevels.Points = new List<Vector2>();
             PosYLevels.Points.Add(new Vector2(levelInX - 1, levelInY - 1));
             iMeleeDelay = meleeDelay;
+
+            KeyBinds = uiManager;
         }
 
         #endregion
@@ -828,7 +832,7 @@ namespace AUTO_Matic.TopDown
 
         private void Input(List<TDEnemy> enemies, GameTime gameTime, TopDownMap map)
         {
-            if(kb.IsKeyDown(Keys.LeftShift) && prevKb.IsKeyDown(Keys.LeftShift) && playerState != PlayerState.Dash||
+            if(kb.IsKeyDown(KeyBinds.TopDownInputs[6]) && prevKb.IsKeyDown(KeyBinds.TopDownInputs[6]) && playerState != PlayerState.Dash||
                 currButtons.RightShoulder == ButtonState.Pressed && prevButtons.RightShoulder == ButtonState.Pressed && playerState != PlayerState.Dash)
             {
                 lockDir = true;//!lockDir
@@ -844,7 +848,7 @@ namespace AUTO_Matic.TopDown
             }
             else
             {
-                if (kb.IsKeyDown(Keys.D) || controllerMoveDir.X > 0 /*&& controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
+                if (kb.IsKeyDown(KeyBinds.TopDownInputs[1]) || controllerMoveDir.X > 0 /*&& controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
                 {
                     velocity.X += moveSpeed;
                     if (!lockDir && shootDir != "right" || playerState == PlayerState.Dash)
@@ -864,7 +868,7 @@ namespace AUTO_Matic.TopDown
                     }
 
                 }
-                if (kb.IsKeyDown(Keys.A) || controllerMoveDir.X < 0/* && controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
+                if (kb.IsKeyDown(KeyBinds.TopDownInputs[0]) || controllerMoveDir.X < 0/* && controllerMoveDir.Y > -.9 && controllerMoveDir.Y < .9*/)
                 {
                     velocity.X += -moveSpeed;
                     if (!lockDir && shootDir != "left" || playerState == PlayerState.Dash)
@@ -884,7 +888,7 @@ namespace AUTO_Matic.TopDown
                         moveDirs[1] = "left";
                     }
                 }
-                if (kb.IsKeyDown(Keys.W) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y > 0 /*&& controllerMoveDir.X > -.6*/)
+                if (kb.IsKeyDown(KeyBinds.TopDownInputs[2]) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y > 0 /*&& controllerMoveDir.X > -.6*/)
                 {
                     velocity.Y += -moveSpeed;
                     if (!lockDir && shootDir != "up" || playerState == PlayerState.Dash)
@@ -903,7 +907,7 @@ namespace AUTO_Matic.TopDown
                         moveDirs[1] = "up";
                     }
                 }
-                if (kb.IsKeyDown(Keys.S) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y < 0 /*&& controllerMoveDir.X > -.6*/ )
+                if (kb.IsKeyDown(KeyBinds.TopDownInputs[3]) ||/* controllerMoveDir.X < .6 &&*/ controllerMoveDir.Y < 0 /*&& controllerMoveDir.X > -.6*/ )
                 {
                     velocity.Y += moveSpeed;
                     if (!lockDir && shootDir != "down" || playerState == PlayerState.Dash)
@@ -924,11 +928,11 @@ namespace AUTO_Matic.TopDown
                     }
                 }
 
-                if (kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D) && controllerMoveDir.X == 0)
+                if (kb.IsKeyUp(KeyBinds.TopDownInputs[0]) && kb.IsKeyUp(KeyBinds.TopDownInputs[1]) && controllerMoveDir.X == 0)
                 {
                     velocity.X = 0;
                 }
-                if (kb.IsKeyUp(Keys.S) && kb.IsKeyUp(Keys.W) && controllerMoveDir.Y == 0)
+                if (kb.IsKeyUp(KeyBinds.TopDownInputs[3]) && kb.IsKeyUp(KeyBinds.TopDownInputs[2]) && controllerMoveDir.Y == 0)
                 {
                     velocity.Y = 0;
                 }
@@ -943,7 +947,7 @@ namespace AUTO_Matic.TopDown
 
           
             shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
+            if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
             {
 
 
@@ -987,7 +991,7 @@ namespace AUTO_Matic.TopDown
 
             }
 
-            if (kb.IsKeyDown(Keys.Space) && prevKb.IsKeyUp(Keys.Space) || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released)
+            if (kb.IsKeyDown(KeyBinds.TopDownInputs[4]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[4]) || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released)
             {
                 lockDir = false;
                 playerState = PlayerState.Dash;
@@ -1005,17 +1009,17 @@ namespace AUTO_Matic.TopDown
                 startPos = position;
             }
             moveDirs = new string[2];
-            if(kb.IsKeyDown(Keys.F) && prevKb.IsKeyUp(Keys.F) && meleeDelay <= 0 || currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && meleeDelay <= 0)
-            {
-                meleeDelay = iMeleeDelay;
-                foreach(TDEnemy enemy in enemies)
-                {
-                    if(MeleeHitbox.Intersects(enemy.Rectangle))
-                    {
-                        enemy.Health -= meleeDmg;
-                    }
-                }
-            }
+            //if(kb.IsKeyDown(Keys.F) && prevKb.IsKeyUp(Keys.F) && meleeDelay <= 0 || currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && meleeDelay <= 0)
+            //{
+            //    meleeDelay = iMeleeDelay;
+            //    foreach(TDEnemy enemy in enemies)
+            //    {
+            //        if(MeleeHitbox.Intersects(enemy.Rectangle))
+            //        {
+            //            enemy.Health -= meleeDmg;
+            //        }
+            //    }
+            //}
             prevKb = kb;
             prevButtons = currButtons;
 

@@ -114,6 +114,7 @@ namespace AUTO_Matic.SideScroll
         float maxJumpSpeed = 8f;
         float maxDashSpeed = 22.5f;
         float maxDashAirSpeed = 15f;
+        UIManager KeyBindData;
         #endregion
 
         #region Shooting
@@ -470,7 +471,7 @@ namespace AUTO_Matic.SideScroll
 
 
 
-        public void Load(ContentManager Content, Rectangle bounds, float friction, Vector2 pos)
+        public void Load(ContentManager Content, Rectangle bounds, float friction, Vector2 pos, UIManager uiManager)
         {
             content = Content;
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile4");
@@ -491,7 +492,7 @@ namespace AUTO_Matic.SideScroll
             shootDelay = 0;
             bombs.Clear();
             particles.Initialize(content.Load<Texture2D>("Textures/white"));
-
+            KeyBindData = uiManager;
             sounds = new SoundManager("Shoot", Content, false);
         }
 
@@ -989,7 +990,7 @@ namespace AUTO_Matic.SideScroll
            
             //if(playerState == PlayerStates.Pilot)
 
-            if(kb.IsKeyDown(Keys.D) && kb.IsKeyDown(Keys.A) /*&& !isColliding*/)
+            if(kb.IsKeyDown(KeyBindData.SideScrollInputs[1]) && kb.IsKeyDown(KeyBindData.SideScrollInputs[0]) /*&& !isColliding*/)
             {
                 if (playerState == PlayerStates.Shooting)
                 {
@@ -1053,7 +1054,7 @@ namespace AUTO_Matic.SideScroll
                             accel = 0;
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
+                        if(kb.IsKeyDown(KeyBindData.SideScrollInputs[4]) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
                         {
                             playerState = PlayerStates.Dashing;
 
@@ -1077,7 +1078,7 @@ namespace AUTO_Matic.SideScroll
                             startDashPos = Position;
                         }
 
-                        if(kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
+                        if(kb.IsKeyDown(KeyBindData.SideScrollInputs[5]) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -1116,7 +1117,7 @@ namespace AUTO_Matic.SideScroll
                         break;
                 }
             }
-            else if(kb.IsKeyDown(Keys.D) && !isCollidingRight || controllerMoveDir.X > 0  && !isCollidingRight && controllerMoveDir.Y > -.9)
+            else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[1]) && !isCollidingRight || controllerMoveDir.X > 0  && !isCollidingRight && controllerMoveDir.Y > -.9)
             {
                 isCollidingLeft = false;
                 if (playerState == PlayerStates.Shooting)
@@ -1172,7 +1173,7 @@ namespace AUTO_Matic.SideScroll
                             //accel = force / mass;
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
+                        if(kb.IsKeyDown(KeyBindData.SideScrollInputs[4]) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
                         {
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
@@ -1183,7 +1184,7 @@ namespace AUTO_Matic.SideScroll
                             startDashPos = Position;
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
+                        if (kb.IsKeyDown(KeyBindData.SideScrollInputs[5]) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -1233,7 +1234,7 @@ namespace AUTO_Matic.SideScroll
                     #endregion
                 }
             }
-            else if(kb.IsKeyDown(Keys.A) && !isCollidingLeft/*&& !isColliding*/ || controllerMoveDir.X < 0 && !isCollidingLeft && controllerMoveDir.Y > -.9)
+            else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[0]) && !isCollidingLeft/*&& !isColliding*/ || controllerMoveDir.X < 0 && !isCollidingLeft && controllerMoveDir.Y > -.9)
             {
                 isCollidingRight = false;
                 if (playerState == PlayerStates.Shooting)
@@ -1286,7 +1287,7 @@ namespace AUTO_Matic.SideScroll
                             //accel = force / (mass);
                         }
 
-                        if(kb.IsKeyDown(Keys.LeftShift) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
+                        if(kb.IsKeyDown(KeyBindData.SideScrollInputs[4]) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
                         {
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
@@ -1298,7 +1299,7 @@ namespace AUTO_Matic.SideScroll
                             startDashPos = Position;
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
+                        if (kb.IsKeyDown(KeyBindData.SideScrollInputs[5]) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -1348,7 +1349,7 @@ namespace AUTO_Matic.SideScroll
                         #endregion
                 }
             }
-            else if(kb.IsKeyUp(Keys.D) && kb.IsKeyUp(Keys.A) || controllerMoveDir == Vector2.Zero)
+            else if(kb.IsKeyUp(KeyBindData.SideScrollInputs[1]) && kb.IsKeyUp(KeyBindData.SideScrollInputs[0]) || controllerMoveDir == Vector2.Zero)
             {
                 switch(playerState)
                 {
@@ -1457,7 +1458,7 @@ namespace AUTO_Matic.SideScroll
 
                         }
 
-                        if ((kb.IsKeyDown(Keys.LeftShift)) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
+                        if ((kb.IsKeyDown(KeyBindData.SideScrollInputs[4])) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
                         {
 
                             playerState = PlayerStates.Dashing;
@@ -1481,7 +1482,7 @@ namespace AUTO_Matic.SideScroll
 
                         }
 
-                        if (kb.IsKeyDown(Keys.Space) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
+                        if (kb.IsKeyDown(KeyBindData.SideScrollInputs[5]) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
 
@@ -1518,7 +1519,7 @@ namespace AUTO_Matic.SideScroll
                 }
             }
 
-            if(kb.IsKeyDown(Keys.E) && blockBottom && prevKb.IsKeyUp(Keys.E) || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Released && blockBottom)
+            if(kb.IsKeyDown(KeyBindData.SideScrollInputs[6]) && blockBottom && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[6]) || currControllerBtn.Y == ButtonState.Pressed && prevControllerBtn.Y == ButtonState.Released && blockBottom)
             {
                 foreach(BottomDoorTile doorTile in SideTileMap.BottomDoorTiles)
                 {
@@ -1577,7 +1578,7 @@ namespace AUTO_Matic.SideScroll
             //}
 
 
-            if (kb.IsKeyDown(Keys.S) && playerState != PlayerStates.Shooting && blockBottom || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && blockBottom)
+            if (kb.IsKeyDown(KeyBindData.SideScrollInputs[2]) && playerState != PlayerStates.Shooting && blockBottom || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && blockBottom)
             {
                 weaponWheel = new WeaponWheel(this, 24);
                 weaponWheel.active = true;
@@ -1603,7 +1604,7 @@ namespace AUTO_Matic.SideScroll
                 }
                 animManager.StartLoop();
             }
-            else if(kb.IsKeyDown(Keys.S) && prevKb.IsKeyUp(Keys.S) && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting && velocity.Y >= 0 && velocity.Y < 7 
+            else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[2]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[2]) && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting && velocity.Y >= 0 && velocity.Y < 7 
                 || controllerMoveDir.Y < -.9 && playerState != PlayerStates.Shooting && playerState != PlayerStates.Shooting && velocity.Y >= 0 && velocity.Y < 5)
             {
                 playerState = PlayerStates.Shooting;
@@ -1625,7 +1626,7 @@ namespace AUTO_Matic.SideScroll
                 animManager.StartLoop();
             }
 
-            if (kb.IsKeyDown(Keys.S) && playerState == PlayerStates.Shooting && prevKb.IsKeyDown(Keys.S) && blockBottom || controllerMoveDir.Y < -.9 && playerState == PlayerStates.Shooting && blockBottom)
+            if (kb.IsKeyDown(KeyBindData.SideScrollInputs[2]) && playerState == PlayerStates.Shooting && prevKb.IsKeyDown(KeyBindData.SideScrollInputs[2]) && blockBottom || controllerMoveDir.Y < -.9 && playerState == PlayerStates.Shooting && blockBottom)
             {
                 weaponWheel = new WeaponWheel(this, 24);
                 weaponWheel.active = true;
@@ -1637,7 +1638,7 @@ namespace AUTO_Matic.SideScroll
                 }
                 shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                if (kb.IsKeyDown(Keys.Enter) && prevKb.IsKeyUp(Keys.Enter) && shootDelay <= 0|| currControllerBtn.X == ButtonState.Pressed && prevControllerBtn.X == ButtonState.Released && shootDelay <= 0)
+                if (kb.IsKeyDown(KeyBindData.SideScrollInputs[3]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[3]) && shootDelay <= 0|| currControllerBtn.X == ButtonState.Pressed && prevControllerBtn.X == ButtonState.Released && shootDelay <= 0)
                 {
                     if(animManager.isRight)
                     {
@@ -1792,7 +1793,7 @@ namespace AUTO_Matic.SideScroll
                 playerState = PlayerStates.Movement;
             }
             int num = kb.GetPressedKeys().Count<Keys>();
-            if (kb.IsKeyUp(Keys.S) && controllerMoveDir.Y > -.9)
+            if (kb.IsKeyUp(KeyBindData.SideScrollInputs[2]) && controllerMoveDir.Y > -.9)
             {
                 weaponWheel.active = false;
             }
@@ -1802,7 +1803,7 @@ namespace AUTO_Matic.SideScroll
             //Weapon Wheel actions
             if(weaponWheel.active)
             {
-                if(kb.IsKeyDown(Keys.Right) && prevKb.IsKeyUp(Keys.Right) ||
+                if(kb.IsKeyDown(KeyBindData.SideScrollInputs[9]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[9]) ||
                     RightStick.X > 0 )
                 {
                     currWeapon = WeaponType.Burst;
@@ -1833,7 +1834,7 @@ namespace AUTO_Matic.SideScroll
 
 
                 }
-                else if(kb.IsKeyDown(Keys.Left) && prevKb.IsKeyUp(Keys.Left) ||
+                else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[8]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[8]) ||
                     RightStick.X < 0)
                 {
                     //if (selectedWeapon == 2)
@@ -1861,7 +1862,7 @@ namespace AUTO_Matic.SideScroll
                     shootDelay = laserDelay;
                     iShootDelay = shootDelay;
                 }
-                else if(kb.IsKeyDown(Keys.Up) && prevKb.IsKeyUp(Keys.Up) ||
+                else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[10]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[10]) ||
                    RightStick.Y > 0)
                 {
                     currWeapon = WeaponType.Bomb;
@@ -1890,7 +1891,7 @@ namespace AUTO_Matic.SideScroll
                     //    iShootDelay = shootDelay;
                     //}
                 }
-                else if(kb.IsKeyDown(Keys.Down) && prevKb.IsKeyUp(Keys.Down) ||
+                else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[11]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[11]) ||
                     RightStick.Y < 0)
                 {
                     //if (selectedWeapon == 0)
@@ -1920,7 +1921,7 @@ namespace AUTO_Matic.SideScroll
                     iShootDelay = shootDelay;
                 }
                 else if(GamePad.GetState(0).IsButtonDown(Buttons.RightStick) ||
-                    kb.IsKeyDown(Keys.RightShift))
+                    kb.IsKeyDown(KeyBindData.SideScrollInputs[7]))
                 {
                     currWeapon = WeaponType.Pistol;
                     selectedWeapon = 0;

@@ -132,7 +132,7 @@ namespace AUTO_Matic.Scripts.SideScroll
                 //{
                 //    center.X -= moveSpeed;
                 //}
-                if ((int)center.Y < (int)position.Y && (center.Y + cameraHeight / 2) + moveSpeed < height)
+                if ((int)center.Y < (int)position.Y && (center.Y + cameraHeight / 2) + moveSpeed < height - 30)
                 {
                     center.Y += moveSpeed;
                     reached = false;

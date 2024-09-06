@@ -481,6 +481,8 @@ namespace AUTO_Matic.Scripts.TopDown
             {
                 bossRect = new Rectangle(0, 0, 32, 32);
                 worldRect = new Rectangle(0, 0, 32, 32);
+                particleManager = new ParticleManager();
+                floors.Clear();
             }
             //foreach(Bullet bullet in bullets)
             //{

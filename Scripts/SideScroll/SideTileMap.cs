@@ -200,8 +200,13 @@ namespace AUTO_Matic
                     //}
                     if (num == 0)
                     {
-                        Textboxes.Add(new Vector2(x * size, y * size));
+                        if(Textboxes.Contains(new Vector2(x * size, y * size)) == false)
+                        {
+                            Textboxes.Add(new Vector2(x * size, y * size));
+                           
+                        }
                         backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
+
                     }
                     else if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 ||
                         num == 17 || num == 18 || num == 19 || num == 20 || num == 21 || num == 22 || num == 23 || num == 46 || num == 47 || num == 52 || num == 53

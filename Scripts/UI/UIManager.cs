@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Microsoft.Xna.Framework.Input;
 
 namespace AUTO_Matic
 {
@@ -21,60 +22,116 @@ namespace AUTO_Matic
         Vector2 buttonPos;
         Vector2 buttonPos2;
 
+
         bool transition = false;
 
         List<Rectangle> savedPos = new List<Rectangle>();
+
+        public bool isTopDownKeys = false;
+        bool isSideScrollKeys = true;
+        public List<Keys> TopDownInputs = new List<Keys>();
+        string[] TopDownKeyBinds;
+        public List<Keys> SideScrollInputs = new List<Keys>();
+        string[] SideKeyBinds;
+        public string currButton;
+        public int currButtonIndex = 0;
 
 
         public void UIButton_Clicked(object sender, UIButtonArgs e)
         {
             string buttonName = e.ID;
-            switch (buttonName)
-            {
-                case "MainMenuExit":
-                    game.Exit();
-                    break;
-                case "MainMenuPlay":
-                    game.ChangeMenuState(Game1.MenuStates.StartGame);
-                    UIHelper.SetElementVisibility("StartNewGame", true, uiElements);
-                    UIHelper.SetElementVisibility("LoadGame", true, uiElements);
-                    UIHelper.SetElementVisibility("StartGameReturn", true, uiElements);
-                    UIHelper.SetButtonState("StartGameReturn", false, uiElements);
 
-                    UIHelper.SetElementVisibility("MainMenuPlay", false, uiElements);
-                    UIHelper.SetElementVisibility("MainMenuExit", false, uiElements);
-                    UIHelper.SetElementVisibility("MainMenuSetting", false, uiElements);
-                    UIHelper.SetButtonState("MainMenu", true, uiElements);
-                    
-                    break;
-                case "MainMenuSetting":
-                    game.ChangeMenuState(Game1.MenuStates.Settings);
-                    UIHelper.SetElementVisibility("Settings", true, uiElements);
-                    break;
-                case "SettingsReturnBtn":
-                    game.ChangeMenuState(Game1.MenuStates.MainMenu);
-                    transition = true;
-                   
-                    break;
-                case "StartGameReturn":
-                    game.ChangeMenuState(Game1.MenuStates.MainMenu);
-                    UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
-                    UIHelper.SetElementVisibility("LoadGame", false, uiElements);
-                    UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
-                    UIHelper.SetButtonState("MainMenu", false, uiElements);
-                    UIHelper.SetButtonState("StartGameReturn", true, uiElements);
-                    break;
-                case "StartNewGame":
-                    game.ChangeGameState(Game1.Scenes.InGame);
-                    UIHelper.SetElementVisibility("MainMenu", false, uiElements);
-                    UIHelper.SetElementVisibility("Settings", false, uiElements);
-                    UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
-                    UIHelper.SetElementVisibility("LoadGame", false, uiElements);
-                    UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
-                    game.LoadTutorial();
-                    break;
-              
+            if(buttonName.Contains("KeyBind"))
+            {
+                //UIHelper.SetButtonText(uiElements[buttonName], "");
+                currButton = buttonName;
+                game.keyBindActive = true;
+
+                if(isTopDownKeys == false)
+                {
+                    for (int i = 0; i < SideKeyBinds.Length; i++)
+                    {
+                        string name = "KeyBindBtn" + SideKeyBinds[i];
+                        if (name == buttonName)
+                            currButtonIndex = i;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < TopDownKeyBinds.Length; i++)
+                    {
+                        string name = "KeyBindBtn" + TopDownKeyBinds[i];
+                        if (name == buttonName)
+                            currButtonIndex = i;
+                    }
+                }
+
+               
             }
+            else if(buttonName.Contains("SwapKeys"))
+            {
+                isTopDownKeys = !isTopDownKeys;
+                isSideScrollKeys = !isSideScrollKeys;
+
+                SetSideKeyBinds(isSideScrollKeys);
+                SetTopDownKeyBinds(isTopDownKeys);
+
+            }
+            else
+            {
+              
+
+                switch (buttonName)
+                {
+                    case "MainMenuExit":
+                        game.Exit();
+                        break;
+                    case "MainMenuPlay":
+                        game.ChangeMenuState(Game1.MenuStates.StartGame);
+                        UIHelper.SetElementVisibility("StartNewGame", true, uiElements);
+                        UIHelper.SetElementVisibility("LoadGame", true, uiElements);
+                        UIHelper.SetElementVisibility("StartGameReturn", true, uiElements);
+                        UIHelper.SetButtonState("StartGameReturn", false, uiElements);
+
+                        UIHelper.SetElementVisibility("MainMenuPlay", false, uiElements);
+                        UIHelper.SetElementVisibility("MainMenuExit", false, uiElements);
+                        UIHelper.SetElementVisibility("MainMenuSetting", false, uiElements);
+                        UIHelper.SetButtonState("MainMenu", true, uiElements);
+
+                        break;
+                    case "MainMenuSetting":
+                        game.ChangeMenuState(Game1.MenuStates.Settings);
+                        UIHelper.SetElementVisibility("Settings", true, uiElements);
+                        break;
+                    case "SettingsReturnBtn":
+                        game.ChangeMenuState(Game1.MenuStates.MainMenu);
+                        transition = true;
+
+                        break;
+                    case "StartGameReturn":
+                        game.ChangeMenuState(Game1.MenuStates.MainMenu);
+                        UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
+                        UIHelper.SetElementVisibility("LoadGame", false, uiElements);
+                        UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
+                        UIHelper.SetButtonState("MainMenu", false, uiElements);
+                        UIHelper.SetButtonState("StartGameReturn", true, uiElements);
+                        break;
+                    case "StartNewGame":
+                        game.ChangeGameState(Game1.Scenes.InGame);
+                        UIHelper.SetElementVisibility("MainMenu", false, uiElements);
+                        UIHelper.SetElementVisibility("Settings", false, uiElements);
+                        UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
+                        UIHelper.SetElementVisibility("LoadGame", false, uiElements);
+                        UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
+                        game.LoadTutorial();
+
+                        UIHelper.SetButtonState("MainMenuPlay", false, uiElements);
+                        UIHelper.SetButtonState("MainMenuExit", false, uiElements);
+                        break;
+
+                }
+            }
+          
         }
 
         public void UpdateTextBlock(string keyWord, Rectangle currBounds, int bossRooms = 0)
@@ -141,7 +198,7 @@ namespace AUTO_Matic
             uiElements[keyWord].Visible = false;
         }
 
-        public void UpdateButton(string keyWord, float moveSpeed)
+        public void UpdateButton(string keyWord, float moveSpeed, Game1 game)
         {
             switch(keyWord)
             {
@@ -214,11 +271,11 @@ namespace AUTO_Matic
                         if (UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).X > ((int)dims.X / 2) - (UIHelper.MenuTitle.Width / 2))
                         {
                             UIHelper.SetElementBGRect(uiElements["MainMenuTitle"],
-                          new Rectangle(((int)dims.X / 2) - (450 / 2), UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Y,
+                          new Rectangle(((int)dims.X / 2) - UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Width/2, UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Y,
                           UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Width, UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Height));
 
                             UIHelper.SetElementRect(uiElements["MainMenuTitle"],
-                        new Rectangle(((int)dims.X / 2) - (450 / 2), UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Y,
+                        new Rectangle(((int)dims.X / 2) - UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Width / 2, UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Y,
                         UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Width, UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Height));
 
 
@@ -228,7 +285,7 @@ namespace AUTO_Matic
                             UIHelper.SetRectangle(uiElements["MainMenuExit"], new Rectangle(((int)dims.X / 2) - (200 / 2),
                                UIHelper.GetRectangle(uiElements["MainMenuExit"]).Y, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Width, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Height));
 
-                            UIHelper.SetRectangle(uiElements["MainMenuSetting"], new Rectangle(((int)dims.X / 2) - (200 / 2),
+                            UIHelper.SetRectangle(uiElements["MainMenuSetting"], new Rectangle(((int)dims.X / 2) + (200),
                                UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Y, UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Width, UIHelper.GetRectangle(uiElements["MainMenuSetting"]).Height));
 
                             transition = false;
@@ -258,6 +315,16 @@ namespace AUTO_Matic
                         UIHelper.SetRectangle(uiElements["SettingsReturnBtn"], new Rectangle((int)(UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).X + moveSpeed),
                             UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Y, UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Width,
                             (UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Height)));
+                        if (uiElements.ContainsKey("SideBindTitle"))
+                        {
+
+                            SetSideKeyBinds(false);
+                            SetTopDownKeyBinds(false);
+                            uiElements["WeaponWheelTitle"].Visible = false;
+                            uiElements["SwapKeys"].Visible = false;
+
+                        }
+                            
                     }
 
                         //Start/Load/Exit/NewGame buttons
@@ -304,6 +371,7 @@ namespace AUTO_Matic
                     break;
                 case "Settings":
                     //Move main menu elements to the left
+                    //bool createKeyBinds = true;
                     if(UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Right > -100)
                     {
                         //Move all Main menu elements
@@ -350,6 +418,8 @@ namespace AUTO_Matic
                         UIHelper.SetRectangle(uiElements["SettingsReturnBtn"], new Rectangle((int)(UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).X - moveSpeed),
                             UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Y, UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Width,
                             (UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Height)));
+                       
+                       
 
                         if (UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).X <
                        (int)((dims.X / 2) - (UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).Width / 2)))
@@ -374,7 +444,11 @@ namespace AUTO_Matic
                              UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Y, UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Width,
                              (UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Height)));
 
-
+                            //CreateKeyBindsUI(game);
+                            SetSideKeyBinds(true);
+                            uiElements["WeaponWheelTitle"].Visible = true;
+                            uiElements["SwapKeys"].Visible = true;
+                            //CreateKeyBindsUI(game);
                         }
                     }
                     break;
@@ -426,7 +500,7 @@ namespace AUTO_Matic
 
             //Settings Box
             uiElements.Add("SettingsButtonBox", UIHelper.CreateTextblock("\n\tSettingsButtonBox", "Hello", (int)(((dims.X * 1.5f))) - (525 / 2),
-                (int)uiElements["SettingsMenuTitle"].Position.Y + 50));
+                (int)uiElements["SettingsMenuTitle"].Position.Y + 70));
             UIHelper.SetElementRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(350, 100)));
             UIHelper.SetElementBGRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(525, 350)));
 
@@ -459,6 +533,8 @@ namespace AUTO_Matic
             uiElements.Add("BossRoomCounter", UIHelper.CreateTextblock("BossRoomCounter", "\n\n          0/10 Rooms Complete", 0,0));
             UIHelper.SetElementRect(uiElements["BossRoomCounter"], new Rectangle(uiElements["BossRoomCounter"].Position.ToPoint(), new Point(128, 96)));
             UIHelper.SetElementBGRect(uiElements["BossRoomCounter"], new Rectangle(uiElements["BossRoomCounter"].Position.ToPoint(), new Point(215, 70)));
+
+            //CreateKeyBindsUI(game);
 
             //uiElements.Add("p2Rotation", UIHelper.CreateTextblock("p2Rotation", "x", 580, 120));
             //uiElements.Add("p2Elevation", UIHelper.CreateTextblock("p2Elevation", "x", 580, 135));
@@ -514,12 +590,279 @@ namespace AUTO_Matic
            
         }
 
+        public void SetSideKeyBinds(bool visible)
+        {
+            for(int i = 0; i < SideKeyBinds.Length; i++)
+            {
+                uiElements["KeyBind" + SideKeyBinds[i]].Visible = visible;
+                uiElements["KeyBindBtn" + SideKeyBinds[i]].Visible = visible;
+                uiElements["SideBindTitle"].Visible = visible;
+                //uiElements["WheaponWheelTitle"].Visible = visible;
+                //uiElements["SwapKeyBinds"].Visible = visible;
+            }
+        }
+
+        public void SetTopDownKeyBinds(bool visible)
+        {
+            for(int i = 0; i < TopDownKeyBinds.Length; i++)
+            {
+                uiElements["KeyBind" + TopDownKeyBinds[i]].Visible = visible;
+                uiElements["KeyBindBtn" + TopDownKeyBinds[i]].Visible = visible;
+                uiElements["TopDownBindTitle"].Visible = visible;
+                //uiElements["Swap"]
+
+            }
+        }
+
+        public void CreateKeyBindsUI(Game1 game)
+        {
+            if(uiElements.ContainsKey("SideBindTitle") == false)
+            {
+                uiElements["SettingsMenuTitle"].Visible = false;
+
+                SideKeyBinds = new string[12]; //Dash, Jump, move: left/right, shoot, StartShoot, WeaponWheel: pistol/Ray/Burst/Bomb/Shotgun
+                SideKeyBinds[0] = "Move Left:";
+                SideKeyBinds[1] = "Move Right:";
+                SideKeyBinds[2] = "Start Shoot:";
+                SideKeyBinds[3] = "Shoot:";
+                SideKeyBinds[4] = "Dash:";
+                SideKeyBinds[5] = "Jump:";
+                SideKeyBinds[6] = "Interact:";
+                SideKeyBinds[7] = "Pistol:";
+                SideKeyBinds[8] = "Ray:";
+                SideKeyBinds[9] = "Burst:";
+                SideKeyBinds[10] = "Bomb:";
+                SideKeyBinds[11] = "Shotgun:";
+
+                SideScrollInputs.Add(Keys.A);
+                SideScrollInputs.Add(Keys.D);
+                SideScrollInputs.Add(Keys.S);
+                SideScrollInputs.Add(Keys.Enter);
+                SideScrollInputs.Add(Keys.LeftShift);
+                SideScrollInputs.Add(Keys.Space);
+                SideScrollInputs.Add(Keys.E);
+                SideScrollInputs.Add(Keys.RightShift);
+                SideScrollInputs.Add(Keys.Left);
+                SideScrollInputs.Add(Keys.Right);
+                SideScrollInputs.Add(Keys.Up);
+                SideScrollInputs.Add(Keys.Down);
+
+                TopDownKeyBinds = new string[12]; //Dash, Move: left/right/up/down, Shoot, WeaponWheel: Pistol/Ray/Burst/Bomb/Shotgun, Direction Locking, 
+                TopDownKeyBinds[0] = "Move Left: ";
+                TopDownKeyBinds[1] = "Move Right: ";
+                TopDownKeyBinds[2] = "Move Up: ";
+                TopDownKeyBinds[3] = "Move Down: ";
+                TopDownKeyBinds[4] = "Dash: ";
+                TopDownKeyBinds[5] = "Shoot: ";
+                TopDownKeyBinds[6] = "Shoot Direction Lock: ";
+                TopDownKeyBinds[7] = "Pistol: ";
+                TopDownKeyBinds[8] = "Ray: ";
+                TopDownKeyBinds[9] = "Burst: ";
+                TopDownKeyBinds[10] = "Bomb: ";
+                TopDownKeyBinds[11] = "Shotgun: ";
+
+                TopDownInputs.Add(Keys.A);
+                TopDownInputs.Add(Keys.D);
+                TopDownInputs.Add(Keys.W);
+                TopDownInputs.Add(Keys.S);
+                TopDownInputs.Add(Keys.Space);
+                TopDownInputs.Add(Keys.Enter);
+                TopDownInputs.Add(Keys.LeftShift);
+                TopDownInputs.Add(Keys.RightShift);
+                TopDownInputs.Add(Keys.Left);
+                TopDownInputs.Add(Keys.Right);
+                TopDownInputs.Add(Keys.Up);
+                TopDownInputs.Add(Keys.Down);
+
+                int width = 128;
+                int height = 25;
+
+                uiElements.Add("SwapKeys", UIHelper.CreateButton("SwapKeys", "Swap to Top/Side Key Binds",
+                    (int)((UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (dims.X)) - (213 / 2)), (int)(UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Bottom - 35)));
+                UIHelper.SetRectangle(uiElements["SwapKeys"], 213, height);
+
+                //uiElements["SwapKeys"].Visible = true;
+
+                CreateSideScrollKeyBinds(width, height);
+
+                CreateTopDownKeyBinds(width, height);
+
+                foreach (UIWidget widget in uiElements.Values)
+                {
+                    if (widget is UIButton)
+                    {
+
+                        ((UIButton)widget).Clicked += new
+                        UIButton.ClickHandler(UIButton_Clicked);
+                    }
+                }
+
+                this.game = game;
+            }
+        }
+
+        private void CreateTopDownKeyBinds(int width, int height)
+        {
+            for (int i = 0; i < TopDownKeyBinds.Length; i++)
+            {
+                if (i == 0)
+                {
+                    uiElements.Add("TopDownBindTitle", UIHelper.CreateTextblock("TopDownBindTitle", "       Top Down Key Binds",
+                   (UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (int)(dims.X)) - (150 / 2), 30));
+                    //uiElements["TopDownBindTitle"].Visible = true;
+                    UIHelper.SetElementBGRect(uiElements["TopDownBindTitle"], new Rectangle(uiElements["TopDownBindTitle"].Position.ToPoint(), new Point(150, 25)));
+                    UIHelper.SetElementRect(uiElements["TopDownBindTitle"], new Rectangle(uiElements["TopDownBindTitle"].Position.ToPoint(), new Point(150, 25)));
+
+                    uiElements.Add("KeyBind" + TopDownKeyBinds[i], UIHelper.CreateTextblock("KeyBind" + TopDownKeyBinds[i], TopDownKeyBinds[i],
+                   (int)((UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).X - (dims.X)) + 5), (int)(UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Y + 80)));
+                    UIHelper.SetElementRect(uiElements["KeyBind" + TopDownKeyBinds[i]], new Rectangle(uiElements["KeyBind" + TopDownKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+                    UIHelper.SetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]], new Rectangle(uiElements["KeyBind" + TopDownKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+
+                    uiElements.Add("KeyBindBtn" + TopDownKeyBinds[i],
+                        UIHelper.CreateButton("KeyBindBtn" + TopDownKeyBinds[i], TopDownInputs[i].ToString(), UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]]).Right + 2,
+                        UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]]).Y));
+
+                    UIHelper.SetRectangle(uiElements["KeyBindBtn" + TopDownKeyBinds[i]], width, height);
+                }
+                else if (i <= 5)
+                {
+                    uiElements.Add("KeyBind" + TopDownKeyBinds[i], UIHelper.CreateTextblock("KeyBind" + TopDownKeyBinds[i], TopDownKeyBinds[i], (int)(uiElements["KeyBind" + TopDownKeyBinds[i - 1]].Position.X),
+                   UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i - 1]]).Bottom + 5));
+                    UIHelper.SetElementRect(uiElements["KeyBind" + TopDownKeyBinds[i]], new Rectangle(uiElements["KeyBind" + TopDownKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+                    UIHelper.SetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]], new Rectangle(uiElements["KeyBind" + TopDownKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+
+                    uiElements.Add("KeyBindBtn" + TopDownKeyBinds[i],
+                       UIHelper.CreateButton("KeyBindBtn" + TopDownKeyBinds[i], TopDownInputs[i].ToString(), UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]]).Right + 2,
+                       UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]]).Y));
+
+                    UIHelper.SetRectangle(uiElements["KeyBindBtn" + TopDownKeyBinds[i]], width, height);
+                }
+                else if (i == 6)
+                {
+                    uiElements.Add("KeyBind" + TopDownKeyBinds[i], UIHelper.CreateTextblock("KeyBind" + TopDownKeyBinds[i], TopDownKeyBinds[i], (int)(uiElements["KeyBind" + TopDownKeyBinds[i - 1]].Position.X),
+                  UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i - 1]]).Bottom + 5));
+                    UIHelper.SetElementRect(uiElements["KeyBind" + TopDownKeyBinds[i]], new Rectangle(uiElements["KeyBind" + TopDownKeyBinds[i]].Position.ToPoint(), new Point(120, height)));
+                    UIHelper.SetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]], new Rectangle(uiElements["KeyBind" + TopDownKeyBinds[i]].Position.ToPoint(), new Point(120, height)));
+
+                    uiElements.Add("KeyBindBtn" + TopDownKeyBinds[i],
+                       UIHelper.CreateButton("KeyBindBtn" + TopDownKeyBinds[i], TopDownInputs[i].ToString(), UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]]).Right + 2,
+                       UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]]).Y));
+
+                    UIHelper.SetRectangle(uiElements["KeyBindBtn" + TopDownKeyBinds[i]], width, height);
+                }
+                else if (i == 7)
+                {
+                    uiElements.Add("KeyBind" + TopDownKeyBinds[i], UIHelper.CreateTextblock("KeyBind" + TopDownKeyBinds[i], TopDownKeyBinds[i], (int)(uiElements["WeaponWheelTitle"].Position.X),
+                   UIHelper.GetElementBGRect(uiElements["WeaponWheelTitle"]).Bottom + 7));
+                    UIHelper.SetElementRect(uiElements["KeyBind" + TopDownKeyBinds[i]], new Rectangle(uiElements["KeyBind" + TopDownKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+                    UIHelper.SetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]], new Rectangle(uiElements["KeyBind" + TopDownKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+
+                    uiElements.Add("KeyBindBtn" + TopDownKeyBinds[i],
+                       UIHelper.CreateButton("KeyBindBtn" + TopDownKeyBinds[i], TopDownInputs[i].ToString(), UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]]).Right + 2,
+                       UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]]).Y));
+
+                    UIHelper.SetRectangle(uiElements["KeyBindBtn" + TopDownKeyBinds[i]], width, height);
+                }
+                else
+                {
+                    uiElements.Add("KeyBind" + TopDownKeyBinds[i], UIHelper.CreateTextblock("KeyBind" + TopDownKeyBinds[i], TopDownKeyBinds[i], (int)(uiElements["KeyBind" + TopDownKeyBinds[i - 1]].Position.X),
+                  UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i - 1]]).Bottom + 5));
+                    UIHelper.SetElementRect(uiElements["KeyBind" + TopDownKeyBinds[i]], new Rectangle(uiElements["KeyBind" + TopDownKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+                    UIHelper.SetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]], new Rectangle(uiElements["KeyBind" + TopDownKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+
+                    uiElements.Add("KeyBindBtn" + TopDownKeyBinds[i],
+                       UIHelper.CreateButton("KeyBindBtn" + TopDownKeyBinds[i], TopDownInputs[i].ToString(), UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]]).Right + 2,
+                       UIHelper.GetElementBGRect(uiElements["KeyBind" + TopDownKeyBinds[i]]).Y));
+
+                    UIHelper.SetRectangle(uiElements["KeyBindBtn" + TopDownKeyBinds[i]], width, height);
+                }
+            }
+        }
+
+        private void CreateSideScrollKeyBinds(int width, int height)
+        {
+            for (int i = 0; i < SideKeyBinds.Length; i++)
+            {
+                if (i == 0)
+                {
+                    uiElements.Add("SideBindTitle", UIHelper.CreateTextblock("SideBindTitle", "       Side Scroll Key Binds",
+                        (UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (int)(dims.X)) - (150 / 2), 30));
+                   // uiElements["SideBindTitle"].Visible = true;
+                    UIHelper.SetElementBGRect(uiElements["SideBindTitle"], new Rectangle(uiElements["SideBindTitle"].Position.ToPoint(), new Point(150, 25)));
+                    UIHelper.SetElementRect(uiElements["SideBindTitle"], new Rectangle(uiElements["SideBindTitle"].Position.ToPoint(), new Point(150, 25)));
+
+                    uiElements.Add("KeyBind" + SideKeyBinds[i], UIHelper.CreateTextblock("KeyBind" + SideKeyBinds[i], SideKeyBinds[i],
+                        (int)((UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).X - (dims.X)) + 5), (int)(UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Y + 80)));
+                    UIHelper.SetElementRect(uiElements["KeyBind" + SideKeyBinds[i]], new Rectangle(uiElements["KeyBind" + SideKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+                    UIHelper.SetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]], new Rectangle(uiElements["KeyBind" + SideKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+
+                    uiElements.Add("KeyBindBtn" + SideKeyBinds[i],
+                        UIHelper.CreateButton("KeyBindBtn" + SideKeyBinds[i], SideScrollInputs[i].ToString(), UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]]).Right + 2,
+                        UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]]).Y));
+
+                    UIHelper.SetRectangle(uiElements["KeyBindBtn" + SideKeyBinds[i]], width, height);
+
+                    //uiElements[SideKeyBinds[i]].Visible = true;
+                }
+                else if (i <= 6)
+                {
+                    uiElements.Add("KeyBind" + SideKeyBinds[i], UIHelper.CreateTextblock("KeyBind" + SideKeyBinds[i], SideKeyBinds[i], (int)(uiElements["KeyBind" + SideKeyBinds[i - 1]].Position.X),
+                        UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i - 1]]).Bottom + 5));
+                    UIHelper.SetElementRect(uiElements["KeyBind" + SideKeyBinds[i]], new Rectangle(uiElements["KeyBind" + SideKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+                    UIHelper.SetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]], new Rectangle(uiElements["KeyBind" + SideKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+
+                    uiElements.Add("KeyBindBtn" + SideKeyBinds[i],
+                       UIHelper.CreateButton("KeyBindBtn" + SideKeyBinds[i], SideScrollInputs[i].ToString(), UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]]).Right + 2,
+                       UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]]).Y));
+
+                    UIHelper.SetRectangle(uiElements["KeyBindBtn" + SideKeyBinds[i]], width, height);
+
+                    //uiElements[SideKeyBinds[i]].Visible = true;
+                }
+                else if (i == 7)
+                {
+
+                    uiElements.Add("WeaponWheelTitle", UIHelper.CreateTextblock("WeaponWheelTitle", "   Weapon Wheel",
+                        UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[0]]).X + 300, UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[0]]).Y + 15));
+                    //uiElements["WeaponWheelTitle"].Visible = true;
+                    UIHelper.SetElementBGRect(uiElements["WeaponWheelTitle"], new Rectangle(uiElements["WeaponWheelTitle"].Position.ToPoint(), new Point(95, height)));
+                    UIHelper.SetElementRect(uiElements["WeaponWheelTitle"], new Rectangle(uiElements["WeaponWheelTitle"].Position.ToPoint(), new Point(95, height)));
+
+                    uiElements.Add("KeyBind" + SideKeyBinds[i], UIHelper.CreateTextblock("KeyBind" + SideKeyBinds[i], SideKeyBinds[i], (int)(uiElements["WeaponWheelTitle"].Position.X),
+                        UIHelper.GetElementBGRect(uiElements["WeaponWheelTitle"]).Bottom + 7));
+                    UIHelper.SetElementRect(uiElements["KeyBind" + SideKeyBinds[i]], new Rectangle(uiElements["KeyBind" + SideKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+                    UIHelper.SetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]], new Rectangle(uiElements["KeyBind" + SideKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+
+                    uiElements.Add("KeyBindBtn" + SideKeyBinds[i],
+                       UIHelper.CreateButton("KeyBindBtn" + SideKeyBinds[i], SideScrollInputs[i].ToString(), UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]]).Right + 2,
+                       UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]]).Y));
+
+                    UIHelper.SetRectangle(uiElements["KeyBindBtn" + SideKeyBinds[i]], width, height);
+                    //uiElements[SideKeyBinds[i]].Visible = true;
+                }
+                else
+                {
+                    uiElements.Add("KeyBind" + SideKeyBinds[i], UIHelper.CreateTextblock("KeyBind" + SideKeyBinds[i], SideKeyBinds[i], (int)(uiElements["KeyBind" + SideKeyBinds[i - 1]].Position.X),
+                       UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i - 1]]).Bottom + 5));
+                    UIHelper.SetElementRect(uiElements["KeyBind" + SideKeyBinds[i]], new Rectangle(uiElements["KeyBind" + SideKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+                    UIHelper.SetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]], new Rectangle(uiElements["KeyBind" + SideKeyBinds[i]].Position.ToPoint(), new Point(64, height)));
+
+                    uiElements.Add("KeyBindBtn" + SideKeyBinds[i],
+                       UIHelper.CreateButton("KeyBindBtn" + SideKeyBinds[i], SideScrollInputs[i].ToString(), UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]]).Right + 2,
+                       UIHelper.GetElementBGRect(uiElements["KeyBind" + SideKeyBinds[i]]).Y));
+
+                    UIHelper.SetRectangle(uiElements["KeyBindBtn" + SideKeyBinds[i]], width, height);
+                    //uiElements[SideKeyBinds[i]].Visible = true;
+                }
+            }
+        }
+
         public void CreateInteractUI(Point pos, bool bossCount = false)
         {
             if(!uiElements.ContainsKey("InteractBox"))
             {
                 uiElements.Add("InteractBox", UIHelper.CreateTextblock("InteractBox", "\n\n    " +
-                "[E] or (Y)", pos.X, pos.Y));
+                "["+SideScrollInputs[6].ToString()+"]"+" or (Y)", pos.X, pos.Y));
                 UIHelper.SetElementRect(uiElements["InteractBox"], new Rectangle(uiElements["InteractBox"].Position.ToPoint(), new Point(64, 64)));
                 UIHelper.SetElementBGRect(uiElements["InteractBox"], new Rectangle(uiElements["InteractBox"].Position.ToPoint(), new Point(64, 64)));
             }
@@ -534,7 +877,6 @@ namespace AUTO_Matic
             }
            
         }
-
         public void RemoveInteractUI()
         {
             if(uiElements.ContainsKey("InteractBox"))
@@ -542,6 +884,67 @@ namespace AUTO_Matic
             if (uiElements.ContainsKey("InteractBoxBossWarning"))
                 uiElements.Remove("InteractBoxBossWarning");
 
+        }
+
+        public void CreatePauseMenu(Rectangle viewRect)
+        {
+            if(!uiElements.ContainsKey("PauseMenuBox"))
+            {
+                uiElements.Add("PauseMenuBox", UIHelper.CreateTextblock("PauseMenuBox", "", (int)(viewRect.Center.X - (150 / 2)), (int)(viewRect.Center.Y - (150 / 2))));
+                UIHelper.SetElementBGRect(uiElements["PauseMenuBox"], new Rectangle(uiElements["PauseMenuBox"].Position.ToPoint(), new Point(200, 200)));
+                UIHelper.SetElementRect(uiElements["PauseMenuBox"], new Rectangle(uiElements["PauseMenuBox"].Position.ToPoint(), new Point(200, 200)));
+
+                uiElements["PauseMenuBox"].Visible = false;
+
+                uiElements.Add("PauseMainMenuBtn", UIHelper.CreateButton("PauseMainMenuBtn", "Return to Game",
+                    UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.X - (150 / 2), UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.Y - (int)(150 / 4)));
+                UIHelper.SetRectangle(uiElements["PauseMainMenuBtn"], 150, 25);
+
+                uiElements.Add("PauseMenuReturn", UIHelper.CreateButton("PauseMenuReturn", "Return to Menu", 
+                    UIHelper.GetRectangle(uiElements["PauseMainMenuBtn"]).X, UIHelper.GetRectangle(uiElements["PauseMainMenuBtn"]).Bottom + 20));
+                UIHelper.SetRectangle(uiElements["PauseMenuReturn"], 150, 25);
+
+
+                uiElements["PauseMenuReturn"].Visible = false;
+                uiElements["PauseMainMenuBtn"].Visible = false;
+            }
+        }
+
+        public void UpdatePauseUI(Rectangle rect)
+        {
+            if (uiElements.ContainsKey("PauseMenuBox"))
+            {
+                UIHelper.SetElementBGRect(uiElements["PauseMenuBox"], new Rectangle(new Point(rect.Center.X - (200/2), rect.Center.Y - (200/2)), new Point(200, 200)));
+                UIHelper.SetElementRect(uiElements["PauseMenuBox"], new Rectangle(new Point(rect.Center.X - (200 / 2), rect.Center.Y - (200 / 2)), new Point(200, 200)));
+                uiElements["PauseMenuBox"].Visible = true;
+            }
+              
+            if (uiElements.ContainsKey("PauseMainMenuBtn"))
+            {
+                UIHelper.SetRectangle(uiElements["PauseMainMenuBtn"], 
+                    new Rectangle(UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.X - (150 / 2),
+                    UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.Y - (int)(150 / 4), 150,25));
+                uiElements["PauseMainMenuBtn"].Visible = true;
+            }
+              
+            if (uiElements.ContainsKey("PauseMenuReturn"))
+            {
+                
+                UIHelper.SetRectangle(uiElements["PauseMenuReturn"], 
+                    new Rectangle(new Point(UIHelper.GetRectangle(uiElements["PauseMainMenuBtn"]).X, UIHelper.GetRectangle(uiElements["PauseMainMenuBtn"]).Bottom + 20), new Point(150,25)));
+                uiElements["PauseMenuReturn"].Visible = true;
+            }
+                
+        }
+
+        public void RemovePauseMenu()
+        {
+            if (uiElements.ContainsKey("PauseMenuBox"))
+                uiElements["PauseMenuBox"].Visible = false;
+            if (uiElements.ContainsKey("PauseMainMenuBtn"))
+                uiElements["PauseMainMenuBtn"].Visible = false;
+            if (uiElements.ContainsKey("PauseMenuReturn"))
+                uiElements["PauseMenuReturn"].Visible = false;
         }
 
         public void Draw(SpriteBatch spriteBatch)
