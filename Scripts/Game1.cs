@@ -1904,6 +1904,8 @@ namespace AUTO_Matic
                             if (kb.IsKeyDown(Keys.Enter) ||
                                 GamePad.GetState(0).Buttons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released)
                             {
+                                UIManager.RemovePauseMenu();
+
                                 if (PauseMenuButtonIndex == 1)
                                 {
                                     currScene = Scenes.TitleScreen;
@@ -1939,7 +1941,7 @@ namespace AUTO_Matic
                                 }
 
                                 PauseMenuButtonIndex = 0;
-                                UIManager.RemovePauseMenu();
+                                //UIManager.RemovePauseMenu();
                             }
 
                             break;
@@ -2359,8 +2361,9 @@ namespace AUTO_Matic
             {
                 UIManager.RemoveInteractUI();
                 //SetDungeonNum();
-                if(openDoorCount >= 1)
+                if(openDoorCount >= 1 && ssPlayer.animManager.isRight || openDoorCount > 1 && ssPlayer.animManager.isLeft)
                     soundManager.ClearSounds();
+     
 
                 //Find top door
                 int bottomTileIndex = 0;
@@ -2823,6 +2826,12 @@ namespace AUTO_Matic
             GamePadButtons currButtons = GamePad.GetState(PlayerIndex.One).Buttons;
             if (UIManager.willDelete)
                 UIManager.SetDeleteWarnings(true);
+            //if(UIManager.uiElements.ContainsKey("PauseMainMenuBtn") /*&& UIManager.uiElements["PauseMainMenuBtn"].Visible*/)
+            //{
+            //    UIManager.uiElements["PauseMenuReturn"].Visible = false;
+            //    UIManager.uiElements["PauseMainMenuBtn"].Visible = false;
+            //    UIManager.uiElements["PauseMenuQuit"].Visible = false;
+            //}
             switch (MenuState)
             {
                 case MenuStates.TitleCrawl:

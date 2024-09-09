@@ -999,10 +999,10 @@ namespace AUTO_Matic
                     UIHelper.GetRectangle(uiElements["PauseMenuReturn"]).Bottom + 20));
                 UIHelper.SetRectangle(uiElements["PauseMenuQuit"], 150, 30);
 
-
                 uiElements["PauseMenuReturn"].Visible = true;
                 uiElements["PauseMainMenuBtn"].Visible = true;
                 uiElements["PauseMenuQuit"].Visible = true;
+
             }
         }
 
@@ -1055,6 +1055,8 @@ namespace AUTO_Matic
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            if (uiElements.ContainsKey("PauseMainMenuBtn") && uiElements["PauseMainMenuBtn"].Visible && uiElements["PauseMenuQuit"].Visible == false)
+                uiElements["PauseMainMenuBtn"].Visible = false;
             foreach (UIWidget widget in uiElements.Values)
                 widget.Draw(spriteBatch);
         }
