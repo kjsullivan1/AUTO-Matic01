@@ -16,6 +16,7 @@ namespace AUTO_Matic.SideScroll
     class SSPlayer
     {
         ContentManager content;
+        Game1 gameData;
 
         //Player States
         enum AnimationStates { Walking, Death, Idle, Jump, Shoot, Dash }
@@ -76,6 +77,8 @@ namespace AUTO_Matic.SideScroll
         public float knockBackX;
         public float knockBackY;
         float gravX = 0;
+
+        bool interactActive = false;
         public float Health
         {
             get
@@ -496,8 +499,10 @@ namespace AUTO_Matic.SideScroll
             sounds = new SoundManager("Shoot", Content, false);
         }
 
-        public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies, bool fade = false)
+        public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies,Game1 game,bool fade = false)
         {
+            gameData = game;
+
             if(fade)
             {
                 if(animState != AnimationStates.Idle)
@@ -900,6 +905,30 @@ namespace AUTO_Matic.SideScroll
                     }
                 }
 
+                bool active = false;
+                foreach (DungeonEntrance dungeonEntrance in SideTileMap.DungeonEntrances)
+                {
+                    if (InteractionBox.Intersects(dungeonEntrance.Rectangle))
+                    {
+                        KeyBindData.CreateInteractUI(new Point(dungeonEntrance.Rectangle.X, dungeonEntrance.Rectangle.Y - 64));
+                        interactActive = true;
+                        active = true;
+                        //if (game.GameState == Game1.GameStates.Tutorial)
+                        //{
+                        //    game.prevGameState = Game1.GameStates.Tutorial;
+                        //    game.StartNewGame();
+                        //    break;
+                        //}
+                        //else if (game.GetDungeonNum() >= game.bossKillCount)
+                        //    game.StartDungeon();
+                    }
+
+                }
+                if(interactActive && !active)
+                {
+                    KeyBindData.RemoveInteractUI();
+                    interactActive = false;
+                }
                 particles.Update(gameTime);
                 sounds.Update(gameTime);
                 //switch (playerState)
@@ -1532,20 +1561,29 @@ namespace AUTO_Matic.SideScroll
                         break;
                     }
                 }
+
+               // bool active = false;
                 foreach(DungeonEntrance dungeonEntrance in SideTileMap.DungeonEntrances)
                 {
                     if(InteractionBox.Intersects(dungeonEntrance.Rectangle))
                     {
+                        //KeyBindData.CreateInteractUI(new Point(playerRect.X, playerRect.Y));
+                        //active = true;
                         if(game.GameState == Game1.GameStates.Tutorial)
                         {
                             game.prevGameState = Game1.GameStates.Tutorial;
                             game.StartNewGame();
                             break;
                         }
-                        else
+                        else if(game.GetDungeonNum() >= game.bossKillCount)
                             game.StartDungeon();
                     }
+                    
                 }
+                //if(!active && KeyBindData.uiElements.ContainsKey("InteractBox"))
+                //{
+                //    KeyBindData.RemoveInteractUI();
+                //}
                // jumpOutDelay = .75f;
             }
 
@@ -1803,8 +1841,8 @@ namespace AUTO_Matic.SideScroll
             //Weapon Wheel actions
             if(weaponWheel.active)
             {
-                if(kb.IsKeyDown(KeyBindData.SideScrollInputs[9]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[9]) ||
-                    RightStick.X > 0 )
+                if(kb.IsKeyDown(KeyBindData.SideScrollInputs[9]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[9]) && gameData.bossKillCount >= 2||
+                    RightStick.X > 0 && gameData.bossKillCount >= 2)
                 {
                     currWeapon = WeaponType.Burst;
                     selectedWeapon = 2;
@@ -1834,8 +1872,8 @@ namespace AUTO_Matic.SideScroll
 
 
                 }
-                else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[8]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[8]) ||
-                    RightStick.X < 0)
+                else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[8]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[8]) && gameData.bossKillCount >= 4||
+                    RightStick.X < 0 && gameData.bossKillCount >= 4)
                 {
                     //if (selectedWeapon == 2)
                     //{
@@ -1862,8 +1900,8 @@ namespace AUTO_Matic.SideScroll
                     shootDelay = laserDelay;
                     iShootDelay = shootDelay;
                 }
-                else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[10]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[10]) ||
-                   RightStick.Y > 0)
+                else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[10]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[10]) && gameData.bossKillCount >= 3||
+                   RightStick.Y > 0 && gameData.bossKillCount >= 3)
                 {
                     currWeapon = WeaponType.Bomb;
                     selectedWeapon = 3;
@@ -1891,8 +1929,8 @@ namespace AUTO_Matic.SideScroll
                     //    iShootDelay = shootDelay;
                     //}
                 }
-                else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[11]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[11]) ||
-                    RightStick.Y < 0)
+                else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[11]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[11]) && gameData.bossKillCount >= 1||
+                    RightStick.Y < 0 && gameData.bossKillCount >= 1)
                 {
                     //if (selectedWeapon == 0)
                     //{

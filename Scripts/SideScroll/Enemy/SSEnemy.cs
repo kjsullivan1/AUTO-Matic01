@@ -1700,7 +1700,7 @@ namespace AUTO_Matic.SideScroll
                         bounds *= 64; //Calculate distance travled from this number to insure bound correction   
                     }
                   
-                    landingPos = position;
+                    //landingPos = position;
                 }
                 if(enemyState == EnemyStates.Jumping)
                 {

@@ -80,7 +80,7 @@ namespace AUTO_Matic.Scripts.SideScroll
             this.maxHeight = height;
         }
 
-        public void Update(Vector2 position, bool dont, bool fade)
+        public void Update(Vector2 position, bool dont, bool fade, bool paused = false)
         {
             count++;
             //if (position.Y - viewport.Height / 2 <= 0)
@@ -107,9 +107,9 @@ namespace AUTO_Matic.Scripts.SideScroll
             height = maxHeight;
             foreach(BorderTile tile in SideTileMap.BorderTiles)
             {
-                if (tile.Rectangle.TouchBottomOf(new Rectangle(ViewRect.Center.X - ((64 * 4))/2, ViewRect.Bottom, 64 * 4, 1)))
+                if (tile.Rectangle.Intersects(new Rectangle(ViewRect.X, ViewRect.Bottom, ViewRect.Width, 10)))
                 {
-                    height = tile.Rectangle.Top;
+                    height = tile.Rectangle.Top - 8;
                 }
             }
           
@@ -132,12 +132,13 @@ namespace AUTO_Matic.Scripts.SideScroll
                 //{
                 //    center.X -= moveSpeed;
                 //}
-                if ((int)center.Y < (int)position.Y && (center.Y + cameraHeight / 2) + moveSpeed < height - 30)
+                if ((int)center.Y < (int)position.Y && (center.Y + cameraHeight / 2) + moveSpeed < height && center.Y + moveSpeed < (int)position.Y)
                 {
                     center.Y += moveSpeed;
                     reached = false;
                 }
-                if ((int)center.Y > (int)position.Y)
+                
+                if ((int)center.Y > (int)position.Y && center.Y - moveSpeed > (int)position.Y)
                 {
                     center.Y -= moveSpeed;
                     reached = false;
@@ -149,11 +150,19 @@ namespace AUTO_Matic.Scripts.SideScroll
 
                 if (MathHelper.Distance(center.X, position.X) > 64 * 3)
                 {
-                    moveSpeed = maxMoveSpeed;
+                    if(paused)
+                    {
+                        moveSpeed = maxMoveSpeed * 10;
+                    }
+                    else
+                        moveSpeed = maxMoveSpeed;
                 }
                 else if(MathHelper.Distance(center.X, position.X) > 64 * 4)
                 {
-                    moveSpeed = maxMoveSpeed * 1.5f;
+                    if (paused)
+                        moveSpeed = maxMoveSpeed * 11;
+                    else
+                        moveSpeed = maxMoveSpeed * 1.5f;
                 }
                 else
                 {
@@ -182,12 +191,12 @@ namespace AUTO_Matic.Scripts.SideScroll
                     center.X -= moveSpeed;
                     reached = false;
                 }
-                if (center.Y < position.Y && (center.Y + 650/2) + moveSpeed < height)
+                if (center.Y < position.Y && (center.Y + 620/2) + moveSpeed < height)
                 {
                     center.Y += moveSpeedY;
                     reached = false;
                 }
-                if (center.Y > position.Y && (int)((center.Y - 650/2) - moveSpeed) > 0)
+                if (center.Y > position.Y && (int)((center.Y - 620/2) - moveSpeed) > 0)
                 {
                     center.Y -= moveSpeedY;
                     reached = false;
@@ -377,6 +386,11 @@ namespace AUTO_Matic.Scripts.SideScroll
             //    transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));
             //}
 
+        }
+
+        public void SetBounds(Rectangle rect)
+        {
+            CameraBounds = rect;
         }
         public Rectangle FollowBox
         {

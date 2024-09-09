@@ -14,6 +14,8 @@ using AUTO_Matic.Scripts.SideScroll.Enemy;
 using AUTO_Matic.Scripts.TopDown.AUTO_Matic.Scripts.TopDown;
 using AUTO_Matic.Scripts.TopDown.Bosses;
 using AUTO_Matic.Scripts.Effects;
+using System.IO;
+
 
 namespace AUTO_Matic
 {
@@ -33,10 +35,11 @@ namespace AUTO_Matic
         int dropRateSS = 15;
         int dropRateTD = 35;
         float healAmount = 2.25f;
-        int openDoorCount = 0; //Counts how many times opened doors in the main SideScroll section
-        int bossKillCount = 0; //How many bosses defeated
+        public int openDoorCount = 0; //Counts how many times opened doors in the main SideScroll section
+        public int bossKillCount = 0; //How many bosses defeated
 
         Rectangle LeaveDungeon = Rectangle.Empty;
+        public bool deleteSave = false;
         bool closeDoor = false;
 
         int MenuButtonIndex = 0;
@@ -60,8 +63,8 @@ namespace AUTO_Matic
 
         Point screenCenter;
         Point saveMousePoint;
-        MouseState ms;
-        MouseState prevMs;
+        public MouseState ms;
+        public MouseState prevMs;
         Vector2 mousePos = Vector2.Zero;
         int count = 0;
         bool dont = false;
@@ -166,10 +169,13 @@ namespace AUTO_Matic
 
         public bool keyBindActive = false;
         public bool changeKey = false;
-        KeyboardState kb = Keyboard.GetState();
+        public KeyboardState kb = Keyboard.GetState();
 
         public Keys keyBindKey;
         int reloadCount = 0;
+        public string dataPath;
+        public string SideInputPath;
+        public string TopDownInputPath;
         class Door
         {
             BottomDoorTile bottomDoor;
@@ -216,6 +222,9 @@ namespace AUTO_Matic
         /// </summary>
         protected override void LoadContent()
         {
+            dataPath = Content.RootDirectory + "/SaveData/Save";
+            SideInputPath = Content.RootDirectory + "/SaveData/SideInputSave";
+            TopDownInputPath = Content.RootDirectory + "/SaveData/TopDownInputSave";
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             tdPlayer = new TDPlayer(this, 64, 200, 200, UIManager);
@@ -266,7 +275,7 @@ namespace AUTO_Matic
             if (currScene == Scenes.InGame)
             {
                 //LoadTutorial();
-              StartNewGame();
+              //StartNewGame();
                //LoadFinalBoss();
                 
             }
@@ -361,6 +370,7 @@ namespace AUTO_Matic
             }
             else if(isBoss && tdPlayer.bossRoom == levelCount)
             {
+                SaveGame();
                 levelCount++;
                 //graphics.PreferredBackBufferWidth = 64 * 15; //1600  // pixelBits * col
                 //graphics.PreferredBackBufferHeight = 64 * 15; //960  // pixelBits * row
@@ -492,19 +502,25 @@ namespace AUTO_Matic
         }
 
 
-        public void StartDungeon()
+        public void StartDungeon(bool loadGame = false)
         {
             healthDrops.Clear();
             soundManager.ClearSounds();
             soundManager.AddSound("BossTheme", true);
             GameState = GameStates.TopDown;
             //tdMap.dMapDims.Clear();
-            SetDungeonNum();
+
+            if(!loadGame)
+            {
+                SetDungeonNum();
+                levelCount = 0;
+            }
+               
 
             tdPlayer = new TDPlayer(this, 64, 200, 200, UIManager);
             tdMap = new TopDownMap();
             //Boss = new Rectangle();
-            levelCount = 0;
+     
             startBoss = false;
             graphics.PreferredBackBufferWidth = 64 * 25; //1600  // pixelBits * col
             graphics.PreferredBackBufferHeight = 64 * 15; //960  // pixelBits * row
@@ -523,21 +539,24 @@ namespace AUTO_Matic
             }
             mapBuilder = new MapBuilder(maps); //Giving maps
 
+            if (levelCount == 0)
+                loadGame = false;
+
             if (tdPlayer.levelInX == 1 && tdPlayer.levelInY == 1)
             {
-                GenerateNewMap(true, false, false, false);
+                GenerateNewMap(true, false, false, loadGame);
             }
             else if (tdPlayer.levelInX > 1 && tdPlayer.levelInY == 1)
             {
-                GenerateNewMap(true, false, false, false);
+                GenerateNewMap(true, false, false, loadGame);
             }
             else if (tdPlayer.levelInY > 1 && tdPlayer.levelInX == 1)
             {
-                GenerateNewMap(false, true, false, false);
+                GenerateNewMap(false, true, false, loadGame);
             }
             else if (tdPlayer.levelInX > 1 && tdPlayer.levelInY > 1)
             {
-                GenerateNewMap(false, false, true, false);
+                GenerateNewMap(false, false, true, loadGame);
             }
             BoundIndexes.Clear();
             BoundIndexes.Add(camera.Position);
@@ -561,10 +580,11 @@ namespace AUTO_Matic
             UIHelper.ChangeDashIcon(UIManager.uiElements["DashIcon"], tdPlayer.DashIndex());
 
             prevGameState = GameState;
+            SaveGame();
             GameState = GameStates.Paused;
         }
 
-        private void SetDungeonNum()
+        public void SetDungeonNum()
         {
             DungeonEntrance entrance = dungeons[0];
             //dungeonNum = 1;
@@ -579,7 +599,66 @@ namespace AUTO_Matic
             }
         }
 
-        public void LoadTutorial()
+        public int GetDungeonNum()
+        {
+            dungeons.Clear();
+            DungeonEntrance closest = SideTileMap.DungeonEntrances[0];
+            DungeonEntrance furthest = SideTileMap.DungeonEntrances[0];
+            while (dungeons.Count < SideTileMap.DungeonEntrances.Count)
+            {
+                for (int i = 0; i < SideTileMap.DungeonEntrances.Count; i++)
+                {
+                    //closest = SideTileMap.DungeonEntrances[i];
+                    if (!dungeons.Contains(SideTileMap.DungeonEntrances[i]))
+                    {
+                        closest = SideTileMap.DungeonEntrances[i];
+                        furthest = SideTileMap.DungeonEntrances[i];
+                        for (int j = 0; j < SideTileMap.DungeonEntrances.Count; j++)
+                        {
+                            if (!dungeons.Contains(SideTileMap.DungeonEntrances[j]))
+                            {
+                                if (closest.Rectangle.X > SideTileMap.DungeonEntrances[j].Rectangle.X)
+                                {
+                                    closest = SideTileMap.DungeonEntrances[j];
+                                }
+                                //else if (SideTileMap.DungeonEntrances[i].Rectangle.X > SideTileMap.DungeonEntrances[j].Rectangle.X)
+                                //{
+                                //    closest = SideTileMap.DungeonEntrances[j];
+                                //    //furthest = SideTileMap.DungeonEntrances[]
+                                //}
+                                else if (furthest.Rectangle.X < SideTileMap.DungeonEntrances[j].Rectangle.X)
+                                {
+                                    furthest = SideTileMap.DungeonEntrances[j];
+                                }
+                            }
+
+                        }
+                    }
+                }
+                if (dungeons.Contains(closest) == false)
+                    dungeons.Add(closest);
+
+            }
+
+            DungeonEntrance entrance = dungeons[0];
+            int k = 0;
+            int closestIndex = 0;
+            for (k = 1; k < dungeons.Count; k++)
+            {
+                if (MathHelper.Distance(entrance.Rectangle.X, ssPlayer.Rectangle.X) >
+                    MathHelper.Distance(dungeons[k].Rectangle.X, ssPlayer.Rectangle.X))
+                {
+                    dungeonNum = k;
+                    entrance = dungeons[k];
+                    closestIndex = k;
+                    //return k;
+                }
+            }
+
+            return closestIndex;
+        }
+
+        public void LoadTutorial(bool restart = false)
         {
             healthDrops.Clear();
             string filePath = Content.RootDirectory + "/SideScroll/Maps/Map0.txt";
@@ -599,6 +678,12 @@ namespace AUTO_Matic
             flyingBeacons.Clear();
             enemies.Clear();
             enemies.Clear();
+            bossKillCount = 0;
+            openDoorCount = 0;
+            dungeonNum = 0;
+            soundManager.ClearSounds();
+
+            fadePos = SideTileMap.playerSpawns[0];
             int k = 1;
             for (int i = 0; i < SideTileMap.enemySpawns.Count; i++)
             {
@@ -621,6 +706,7 @@ namespace AUTO_Matic
 
             for(int i = 0; i < SideTileMap.flyingBeacons.Count;i++)
             {
+
                 flyingBeacons.Add(new FlyingControlBeacon(SideTileMap.flyingBeacons[i].Rectangle, Content));
             }
                 //Add final boss here 
@@ -660,6 +746,9 @@ namespace AUTO_Matic
             UIHelper.SetElementVisibility("MainMenu", false, UIManager.uiElements);
             UIHelper.SetElementVisibility("Settings", false, UIManager.uiElements);
             UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
+
+            //if (restart)
+            //    LoadGame(false);
 
         }
 
@@ -717,7 +806,7 @@ namespace AUTO_Matic
 
         }
 
-        public void StartNewGame(bool respawn = false)
+        public void StartNewGame(bool respawn = false, bool loadGame = false)
         {
             SideTileMap.WallTiles.Clear();
             SideTileMap.GroundTiles.Clear();
@@ -738,25 +827,17 @@ namespace AUTO_Matic
             graphics.IsFullScreen = false;
             graphics.ApplyChanges();
             //maxShootRate = shootRate;
-            camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2));
+            //camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2));
 
-            if (!respawn)
-            {
-                openDoorCount = 0;
-                bossKillCount = 0;
-            }
-            else if(respawn)
-            {
-                openDoorCount = 0;
-            }
 
             healthDrops.Clear();
             UIHelper.SetElementVisibility("MainMenu", false, UIManager.uiElements);
             UIHelper.SetElementVisibility("Settings", false, UIManager.uiElements);
             UIHelper.SetElementVisibility("TitleCrawl", false, UIManager.uiElements);
-
+            UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
+            UIHelper.SetElementVisibility("DashIcon", true, UIManager.uiElements);
             //camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth / 2 - (64*3.5f), graphics.PreferredBackBufferHeight / 2));
-           
+
 
             this.IsMouseVisible = false;
             Tile.Content = Content;
@@ -809,7 +890,7 @@ namespace AUTO_Matic
             //SideTileMap.SetFlyingEnemies(flyingEnemies);
             DungeonEntrance closest = SideTileMap.DungeonEntrances[0];
             DungeonEntrance furthest = SideTileMap.DungeonEntrances[0];
-            while (dungeons.Count < SideTileMap.DungeonEntrances.Count - 1)
+            while (dungeons.Count < SideTileMap.DungeonEntrances.Count)
             {
                 for (int i = 0; i < SideTileMap.DungeonEntrances.Count; i++)
                 {
@@ -852,24 +933,45 @@ namespace AUTO_Matic
             //if(respawn && prevGameState != GameStates.Tutorial)
             //    ssPlayer.Load(Content, Window.ClientBounds, friction, savedPos);
             //else
+            if(!loadGame)
+            {
+                ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0),
+               (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
+
                 ssPlayer.Load(Content, Window.ClientBounds, friction, SideTileMap.playerSpawns[0], UIManager);
+
+                fadePos = SideTileMap.playerSpawns[0];
+            }
+
+           
+            
+            if (!respawn)
+            {
+                openDoorCount = 0;
+                bossKillCount = 0;
+            }
+            else if (respawn)
+            {
+                openDoorCount = 0;
+            }
 
             ssPlayer.Health = 10;
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
             UIHelper.ChangeDashIcon(UIManager.uiElements["DashIcon"], ssPlayer.DashIndex());
             UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
             UIHelper.SetElementVisibility("DashIcon", true, UIManager.uiElements);
-            ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0,0),
-                (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
-            ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
-            fadePos = SideTileMap.playerSpawns[0];
+           
+            //ssCamera.Update(new Vector2(ssPlayer.playerRect.X, ssPlayer.playerRect.Y), dont, fade);
            //ssCamera.Zoom = .5f;
             // ssCamera.Position = ssPlayer.Position;
             //enemy = new SSEnemy(Content, GraphicsDevice.Viewport.Bounds, 5);
             GameState = GameStates.SideScroll;
+         
             //ChangeToSideScroll();
             prevGameState = GameState;
             GameState = GameStates.Paused;
+
+         
 
             UIHelper.SetElementVisibility("TutorialBox", false, UIManager.uiElements);
 
@@ -893,45 +995,77 @@ namespace AUTO_Matic
             //pos = new Vector2(Window.ClientBounds.Width / 2 + (Window.ClientBounds.Width * (levelInX - 1)), graphics.PreferredBackBufferHeight / 2 + (graphics.PreferredBackBufferHeight * (levelInY - 1)));
             if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) > pos.X))
             {
-                pos.X += graphics.PreferredBackBufferWidth / pixelBits;
+                if (pos.X + graphics.PreferredBackBufferWidth / pixelBits > graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)))
+                {
+                    pos.X = graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1));
+                }
+                else
+                {
+                    pos.X += graphics.PreferredBackBufferWidth / pixelBits;
 
-                //if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) < pos.X))
-                //{
-                //    pos.X = graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1));
-                //}
+                    //if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) < pos.X))
+                    //{
+                    //    pos.X = graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1));
+                    //}
 
-                tdCameraReached = false;
+                    tdCameraReached = false;
+                }
+              
             }
             else if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) < pos.X))
             {
-                pos.X -= graphics.PreferredBackBufferWidth / pixelBits;
+                if (pos.X - graphics.PreferredBackBufferWidth / pixelBits < graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)))
+                {
+                    pos.X = graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1));
+                }
+                else
+                {
+                    pos.X -= graphics.PreferredBackBufferWidth / pixelBits;
 
-                //if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) > pos.X))
-                //{
-                //    pos.X = graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1));
-                //}
+                    //if ((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) < pos.X))
+                    //{
+                    //    pos.X = graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1));
+                    //}
 
-                tdCameraReached = false;
+                    tdCameraReached = false;
+                }
             }
             if (((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))) < pos.Y))
             {
-                pos.Y -= graphics.PreferredBackBufferHeight / pixelBits;
+                if(pos.Y - graphics.PreferredBackBufferHeight / pixelBits < ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)))))
+                {
+                    pos.Y = ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
+                }
+                else
+                {
 
-                //if (((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))) > pos.Y))
-                //{
-                //    pos.Y = ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
-                //}
-                tdCameraReached = false;
+                    pos.Y -= graphics.PreferredBackBufferHeight / pixelBits;
+
+                    //if (((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))) > pos.Y))
+                    //{
+                    //    pos.Y = ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
+                    //}
+                    tdCameraReached = false;
+                }
+
             }
             else if ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) > pos.Y))
             {
-                pos.Y += graphics.PreferredBackBufferHeight / pixelBits;
+                if (pos.Y + graphics.PreferredBackBufferHeight / pixelBits < ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)))))
+                {
+                    pos.Y = ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
+                }
+                else
+                {
 
-                //if (((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))) < pos.Y))
-                //{
-                //    pos.Y = ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
-                //}
-                tdCameraReached = false;
+                    pos.Y += graphics.PreferredBackBufferHeight / pixelBits;
+
+                    //if (((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))) > pos.Y))
+                    //{
+                    //    pos.Y = ((graphics.PreferredBackBufferHeight / 2 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
+                    //}
+                    tdCameraReached = false;
+                }
             }
 
             if (BoundIndexes.Contains(new Vector2((graphics.PreferredBackBufferWidth / 2 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1))), 
@@ -1008,9 +1142,9 @@ namespace AUTO_Matic
 
 
 
-                                ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X, SideTileMap.playerSpawns[0].Y - 200), dont, fade);
-
-                                ssPlayer.Update(gameTime, Gravity, enemies, true);
+                                //ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X, SideTileMap.playerSpawns[0].Y - 200), dont, fade);
+                                ssCamera.Update(fadePos, dont, fade);
+                                ssPlayer.Update(gameTime, Gravity, enemies, this ,true);
                                 if (fade)
                                 {
                                     //ssCamera.Update(new Vector2(fadePos.X, fadePos.Y - 50), false, fade);
@@ -1029,14 +1163,15 @@ namespace AUTO_Matic
                                         }
 
                                     }
-
+                                   if(!doorTrans && openDoorCount == 0)
+                                        ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X, SideTileMap.playerSpawns[0].Y - 200), dont, fade);
                                 }
                                
                                    
-                                if (updateDoor)
+                                if (doorTrans)
                                 {
                                     UpdateDoor(topIndex, bottomIndex);
-                                    //ssCamera.Update(fadePos, dont, fade);
+                                    ssCamera.Update(fadePos, false, fade);
                                 }
                              
 
@@ -1054,6 +1189,7 @@ namespace AUTO_Matic
                                 {
                                     prevGameState = GameState;
                                     GameState = GameStates.InGamePause;
+                                    UIManager.CreatePauseMenu(ssCamera.ViewRect);
                                     UIManager.uiElements["HealthBar"].Visible = false;
                                     UIManager.uiElements["DashIcon"].Visible = false;
                                     //mainMenuPos = new Vector2(0, 0);
@@ -1073,12 +1209,12 @@ namespace AUTO_Matic
                                 ssCamera.Update(fadePos, dont, fade);
                                 UIManager.uiElements["DashIcon"].Visible = false;
                                 UIManager.uiElements["HealthBar"].Visible = false;
-                                ssPlayer.Update(gameTime, Gravity, enemies, true);
+                                ssPlayer.Update(gameTime, Gravity, enemies, this,true);
                                 //ChangeToSideScroll();
 
-                               
-                                 
-                               
+
+                 
+
 
                                 if (fade)
                                 {
@@ -1124,7 +1260,7 @@ namespace AUTO_Matic
                             else
                             {
                                 SideScrollPhysics(gameTime, kb, worldRect);
-                                if (kb.IsKeyDown(Keys.J))
+                                if (kb.IsKeyDown(Keys.J) && prevKB.IsKeyUp(Keys.J))
                                 {
                                     GameState = GameStates.TopDown;
                                     StartDungeon();
@@ -1135,6 +1271,7 @@ namespace AUTO_Matic
                                 {
                                     prevGameState = GameState;
                                     GameState = GameStates.InGamePause;
+                                    UIManager.CreatePauseMenu(ssCamera.ViewRect);
                                     UIManager.uiElements["HealthBar"].Visible = false;
                                     UIManager.uiElements["DashIcon"].Visible = false;
                                     //soundManager.ClearSounds();
@@ -1177,6 +1314,9 @@ namespace AUTO_Matic
                                 {
                                     prevGameState = GameState;
                                     GameState = GameStates.InGamePause;
+                                    UIManager.CreatePauseMenu(new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                                       (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                                       new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height)));
                                     UIManager.uiElements["HealthBar"].Visible = false;
                                     UIManager.uiElements["DashIcon"].Visible = false;
                                     //soundManager.ClearSounds();
@@ -1217,7 +1357,7 @@ namespace AUTO_Matic
                                 }
                                 if (tdPlayer.Health <= 0)
                                 {
-                                    StartDungeon();
+                                    LoadGame();
                                 }
 
                                 UIHelper.UpdatePlayerUI(UIManager.uiElements["HealthBar"], new Rectangle(new Point((int)(camera.Position.X - GraphicsDevice.Viewport.Width / 2) + 20,
@@ -1230,7 +1370,7 @@ namespace AUTO_Matic
                                 //camera.Update(new Vector2(camera.X, camera.Y));
                                 tdPlayer.Update(gameTime, tdMap, shotGunBoss, tdEnemies);
                                 camera.Update(CameraPos());
-                                if (kb.IsKeyDown(Keys.J) || tdPlayer.rectangle.Intersects(LeaveDungeon))//Switching back to sidescroll
+                                if (kb.IsKeyDown(Keys.J) && prevKB.IsKeyUp(Keys.J) || tdPlayer.rectangle.Intersects(LeaveDungeon))//Switching back to sidescroll
                                 {
                                     ChangeToSideScroll();
                                     //Camera position not updated
@@ -1390,6 +1530,7 @@ namespace AUTO_Matic
                                                 ChangeToSideScroll();
                                                 ssPlayer.Health = 10;
                                                 bossKillCount++;
+                                                levelCount = 0;
                                             }
                                          
                                             for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
@@ -1415,6 +1556,7 @@ namespace AUTO_Matic
                                                 ChangeToSideScroll();
                                                 ssPlayer.Health = 10;
                                                 bossKillCount++;
+                                                levelCount = 0;
                                             }
                                             
 
@@ -1430,6 +1572,7 @@ namespace AUTO_Matic
                                                 ChangeToSideScroll();
                                                 ssPlayer.Health = 10;
                                                 bossKillCount++;
+                                                levelCount = 0;
                                             }
                                             
                                                
@@ -1457,6 +1600,7 @@ namespace AUTO_Matic
                                                 ChangeToSideScroll();
                                                 ssPlayer.Health = 10;
                                                 bossKillCount++;
+                                                levelCount = 0;
                                             }
                                                 
                                             break;
@@ -1508,13 +1652,14 @@ namespace AUTO_Matic
                         #endregion
                         #region Paused
                         case GameStates.Paused:
+                            
                             if(prevGameState == GameStates.SideScroll || prevGameState == GameStates.Tutorial)
                             {
                                 if (fadePos == Vector2.Zero )
                                 {
                                     fadePos = new Vector2(SideTileMap.playerSpawns[0].X, SideTileMap.playerSpawns[0].Y);
                                 }
-                                ssCamera.Update(fadePos, dont, fade);
+                                ssCamera.Update(fadePos, dont, fade, true);
                                 //ssPlayer.Update(gameTime, -ssPlayer.velocity, enemies);
                                 if (ssCamera.reached == false)
                                 {
@@ -1524,7 +1669,20 @@ namespace AUTO_Matic
                                 {
                                     GameState = prevGameState;
                                     fade = true;
+
+                                    if(dungeonNum < bossKillCount && soundManager.currEffectName == "BossTheme") //Just came from a dungeon on first load from a LoadGame
+                                    {
+                                        soundManager.ClearSounds();
+                                        soundManager.AddSound("Level" + dungeonNum + "Side", true);
+                                    }
+                                    else if(soundManager.currEffectName != "Level" + bossKillCount + "Side") //First load in sidescroll
+                                    {
+                                        soundManager.ClearSounds();
+                                        soundManager.AddSound("Level" + bossKillCount + "Side", true);
+                                    }
                                     soundManager.PlaySound();
+                                 
+                                    //SaveGame();
                                 }
                             }
                             else if(prevGameState == GameStates.TopDown)
@@ -1541,6 +1699,7 @@ namespace AUTO_Matic
                                     GameState = prevGameState;
                                     fade = true;
                                     soundManager.PlaySound();
+                                    //SaveGame();
                                 }
                             }
                             else if(prevGameState == GameStates.FinalBoss)
@@ -1562,7 +1721,7 @@ namespace AUTO_Matic
                         case GameStates.FinalBoss:
                             if(fade)
                             {
-                                ssPlayer.Update(gameTime, Gravity, enemies, true);
+                                ssPlayer.Update(gameTime, Gravity, enemies, this,true);
                                 fade = false;
                                 // UIHelper.UpdateHealthBar(UIManager.uiElements["HealthBar"], new Rectangle(new Point(ssCamera.CameraBounds.X + 20,
                                 //  ssCamera.CameraBounds.Y + 20), new Point(0, 0)));
@@ -1579,14 +1738,14 @@ namespace AUTO_Matic
 
                                 UIHelper.ChangeDashIcon(UIManager.uiElements["DashIcon"], ssPlayer.DashIndex());
 
-                                ssPlayer.Update(gameTime, Gravity, enemies);
+                                ssPlayer.Update(gameTime, Gravity, enemies, this);
                                 ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X + (64 * 11.5f), SideTileMap.playerSpawns[0].Y - (64 * 5.25f)), false, fade);
 
 
                                 if(ssPlayer.damaged)
                                     UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
                                 if (ssPlayer.Health <= 0)
-                                    LoadFinalBoss();
+                                    LoadGame();
                                 #region Collisions
                                 ssPlayer.blockBottom = false;
 
@@ -1673,11 +1832,15 @@ namespace AUTO_Matic
                         #endregion
                         #region InGamePause
                         case GameStates.InGamePause:
+
+                            
+
                             if(prevGameState == GameStates.SideScroll || prevGameState == GameStates.Tutorial)
                             {
 
                                 //UIManager.uiElements["PauseMainMenuBtn"].Visible = true;
                                 //UIManager.uiElements["PauseMenuReturn"].Visible = true;
+                                //UIManager.CreatePauseMenu(ssCamera.ViewRect);
                                 UIManager.UpdatePauseUI(ssCamera.ViewRect);
                                 ssCamera.Update(new Vector2(ssPlayer.Rectangle.X, ssPlayer.Rectangle.Y), dont, fade);
 
@@ -1685,6 +1848,9 @@ namespace AUTO_Matic
                             }
                             else if(prevGameState == GameStates.TopDown)
                             {
+                                //UIManager.CreatePauseMenu(new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                                       //(0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                                       //new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height)));
                                 UIManager.UpdatePauseUI(new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
                                        (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
                                        new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height)));
@@ -1787,7 +1953,7 @@ namespace AUTO_Matic
                 }
 
                 bool warning = false;
-                if (ssPlayer.animManager.isRight && openDoorCount > bossKillCount)
+                if (ssPlayer.animManager.isRight && openDoorCount > bossKillCount && GameState == GameStates.SideScroll)
                     warning = true;
                 
 
@@ -1853,25 +2019,26 @@ namespace AUTO_Matic
 
             if (kb.IsKeyDown(Keys.P) || ssPlayer.Health <= 0 || ssPlayer.playerRect.Y > SideTileMap.GetWorldDims().Y)//Reset Pos
             {
-                if (GameState == GameStates.SideScroll)
-                    StartNewGame(true);
-                else if (GameState == GameStates.Tutorial)
-                    LoadTutorial();
-                else if (GameState == GameStates.FinalBoss)
-                    LoadFinalBoss();
-                //StartNewGame();
-                ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
-                fadePos = SideTileMap.playerSpawns[0];
+                //if (GameState == GameStates.SideScroll)
+                //    StartNewGame(true);
+                //else if (GameState == GameStates.Tutorial)
+                //    LoadTutorial();
+                //else if (GameState == GameStates.FinalBoss)
+                //    LoadFinalBoss();
+                ////StartNewGame();
+                //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
+                //fadePos = SideTileMap.playerSpawns[0];
 
-                soundManager.ClearSounds();
-                soundManager.AddSound("Level0Side", true);
+                //soundManager.ClearSounds();
+                //soundManager.AddSound("Level0Side", true);
+                LoadGame();
             }
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
             if (updateDoor)
             {
                 UpdateDoor(topIndex, bottomIndex);
             }
-            ssPlayer.Update(gameTime, Gravity, enemies);
+            ssPlayer.Update(gameTime, Gravity, enemies, this);
 
 
             for (int i = enemies.Count - 1; i >= 0; i--)
@@ -2065,6 +2232,8 @@ namespace AUTO_Matic
 
         private void ChangeToSideScroll()
         {
+            
+            
             GameState = GameStates.SideScroll;
             //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(0, 0), (int)SideTileMap.GetWorldDims().X, (int)SideTileMap.GetWorldDims().Y);
             graphics.PreferredBackBufferWidth = 1920;/*(int)(graphics.PreferredBackBufferWidth * 1.5f)*/
@@ -2093,6 +2262,11 @@ namespace AUTO_Matic
             UIHelper.HealthBar = healthbars;
             
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
+            prevGameState = GameState;
+            GameState = GameStates.Paused;
+
+            
+            fadePos = new Vector2(ssPlayer.position.X, ssPlayer.position.Y);
         }
 
         private Rectangle CheckForTiles(Rectangle worldRect)
@@ -2156,7 +2330,7 @@ namespace AUTO_Matic
             {
                 UIManager.RemoveInteractUI();
                 //SetDungeonNum();
-                if(openDoorCount > 1)
+                if(openDoorCount >= 1)
                     soundManager.ClearSounds();
 
                 //Find top door
@@ -2222,7 +2396,7 @@ namespace AUTO_Matic
                         openDoorCount--;
                     }
 
-                    if (openDoorCount > 1)
+                    if (openDoorCount >= 1)
                     {
                         try
                         {
@@ -2236,20 +2410,23 @@ namespace AUTO_Matic
                     }
                 }
 
+           
+                dont = false;
+                fadePos = ssCamera.Position;
+
                 if (GameState == GameStates.Tutorial)
                 {
                     minChange = SideTileMap.BottomDoorTiles[0].Rectangle.X;
+                    openDoorCount++;
                 }
                 else if (GameState == GameStates.SideScroll)
                 {
                     minChange = SideTileMap.BottomDoorTiles[bottomIndex].Rectangle.X;
                 }
 
-                dont = false;
-                fadePos = ssCamera.Position;
             }
 
-           
+
         }
 
         void UpdateDoor(int topTile, int bottomTile)
@@ -2285,6 +2462,9 @@ namespace AUTO_Matic
                 UIManager.uiElements["DashIcon"].Visible = true;
                 UIManager.uiElements["HealthBar"].Visible = true;
 
+                if(openDoorCount > 1)
+                    SaveGame();
+
             }
         }
         /// <summary>
@@ -2315,7 +2495,9 @@ namespace AUTO_Matic
                             {
                                 iRate = 1;
                                 fade = false;
-                                if(GameState == GameStates.Tutorial)
+                                UIManager.uiElements["HealthBar"].Visible = true;
+                                UIManager.uiElements["DashIcon"].Visible = true;
+                                if (GameState == GameStates.Tutorial && openDoorCount == 0)
                                     startGame = true;
                             }
                             
@@ -2395,8 +2577,10 @@ namespace AUTO_Matic
                                 UIManager.CreateTutorialUI(SideTileMap.playerSpawns[0], this);
                                 UIHelper.SetElementVisibility("Tutorial", true, UIManager.uiElements);
                                 startGame = false;
-                                soundManager.PlaySound();
+                               
+                                UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
                                 UIManager.CreatePauseMenu(Rectangle.Empty);
+                                SaveGame();
                             }
                             //UIManager.CreateTutorialUI(SideTileMap.playerSpawns[0], this);
                             //UIHelper.SetElementVisibility("Tutorial", true, UIManager.uiElements);
@@ -2608,7 +2792,8 @@ namespace AUTO_Matic
         {
             float crawlSpeed = 10f;
             GamePadButtons currButtons = GamePad.GetState(PlayerIndex.One).Buttons;
-
+            if (UIManager.willDelete)
+                UIManager.SetDeleteWarnings(true);
             switch (MenuState)
             {
                 case MenuStates.TitleCrawl:
@@ -2677,7 +2862,8 @@ namespace AUTO_Matic
                     UseMouse(kb, crawlSpeed);
                     UpdateCamera(mainMenuPos, 10);
                     UIManager.UpdateButton("MainMenu", crawlSpeed, this);
-
+                  
+        
                     if (currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released || 
                         currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && MenuButtonIndex == 0)
                     {
@@ -2787,7 +2973,7 @@ namespace AUTO_Matic
                     (int)(ms.Position.Y + (camera.Position.Y - (camera.viewport.Height / 2)))); //Can be Moved to UIManager. Sending the mspos
                 if (ms.RightButton == ButtonState.Released)
                 {
-                    if (ms.LeftButton == ButtonState.Pressed && prevMs.LeftButton == ButtonState.Released)
+                    if (ms.LeftButton == ButtonState.Released && prevMs.LeftButton == ButtonState.Pressed)
                     {
                         if (keyBindActive)
                             keyBindActive = false;
@@ -2895,6 +3081,175 @@ namespace AUTO_Matic
                                                           //string secondDP = r.Next(0, 9).ToString();//2nd decimal point
             string combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
             return decimalNumber = float.Parse(combined);
+        }
+
+        public void SaveGame()
+        {
+            //PlayerPosition TD && SS, BossKillCount, GameState, KeyBinds, ViewRect 
+
+            Vector2 ssPlayerPos = new Vector2((int)ssPlayer.position.X, (int)ssPlayer.position.Y);
+            int DungeonNum = bossKillCount;
+            //Vector2 tdPlayerPos;
+            int killedBosses = bossKillCount;
+
+            GameStates currGameState = GameState;
+
+            List<Keys> SideScrollInputs = UIManager.SideScrollInputs;
+            List<Keys> TopDownInputs = UIManager.TopDownInputs;
+
+            Rectangle sideScrollView;
+            Rectangle topDownView;
+
+
+            sideScrollView = ssCamera.CameraBounds;
+            topDownView = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+
+            List<string> savedData = new List<string>();
+            savedData.Add(currGameState.ToString()); //0
+            savedData.Add(ssPlayerPos.X.ToString());//1
+            savedData.Add(ssPlayerPos.Y.ToString());//2
+
+            savedData.Add(killedBosses.ToString());//3
+
+            savedData.Add(sideScrollView.Center.X.ToString());//4
+            savedData.Add(sideScrollView.Center.Y.ToString());//5
+            savedData.Add(SideTileMap.GetWorldDims().X.ToString());//6
+            savedData.Add(SideTileMap.GetWorldDims().Y.ToString());//7
+
+            savedData.Add(openDoorCount.ToString());//8
+            savedData.Add(levelCount.ToString());//9
+            savedData.Add((ssCamera.ViewRect.Width / 2).ToString());//10
+            savedData.Add(dungeonNum.ToString());//11
+            //savedData.Add(fadePos.X.ToString());
+            //savedData.Add(fadePos.Y.ToString());
+            //savedData.Add(topDownView.X.ToString());
+            //savedData.Add(topDownView.Y.ToString());
+            //savedData.Add(topDownView.Width.ToString());
+            //savedData.Add(topDownView.Height.ToString());
+
+            List<string> sideInputData = new List<string>();
+            List<string> topInputData = new List<string>();
+            for (int i = 0; i < SideScrollInputs.Count; i++)
+            {
+                sideInputData.Add(SideScrollInputs[i].ToString());
+            }
+            for (int i = 0; i < TopDownInputs.Count; i++)
+            {
+                topInputData.Add(TopDownInputs[i].ToString());
+            }
+
+            using (var sw = new StreamWriter(System.IO.File.Create(dataPath)))
+            {
+                for (int i = 0; i < savedData.Count; i++)
+                {
+                    sw.Write(savedData[i] + "\n");
+                }
+
+                sw.Flush();
+
+                sw.Close();
+            }
+
+
+            using (var sw = new StreamWriter(System.IO.File.Create(SideInputPath)))
+            {
+                for (int i = 0; i < sideInputData.Count; i++)
+                {
+                    sw.Write(sideInputData[i] + "\n");
+                }
+
+                sw.Flush();
+
+                sw.Close();
+            }
+
+
+            using (var sw = new StreamWriter(System.IO.File.Create(TopDownInputPath)))
+            {
+                for (int i = 0; i < topInputData.Count; i++)
+                {
+                    sw.Write(topInputData[i] + "\n");
+                }
+
+                sw.Flush();
+
+                sw.Close();
+            }
+
+
+
+
+
+        }
+
+        public void LoadGame(bool restart = false)
+        {
+            if(System.IO.File.Exists(dataPath))
+            {
+                string[] gameData = File.ReadAllLines(dataPath); //Data File: CurrGameState , ssPlayerX, ssPlayerY, killedBosses, Camera XYWH |||| Input Files: SideInputs, TopInputs
+                string[] sideInputData = File.ReadAllLines(SideInputPath);
+                string[] topInputData = File.ReadAllLines(TopDownInputPath);
+
+
+                object gameState = Enum.Parse(typeof(GameStates), gameData[0]);
+
+                bossKillCount = int.Parse(gameData[3]);
+
+                for(int i = 0; i < sideInputData.Length; i++)
+                {
+                    UIManager.SideScrollInputs[i] = (Keys)Enum.Parse(typeof(Keys), sideInputData[i]);
+                }
+                for(int i = 0; i < topInputData.Length; i++)
+                {
+                    UIManager.TopDownInputs[i] = (Keys)Enum.Parse(typeof(Keys), topInputData[i]);
+                }
+
+                //ssPlayer.Load(Content, Window.ClientBounds, friction, new Vector2(int.Parse(gameData[1]), int.Parse(gameData[2])), UIManager);
+               
+
+                //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(int.Parse(gameData[4]), int.Parse(gameData[5])), int.Parse(gameData[6]), int.Parse(gameData[7]));
+                
+                if((GameStates)gameState != GameStates.Tutorial)
+                {
+                    StartNewGame(true, true);
+                    ssPlayer.Load(Content, Window.ClientBounds, friction, new Vector2(int.Parse(gameData[1]), int.Parse(gameData[2])), UIManager);
+                    //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(int.Parse(gameData[4]), int.Parse(gameData[5])), int.Parse(gameData[6]), int.Parse(gameData[7]));
+                    openDoorCount = int.Parse(gameData[8]);
+                    if (openDoorCount >= 1)
+                    {
+                        ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(int.Parse(gameData[4]) /*+ (int.Parse(gameData[10]))*/, int.Parse(gameData[5])), int.Parse(gameData[6]), int.Parse(gameData[7]));
+                        //ssCamera.SetBounds(new Rectangle(int.Parse(gameData[4]), int.Parse(gameData[5]), int.Parse(gameData[6]), int.Parse(gameData[7])));
+                        fadePos = new Vector2(int.Parse(gameData[1]) + int.Parse(gameData[10]), int.Parse(gameData[2]));
+                    }
+                    reloadCount++;
+                    soundManager.ClearSounds();
+                    dungeonNum = int.Parse(gameData[11]);
+                    if (((GameStates)gameState) == GameStates.TopDown)
+                    {
+                        int levelCount = int.Parse(gameData[9]);
+                        tdPlayer = new TDPlayer(this, 64, 200, 200, UIManager);
+                        if (levelCount >= tdPlayer.bossRoom)
+                            this.levelCount = levelCount - 1;
+                        else
+                            this.levelCount = 0;
+                        
+                        
+                        StartDungeon(true);
+                        //soundManager.AddSound("BossTheme", true);
+
+                    }
+                    else
+                    {
+                        soundManager.AddSound("Level" + bossKillCount + "Side", true);
+                    }
+                }
+                else if((GameStates)gameState == GameStates.Tutorial)
+                {
+                    LoadTutorial(restart);
+                }
+            }
         }
     }
 }

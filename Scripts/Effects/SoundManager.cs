@@ -16,6 +16,7 @@ namespace AUTO_Matic.Scripts.Effects
         List<SoundEffectInstance> soundList = new List<SoundEffectInstance>();
         ContentManager content;
         bool canLoop = false;
+        public string currEffectName = "";
 
 
         public SoundManager(string effectName, ContentManager content, bool canLoop)
@@ -24,6 +25,7 @@ namespace AUTO_Matic.Scripts.Effects
             this.content = content;
             soundInstance = sound.CreateInstance();
             soundInstance.IsLooped = canLoop;
+            currEffectName = effectName;
         }
 
         public void AddSound(string effectName, bool canLoop, float pitch = -1001100)
@@ -31,6 +33,7 @@ namespace AUTO_Matic.Scripts.Effects
             sound = content.Load<Microsoft.Xna.Framework.Audio.SoundEffect>(@"Audio\" + effectName);
             soundInstance = sound.CreateInstance();
             soundInstance.IsLooped = canLoop;
+            currEffectName = effectName;
             
             if(pitch != -1001100)
             {

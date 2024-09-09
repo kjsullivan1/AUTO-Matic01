@@ -108,9 +108,13 @@
     <Content Include="Content\Audio\BossTheme.mp3" />
     <Content Include="Content\Audio\FinalBossTheme.mp3" />
     <Content Include="Content\Audio\Level0Side.mp3" />
+    <Content Include="Content\Audio\Level1Side.mp3" />
     <Content Include="Content\Audio\Level2Side.mp3" />
     <Content Include="Content\Audio\Level3Side.mp3" />
     <Content Include="Content\Audio\Shoot.mp3" />
+    <Content Include="Content\SaveData\Test.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\SideScroll\Animations\Bullet.png" />
     <Content Include="Content\SideScroll\Animations\DroneEnemy.png" />
     <Content Include="Content\SideScroll\Animations\EnergyBlast.png" />
@@ -230,6 +234,7 @@
     <Content Include="Content\SideScroll\MapTiles\Tile58.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile59.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile6.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile60.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile7.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile8.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile9.png" />

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Microsoft.Xna.Framework.Input;
+using System.Collections;
 
 namespace AUTO_Matic
 {
@@ -24,6 +25,7 @@ namespace AUTO_Matic
 
 
         bool transition = false;
+        public bool willDelete = false;
 
         List<Rectangle> savedPos = new List<Rectangle>();
 
@@ -117,17 +119,63 @@ namespace AUTO_Matic
                         UIHelper.SetButtonState("StartGameReturn", true, uiElements);
                         break;
                     case "StartNewGame":
-                        game.ChangeGameState(Game1.Scenes.InGame);
-                        UIHelper.SetElementVisibility("MainMenu", false, uiElements);
-                        UIHelper.SetElementVisibility("Settings", false, uiElements);
-                        UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
-                        UIHelper.SetElementVisibility("LoadGame", false, uiElements);
-                        UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
-                        game.LoadTutorial();
 
-                        UIHelper.SetButtonState("MainMenuPlay", false, uiElements);
-                        UIHelper.SetButtonState("MainMenuExit", false, uiElements);
+                        if(System.IO.File.Exists(game.dataPath))
+                        {
+                            //CreateDeleteSave();
+                            uiElements["StartNewGame"].Visible = false;
+                            uiElements["LoadGame"].Visible = false;
+                            
+                            willDelete = true;
+                           
+                            //System.IO.File.Delete(game.dataPath);
+                        }
+                        else
+                        {
+                            game.ChangeGameState(Game1.Scenes.InGame);
+                            UIHelper.SetElementVisibility("MainMenu", false, uiElements);
+                            UIHelper.SetElementVisibility("Settings", false, uiElements);
+                            UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
+                            UIHelper.SetElementVisibility("LoadGame", false, uiElements);
+                            UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
+                            game.LoadTutorial();
+
+                            UIHelper.SetButtonState("MainMenuPlay", false, uiElements);
+                            UIHelper.SetButtonState("MainMenuExit", false, uiElements);
+                        }
+
+                     
                         break;
+                    case "LoadGame":
+                        if(System.IO.File.Exists(game.dataPath))
+                        {
+                            game.ChangeGameState(Game1.Scenes.InGame);
+                            UIHelper.SetElementVisibility("MainMenu", false, uiElements);
+                            UIHelper.SetElementVisibility("Settings", false, uiElements);
+                            UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
+                            UIHelper.SetElementVisibility("LoadGame", false, uiElements);
+                            UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
+                            UIHelper.SetButtonState("MainMenuPlay", false, uiElements);
+                            UIHelper.SetButtonState("MainMenuExit", false, uiElements);
+
+                            game.LoadGame();
+                        }
+                        
+                        break;
+                    case "DeleteSaveAcceptBtn":
+                       
+                            System.IO.File.Delete(game.dataPath);
+                            game.Exit();
+                        
+                
+                        break;
+                    case "DeleteSaveDenyBtn":
+                        SetDeleteWarnings(false);
+                        uiElements["StartNewGame"].Visible = true;
+                        uiElements["LoadGame"].Visible = true;
+                        willDelete = false;
+                        break;
+
 
                 }
             }
@@ -518,6 +566,23 @@ namespace AUTO_Matic
             uiElements.Add("LoadGame", UIHelper.CreateButton("LoadGame", "Load", ((int)dims.X / 2) - (200 / 2),
                 (int)(UIHelper.GetRectangle(uiElements["StartNewGame"]).Bottom + 20)));
             buttonPos2 = uiElements["LoadGame"].Position;
+
+            //Delete save warning
+            uiElements.Add("DeleteSaveBox", UIHelper.CreateTextblock("DeleteSaveBox", "\n\n                  You Currently have a save on file." +
+                "\n                   Do you wish to delete it and restart?\n                  (you will need to restart the game :) )"
+                , ((int)dims.X / 2 - (300 / 2)), (int)(dims.Y / 2 - (200 / 2))));
+            UIHelper.SetElementRect(uiElements["DeleteSaveBox"], new Rectangle(uiElements["DeleteSaveBox"].Position.ToPoint(), new Point(300, 200)));
+            UIHelper.SetElementBGRect(uiElements["DeleteSaveBox"], new Rectangle(uiElements["DeleteSaveBox"].Position.ToPoint(), new Point(300, 200)));
+
+            uiElements.Add("DeleteSaveAcceptBtn", UIHelper.CreateButton("DeleteSaveAcceptBtn", "   ACCEPT", UIHelper.GetElementBGRect(uiElements["DeleteSaveBox"]).Center.X - (150 / 2), 
+                UIHelper.GetElementBGRect(uiElements["DeleteSaveBox"]).Y + (int)(UIHelper.GetElementBGRect(uiElements["DeleteSaveBox"]).Height/2.75f)));
+            UIHelper.SetRectangle(uiElements["DeleteSaveAcceptBtn"], 150, 50);
+
+            uiElements.Add("DeleteSaveDenyBtn", UIHelper.CreateButton("DeleteSaveDenyBtn", "NEVERMIND", UIHelper.GetRectangle(uiElements["DeleteSaveAcceptBtn"]).X, UIHelper.GetRectangle(uiElements["DeleteSaveAcceptBtn"]).Bottom + 10));
+            UIHelper.SetRectangle(uiElements["DeleteSaveDenyBtn"], 150, 50);
+
+            SetDeleteWarnings(false);
+
             //Return 
             uiElements.Add("StartGameReturn", UIHelper.CreateButton("StartGameReturn", "", (int)uiElements["MainMenuSetting"].Position.X, (int)uiElements["MainMenuSetting"].Position.Y));
             UIHelper.SetRectangle(uiElements["StartGameReturn"], 50, 50);
@@ -552,17 +617,27 @@ namespace AUTO_Matic
             }
         }
 
+        public void SetDeleteWarnings(bool visible)
+        {
+            foreach(UIWidget widget in uiElements.Values)
+            {
+                if (widget.ID.Contains("DeleteSave"))
+                    widget.Visible = visible;
+            }
+        }
+
         public void CreateTutorialUI(Vector2 dims, Game1 game)
         {
             if(uiElements.ContainsKey("TutorialBoxGame") == false)
             {
                 string[] tutorialText = new string[SideTileMap.GetTextBoxes().Count];
-                tutorialText[0] = " \n  [Space] key or (A) button to jump \n" +
-                                        "  [LShift] or (B) to dash";
-                tutorialText[1] = " \n  [W][A][S][D] keys or (L) Analog to move";
-                tutorialText[2] = " \n  [S] key or DOWN on (L) analog to get into a \n shooting stance or ground pound (Air) \n" +
-                                  " \n  Press  [Enter] or (X) button to fire";
-                tutorialText[3] = " \n  While shooting, use the ARROW keys or \n  DPAD to use the weapon wheel";
+                tutorialText[0] = " \n  [" + SideScrollInputs[5] + "] key or (A) button to jump \n" +
+                                        "  [" + SideScrollInputs[4] + "] or (B) to dash";
+                tutorialText[1] = " \n  [" + SideScrollInputs[0] + "][" + SideScrollInputs[1] + "] keys or (L) Analog to move";
+                tutorialText[2] = " \n  [" + SideScrollInputs[2] +"] key or DOWN on (L) analog to get into a \n shooting stance or ground pound (Air) \n" +
+                                  " \n  Press  ["+SideScrollInputs[3] +"] or (X) button to fire";
+                tutorialText[3] = " \n  Use the [" + SideScrollInputs[11] + "][" + SideScrollInputs[9] + "][" + SideScrollInputs[10] + "][" + SideScrollInputs[8] + "] keys or (R)\n  analog to use the weapon wheel\n" +
+                    "  Use [" + SideScrollInputs[7] + "] key or press the (R) \n  analog to return to Pistol";
 
                 for(int i = 0; i < SideTileMap.GetTextBoxes().Count; i++)
                 {
@@ -571,6 +646,10 @@ namespace AUTO_Matic
                         uiElements.Add("TutorialBox" + i, UIHelper.CreateTextblock("TutorialBox" + i, tutorialText[i], (int)SideTileMap.GetTextBoxes()[i].X, (int)SideTileMap.GetTextBoxes()[i].Y));
                         UIHelper.SetElementRect(uiElements["TutorialBox" + i], new Rectangle(uiElements["TutorialBox" + i].Position.ToPoint(), new Point(128, 96)));
                         UIHelper.SetElementBGRect(uiElements["TutorialBox" + i], new Rectangle(uiElements["TutorialBox" + i].Position.ToPoint(), new Point(215, 70)));
+                    }
+                    else
+                    {
+                        UIHelper.SetElementText(uiElements["TutorialBox" + i], tutorialText[i]);
                     }
                   
                 }
@@ -587,7 +666,8 @@ namespace AUTO_Matic
             //    UIHelper.SetElementRect(uiElements["TutorialBoxGame"], new Rectangle(uiElements["TutorialBoxGame"].Position.ToPoint(), new Point(450, 600)));
             //    UIHelper.SetElementBGRect(uiElements["TutorialBoxGame"], new Rectangle(uiElements["TutorialBoxGame"].Position.ToPoint(), new Point(400, 225)));
             }
-           
+     
+
         }
 
         public void SetSideKeyBinds(bool visible)
@@ -634,7 +714,7 @@ namespace AUTO_Matic
                 SideKeyBinds[10] = "Bomb:";
                 SideKeyBinds[11] = "Shotgun:";
 
-                SideScrollInputs.Add(Keys.A);
+                SideScrollInputs.Add(Keys.A); //While loading them in.... check all keys, converting them into strings, if they match, assign it to the proper index
                 SideScrollInputs.Add(Keys.D);
                 SideScrollInputs.Add(Keys.S);
                 SideScrollInputs.Add(Keys.Enter);
@@ -646,6 +726,11 @@ namespace AUTO_Matic
                 SideScrollInputs.Add(Keys.Right);
                 SideScrollInputs.Add(Keys.Up);
                 SideScrollInputs.Add(Keys.Down);
+                string word = "Up";
+
+                ArrayList keys = new ArrayList(Enum.GetValues(typeof(Keys)));
+
+                Enum.Parse(typeof(Keys), word);
 
                 TopDownKeyBinds = new string[12]; //Dash, Move: left/right/up/down, Shoot, WeaponWheel: Pistol/Ray/Burst/Bomb/Shotgun, Direction Locking, 
                 TopDownKeyBinds[0] = "Move Left: ";
@@ -875,7 +960,11 @@ namespace AUTO_Matic
                 UIHelper.SetElementRect(uiElements["InteractBoxBossWarning"], new Rectangle(uiElements["InteractBoxBossWarning"].Position.ToPoint(), new Point(128, 96)));
                 UIHelper.SetElementBGRect(uiElements["InteractBoxBossWarning"], new Rectangle(uiElements["InteractBoxBossWarning"].Position.ToPoint(), new Point(215, 70)));
             }
-           
+
+
+            UIHelper.SetElementVisibility("InteractBox", true, uiElements);
+
+
         }
         public void RemoveInteractUI()
         {
@@ -883,6 +972,8 @@ namespace AUTO_Matic
                 uiElements.Remove("InteractBox");
             if (uiElements.ContainsKey("InteractBoxBossWarning"))
                 uiElements.Remove("InteractBoxBossWarning");
+
+            UIHelper.SetElementVisibility("InteractBox", false, uiElements);
 
         }
 
@@ -894,19 +985,19 @@ namespace AUTO_Matic
                 UIHelper.SetElementBGRect(uiElements["PauseMenuBox"], new Rectangle(uiElements["PauseMenuBox"].Position.ToPoint(), new Point(200, 200)));
                 UIHelper.SetElementRect(uiElements["PauseMenuBox"], new Rectangle(uiElements["PauseMenuBox"].Position.ToPoint(), new Point(200, 200)));
 
-                uiElements["PauseMenuBox"].Visible = false;
+                //uiElements["PauseMenuBox"].Visible = true;
 
                 uiElements.Add("PauseMainMenuBtn", UIHelper.CreateButton("PauseMainMenuBtn", "Return to Game",
                     UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.X - (150 / 2), UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.Y - (int)(150 / 4)));
-                UIHelper.SetRectangle(uiElements["PauseMainMenuBtn"], 150, 25);
+                UIHelper.SetRectangle(uiElements["PauseMainMenuBtn"], 150, 30);
 
                 uiElements.Add("PauseMenuReturn", UIHelper.CreateButton("PauseMenuReturn", "Return to Menu", 
                     UIHelper.GetRectangle(uiElements["PauseMainMenuBtn"]).X, UIHelper.GetRectangle(uiElements["PauseMainMenuBtn"]).Bottom + 20));
-                UIHelper.SetRectangle(uiElements["PauseMenuReturn"], 150, 25);
+                UIHelper.SetRectangle(uiElements["PauseMenuReturn"], 150, 30);
 
 
-                uiElements["PauseMenuReturn"].Visible = false;
-                uiElements["PauseMainMenuBtn"].Visible = false;
+                uiElements["PauseMenuReturn"].Visible = true;
+                uiElements["PauseMainMenuBtn"].Visible = true;
             }
         }
 
@@ -916,7 +1007,7 @@ namespace AUTO_Matic
             {
                 UIHelper.SetElementBGRect(uiElements["PauseMenuBox"], new Rectangle(new Point(rect.Center.X - (200/2), rect.Center.Y - (200/2)), new Point(200, 200)));
                 UIHelper.SetElementRect(uiElements["PauseMenuBox"], new Rectangle(new Point(rect.Center.X - (200 / 2), rect.Center.Y - (200 / 2)), new Point(200, 200)));
-                uiElements["PauseMenuBox"].Visible = true;
+               // uiElements["PauseMenuBox"].Visible = true;
             }
               
             if (uiElements.ContainsKey("PauseMainMenuBtn"))
@@ -933,6 +1024,7 @@ namespace AUTO_Matic
                 UIHelper.SetRectangle(uiElements["PauseMenuReturn"], 
                     new Rectangle(new Point(UIHelper.GetRectangle(uiElements["PauseMainMenuBtn"]).X, UIHelper.GetRectangle(uiElements["PauseMainMenuBtn"]).Bottom + 20), new Point(150,25)));
                 uiElements["PauseMenuReturn"].Visible = true;
+                
             }
                 
         }

@@ -167,6 +167,8 @@ namespace AUTO_Matic
             playerSpawns.Clear();
             dungeonEntrances.Clear();
             wallTiles.Clear();
+            flyingBeacons.Clear();
+            BorderTiles.Clear();
 
 
             int count = 0;//Repeat background are 4 tiles long so must make every 4
@@ -205,8 +207,14 @@ namespace AUTO_Matic
                             Textboxes.Add(new Vector2(x * size, y * size));
                            
                         }
+                        if(backgroundTiles.Contains(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size))) == false)
                         backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
 
+                    }
+                    else if(num == 60)
+                    {
+                        BorderTiles.Add(new BorderTile(num, new Rectangle(x * size, y * size, size, size)));
+                        backgroundTiles.Add(new BackgroundTile(map[y - 2, x], new Rectangle(x * size, y * size, size, size)));
                     }
                     else if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 ||
                         num == 17 || num == 18 || num == 19 || num == 20 || num == 21 || num == 22 || num == 23 || num == 46 || num == 47 || num == 52 || num == 53
@@ -218,17 +226,20 @@ namespace AUTO_Matic
                      
                         if(num >= 27 && num < 35 || num == 36 )
                         {
+                            if(backgroundTiles.Contains(new BackgroundTile(35, new Rectangle(x * size, y * size, size, size))) == false)
                             backgroundTiles.Add(new BackgroundTile(35, new Rectangle(x * size, y * size, size, size)));
                         }
 
                         if (y==0)
                         {
-                            groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if(groundTiles.Contains(new GroundTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                                groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (GroundIndexes.Contains(num) == false)
                                 GroundIndexes.Add(num);
                         }
                         else if(y > 0 && GroundIndexes.Contains(num2))//If there is a tile above this one
                         {
+                            if(wallTiles.Contains(new WallTile(num, new Rectangle(x * size, y * size, size, size))) == false)
                             wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
                             //Add indexes?
                             if (GroundIndexes.Contains(num) == false)
@@ -236,9 +247,16 @@ namespace AUTO_Matic
                         }
                         else //Make it a ground tile
                         {
-                            groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
-                            if (GroundIndexes.Contains(num) == false)
+                            if (num == 21 && x == 25 && y == 7)
+                            {
+                                num = 15;
+                            }
+                            if (groundTiles.Contains(new GroundTile(num, new Rectangle(x * size, y * size, size, size))) == false /*&& num != 21*/)
+                                groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if (GroundIndexes.Contains(num) == false /*&& num != 21*/)
                                 GroundIndexes.Add(num);
+
+                          
                         }
                       
                        
@@ -252,19 +270,22 @@ namespace AUTO_Matic
 
                         if (y == 0)//If at the top of the map
                         {
-                            platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if(platformTiles.Contains(new PlatformTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                                platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (PlatformIndexes.Contains(num) == false)
                                 PlatformIndexes.Add(num);
                         }
                         else if(y > 0 && PlatformIndexes.Contains(num2)) //If there is one above it 
                         {
-                            wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if(wallTiles.Contains(new WallTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                                wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (PlatformIndexes.Contains(num) == false)
                                 PlatformIndexes.Add(num);
                         }
                         else //Regular platform
                         {
-                            platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if(platformTiles.Contains(new PlatformTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                             platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (PlatformIndexes.Contains(num) == false)
                                 PlatformIndexes.Add(num);
                         }
@@ -272,7 +293,8 @@ namespace AUTO_Matic
                     }
                     else if(num == 1 || num == 35 || num == 39 || num == 58) //Background
                     {
-                        backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
+                        if(backgroundTiles.Contains(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                            backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
                         if (BackgroundIndexes.Contains(num) == false)
                             BackgroundIndexes.Add(num);
                     }
@@ -294,7 +316,8 @@ namespace AUTO_Matic
                     }
                     else if(num == 25) //Enemy spawns
                     {
-                        enemySpawns.Add(new Vector2(x * size, y * size));
+                        if(enemySpawns.Contains(new Vector2(x * size, y * size)) == false)
+                            enemySpawns.Add(new Vector2(x * size, y * size));
                         backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
                     }
                     else if(num == 57)//Dungeon entrance
@@ -309,8 +332,12 @@ namespace AUTO_Matic
                     }
                     else if(num == 59)
                     {
-                        flyingBeacons.Add(new ControllBeacon(num, new Rectangle(x * size, y* size, size, size)));
-                        backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
+                        if(flyingBeacons.Contains(new ControllBeacon(num, new Rectangle(x * size, y * size, size, size))) == false)
+                        {
+                            flyingBeacons.Add(new ControllBeacon(num, new Rectangle(x * size, y * size, size, size)));
+                            backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
+                        }
+                  
                     }
                     else if(num == 99)
                     {
@@ -446,9 +473,9 @@ namespace AUTO_Matic
             }
             foreach (GroundTile tile in groundTiles)
             {
-                tile.Draw(spriteBatch); 
+                tile.Draw(spriteBatch);
             }
-            foreach(PlatformTile tile in platformTiles)
+            foreach (PlatformTile tile in platformTiles)
             {
                 tile.Draw(spriteBatch);
             }
