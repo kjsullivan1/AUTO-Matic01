@@ -639,6 +639,10 @@ namespace AUTO_Matic.SideScroll
                        {
                             cantReach = false;
                        }
+                       //else if(enemyRect.Center.Y/64 > player.playerRect.Center.Y/64 && player.blockBottom)
+                       //{
+                       //     cantReach = false;
+                       //}
                     }
                     else
                     {
@@ -1688,14 +1692,14 @@ namespace AUTO_Matic.SideScroll
             }
 
 
-           
+
             //animManager.Draw(spriteBatch, Color.White);
-            //foreach (Rectangle rect in vision)
-            //{
-            //    spriteBatch.Draw(visionTxture, rect, Color.White * .25f);
+            foreach (Rectangle rect in vision)
+            {
+                spriteBatch.Draw(visionTxture, rect, Color.White * .25f);
 
 
-            //}
+            }
             //animManager.Draw(spriteBatch);
         }
 
