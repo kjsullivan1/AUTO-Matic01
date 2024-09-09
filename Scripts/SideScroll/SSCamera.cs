@@ -132,7 +132,7 @@ namespace AUTO_Matic.Scripts.SideScroll
                 //{
                 //    center.X -= moveSpeed;
                 //}
-                if ((int)center.Y < (int)position.Y && (center.Y + cameraHeight / 2) + moveSpeed < height && center.Y + moveSpeed < (int)position.Y)
+                if ((int)center.Y < (int)position.Y && (center.Y + 620 / 2) + moveSpeed < height && center.Y + moveSpeed < (int)position.Y)
                 {
                     center.Y += moveSpeed;
                     reached = false;
@@ -191,12 +191,12 @@ namespace AUTO_Matic.Scripts.SideScroll
                     center.X -= moveSpeed;
                     reached = false;
                 }
-                if (center.Y < position.Y && (center.Y + 650/2) + moveSpeed < height)
+                if (center.Y < position.Y && (center.Y + 620/2) + moveSpeedY < height)
                 {
                     center.Y += moveSpeedY;
                     reached = false;
                 }
-                if (center.Y > position.Y && (int)((center.Y - 650/2) - moveSpeed) > 0)
+                if (center.Y > position.Y && (int)((center.Y - 620/2) - moveSpeedY) > 0)
                 {
                     center.Y -= moveSpeedY;
                     reached = false;
@@ -353,7 +353,7 @@ namespace AUTO_Matic.Scripts.SideScroll
             }
             if (viewRect.Top < 0 )
             {
-                center.Y += moveSpeed;
+                center.Y += moveSpeedY;
                 if (!fade)
                     CameraBounds.Y = 0;
                 //center.Y = 0;
@@ -369,7 +369,7 @@ namespace AUTO_Matic.Scripts.SideScroll
 
             if (viewRect.Bottom > height)
             {
-                 center.Y -= moveSpeed;
+                 center.Y -= moveSpeedY;
                 //center.Y = height - viewRect.Height / 2;
                 reached = false;
             }

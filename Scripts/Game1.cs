@@ -177,7 +177,8 @@ namespace AUTO_Matic
         public string SideInputPath;
         public string TopDownInputPath;
 
-        public bool isLoadedGame = false;   
+        public bool isLoadedGame = false;
+        bool fromDungeon = false; //Helps deal with sounds
         class Door
         {
             BottomDoorTile bottomDoor;
@@ -647,8 +648,8 @@ namespace AUTO_Matic
             int closestIndex = 0;
             for (k = 1; k < dungeons.Count; k++)
             {
-                if (MathHelper.Distance(entrance.Rectangle.X, ssPlayer.Rectangle.X) >
-                    MathHelper.Distance(dungeons[k].Rectangle.X, ssPlayer.Rectangle.X))
+                if (MathHelper.Distance(entrance.Rectangle.X, ssPlayer.position.X) >
+                    MathHelper.Distance(dungeons[k].Rectangle.X, ssPlayer.position.X))
                 {
                     dungeonNum = k;
                     entrance = dungeons[k];
@@ -660,7 +661,7 @@ namespace AUTO_Matic
             return closestIndex;
         }
 
-        public void LoadTutorial(bool restart = false)
+        public void LoadTutorial()
         {
             healthDrops.Clear();
             string filePath = Content.RootDirectory + "/SideScroll/Maps/Map0.txt";
@@ -1238,6 +1239,8 @@ namespace AUTO_Matic
                                     foreach (BottomDoorTile door in SideTileMap.BottomDoorTiles)
                                     {
                                         float num = MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X);
+                                       
+                                    
                                         if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) < 64 * 8/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
                                         {
                                             dont = true; //dont move camera
@@ -1687,7 +1690,14 @@ namespace AUTO_Matic
                                     GameState = prevGameState;
                                     fade = true;
 
-                                    if(dungeonNum < bossKillCount && soundManager.currEffectName == "BossTheme") //Just came from a dungeon on first load from a LoadGame
+                                    if (dungeonNum < bossKillCount)
+                                        SaveGame();
+
+                                    Rectangle tempRect = ssPlayer.playerRect;
+
+                                    ssPlayer.playerRect.X += 64 * 4;
+
+                                    if(dungeonNum < bossKillCount && soundManager.currEffectName == "BossTheme" /*|| soundManager.currEffectName.Contains(GetDun) == false*/) //Just came from a dungeon on first load from a LoadGame
                                     {
                                         soundManager.ClearSounds();
                                         soundManager.AddSound("Level" + dungeonNum + "Side", true);
@@ -1695,8 +1705,9 @@ namespace AUTO_Matic
                                     else if(soundManager.currEffectName.Contains("Level") == false) //First load in sidescroll
                                     {
                                         soundManager.ClearSounds();
-                                        soundManager.AddSound("Level" + bossKillCount + "Side", true);
+                                        soundManager.AddSound("Level" + GetDungeonNum() + "Side", true);
                                     }
+                                    ssPlayer.playerRect = tempRect;
                                     soundManager.PlaySound();
                                  
                                     //SaveGame();
@@ -1971,13 +1982,19 @@ namespace AUTO_Matic
             {
 
                 float num = MathHelper.Distance(ssPlayer.playerRect.Center.X, door.Rectangle.Center.X);
-                if (ssCamera.CameraBounds.Contains(door.Rectangle) && num < 64 * 12/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
+                Rectangle doorRect = door.Rectangle;
+                if (ssPlayer.isFalling)
+                {
+                    doorRect = new Rectangle(door.Rectangle.X, door.Rectangle.Bottom, door.Rectangle.Width, 1);
+                }
+                if (ssCamera.CameraBounds.Contains(doorRect) && num < 64 * 12 && ssPlayer.Y / 64 == door.Rectangle.Y / 64 || 
+                    ssCamera.CameraBounds.Contains(doorRect) && num < 64 * 12 && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Bottom + 64) > 64)
                 {
 
                     dont = true;
                 }
-                else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 12
-                        /*|| ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 10*/)
+                else if (ssCamera.CameraBounds.Contains(doorRect) && MathHelper.Distance(ssPlayer.playerRect.X, doorRect.X) > 64 * 12
+                        /*|| ssCamera.CameraBounds.Contains(doorRect) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Bottom + 64) <= 64 */)
                 {
 
                     dont = false;
@@ -2009,28 +2026,29 @@ namespace AUTO_Matic
                 }
             }
 
-            foreach (TopDoorTile door in SideTileMap.TopDoorTiles)
-            {
+            //foreach (TopDoorTile door in SideTileMap.TopDoorTiles)
+            //{
 
-                float num = MathHelper.Distance(ssPlayer.playerRect.Center.X, door.Rectangle.Center.X);
-                if (ssCamera.CameraBounds.Contains(door.Rectangle) && num < 64 * 12/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
-                {
+            //    float num = MathHelper.Distance(ssPlayer.playerRect.Center.X, door.Rectangle.Center.X);
+            //    if (ssCamera.CameraBounds.Contains(door.Rectangle) && num < 64 * 12/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
+            //    {
 
-                    dont = true;
-                }
-                else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 12
-                        /*|| ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 10*/)
-                {
+            //        dont = true;
+            //    }
+            //    else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 12
+            //            /*|| ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 10*/)
+            //    {
 
-                    dont = false;
-                }
-            }
+            //        dont = false;
+            //    }
+            //}
 
             if (dont == false && canChange)
             {
                 ssCamera.min = 0;
             }
 
+                //dont = false;
 
             if (ssPlayer.isPilot)
             {
@@ -2074,7 +2092,7 @@ namespace AUTO_Matic
 
             for (int i = enemies.Count - 1; i >= 0; i--)
             {
-                if (worldRect.Intersects(enemies[i].enemyRect) || enemies[i].enemyState != SSEnemy.EnemyStates.Idle)
+                if (ssCamera.ViewRect.Intersects(enemies[i].enemyRect) /*|| enemies[i].enemyState != SSEnemy.EnemyStates.Idle*/)
                 {
                     enemies[i].Update(gameTime, Gravity, ssPlayer, this, new Vector2(groundPoundX, groundPoundY));
                     for (int j = i + 1; j < enemies.Count; j++)
@@ -2273,6 +2291,7 @@ namespace AUTO_Matic
 
             try
             {
+                
                 soundManager.AddSound("Level" + (dungeonNum) + "Side", true);
                 soundManager.PlaySound();
             }
@@ -2505,7 +2524,7 @@ namespace AUTO_Matic
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             Window.Title = camera.Position.ToString() + "   MousePos: " + mousePos.ToString();
             switch(currScene)
@@ -3125,25 +3144,24 @@ namespace AUTO_Matic
         {
             //PlayerPosition TD && SS, BossKillCount, GameState, KeyBinds, ViewRect 
 
-            Vector2 ssPlayerPos = new Vector2((int)ssPlayer.position.X, (int)ssPlayer.position.Y);
-            int DungeonNum = bossKillCount;
-            //Vector2 tdPlayerPos;
-            int killedBosses = bossKillCount;
+            Vector2 ssPlayerPos = new Vector2((int)ssPlayer.position.X, (int)ssPlayer.position.Y); //Saves player position
+            int killedBosses = bossKillCount; //Bosses killed (Used with weapon wheel and to determine where in the game you are
 
-            GameStates currGameState = GameState;
+            GameStates currGameState = GameState; // Current GameState
 
-            List<Keys> SideScrollInputs = UIManager.SideScrollInputs;
-            List<Keys> TopDownInputs = UIManager.TopDownInputs;
+            List<Keys> SideScrollInputs = UIManager.SideScrollInputs; //Side Scroll Inputs
+            List<Keys> TopDownInputs = UIManager.TopDownInputs; // Top Down Inputs
 
-            Rectangle sideScrollView;
+            Rectangle sideScrollView; 
             Rectangle topDownView;
 
 
-            sideScrollView = ssCamera.CameraBounds;
+            sideScrollView = ssCamera.CameraBounds; //Current position at time of save
             topDownView = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
                 (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
-                new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height)); //The position that the first level will be drawn (constant on first load of a dungeon)
 
+            //Saving non key bind data do a list of strings
             List<string> savedData = new List<string>();
             savedData.Add(currGameState.ToString()); //0
             savedData.Add(ssPlayerPos.X.ToString());//1
@@ -3167,6 +3185,7 @@ namespace AUTO_Matic
             //savedData.Add(topDownView.Width.ToString());
             //savedData.Add(topDownView.Height.ToString());
 
+            //The same to the Key Binds
             List<string> sideInputData = new List<string>();
             List<string> topInputData = new List<string>();
             for (int i = 0; i < SideScrollInputs.Count; i++)
@@ -3178,6 +3197,7 @@ namespace AUTO_Matic
                 topInputData.Add(TopDownInputs[i].ToString());
             }
 
+            //Saving the data
             using (var sw = new StreamWriter(System.IO.File.Create(dataPath)))
             {
                 for (int i = 0; i < savedData.Count; i++)
@@ -3190,7 +3210,7 @@ namespace AUTO_Matic
                 sw.Close();
             }
 
-
+            //Saving Side Key Binds
             using (var sw = new StreamWriter(System.IO.File.Create(SideInputPath)))
             {
                 for (int i = 0; i < sideInputData.Count; i++)
@@ -3203,7 +3223,7 @@ namespace AUTO_Matic
                 sw.Close();
             }
 
-
+            //Saving TopDown Key Binds
             using (var sw = new StreamWriter(System.IO.File.Create(TopDownInputPath)))
             {
                 for (int i = 0; i < topInputData.Count; i++)
@@ -3282,12 +3302,12 @@ namespace AUTO_Matic
                     }
                     else
                     {
-                        soundManager.AddSound("Level" + bossKillCount + "Side", true);
+                        //soundManager.AddSound("Level" + bossKillCount + "Side", true);
                     }
                 }
                 else if((GameStates)gameState == GameStates.Tutorial)
                 {
-                    LoadTutorial(restart);
+                    LoadTutorial();
                 }
                 else if((GameStates)gameState == GameStates.FinalBoss)
                 {

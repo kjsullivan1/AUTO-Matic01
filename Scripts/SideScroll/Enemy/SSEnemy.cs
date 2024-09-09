@@ -214,7 +214,7 @@ namespace AUTO_Matic.SideScroll
             {
                 bounds *= 64;
                 if (bounds.Y != 0)
-                    bounds.Y -= 64;
+                    bounds.Y -= 40;
             }
             texture = manager.Load<Texture2D>(@"Textures\TitleCrawlBG");
             visionTxture = content.Load<Texture2D>(@"Textures\Red");
@@ -738,7 +738,7 @@ namespace AUTO_Matic.SideScroll
                                 {
                                     bounds *= 64;
                                     if (bounds.Y != 0)
-                                        bounds.Y -= 64;
+                                        bounds.Y -= 40;
                                 }
                                 //landingPos = position;
                             }
@@ -1727,7 +1727,7 @@ namespace AUTO_Matic.SideScroll
                         {
                             bounds *= 64; //Calculate distance travled from this number to insure bound correction
                             if (bounds.Y != 0)
-                                bounds.Y -= 64;
+                                bounds.Y -= 40;
                         }
                         landingPos = position;
                     }

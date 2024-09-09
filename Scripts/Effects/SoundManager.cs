@@ -47,6 +47,7 @@ namespace AUTO_Matic.Scripts.Effects
 
             StopCurrSounds();
             soundList.Clear();
+            currEffectName = "";
            
         }
 
