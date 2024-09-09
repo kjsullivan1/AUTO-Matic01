@@ -120,7 +120,7 @@ namespace AUTO_Matic
                         break;
                     case "StartNewGame":
 
-                        if(System.IO.File.Exists(game.dataPath))
+                        if(System.IO.File.Exists(game.dataPath) && game.isLoadedGame)
                         {
                             //CreateDeleteSave();
                             uiElements["StartNewGame"].Visible = false;
@@ -150,15 +150,15 @@ namespace AUTO_Matic
                         if(System.IO.File.Exists(game.dataPath))
                         {
                             game.ChangeGameState(Game1.Scenes.InGame);
-                            UIHelper.SetElementVisibility("MainMenu", false, uiElements);
-                            UIHelper.SetElementVisibility("Settings", false, uiElements);
-                            UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
-                            UIHelper.SetElementVisibility("LoadGame", false, uiElements);
-                            UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
-                            UIHelper.SetButtonState("MainMenuPlay", false, uiElements);
-                            UIHelper.SetButtonState("MainMenuExit", false, uiElements);
+                        UIHelper.SetElementVisibility("MainMenu", false, uiElements);
+                        UIHelper.SetElementVisibility("Settings", false, uiElements);
+                        UIHelper.SetElementVisibility("StartNewGame", false, uiElements);
+                        UIHelper.SetElementVisibility("LoadGame", false, uiElements);
+                        UIHelper.SetElementVisibility("StartGameReturn", false, uiElements);
+                        UIHelper.SetButtonState("MainMenuPlay", false, uiElements);
+                        UIHelper.SetButtonState("MainMenuExit", false, uiElements);
 
-                            game.LoadGame();
+                        game.LoadGame();
                         }
                         
                         break;
@@ -987,17 +987,22 @@ namespace AUTO_Matic
 
                 //uiElements["PauseMenuBox"].Visible = true;
 
-                uiElements.Add("PauseMainMenuBtn", UIHelper.CreateButton("PauseMainMenuBtn", "Return to Game",
-                    UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.X - (150 / 2), UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.Y - (int)(150 / 4)));
+                uiElements.Add("PauseMainMenuBtn", UIHelper.CreateButton("PauseMainMenuBtn", "    Return to Game",
+                    UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.X - (150 / 2), UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.Y - (int)(150 / 3)));
                 UIHelper.SetRectangle(uiElements["PauseMainMenuBtn"], 150, 30);
 
-                uiElements.Add("PauseMenuReturn", UIHelper.CreateButton("PauseMenuReturn", "Return to Menu", 
+                uiElements.Add("PauseMenuReturn", UIHelper.CreateButton("PauseMenuReturn", "    Return to Menu", 
                     UIHelper.GetRectangle(uiElements["PauseMainMenuBtn"]).X, UIHelper.GetRectangle(uiElements["PauseMainMenuBtn"]).Bottom + 20));
                 UIHelper.SetRectangle(uiElements["PauseMenuReturn"], 150, 30);
+
+                uiElements.Add("PauseMenuQuit", UIHelper.CreateButton("PauseMenuQuit", "        Quit Game", UIHelper.GetRectangle(uiElements["PauseMenuReturn"]).X,
+                    UIHelper.GetRectangle(uiElements["PauseMenuReturn"]).Bottom + 20));
+                UIHelper.SetRectangle(uiElements["PauseMenuQuit"], 150, 30);
 
 
                 uiElements["PauseMenuReturn"].Visible = true;
                 uiElements["PauseMainMenuBtn"].Visible = true;
+                uiElements["PauseMenuQuit"].Visible = true;
             }
         }
 
@@ -1026,6 +1031,13 @@ namespace AUTO_Matic
                 uiElements["PauseMenuReturn"].Visible = true;
                 
             }
+
+            if (uiElements.ContainsKey("PauseMenuQuit"))
+            {
+                UIHelper.SetRectangle(uiElements["PauseMenuQuit"],
+                   new Rectangle(new Point(UIHelper.GetRectangle(uiElements["PauseMenuReturn"]).X, UIHelper.GetRectangle(uiElements["PauseMenuReturn"]).Bottom + 20), new Point(150, 25)));
+                uiElements["PauseMenuQuit"].Visible = true;
+            }
                 
         }
 
@@ -1037,6 +1049,8 @@ namespace AUTO_Matic
                 uiElements["PauseMainMenuBtn"].Visible = false;
             if (uiElements.ContainsKey("PauseMenuReturn"))
                 uiElements["PauseMenuReturn"].Visible = false;
+            if (uiElements.ContainsKey("PauseMenuQuit"))
+                uiElements["PauseMenuQuit"].Visible = false;
         }
 
         public void Draw(SpriteBatch spriteBatch)

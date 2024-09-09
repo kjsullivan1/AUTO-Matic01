@@ -109,7 +109,7 @@ namespace AUTO_Matic.Scripts.SideScroll
             {
                 if (tile.Rectangle.Intersects(new Rectangle(ViewRect.X, ViewRect.Bottom, ViewRect.Width, 10)))
                 {
-                    height = tile.Rectangle.Top - 8;
+                    height = tile.Rectangle.Top - 4;
                 }
             }
           
@@ -191,12 +191,12 @@ namespace AUTO_Matic.Scripts.SideScroll
                     center.X -= moveSpeed;
                     reached = false;
                 }
-                if (center.Y < position.Y && (center.Y + 620/2) + moveSpeed < height)
+                if (center.Y < position.Y && (center.Y + 650/2) + moveSpeed < height)
                 {
                     center.Y += moveSpeedY;
                     reached = false;
                 }
-                if (center.Y > position.Y && (int)((center.Y - 620/2) - moveSpeed) > 0)
+                if (center.Y > position.Y && (int)((center.Y - 650/2) - moveSpeed) > 0)
                 {
                     center.Y -= moveSpeedY;
                     reached = false;

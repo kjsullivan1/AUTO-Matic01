@@ -213,14 +213,15 @@ namespace AUTO_Matic
                     }
                     else if(num == 60)
                     {
-                        BorderTiles.Add(new BorderTile(num, new Rectangle(x * size, y * size, size, size)));
+                        if(BorderTiles.Contains(new BorderTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                            BorderTiles.Add(new BorderTile(num, new Rectangle(x * size, y * size, size, size)));
                         backgroundTiles.Add(new BackgroundTile(map[y - 2, x], new Rectangle(x * size, y * size, size, size)));
                     }
                     else if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 ||
                         num == 17 || num == 18 || num == 19 || num == 20 || num == 21 || num == 22 || num == 23 || num == 46 || num == 47 || num == 52 || num == 53
                         || num == 33 || num == 34 || num == 27 || num == 32 || num == 36 || num == 40 || num == 41 || num == 43 || num == 49 || num == 54 || num == 55
-                        || num == 37 || num == 56 || num == 29 || num == 28 || num == 30 || num == 45 || num == 42 || num == 48 || num == 44 || num == 45 
-                        || num == 51 || num == 38 || num == 50)
+                        || num == 37 || num == 56 /*|| num == 29*/ || num == 28 /*|| num == 30*/ || num == 45 /*|| num == 42 */|| num == 48 /*|| num == 44 */|| num == 45 
+                        /*|| num == 51*/ || num == 38 /*|| num == 50*/) //Corner tiles need to be moved to Platform tiles 
                     {
                         //If at the top of the map
                      
@@ -261,13 +262,10 @@ namespace AUTO_Matic
                       
                        
                     }
-                    else if (num == 3 || num == 4 || num == 26) //Platforms
+                    else if (num == 3 || num == 4 || num == 26 || num == 31 || num == 29 || num == 30 || num == 42 || num == 44 || num == 51 || num == 50) //Platforms
                     {
-                        if (num == 26)
-                        {
-                            backgroundTiles.Add(new BackgroundTile(map[y + 1,x], new Rectangle(x * size, y * size, size, size)));
-                        }
-
+                        if (backgroundTiles.Contains(new BackgroundTile(map[y - 2, x], new Rectangle(x * size, y * size, size, size))) == false)
+                            backgroundTiles.Add(new BackgroundTile(map[y - 2, x], new Rectangle(x * size, y * size, size, size)));
                         if (y == 0)//If at the top of the map
                         {
                             if(platformTiles.Contains(new PlatformTile(num, new Rectangle(x * size, y * size, size, size))) == false)

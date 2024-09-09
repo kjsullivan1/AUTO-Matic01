@@ -44,7 +44,7 @@ namespace AUTO_Matic
             else if(id.Contains("PauseMenu") || id.Contains("PauseMainMenu"))
             {
                 
-                UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(90, 40), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
+                UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(50, 25), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
                 a.Disabled = false;
                 return a;
             }

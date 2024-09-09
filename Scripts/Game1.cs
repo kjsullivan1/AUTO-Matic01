@@ -150,7 +150,7 @@ namespace AUTO_Matic
 
 
         List<FlyingControlBeacon> flyingBeacons = new List<FlyingControlBeacon>();
-
+        GamePadState prevGamePad;
         Rectangle tdPrevBounds = Rectangle.Empty;
         MapBuilder mapBuilder;
         FinalBoss finalBoss;
@@ -176,6 +176,8 @@ namespace AUTO_Matic
         public string dataPath;
         public string SideInputPath;
         public string TopDownInputPath;
+
+        public bool isLoadedGame = false;   
         class Door
         {
             BottomDoorTile bottomDoor;
@@ -282,8 +284,8 @@ namespace AUTO_Matic
 
 
             UIManager.CreateKeyBindsUI(this);
-           
 
+            prevGamePad = GamePad.GetState(0);
 
 
 
@@ -1163,7 +1165,22 @@ namespace AUTO_Matic
                                         }
 
                                     }
-                                   if(!doorTrans && openDoorCount == 0)
+                                    foreach (TopDoorTile door in SideTileMap.TopDoorTiles)
+                                    {
+                                        float num = MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X);
+                                        if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) < 64 * 8 && ssPlayer.Y / 64 == door.Rectangle.Y / 64)
+                                        {
+                                            dont = true; //dont move camera
+                                        }
+                                        else if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) > 64 * 8 ||
+                                            ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.Y, door.Rectangle.Y) > 64 * 8)
+                                        {
+                                            if (dont)
+                                                dont = false;
+                                        }
+
+                                    }
+                                    if (!doorTrans && openDoorCount == 0)
                                         ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X, SideTileMap.playerSpawns[0].Y - 200), dont, fade);
                                 }
                                
@@ -1675,7 +1692,7 @@ namespace AUTO_Matic
                                         soundManager.ClearSounds();
                                         soundManager.AddSound("Level" + dungeonNum + "Side", true);
                                     }
-                                    else if(soundManager.currEffectName != "Level" + bossKillCount + "Side") //First load in sidescroll
+                                    else if(soundManager.currEffectName.Contains("Level") == false) //First load in sidescroll
                                     {
                                         soundManager.ClearSounds();
                                         soundManager.AddSound("Level" + bossKillCount + "Side", true);
@@ -1704,7 +1721,7 @@ namespace AUTO_Matic
                             }
                             else if(prevGameState == GameStates.FinalBoss)
                             {
-                                ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X + (64 * 11.5f), SideTileMap.playerSpawns[0].Y - (64 * 5.25f)), dont, fade);
+                                ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X + (64 * 10.5f), SideTileMap.playerSpawns[0].Y - (64 * 5.25f)), dont, fade);
                                 //ssPlayer.Update(gameTime, -ssPlayer.velocity, enemies);
                                 if (ssCamera.reached == false)
                                 {
@@ -1739,13 +1756,13 @@ namespace AUTO_Matic
                                 UIHelper.ChangeDashIcon(UIManager.uiElements["DashIcon"], ssPlayer.DashIndex());
 
                                 ssPlayer.Update(gameTime, Gravity, enemies, this);
-                                ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X + (64 * 11.5f), SideTileMap.playerSpawns[0].Y - (64 * 5.25f)), false, fade);
+                                ssCamera.Update(new Vector2(SideTileMap.playerSpawns[0].X + (64 * 10.5f), SideTileMap.playerSpawns[0].Y - (64 * 5.25f)), false, fade);
 
 
                                 if(ssPlayer.damaged)
                                     UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
                                 if (ssPlayer.Health <= 0)
-                                    LoadGame();
+                                    LoadFinalBoss();
                                 #region Collisions
                                 ssPlayer.blockBottom = false;
 
@@ -1859,7 +1876,8 @@ namespace AUTO_Matic
                             }
 
                             if (kb.IsKeyDown(Keys.Escape) && prevKB.IsKeyUp(Keys.Escape) || 
-                                GamePad.GetState(0).Buttons.BigButton == ButtonState.Pressed && prevButtons.BigButton == ButtonState.Released)
+                                GamePad.GetState(0).Buttons.BigButton == ButtonState.Pressed && prevButtons.BigButton == ButtonState.Released ||
+                                GamePad.GetState(0).Buttons.B == ButtonState.Pressed && prevGamePad.Buttons.B == ButtonState.Released)
                             {
                                 GameState = prevGameState;
                                 UIManager.RemovePauseMenu();
@@ -1867,14 +1885,21 @@ namespace AUTO_Matic
                                 UIManager.uiElements["DashIcon"].Visible = true;
                             }
 
-                            if (kb.IsKeyDown(Keys.Up) || GamePad.GetState(0).ThumbSticks.Left.Y < -.9)
+                            if (kb.IsKeyDown(Keys.Up) && prevKB.IsKeyDown(Keys.Up) || GamePad.GetState(0).ThumbSticks.Left.Y < -.9 && prevGamePad.ThumbSticks.Left.Y == 0 ||
+                                GamePad.GetState(0).DPad.Up == ButtonState.Pressed && prevGamePad.DPad.Up == ButtonState.Released)
                             {
-                                PauseMenuButtonIndex = 0;
+                                PauseMenuButtonIndex--;
+                                if(PauseMenuButtonIndex < 0)
+                                    PauseMenuButtonIndex = 0;
                             }
-                            if (kb.IsKeyDown(Keys.Down) || GamePad.GetState(0).ThumbSticks.Left.Y > .9)
+                            if (kb.IsKeyDown(Keys.Down) && prevKB.IsKeyUp(Keys.Down)|| GamePad.GetState(0).ThumbSticks.Left.Y > .9 && prevGamePad.ThumbSticks.Left.Y == 0 ||
+                                GamePad.GetState(0).DPad.Down == ButtonState.Pressed && prevGamePad.DPad.Down == ButtonState.Released)
                             {
-                                PauseMenuButtonIndex = 1;
+                                PauseMenuButtonIndex++;
+                                if (PauseMenuButtonIndex > 2)
+                                    PauseMenuButtonIndex = 2;
                             }
+                            prevGamePad = GamePad.GetState(0);
 
                             if (kb.IsKeyDown(Keys.Enter) ||
                                 GamePad.GetState(0).Buttons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released)
@@ -1907,6 +1932,10 @@ namespace AUTO_Matic
                                     UIManager.uiElements["HealthBar"].Visible = true;
                                     UIManager.uiElements["DashIcon"].Visible = true;
                                     //UIManager.RemovePauseMenu();
+                                }
+                                else if(PauseMenuButtonIndex == 2)
+                                {
+                                    Exit();
                                 }
 
                                 PauseMenuButtonIndex = 0;
@@ -3188,6 +3217,8 @@ namespace AUTO_Matic
         {
             if(System.IO.File.Exists(dataPath))
             {
+                isLoadedGame = true;
+
                 string[] gameData = File.ReadAllLines(dataPath); //Data File: CurrGameState , ssPlayerX, ssPlayerY, killedBosses, Camera XYWH |||| Input Files: SideInputs, TopInputs
                 string[] sideInputData = File.ReadAllLines(SideInputPath);
                 string[] topInputData = File.ReadAllLines(TopDownInputPath);
@@ -3248,6 +3279,10 @@ namespace AUTO_Matic
                 else if((GameStates)gameState == GameStates.Tutorial)
                 {
                     LoadTutorial(restart);
+                }
+                else if((GameStates)gameState == GameStates.FinalBoss)
+                {
+                    LoadFinalBoss();
                 }
             }
         }

@@ -38,14 +38,14 @@ namespace AUTO_Matic.Scripts.TopDown
                 {
                     int num = rand.Next(0, 101);
 
-                    if (num < 25 && numEnvironment < 6)
+                    if (num < 25 && numEnvironment < 8)
                     {
                         mapObjectEffect = MapEffectObjects.SpeedBoost;
                         GetDirection();
                         selected = true;
                         numEnvironment++;
                     }
-                    else if (num >= 25 && num < 50 && numEnvironment < 6)
+                    else if (num >= 25 && num < 50 && numEnvironment < 8)
                     {
                         mapObjectEffect = MapEffectObjects.DamageOverTime;
                         GetDirection();
@@ -172,7 +172,7 @@ namespace AUTO_Matic.Scripts.TopDown
                         mapData.enemySpawnPoints.Remove(mapData.enemySpawnPoints[i]);
                     }
                 }
-                int affectedObjects = rand.Next(5, 9);
+                int affectedObjects = rand.Next(5, 20);
                 numEnemies = mapData.enemySpawnPoints.Count;
                 //int removeObjectChance = 10;
                 //mapObjectEffect = MapEffectObjects.AddWall;

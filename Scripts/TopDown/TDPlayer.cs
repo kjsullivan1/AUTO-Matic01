@@ -47,7 +47,7 @@ namespace AUTO_Matic.TopDown
 
         float fireDmg = .5f;
         float fireDmgRate = .15f;
-        float iFireDmgRate;
+        float iFireDmgRate = .25f;
         bool inDOT = false; //Is inside the DamageOverTime tile
 
         UIManager KeyBinds; 
@@ -304,7 +304,7 @@ namespace AUTO_Matic.TopDown
 
             iSpeedBoostInputDelay = speedBoostInputDelay;
             iSpeedBoostTime = speedBoostTime;
-            iFireDmgRate = fireDmgRate;
+            //iFireDmgRate = fireDmgRate;
 
             particles = new ParticleManager();
         }
@@ -1029,7 +1029,7 @@ namespace AUTO_Matic.TopDown
             foreach(EnvironmentTile environmentTile in map.EnvironmentTiles)
             {
               
-                if (new Rectangle(environmentTile.Rectangle.Center.X, environmentTile.Rectangle.Center.Y, 1,1).Intersects(rectangle) /*&& !speedBoosted*/)
+                if (new Rectangle(environmentTile.Rectangle.Center.X - 10, environmentTile.Rectangle.Center.Y - 10, 10,10).Intersects(rectangle) /*&& !speedBoosted*/)
                 {
                     switch(environmentTile.effectType)
                     {
