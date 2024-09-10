@@ -160,7 +160,7 @@ namespace AUTO_Matic.Scripts.SideScroll
                 else if(MathHelper.Distance(center.X, position.X) > 64 * 4)
                 {
                     if (paused)
-                        moveSpeed = maxMoveSpeed * 11;
+                        moveSpeed = maxMoveSpeed * 8;
                     else
                         moveSpeed = maxMoveSpeed * 1.5f;
                 }
@@ -181,22 +181,22 @@ namespace AUTO_Matic.Scripts.SideScroll
                 {
                     moveSpeedY = 4.3f;
                 }
-                if (center.X < position.X && (center.X + cameraWidth / 2) + moveSpeed < width)
+                if ((int)center.X < position.X && (center.X + cameraWidth / 2) + moveSpeed < width)
                 {
                     center.X += moveSpeed;
                     reached = false;
                 }
-                if (center.X > position.X && (center.X - cameraWidth / 2) - moveSpeed > min)
+                if ((int)center.X > position.X && (center.X - cameraWidth / 2) - moveSpeed > min)
                 {
                     center.X -= moveSpeed;
                     reached = false;
                 }
-                if (center.Y < position.Y && (center.Y + 620/2) + moveSpeedY < height)
+                if ((int)center.Y < position.Y && (center.Y + 620/2) + moveSpeedY < height)
                 {
                     center.Y += moveSpeedY;
                     reached = false;
                 }
-                if (center.Y > position.Y && (int)((center.Y - 620/2) - moveSpeedY) > 0)
+                if ((int)center.Y > position.Y && (int)((center.Y - 620/2) - moveSpeedY) > 0)
                 {
                     center.Y -= moveSpeedY;
                     reached = false;
@@ -357,7 +357,17 @@ namespace AUTO_Matic.Scripts.SideScroll
                 if (!fade)
                     CameraBounds.Y = 0;
                 //center.Y = 0;
-                reached = false;
+
+                if (paused)
+                {
+                    center.Y = 0 + ViewRect.Height / 2;
+                }
+                else
+                {
+                    reached = false;
+                }
+                   
+               
 
             }
 

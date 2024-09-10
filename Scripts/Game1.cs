@@ -1211,7 +1211,8 @@ namespace AUTO_Matic
                             {
                                 SideScrollPhysics(gameTime, kb, worldRect);
                                 if (kb.IsKeyDown(Keys.Escape) && prevKB.IsKeyUp(Keys.Escape) ||
-                                    GamePad.GetState(PlayerIndex.One).Buttons.BigButton == ButtonState.Pressed && prevButtons.BigButton == ButtonState.Released)
+                                    GamePad.GetState(PlayerIndex.One).Buttons.BigButton == ButtonState.Pressed && prevButtons.BigButton == ButtonState.Released ||
+                                    GamePad.GetState(0).Buttons.Back == ButtonState.Pressed && prevButtons.Back == ButtonState.Released)
                                 {
                                     prevGameState = GameState;
                                     GameState = GameStates.InGamePause;
@@ -1295,7 +1296,8 @@ namespace AUTO_Matic
 
                                 }
                                 if(kb.IsKeyDown(Keys.Escape) && prevKB.IsKeyUp(Keys.Escape) || 
-                                    GamePad.GetState(PlayerIndex.One).Buttons.BigButton == ButtonState.Pressed && prevButtons.BigButton == ButtonState.Released)
+                                    GamePad.GetState(PlayerIndex.One).Buttons.BigButton == ButtonState.Pressed && prevButtons.BigButton == ButtonState.Released
+                                    || GamePad.GetState(0).Buttons.Back == ButtonState.Pressed && prevButtons.Back == ButtonState.Released)
                                 {
                                     prevGameState = GameState;
                                     GameState = GameStates.InGamePause;
@@ -1338,7 +1340,8 @@ namespace AUTO_Matic
                                        (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
                                        new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
                                 if (kb.IsKeyDown(Keys.Escape) && prevKB.IsKeyUp(Keys.Escape) && !startBoss ||
-                                       GamePad.GetState(PlayerIndex.One).Buttons.BigButton == ButtonState.Pressed && prevButtons.BigButton == ButtonState.Released && !startBoss)
+                                       GamePad.GetState(PlayerIndex.One).Buttons.BigButton == ButtonState.Pressed && prevButtons.BigButton == ButtonState.Released && !startBoss ||
+                                    GamePad.GetState(0).Buttons.Back == ButtonState.Pressed && prevButtons.Back == ButtonState.Released && !startBoss)
                                 {
                                     prevGameState = GameState;
                                     GameState = GameStates.InGamePause;
@@ -3324,6 +3327,8 @@ namespace AUTO_Matic
 
                         if (openDoorCount == 1)
                             fadePos = new Vector2(int.Parse(gameData[1]) /*- int.Parse(gameData[10])*/, int.Parse(gameData[2]));
+                        else if (openDoorCount == 4)
+                            fadePos = new Vector2(int.Parse(gameData[1]) - int.Parse(gameData[10]), int.Parse(gameData[2]));
                         else
                             fadePos = new Vector2(int.Parse(gameData[1])/* + int.Parse(gameData[10])*/, int.Parse(gameData[2]));
 

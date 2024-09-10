@@ -192,7 +192,7 @@ namespace AUTO_Matic.SideScroll
         Vector2 startDashPos = Vector2.Zero;
         //public bool isDashing = false;
         float dashCoolDown = 0;
-        float dashCoolDownMax = 1.5f;
+        float dashCoolDownMax = .75f;
         Vector2 DashForce
         {
             get
@@ -1902,7 +1902,17 @@ namespace AUTO_Matic.SideScroll
             //Weapon Wheel actions
             if(weaponWheel.active)
             {
-                if(kb.IsKeyDown(KeyBindData.SideScrollInputs[9]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[9]) && gameData.bossKillCount >= 2||
+                if (GamePad.GetState(0).IsButtonDown(Buttons.RightStick) || GamePad.GetState(0).IsButtonDown(Buttons.RightTrigger) ||
+                    kb.IsKeyDown(KeyBindData.SideScrollInputs[7]))
+                {
+                    currWeapon = WeaponType.Pistol;
+                    selectedWeapon = 0;
+
+                    bulletDmg = pistolDmg;
+                    shootDelay = pistolDelay;
+                    iShootDelay = shootDelay;
+                }
+                else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[9]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[9]) && gameData.bossKillCount >= 2||
                     RightStick.X > 0 && gameData.bossKillCount >= 2)
                 {
                     currWeapon = WeaponType.Burst;
@@ -2019,16 +2029,7 @@ namespace AUTO_Matic.SideScroll
                     shootDelay = shotGunDelay;
                     iShootDelay = shootDelay;
                 }
-                else if(GamePad.GetState(0).IsButtonDown(Buttons.RightStick) ||
-                    kb.IsKeyDown(KeyBindData.SideScrollInputs[7]))
-                {
-                    currWeapon = WeaponType.Pistol;
-                    selectedWeapon = 0;
-
-                    bulletDmg = pistolDmg;
-                    shootDelay = pistolDelay;
-                    iShootDelay = shootDelay;
-                }
+               
             }
             prevKb = kb;
             prevControllerBtn = currControllerBtn;
