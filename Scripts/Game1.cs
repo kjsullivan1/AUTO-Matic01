@@ -373,7 +373,7 @@ namespace AUTO_Matic
             }
             else if(isBoss && tdPlayer.bossRoom == levelCount)
             {
-                SaveGame();
+                //SaveGame();
                 levelCount++;
                 //graphics.PreferredBackBufferWidth = 64 * 15; //1600  // pixelBits * col
                 //graphics.PreferredBackBufferHeight = 64 * 15; //960  // pixelBits * row
@@ -695,7 +695,7 @@ namespace AUTO_Matic
                     enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], true));
                 else if (k == 2)
                 {
-                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 5, SideTileMap.enemySpawns[i], false));
+                    enemies.Add(new SSEnemy(Content, Window.ClientBounds, 8, SideTileMap.enemySpawns[i], false));
                     k = 0;
                 }
                 else if (k == 3)
@@ -1658,6 +1658,7 @@ namespace AUTO_Matic
                                 //             bossHealth -= tdPlayer.bulletDmg;
                                 //            if (bossHealth <= 0)
                                 //            {
+                                //            {
                                 //                Boss = new Rectangle();
                                 //                break;
                                 //            }
@@ -1690,14 +1691,17 @@ namespace AUTO_Matic
                                     GameState = prevGameState;
                                     fade = true;
 
-                                    if (dungeonNum < bossKillCount)
-                                        SaveGame();
+                                    SaveGame();
 
-                                    Rectangle tempRect = ssPlayer.playerRect;
 
-                                    ssPlayer.playerRect.X += 64 * 4;
+                                    Vector2 tempPos = ssPlayer.position;
 
-                                    if(dungeonNum < bossKillCount && soundManager.currEffectName == "BossTheme" /*|| soundManager.currEffectName.Contains(GetDun) == false*/) //Just came from a dungeon on first load from a LoadGame
+                                    if(dungeonNum >= 2 && bossKillCount >= 3)
+                                        ssPlayer.position.X += 64 * 20;
+                                    else
+                                        ssPlayer.position.X += 64 * 6;
+
+                                    if (dungeonNum < bossKillCount && soundManager.currEffectName == "BossTheme" /*|| soundManager.currEffectName.Contains(GetDun) == false*/) //Just came from a dungeon on first load from a LoadGame
                                     {
                                         soundManager.ClearSounds();
                                         soundManager.AddSound("Level" + dungeonNum + "Side", true);
@@ -1707,7 +1711,7 @@ namespace AUTO_Matic
                                         soundManager.ClearSounds();
                                         soundManager.AddSound("Level" + GetDungeonNum() + "Side", true);
                                     }
-                                    ssPlayer.playerRect = tempRect;
+                                    ssPlayer.position = tempPos;
                                     soundManager.PlaySound();
                                  
                                     //SaveGame();
@@ -2425,7 +2429,7 @@ namespace AUTO_Matic
                     {
                         try
                         {
-                            soundManager.AddSound("Level" + (dungeonNum + 1) + "Side", true);
+                            soundManager.AddSound("Level" + (openDoorCount - 1) + "Side", true);
                             soundManager.PlaySound();
                         }
                         catch
@@ -2446,12 +2450,11 @@ namespace AUTO_Matic
                     {
                         openDoorCount--;
                     }
-
                     if (openDoorCount >= 1)
                     {
                         try
                         {
-                            soundManager.AddSound("Level" + (dungeonNum) + "Side", true);
+                            soundManager.AddSound("Level" + (openDoorCount - 1) + "Side", true);
                             soundManager.PlaySound();
                         }
                         catch
@@ -2772,7 +2775,7 @@ namespace AUTO_Matic
                     {
                         if(black)
                             GraphicsDevice.Clear(Color.Black * .25f);
-                        Window.Title = ssCamera.CameraBounds.ToString();
+                        //Window.Title = ssCamera.CameraBounds.ToString();
                     }
                     else if(GameState == GameStates.FinalBoss)
                     {
@@ -3001,6 +3004,8 @@ namespace AUTO_Matic
                         //UIManager.SideScrollInputs[UIManager.currButtonIndex] = keyBindKey;
                         //changeKey = true;
                         keyBindActive = false;
+
+                        
                     }
 
                     if (prevButtons.B == ButtonState.Pressed && currButtons.B == ButtonState.Released)
@@ -3152,7 +3157,7 @@ namespace AUTO_Matic
             List<Keys> SideScrollInputs = UIManager.SideScrollInputs; //Side Scroll Inputs
             List<Keys> TopDownInputs = UIManager.TopDownInputs; // Top Down Inputs
 
-            Rectangle sideScrollView; 
+            Rectangle sideScrollView;
             Rectangle topDownView;
 
 
@@ -3185,18 +3190,6 @@ namespace AUTO_Matic
             //savedData.Add(topDownView.Width.ToString());
             //savedData.Add(topDownView.Height.ToString());
 
-            //The same to the Key Binds
-            List<string> sideInputData = new List<string>();
-            List<string> topInputData = new List<string>();
-            for (int i = 0; i < SideScrollInputs.Count; i++)
-            {
-                sideInputData.Add(SideScrollInputs[i].ToString());
-            }
-            for (int i = 0; i < TopDownInputs.Count; i++)
-            {
-                topInputData.Add(TopDownInputs[i].ToString());
-            }
-
             //Saving the data
             using (var sw = new StreamWriter(System.IO.File.Create(dataPath)))
             {
@@ -3208,6 +3201,24 @@ namespace AUTO_Matic
                 sw.Flush();
 
                 sw.Close();
+            }
+
+            SaveKeyBinds(SideScrollInputs, TopDownInputs);
+
+        }
+
+        public void SaveKeyBinds(List<Keys> SideScrollInputs, List<Keys> TopDownInputs)
+        {
+            //The same to the Key Binds
+            List<string> sideInputData = new List<string>();
+            List<string> topInputData = new List<string>();
+            for (int i = 0; i < SideScrollInputs.Count; i++)
+            {
+                sideInputData.Add(SideScrollInputs[i].ToString());
+            }
+            for (int i = 0; i < TopDownInputs.Count; i++)
+            {
+                topInputData.Add(TopDownInputs[i].ToString());
             }
 
             //Saving Side Key Binds
@@ -3235,11 +3246,32 @@ namespace AUTO_Matic
 
                 sw.Close();
             }
+        }
 
+        public List<Keys> GetSideScrollInputs()
+        {
+            List<Keys> inputs = new List<Keys>();
+            string[] sideInputData = File.ReadAllLines(SideInputPath);
 
+            for(int i = 0; i < sideInputData.Length; i++)
+            {
+                inputs.Add((Keys)Enum.Parse(typeof(Keys), sideInputData[i]));
+            }
 
+            return inputs;
+        }
 
+        public List<Keys> GetTopDownInputs()
+        {
+            List<Keys> inputs = new List<Keys>();
+            string[] topDownInputData = File.ReadAllLines(TopDownInputPath);
 
+            for (int i = 0; i < topDownInputData.Length; i++)
+            {
+                inputs.Add((Keys)Enum.Parse(typeof(Keys), topDownInputData[i]));
+            }
+
+            return inputs;
         }
 
         public void LoadGame(bool restart = false)
@@ -3277,11 +3309,25 @@ namespace AUTO_Matic
                     ssPlayer.Load(Content, Window.ClientBounds, friction, new Vector2(int.Parse(gameData[1]), int.Parse(gameData[2])), UIManager);
                     //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(int.Parse(gameData[4]), int.Parse(gameData[5])), int.Parse(gameData[6]), int.Parse(gameData[7]));
                     openDoorCount = int.Parse(gameData[8]);
-                    if (openDoorCount >= 1)
+                    if (openDoorCount >= 0)
                     {
                         ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(int.Parse(gameData[4]) /*+ (int.Parse(gameData[10]))*/, int.Parse(gameData[5])), int.Parse(gameData[6]), int.Parse(gameData[7]));
                         //ssCamera.SetBounds(new Rectangle(int.Parse(gameData[4]), int.Parse(gameData[5]), int.Parse(gameData[6]), int.Parse(gameData[7])));
-                        fadePos = new Vector2(int.Parse(gameData[1]) + int.Parse(gameData[10]), int.Parse(gameData[2]));
+
+                        if (openDoorCount == 1)
+                            fadePos = new Vector2(int.Parse(gameData[1]) /*- int.Parse(gameData[10])*/, int.Parse(gameData[2]));
+                        else
+                            fadePos = new Vector2(int.Parse(gameData[1])/* + int.Parse(gameData[10])*/, int.Parse(gameData[2]));
+
+                        foreach (BottomDoorTile doorTile in SideTileMap.BottomDoorTiles)
+                        {
+                            if (openDoorCount >= 2 && MathHelper.Distance(doorTile.Rectangle.Center.X, ssPlayer.position.X) < 200 )
+                                fadePos = new Vector2(int.Parse(gameData[1]) + (int.Parse(gameData[10]) - 66), int.Parse(gameData[2]));
+                            //else if (openDoorCount == 1 && MathHelper.Distance(doorTile.Rectangle.Center.X, ssPlayer.position.X) < 200)
+                            //    fadePos = new Vector2(int.Parse(gameData[1])/* + int.Parse(gameData[10])*/, int.Parse(gameData[2]));
+                        }
+
+                      
                     }
                     reloadCount++;
                     soundManager.ClearSounds();

@@ -1126,7 +1126,8 @@ namespace AUTO_Matic.SideScroll
                             prevKb = kb;
                             foreach(SSEnemy enemy in enemies)
                             {
-                                enemy.leftOnX.Add(playerRect.X);
+                                if (playerRect.Top/64 == enemy.enemyRect.Y/64)
+                                    enemy.leftOnX.Add(playerRect.X);
                             }
                             velocity.Y = -jumpForce;
 
@@ -1234,7 +1235,8 @@ namespace AUTO_Matic.SideScroll
                             velocity.Y = -jumpForce;
                             foreach (SSEnemy enemy in enemies)
                             {
-                                enemy.leftOnX.Add(playerRect.X);
+                                if (playerRect.Top/64 == enemy.enemyRect.Y/64)
+                                    enemy.leftOnX.Add(playerRect.X);
                             }
                             position.Y -= 1f;
 
@@ -1349,7 +1351,8 @@ namespace AUTO_Matic.SideScroll
                             velocity.Y = -jumpForce;
                             foreach (SSEnemy enemy in enemies)
                             {
-                                enemy.leftOnX.Add(playerRect.X);
+                                if (playerRect.Top/64 == enemy.enemyRect.Y/64)
+                                    enemy.leftOnX.Add(playerRect.X);
                             }
 
                             position.Y -= 1f;
@@ -1532,7 +1535,8 @@ namespace AUTO_Matic.SideScroll
                             velocity.Y = -jumpForce;
                             foreach (SSEnemy enemy in enemies)
                             {
-                                enemy.leftOnX.Add(playerRect.X);
+                                if(playerRect.Top/64 == enemy.enemyRect.Y/64)
+                                    enemy.leftOnX.Add(playerRect.X);
                             }
 
                             position.Y -= 1f;

@@ -38,6 +38,9 @@ namespace AUTO_Matic
         public string currButton;
         public int currButtonIndex = 0;
 
+        public List<Keys> DefaultSideScrolKeys = new List<Keys>();
+        public List<Keys> DefaultTopDownKeys = new List<Keys>();
+
 
         public void UIButton_Clicked(object sender, UIButtonArgs e)
         {
@@ -70,15 +73,6 @@ namespace AUTO_Matic
 
                
             }
-            else if(buttonName.Contains("SwapKeys"))
-            {
-                isTopDownKeys = !isTopDownKeys;
-                isSideScrollKeys = !isSideScrollKeys;
-
-                SetSideKeyBinds(isSideScrollKeys);
-                SetTopDownKeyBinds(isTopDownKeys);
-
-            }
             else
             {
               
@@ -108,6 +102,7 @@ namespace AUTO_Matic
                     case "SettingsReturnBtn":
                         game.ChangeMenuState(Game1.MenuStates.MainMenu);
                         transition = true;
+                        game.SaveKeyBinds(SideScrollInputs, TopDownInputs);
 
                         break;
                     case "StartGameReturn":
@@ -175,7 +170,60 @@ namespace AUTO_Matic
                         uiElements["LoadGame"].Visible = true;
                         willDelete = false;
                         break;
+                    case "SwapKeys":
+                        isTopDownKeys = !isTopDownKeys;
+                        isSideScrollKeys = !isSideScrollKeys;
 
+                        SetSideKeyBinds(isSideScrollKeys);
+                        SetTopDownKeyBinds(isTopDownKeys);
+                        break;
+                    case "SwapKeysDefault":
+                        if (isSideScrollKeys)
+                        {
+                            //Considering I never replace the values of these. They will be changed regardless before entering this case statement... So i manually set them back
+                            DefaultSideScrolKeys.Clear();
+                            DefaultSideScrolKeys.Add(Keys.A); //While loading them in.... check all keys, converting them into strings, if they match, assign it to the proper index
+                            DefaultSideScrolKeys.Add(Keys.D);
+                            DefaultSideScrolKeys.Add(Keys.S);
+                            DefaultSideScrolKeys.Add(Keys.Enter);
+                            DefaultSideScrolKeys.Add(Keys.LeftShift);
+                            DefaultSideScrolKeys.Add(Keys.Space);
+                            DefaultSideScrolKeys.Add(Keys.E);
+                            DefaultSideScrolKeys.Add(Keys.RightShift);
+                            DefaultSideScrolKeys.Add(Keys.Left);
+                            DefaultSideScrolKeys.Add(Keys.Right);
+                            DefaultSideScrolKeys.Add(Keys.Up);
+                            DefaultSideScrolKeys.Add(Keys.Down);
+                            SideScrollInputs = DefaultSideScrolKeys;
+
+                            for(int i = 0; i < SideScrollInputs.Count; i++)
+                            {
+                                UIHelper.SetButtonText(uiElements["KeyBindBtn" + SideKeyBinds[i]], SideScrollInputs[i].ToString());
+                            }
+                        } 
+                        else if (isTopDownKeys)
+                        {
+                            DefaultTopDownKeys.Clear();
+                            DefaultTopDownKeys.Add(Keys.A);
+                            DefaultTopDownKeys.Add(Keys.D);
+                            DefaultTopDownKeys.Add(Keys.W);
+                            DefaultTopDownKeys.Add(Keys.S);
+                            DefaultTopDownKeys.Add(Keys.Space);
+                            DefaultTopDownKeys.Add(Keys.Enter);
+                            DefaultTopDownKeys.Add(Keys.LeftShift);
+                            DefaultTopDownKeys.Add(Keys.RightShift);
+                            DefaultTopDownKeys.Add(Keys.Left);
+                            DefaultTopDownKeys.Add(Keys.Right);
+                            DefaultTopDownKeys.Add(Keys.Up);
+                            DefaultTopDownKeys.Add(Keys.Down);
+                            TopDownInputs = DefaultTopDownKeys;
+
+                            for(int i = 0; i < TopDownInputs.Count; i++)
+                            {
+                                UIHelper.SetButtonText(uiElements["KeyBindBtn" + TopDownKeyBinds[i]], TopDownInputs[i].ToString());
+                            }
+                        }
+                        break;
 
                 }
             }
@@ -370,6 +418,7 @@ namespace AUTO_Matic
                             SetTopDownKeyBinds(false);
                             uiElements["WeaponWheelTitle"].Visible = false;
                             uiElements["SwapKeys"].Visible = false;
+                            uiElements["SwapKeysDefault"].Visible = false;
 
                         }
                             
@@ -496,6 +545,7 @@ namespace AUTO_Matic
                             SetSideKeyBinds(true);
                             uiElements["WeaponWheelTitle"].Visible = true;
                             uiElements["SwapKeys"].Visible = true;
+                            uiElements["SwapKeysDefault"].Visible = true;
                             //CreateKeyBindsUI(game);
                         }
                     }
@@ -543,11 +593,11 @@ namespace AUTO_Matic
             //Title
             string titleTxt = "Settings";
             uiElements.Add("SettingsMenuTitle", UIHelper.CreateTextblock("SettingsMenuTitle", titleTxt, (int)(((dims.X * 1.5f)) - (titleTxt.Length * 11.0f)), // dividing the txt * 11 / 2 makes in longer?
-                UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Top - 100 ));
+                UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Top - 75));
             UIHelper.SetElementRect(uiElements["SettingsMenuTitle"], new Rectangle(uiElements["SettingsMenuTitle"].Position.ToPoint(), new Point(titleTxt.Length, 20)));
 
             //Settings Box
-            uiElements.Add("SettingsButtonBox", UIHelper.CreateTextblock("\n\tSettingsButtonBox", "Hello", (int)(((dims.X * 1.5f))) - (525 / 2),
+            uiElements.Add("SettingsButtonBox", UIHelper.CreateTextblock("\n\tSettingsButtonBox", "", (int)(((dims.X * 1.5f))) - (525 / 2),
                 (int)uiElements["SettingsMenuTitle"].Position.Y + 70));
             UIHelper.SetElementRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(350, 100)));
             UIHelper.SetElementBGRect(uiElements["SettingsButtonBox"], new Rectangle(uiElements["SettingsButtonBox"].Position.ToPoint(), new Point(525, 350)));
@@ -714,23 +764,26 @@ namespace AUTO_Matic
                 SideKeyBinds[10] = "Bomb:";
                 SideKeyBinds[11] = "Shotgun:";
 
-                SideScrollInputs.Add(Keys.A); //While loading them in.... check all keys, converting them into strings, if they match, assign it to the proper index
-                SideScrollInputs.Add(Keys.D);
-                SideScrollInputs.Add(Keys.S);
-                SideScrollInputs.Add(Keys.Enter);
-                SideScrollInputs.Add(Keys.LeftShift);
-                SideScrollInputs.Add(Keys.Space);
-                SideScrollInputs.Add(Keys.E);
-                SideScrollInputs.Add(Keys.RightShift);
-                SideScrollInputs.Add(Keys.Left);
-                SideScrollInputs.Add(Keys.Right);
-                SideScrollInputs.Add(Keys.Up);
-                SideScrollInputs.Add(Keys.Down);
-                string word = "Up";
+                DefaultSideScrolKeys.Add(Keys.A); //While loading them in.... check all keys, converting them into strings, if they match, assign it to the proper index
+                DefaultSideScrolKeys.Add(Keys.D);
+                DefaultSideScrolKeys.Add(Keys.S);
+                DefaultSideScrolKeys.Add(Keys.Enter);
+                DefaultSideScrolKeys.Add(Keys.LeftShift);
+                DefaultSideScrolKeys.Add(Keys.Space);
+                DefaultSideScrolKeys.Add(Keys.E);
+                DefaultSideScrolKeys.Add(Keys.RightShift);
+                DefaultSideScrolKeys.Add(Keys.Left);
+                DefaultSideScrolKeys.Add(Keys.Right);
+                DefaultSideScrolKeys.Add(Keys.Up);
+                DefaultSideScrolKeys.Add(Keys.Down);
 
-                ArrayList keys = new ArrayList(Enum.GetValues(typeof(Keys)));
+       
+                SideScrollInputs = game.GetSideScrollInputs();
+                //string word = "Up";
 
-                Enum.Parse(typeof(Keys), word);
+                //ArrayList keys = new ArrayList(Enum.GetValues(typeof(Keys)));
+
+                //Enum.Parse(typeof(Keys), word);
 
                 TopDownKeyBinds = new string[12]; //Dash, Move: left/right/up/down, Shoot, WeaponWheel: Pistol/Ray/Burst/Bomb/Shotgun, Direction Locking, 
                 TopDownKeyBinds[0] = "Move Left: ";
@@ -746,18 +799,27 @@ namespace AUTO_Matic
                 TopDownKeyBinds[10] = "Bomb: ";
                 TopDownKeyBinds[11] = "Shotgun: ";
 
-                TopDownInputs.Add(Keys.A);
-                TopDownInputs.Add(Keys.D);
-                TopDownInputs.Add(Keys.W);
-                TopDownInputs.Add(Keys.S);
-                TopDownInputs.Add(Keys.Space);
-                TopDownInputs.Add(Keys.Enter);
-                TopDownInputs.Add(Keys.LeftShift);
-                TopDownInputs.Add(Keys.RightShift);
-                TopDownInputs.Add(Keys.Left);
-                TopDownInputs.Add(Keys.Right);
-                TopDownInputs.Add(Keys.Up);
-                TopDownInputs.Add(Keys.Down);
+                DefaultTopDownKeys.Add(Keys.A);
+                DefaultTopDownKeys.Add(Keys.D);
+                DefaultTopDownKeys.Add(Keys.W);
+                DefaultTopDownKeys.Add(Keys.S);
+                DefaultTopDownKeys.Add(Keys.Space);
+                DefaultTopDownKeys.Add(Keys.Enter);
+                DefaultTopDownKeys.Add(Keys.LeftShift);
+                DefaultTopDownKeys.Add(Keys.RightShift);
+                DefaultTopDownKeys.Add(Keys.Left);
+                DefaultTopDownKeys.Add(Keys.Right);
+                DefaultTopDownKeys.Add(Keys.Up);
+                DefaultTopDownKeys.Add(Keys.Down);
+
+                
+                TopDownInputs = game.GetTopDownInputs();
+
+                if(SideScrollInputs == new List<Keys>() && TopDownInputs == new List<Keys>())
+                {
+                    SideScrollInputs = DefaultSideScrolKeys;
+                    TopDownInputs = DefaultTopDownKeys;
+                }
 
                 int width = 128;
                 int height = 25;
@@ -765,6 +827,10 @@ namespace AUTO_Matic
                 uiElements.Add("SwapKeys", UIHelper.CreateButton("SwapKeys", "Swap to Top/Side Key Binds",
                     (int)((UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (dims.X)) - (213 / 2)), (int)(UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Bottom - 35)));
                 UIHelper.SetRectangle(uiElements["SwapKeys"], 213, height);
+
+                uiElements.Add("SwapKeysDefault", UIHelper.CreateButton("SwapKeysDefault", "Set to Default Keys",
+                    UIHelper.GetRectangle(uiElements["SwapKeys"]).X, UIHelper.GetRectangle(uiElements["SwapKeys"]).Y - (height + 2)));
+                UIHelper.SetRectangle(uiElements["SwapKeysDefault"], 213, height);
 
                 //uiElements["SwapKeys"].Visible = true;
 
@@ -793,7 +859,7 @@ namespace AUTO_Matic
                 if (i == 0)
                 {
                     uiElements.Add("TopDownBindTitle", UIHelper.CreateTextblock("TopDownBindTitle", "       Top Down Key Binds",
-                   (UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (int)(dims.X)) - (150 / 2), 30));
+                   (UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (int)(dims.X)) - (150 / 2), 60));
                     //uiElements["TopDownBindTitle"].Visible = true;
                     UIHelper.SetElementBGRect(uiElements["TopDownBindTitle"], new Rectangle(uiElements["TopDownBindTitle"].Position.ToPoint(), new Point(150, 25)));
                     UIHelper.SetElementRect(uiElements["TopDownBindTitle"], new Rectangle(uiElements["TopDownBindTitle"].Position.ToPoint(), new Point(150, 25)));
@@ -871,7 +937,7 @@ namespace AUTO_Matic
                 if (i == 0)
                 {
                     uiElements.Add("SideBindTitle", UIHelper.CreateTextblock("SideBindTitle", "       Side Scroll Key Binds",
-                        (UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (int)(dims.X)) - (150 / 2), 30));
+                        (UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (int)(dims.X)) - (150 / 2), 60));
                    // uiElements["SideBindTitle"].Visible = true;
                     UIHelper.SetElementBGRect(uiElements["SideBindTitle"], new Rectangle(uiElements["SideBindTitle"].Position.ToPoint(), new Point(150, 25)));
                     UIHelper.SetElementRect(uiElements["SideBindTitle"], new Rectangle(uiElements["SideBindTitle"].Position.ToPoint(), new Point(150, 25)));
