@@ -230,6 +230,38 @@ namespace AUTO_Matic
           
         }
 
+        public void SetToDefaultKeyBinds()
+        {
+            DefaultSideScrolKeys.Clear();
+            DefaultSideScrolKeys.Add(Keys.A); //While loading them in.... check all keys, converting them into strings, if they match, assign it to the proper index
+            DefaultSideScrolKeys.Add(Keys.D);
+            DefaultSideScrolKeys.Add(Keys.S);
+            DefaultSideScrolKeys.Add(Keys.Enter);
+            DefaultSideScrolKeys.Add(Keys.LeftShift);
+            DefaultSideScrolKeys.Add(Keys.Space);
+            DefaultSideScrolKeys.Add(Keys.E);
+            DefaultSideScrolKeys.Add(Keys.RightShift);
+            DefaultSideScrolKeys.Add(Keys.Left);
+            DefaultSideScrolKeys.Add(Keys.Right);
+            DefaultSideScrolKeys.Add(Keys.Up);
+            DefaultSideScrolKeys.Add(Keys.Down);
+            SideScrollInputs = DefaultSideScrolKeys;
+
+            DefaultTopDownKeys.Clear();
+            DefaultTopDownKeys.Add(Keys.A);
+            DefaultTopDownKeys.Add(Keys.D);
+            DefaultTopDownKeys.Add(Keys.W);
+            DefaultTopDownKeys.Add(Keys.S);
+            DefaultTopDownKeys.Add(Keys.Space);
+            DefaultTopDownKeys.Add(Keys.Enter);
+            DefaultTopDownKeys.Add(Keys.LeftShift);
+            DefaultTopDownKeys.Add(Keys.RightShift);
+            DefaultTopDownKeys.Add(Keys.Left);
+            DefaultTopDownKeys.Add(Keys.Right);
+            DefaultTopDownKeys.Add(Keys.Up);
+            DefaultTopDownKeys.Add(Keys.Down);
+            TopDownInputs = DefaultTopDownKeys;
+        }
         public void UpdateTextBlock(string keyWord, Rectangle currBounds, int bossRooms = 0)
         {
             switch(keyWord)

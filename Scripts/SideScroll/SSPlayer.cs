@@ -1127,7 +1127,21 @@ namespace AUTO_Matic.SideScroll
                             foreach(SSEnemy enemy in enemies)
                             {
                                 if (playerRect.Top/64 == enemy.enemyRect.Y/64)
-                                    enemy.leftOnX.Add(playerRect.X);
+                                {
+                                    if (playerRect.Center.X < enemy.enemyRect.Center.X)
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.Right, playerRect.Y));
+                                    }
+                                    else if (playerRect.Center.X > enemy.enemyRect.Center.X)
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.X, playerRect.Y));
+                                    }
+                                    else
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.Center.X, playerRect.Y));
+                                    }
+                                }
+                                    //enemy.leftOn.Add(new Vector2(playerRect.X, playerRect.Y));
                             }
                             velocity.Y = -jumpForce;
 
@@ -1236,7 +1250,21 @@ namespace AUTO_Matic.SideScroll
                             foreach (SSEnemy enemy in enemies)
                             {
                                 if (playerRect.Top/64 == enemy.enemyRect.Y/64)
-                                    enemy.leftOnX.Add(playerRect.X);
+                                {
+                                    if (playerRect.Center.X < enemy.enemyRect.Center.X)
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.Right, playerRect.Y));
+                                    }
+                                    else if (playerRect.Center.X > enemy.enemyRect.Center.X)
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.X, playerRect.Y));
+                                    }
+                                    else
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.Center.X, playerRect.Y));
+                                    }
+                                }
+                                    //enemy.leftOn.Add(new Vector2(playerRect.X, playerRect.Y));
                             }
                             position.Y -= 1f;
 
@@ -1352,7 +1380,21 @@ namespace AUTO_Matic.SideScroll
                             foreach (SSEnemy enemy in enemies)
                             {
                                 if (playerRect.Top/64 == enemy.enemyRect.Y/64)
-                                    enemy.leftOnX.Add(playerRect.X);
+                                {
+                                    if (playerRect.Center.X < enemy.enemyRect.Center.X)
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.Right, playerRect.Y));
+                                    }
+                                    else if (playerRect.Center.X > enemy.enemyRect.Center.X)
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.X, playerRect.Y));
+                                    }
+                                    else
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.Center.X, playerRect.Y));
+                                    }
+                                }
+                                    //enemy.leftOn.Add(new Vector2(playerRect.X, playerRect.Y));
                             }
 
                             position.Y -= 1f;
@@ -1536,7 +1578,22 @@ namespace AUTO_Matic.SideScroll
                             foreach (SSEnemy enemy in enemies)
                             {
                                 if(playerRect.Top/64 == enemy.enemyRect.Y/64)
-                                    enemy.leftOnX.Add(playerRect.X);
+                                {
+                                    if(playerRect.Center.X < enemy.enemyRect.Center.X)
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.Right, playerRect.Y));
+                                    }
+                                    else if(playerRect.Center.X > enemy.enemyRect.Center.X)
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.X, playerRect.Y));
+                                    }
+                                    else
+                                    {
+                                        enemy.leftOn.Add(new Vector2(playerRect.Center.X, playerRect.Y));
+                                    }
+                                   
+                                }
+                                   
                             }
 
                             position.Y -= 1f;

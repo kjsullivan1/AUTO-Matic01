@@ -283,8 +283,16 @@ namespace AUTO_Matic
                 
             }
 
+            if (File.Exists(SideInputPath) == false)
+            {
+                UIManager.SetToDefaultKeyBinds();
+                SaveKeyBinds(UIManager.SideScrollInputs, UIManager.TopDownInputs);
+            }
 
             UIManager.CreateKeyBindsUI(this);
+
+         
+                     
 
             prevGamePad = GamePad.GetState(0);
 
