@@ -28,6 +28,7 @@ namespace AUTO_Matic
         SpriteBatch spriteBatch;
 
         Camera camera;
+        ControllerReticle controllerReticle;
         bool startGame = false;
         UIManager UIManager = new UIManager();
         List<HealthDrop> healthDrops = new List<HealthDrop>();
@@ -208,6 +209,7 @@ namespace AUTO_Matic
             //graphics.HardwareModeSwitch = false;
             //graphics.IsFullScreen = true;
             graphics.ApplyChanges();
+          
             //maxShootRate = shootRate;
             camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth/2, graphics.PreferredBackBufferHeight/2));
             camera.Zoom = 1f;
@@ -225,6 +227,9 @@ namespace AUTO_Matic
         /// </summary>
         protected override void LoadContent()
         {
+            controllerReticle = new ControllerReticle(new Rectangle(graphics.PreferredBackBufferWidth / 2, graphics.PreferredBackBufferHeight / 2, 48, 48),
+                Content.Load<Texture2D>("Textures/MouseReticle"));
+
             dataPath = Content.RootDirectory + "/SaveData/Save";
             SideInputPath = Content.RootDirectory + "/SaveData/SideInputSave";
             TopDownInputPath = Content.RootDirectory + "/SaveData/TopDownInputSave";
@@ -2550,7 +2555,7 @@ namespace AUTO_Matic
                     spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
 
                     UIManager.Draw(spriteBatch);
-
+                    controllerReticle.Draw(spriteBatch);
                     spriteBatch.End();
                     break;
                 case Scenes.InGame:
@@ -2938,31 +2943,31 @@ namespace AUTO_Matic
                     UIManager.UpdateButton("MainMenu", crawlSpeed, this);
                   
         
-                    if (currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released || 
-                        currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && MenuButtonIndex == 0)
-                    {
-                        MenuState = MenuStates.StartGame;
-                        MenuButtonIndex = 0;
-                    }
-                    if (prevButtons.B == ButtonState.Pressed && currButtons.B == ButtonState.Released)
-                    {
-                        MenuState = MenuStates.Settings;
-                    }
+                    //if (currButtons.Start == ButtonState.Pressed && prevButtons.Start == ButtonState.Released || 
+                    //    currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && MenuButtonIndex == 0)
+                    //{
+                    //    MenuState = MenuStates.StartGame;
+                    //    MenuButtonIndex = 0;
+                    //}
+                    //if (prevButtons.B == ButtonState.Pressed && currButtons.B == ButtonState.Released)
+                    //{
+                    //    MenuState = MenuStates.Settings;
+                    //}
                     
-                    if(currButtons.Back == ButtonState.Pressed && prevButtons.Back == ButtonState.Released ||
-                        currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && MenuButtonIndex == 1)
-                    {
-                        Exit();
-                    }
+                    //if(currButtons.Back == ButtonState.Pressed && prevButtons.Back == ButtonState.Released ||
+                    //    currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && MenuButtonIndex == 1)
+                    //{
+                    //    Exit();
+                    //}
 
-                    if(GamePad.GetState(0).DPad.Down == ButtonState.Pressed)
-                    {
-                        MenuButtonIndex = 1;
-                    }
-                    if(GamePad.GetState(0).DPad.Up == ButtonState.Pressed)
-                    {
-                        MenuButtonIndex = 0;
-                    }
+                    //if(GamePad.GetState(0).DPad.Down == ButtonState.Pressed)
+                    //{
+                    //    MenuButtonIndex = 1;
+                    //}
+                    //if(GamePad.GetState(0).DPad.Up == ButtonState.Pressed)
+                    //{
+                    //    MenuButtonIndex = 0;
+                    //}
 
                     break;
                 case MenuStates.StartGame:
@@ -3086,16 +3091,101 @@ namespace AUTO_Matic
             else
                 mousePos = Vector2.Zero;
 
-            if (kb.IsKeyDown(Keys.Right))
+
+            //float reticleSpeed = 3f;
+
+            GamePadState controller = GamePad.GetState(0);
+            if(controller.ThumbSticks.Left != Vector2.Zero)
             {
-                camera.Update(new Vector2(camera.X + crawlSpeed, camera.Y));
+                controllerReticle.visible = true;
             }
 
-            if (kb.IsKeyDown(Keys.Left))
+            if(controller.ThumbSticks.Left.X < 0 && controller.ThumbSticks.Left.X > -.4f)
             {
-                camera.Update(new Vector2(camera.X - crawlSpeed, camera.Y));
+                controllerReticle.pos.X -= (int)controllerReticle.moveSpeed / 2;
+            }
+            else if(controller.ThumbSticks.Left.X < 0)
+            {
+                controllerReticle.pos.X -= (int)controllerReticle.moveSpeed;
             }
 
+            if (controller.ThumbSticks.Left.X > 0 && controller.ThumbSticks.Left.X < .4f)
+            {
+                controllerReticle.pos.X += (int)controllerReticle.moveSpeed / 2;
+            }
+            else if (controller.ThumbSticks.Left.X > 0)
+            {
+                controllerReticle.pos.X += (int)controllerReticle.moveSpeed;
+            }
+
+            if(controller.ThumbSticks.Left.Y < 0 && controller.ThumbSticks.Left.Y > -.4f)
+            {
+                controllerReticle.pos.Y += (int)controllerReticle.moveSpeed / 2;
+            }
+            else if(controller.ThumbSticks.Left.Y < 0)
+            {
+                controllerReticle.pos.Y += (int)controllerReticle.moveSpeed;
+            }
+
+            if(controller.ThumbSticks.Left.Y > 0 && controller.ThumbSticks.Left.Y < .4f)
+            {
+                controllerReticle.pos.Y -= (int)controllerReticle.moveSpeed / 2;
+            }
+            else if(controller.ThumbSticks.Left.Y > 0)
+            {
+                controllerReticle.pos.Y -= (int)controllerReticle.moveSpeed;
+            }
+
+
+
+            if(controller.Buttons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released)
+            {
+                foreach (UIWidget widget in UIManager.uiElements.Values)
+                {
+                    if (widget is UIButton)
+                    {
+
+                        ((UIButton)widget).HitTest(
+                    new Point(controllerReticle.rect.Center.X, controllerReticle.rect.Center.Y));
+
+
+                    }
+                }
+            }
+            //if (kb.IsKeyDown(Keys.Right))
+            //{
+            //    camera.Update(new Vector2(camera.X + crawlSpeed, camera.Y));
+            //}
+
+            //if (kb.IsKeyDown(Keys.Left))
+            //{
+            //    camera.Update(new Vector2(camera.X - crawlSpeed, camera.Y));
+            //}
+            controllerReticle.Update();
+
+            if(controllerReticle.rect.Right > graphics.PreferredBackBufferWidth)
+            {
+                controllerReticle.rect.X = graphics.PreferredBackBufferWidth - controllerReticle.rect.Width;
+                controllerReticle.pos.X = controllerReticle.rect.X;
+            }
+            else if(controllerReticle.rect.X < 0)
+            {
+                controllerReticle.rect.X = 0;
+                controllerReticle.pos.X = 0;
+            }
+
+            if(controllerReticle.rect.Y < 0)
+            {
+                controllerReticle.rect.Y = 0;
+                controllerReticle.pos.Y = 0;
+            }
+            else if(controllerReticle.rect.Bottom > graphics.PreferredBackBufferHeight)
+            {
+                controllerReticle.rect.Y = graphics.PreferredBackBufferHeight - controllerReticle.rect.Height;
+                controllerReticle.pos.Y = controllerReticle.rect.Y;
+            }
+           
+            prevButtons = controller.Buttons;
             prevMs = ms;
         }
 
@@ -3325,7 +3415,19 @@ namespace AUTO_Matic
                     UIManager.TopDownInputs[i] = (Keys)Enum.Parse(typeof(Keys), topInputData[i]);
                 }
 
-                soundManager.ChangeVolume(float.Parse(gameData[12]), float.Parse(gameData[14]), float.Parse(gameData[13]));
+                if (!isLoadedGame)
+                {
+                    soundManager.ChangeVolume(float.Parse(gameData[12]), float.Parse(gameData[14]), float.Parse(gameData[13]));
+                    UIManager.MasterVolume = float.Parse(gameData[12]);
+                    UIManager.EffectVolume = float.Parse(gameData[14]);
+                    UIManager.MusicVolume = float.Parse(gameData[13]);
+                }
+                else if (isLoadedGame)
+                    soundManager.ChangeVolume(UIManager.MasterVolume, UIManager.EffectVolume, UIManager.MusicVolume);
+
+                UIHelper.SetElementText(UIManager.uiElements["VolumeSettingsMasterNum"], ((int)(UIManager.MasterVolume * 100)).ToString());
+                UIHelper.SetElementText(UIManager.uiElements["VolumeSettingsEffectsNum"], ((int)(UIManager.EffectVolume * 100)).ToString());
+                UIHelper.SetElementText(UIManager.uiElements["VolumeSettingsMusicNum"], ((int)(UIManager.MusicVolume * 100)).ToString());
                 //ssPlayer.Load(Content, Window.ClientBounds, friction, new Vector2(int.Parse(gameData[1]), int.Parse(gameData[2])), UIManager);
                
 
@@ -3390,6 +3492,34 @@ namespace AUTO_Matic
                     LoadFinalBoss();
                 }
             }
+        }
+    }
+
+    class ControllerReticle
+    {
+        public Rectangle rect;
+        public float moveSpeed = 5f;
+        public Texture2D texture;
+        public bool visible = false;
+        public Point pos;
+
+        public ControllerReticle(Rectangle rect, Texture2D texture)
+        {
+            this.rect = rect;
+            this.texture = texture;
+            pos = new Point(rect.X, rect.Y);
+        }
+
+        public void Update()
+        {
+            if(visible)
+                rect = new Rectangle(pos.X, pos.Y, rect.Width, rect.Height);
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            if(visible)
+                spriteBatch.Draw(texture, rect, Color.White);
         }
     }
 }

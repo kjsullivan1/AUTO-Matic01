@@ -1833,6 +1833,10 @@ namespace AUTO_Matic.SideScroll
                                 }
                                 break;
                             case WeaponType.Bomb:
+
+                                sounds.AddSound("SoundEffects/ThrowBomb", false);
+                                sounds.PlaySound();
+
                                 bulletSpeed = 3.5f;
                                 bombs.Add(new Bomb(new Circle(new Vector2(position.X + playerRect.Width,
                                   (position.Y + playerRect.Height /2f)), 9), bulletSpeed, -bulletSpeed * 5f, content));

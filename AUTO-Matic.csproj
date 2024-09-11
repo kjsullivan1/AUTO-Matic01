@@ -255,7 +255,9 @@
     <Content Include="Content\Textures\DashIcons\DashIcon3.png" />
     <Content Include="Content\Textures\DashIcons\DashIcon4.png" />
     <Content Include="Content\Textures\Health.png" />
+    <Content Include="Content\Textures\MouseReticle.png" />
     <Content Include="Content\Textures\Red.png" />
+    <Content Include="Content\Textures\Reticle.png" />
     <Content Include="Content\Textures\Textbox.png" />
     <Content Include="Content\Textures\Title.png" />
     <Content Include="Content\Textures\TitleCrawlBG.png" />
