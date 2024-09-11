@@ -154,6 +154,24 @@ namespace AUTO_Matic.Scripts.Effects
 
             //    }
             //}
+
+            for(int i = 0; i < MasterList.Count; i++)
+            {
+                for(int j = MasterList[i].Count - 1; j >= 0; j--)
+                {
+                    if(MasterList[i][j].IsLooped)
+                    {
+                        
+                    }
+                    else
+                    {
+                        if(MasterList[i][j].State == SoundState.Stopped)
+                        {
+                            MasterList[i].RemoveAt(j);
+                        }
+                    }
+                }
+            }
         }
     }
 }
