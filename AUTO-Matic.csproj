@@ -111,7 +111,16 @@
     <Content Include="Content\Audio\Level1Side.mp3" />
     <Content Include="Content\Audio\Level2Side.mp3" />
     <Content Include="Content\Audio\Level3Side.mp3" />
-    <Content Include="Content\Audio\Shoot.mp3" />
+    <Content Include="Content\Audio\SoundEffects\Shoot.mp3" />
+    <Content Include="Content\Audio\SoundEffects\AirDashSound.mp3" />
+    <Content Include="Content\Audio\SoundEffects\Enemy Dies_01.mp3" />
+    <Content Include="Content\Audio\SoundEffects\Enemy Hit_01.mp3" />
+    <Content Include="Content\Audio\SoundEffects\explosion.mp3" />
+    <Content Include="Content\Audio\SoundEffects\HealthPickUp_01.mp3" />
+    <Content Include="Content\Audio\SoundEffects\jump.mp3" />
+    <Content Include="Content\Audio\SoundEffects\PlayerDeath.mp3" />
+    <Content Include="Content\Audio\SoundEffects\SelectNoise_01.mp3" />
+    <Content Include="Content\Audio\SoundEffects\ThrowBomb.mp3" />
     <Content Include="Content\SaveData\Test.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

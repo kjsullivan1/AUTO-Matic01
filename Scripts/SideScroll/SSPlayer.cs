@@ -496,7 +496,9 @@ namespace AUTO_Matic.SideScroll
             bombs.Clear();
             particles.Initialize(content.Load<Texture2D>("Textures/white"));
             KeyBindData = uiManager;
-            sounds = new SoundManager("Shoot", Content, false);
+            sounds = new SoundManager("SoundEffects/Shoot", Content, false, KeyBindData.MasterVolume, KeyBindData.EffectVolume, KeyBindData.MusicVolume);
+
+            sounds.ChangeVolume(uiManager.MasterVolume, uiManager.EffectVolume, uiManager.MusicVolume);
         }
 
         public void Update(GameTime gameTime, Vector2 gravity, List<SSEnemy> enemies,Game1 game,bool fade = false)
@@ -838,8 +840,19 @@ namespace AUTO_Matic.SideScroll
                             if (bullets[i].rect.Intersects(enemy.enemyRect))
                             {
                                 if (!enemy.damaged)
+                                {
                                     enemy.healthBar.RecieveDamage(bulletDmg);
-                                enemy.Health -= bulletDmg;
+                                    enemy.Health -= bulletDmg;
+                                    
+                                    if(enemy.dead == false)
+                                    {
+                                        sounds.AddSound("SoundEffects/Enemy Hit_01", false);
+                                        sounds.PlaySound();
+                                    }
+                                 
+                                }
+                                   
+                               
                                 
                                 ApplyKnockback(enemy);
 
@@ -865,6 +878,8 @@ namespace AUTO_Matic.SideScroll
                     {
                         explosions.Add(new Explosion(bombs[i].circle, 2, (int)(bombs[i].circle.Bounds.Width * 2.5f)));
 
+                 
+
                         int radiusDif = explosions[explosions.Count - 1].maxSize - explosions[explosions.Count - 1].rect.Radius;
 
 
@@ -872,6 +887,9 @@ namespace AUTO_Matic.SideScroll
                                new Circle(new Vector2(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif,
                                explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif), explosions[explosions.Count - 1].maxSize / 2),
                                20);
+
+                        sounds.AddSound("SoundEffects/explosion", false);
+                        sounds.PlaySound();
 
                         bombs.RemoveAt(i);
                     }
@@ -886,8 +904,18 @@ namespace AUTO_Matic.SideScroll
                         if (explosions[i].rect.Intersects(enemies[j].enemyRect))
                         {
                             if (enemies[j].damaged == false)
+                            {
                                 enemies[j].healthBar.RecieveDamage(bulletDmg);
-                            enemies[j].Health -= bulletDmg;
+                                enemies[j].Health -= bulletDmg;
+                                if(!enemies[j].dead)
+                                {
+                                    sounds.AddSound("SoundEffects/Enemy Hit_01", false);
+                                    sounds.PlaySound();
+                                }
+
+                            }
+                               
+                           
                  
 
                             ApplyKnockback(enemies[j]);
@@ -1086,7 +1114,8 @@ namespace AUTO_Matic.SideScroll
                         if(kb.IsKeyDown(KeyBindData.SideScrollInputs[4]) && canDash || currControllerBtn.B == ButtonState.Pressed && canDash || currControllerBtn.LeftShoulder == ButtonState.Pressed && canDash)
                         {
                             playerState = PlayerStates.Dashing;
-
+                            sounds.AddSound("SoundEffects/AirDashSound", false);
+                            sounds.PlaySound();
                             prevKb = kb;
                             if (right)
                             {
@@ -1110,7 +1139,8 @@ namespace AUTO_Matic.SideScroll
                         if(kb.IsKeyDown(KeyBindData.SideScrollInputs[5]) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
-
+                            sounds.AddSound("SoundEffects/jump", false);
+                            sounds.PlaySound();
                             if (animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Jump;
@@ -1222,6 +1252,9 @@ namespace AUTO_Matic.SideScroll
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
 
+                            sounds.AddSound("SoundEffects/AirDashSound", false);
+                            sounds.PlaySound();
+
                             velocity = new Vector2(DashForce.X, -DashForce.Y);
                             position.Y -= 1f;
 
@@ -1231,7 +1264,8 @@ namespace AUTO_Matic.SideScroll
                         if (kb.IsKeyDown(KeyBindData.SideScrollInputs[5]) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
-
+                            sounds.AddSound("SoundEffects/jump", false);
+                            sounds.PlaySound();
                             if (animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Jump;
@@ -1351,6 +1385,9 @@ namespace AUTO_Matic.SideScroll
                             playerState = PlayerStates.Dashing;
                             prevKb = kb;
 
+                            sounds.AddSound("SoundEffects/AirDashSound", false);
+                            sounds.PlaySound();
+
                             velocity = new Vector2(-(DashForce.X), -DashForce.Y);
 
                             position.Y -= 1f;
@@ -1361,7 +1398,8 @@ namespace AUTO_Matic.SideScroll
                         if (kb.IsKeyDown(KeyBindData.SideScrollInputs[5]) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
-
+                            sounds.AddSound("SoundEffects/jump", false);
+                            sounds.PlaySound();
                             if (animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Jump;
@@ -1536,6 +1574,10 @@ namespace AUTO_Matic.SideScroll
                         {
 
                             playerState = PlayerStates.Dashing;
+
+                            sounds.AddSound("SoundEffects/AirDashSound", false);
+                            sounds.PlaySound();
+
                             prevKb = kb;
                             if (animManager.isRight)
                             {
@@ -1559,7 +1601,8 @@ namespace AUTO_Matic.SideScroll
                         if (kb.IsKeyDown(KeyBindData.SideScrollInputs[5]) && canJump && !isFalling || currControllerBtn.A == ButtonState.Pressed && canJump && !isFalling)
                         {
                             playerState = PlayerStates.Jumping;
-
+                            sounds.AddSound("SoundEffects/jump", false);
+                            sounds.PlaySound();
                             if (animState != AnimationStates.Jump)
                             {
                                 animState = AnimationStates.Jump;
@@ -1751,14 +1794,14 @@ namespace AUTO_Matic.SideScroll
                                     position.Y + playerRect.Height / 1.5f), bulletSpeed, 
                                     new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
 
-                                sounds.AddSound("Shoot", false);
+                                sounds.AddSound("SoundEffects/Shoot", false);
                                 sounds.PlaySound();
                                 break;
 
                             case WeaponType.Shotgun:
                                 bulletTravelDist = 64 * 1.5f;
                                 bulletSpeed = 3.5f * 2;
-                                sounds.AddSound("Shoot", false, -1);
+                                sounds.AddSound("SoundEffects/Shoot", false, -1);
                                 sounds.PlaySound();
                                 //Top 
                                 bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
@@ -1785,7 +1828,7 @@ namespace AUTO_Matic.SideScroll
                                     bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                   (position.Y + playerRect.Height / 1.5f)), bulletSpeed,
                                   new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
-                                    sounds.AddSound("Shoot", false, -.5f);
+                                    sounds.AddSound("SoundEffects/Shoot", false, -.5f);
                                     sounds.PlaySound();
                                 }
                                 break;
@@ -1802,7 +1845,7 @@ namespace AUTO_Matic.SideScroll
                                     bullets.Add(new Bullet(new Vector2(position.X + playerRect.Width,
                                   (position.Y + playerRect.Height / 1.5f)), bulletSpeed,
                                   new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
-                                    sounds.AddSound("Shoot", false, .5f);
+                                    sounds.AddSound("SoundEffects/Shoot", false, .5f);
                                     sounds.PlaySound();
                                 }
                                 break;
@@ -1822,14 +1865,14 @@ namespace AUTO_Matic.SideScroll
                                 bullets.Add(new Bullet(new Vector2(position.X/* - (18 / 2)*/, 
                                     position.Y + playerRect.Height / 1.5f), -bulletSpeed, 
                                     new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
-                                sounds.AddSound("Shoot", false);
+                                sounds.AddSound("SoundEffects/Shoot", false);
                                 sounds.PlaySound();
                                 break;
                             case WeaponType.Shotgun:
                                 bulletTravelDist = 64 * 1.5f;
                                 bulletSpeed = 3.5f * 2;
 
-                                sounds.AddSound("Shoot", false, -.1f);
+                                sounds.AddSound("SoundEffects/Shoot", false, -1f);
                                 sounds.PlaySound();
 
                                 //Top 
@@ -1841,13 +1884,13 @@ namespace AUTO_Matic.SideScroll
                                 bullets.Add(new Bullet(new Vector2(position.X /*- (18/2)*/,
                                    position.Y + playerRect.Height / 1.5f), -bulletSpeed,
                                    new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
-                                //sounds.AddSound("Shoot", false, -1);
+                                //sounds.AddSound("SoundEffects/Shoot", false, -1);
                                 //sounds.PlaySound();
                                 //Bottom
                                 bullets.Add(new Bullet(new Vector2(position.X /*- (18/2)*/,
                                    position.Y + playerRect.Height / 1.5f), -bulletSpeed,
                                    new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 3, isPlayer: true));
-                                //sounds.AddSound("Shoot", false, -1);
+                                //sounds.AddSound("SoundEffects/Shoot", false, -1);
                                 //sounds.PlaySound();
                                 break;
                             case WeaponType.Burst:
@@ -1858,11 +1901,15 @@ namespace AUTO_Matic.SideScroll
                                     bullets.Add(new Bullet(new Vector2(position.X /*- (18 / 2)*/,
                                   (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
                                   new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
-                                    sounds.AddSound("Shoot", false, -.5f);
+                                    sounds.AddSound("SoundEffects/Shoot", false, -.5f);
                                     sounds.PlaySound();
                                 }
                                 break;
                             case WeaponType.Bomb:
+
+                                sounds.AddSound("SoundEffects/ThrowBomb", false);
+                                sounds.PlaySound();
+
                                 bulletSpeed = 3.5f;
                                 bombs.Add(new Bomb(new Circle(new Vector2(position.X/* - (18 / 2)*/,
                                     (position.Y + playerRect.Height / 2f)), 9), -bulletSpeed, -bulletSpeed * 5f, content));
@@ -1875,7 +1922,7 @@ namespace AUTO_Matic.SideScroll
                                     bullets.Add(new Bullet(new Vector2(position.X /*- (18 / 2)*/,
                                   (position.Y + playerRect.Height / 1.5f)), -bulletSpeed,
                                   new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, isPlayer: true));
-                                    sounds.AddSound("Shoot", false, .5f);
+                                    sounds.AddSound("SoundEffects/Shoot", false, .5f);
                                     sounds.PlaySound();
                                 }
                                 break;

@@ -49,11 +49,65 @@
 /processorParam:Quality=Best
 /build:Audio/Level3Side.mp3
 
-#begin Audio/Shoot.mp3
+#begin Audio/SoundEffects/AirDashSound.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:Audio/Shoot.mp3
+/build:Audio/SoundEffects/AirDashSound.mp3
+
+#begin Audio/SoundEffects/Enemy Dies_01.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/SoundEffects/Enemy Dies_01.mp3
+
+#begin Audio/SoundEffects/Enemy Hit_01.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/SoundEffects/Enemy Hit_01.mp3
+
+#begin Audio/SoundEffects/explosion.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/SoundEffects/explosion.mp3
+
+#begin Audio/SoundEffects/HealthPickUp_01.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/SoundEffects/HealthPickUp_01.mp3
+
+#begin Audio/SoundEffects/jump.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/SoundEffects/jump.mp3
+
+#begin Audio/SoundEffects/PlayerDeath.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/SoundEffects/PlayerDeath.mp3
+
+#begin Audio/SoundEffects/SelectNoise_01.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/SoundEffects/SelectNoise_01.mp3
+
+#begin Audio/SoundEffects/Shoot.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/SoundEffects/Shoot.mp3
+
+#begin Audio/SoundEffects/ThrowBomb.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/SoundEffects/ThrowBomb.mp3
 
 #begin Effects/Particles.fx
 /importer:EffectImporter

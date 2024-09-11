@@ -33,6 +33,8 @@ namespace AUTO_Matic
         public static Rectangle Bounds;
         public static int DungeonLevels;
 
+
+
         public static UIButton CreateButton(string id, string text, int x, int y)//ButtonTexture Width and Height need to change
         {
             if(id.Contains("KeyBind") || id.Contains("SwapKeys"))
@@ -53,6 +55,29 @@ namespace AUTO_Matic
                 UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(90, 40), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
                 a.Disabled = false;
                 return a;
+            }
+            else if(id.Contains("SwapToVolume"))
+            {
+                UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(45, 30), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
+                a.Disabled = false;
+                return a;
+            }
+            else if(id.Contains("VolumeSettings"))
+            {
+                if(id.Contains("Return"))
+                {
+                    UIButton f = new UIButton(id, new Vector2(x, y), new Vector2(50, 50),
+                     ButtonFont, "", Color.White, ReturnBtn);
+                    f.Disabled = false;
+                    return f;
+                }
+                else
+                {
+                    UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(45, 30), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
+                    a.Disabled = false;
+                    return a;
+                }
+                
             }
             else
             {
@@ -101,6 +126,31 @@ namespace AUTO_Matic
             {
                 UITextBlock b = new UITextBlock(id, new Vector2(x, y), new Vector2(3,5), TutorialFont, text, Color.Black, TutorialTexture);
                 return b;
+            }
+            else if(id.Contains("BindTitle"))
+            {
+           
+                UITextBlock b = new UITextBlock(id, new Vector2(x, y),new Vector2(0,5), TutorialFont, text, Color.Black, TutorialTexture);
+                return b;
+            }
+            else if(id.Contains("VolumeSettings"))
+            {
+                if(id.Contains("Title"))
+                {
+                    UITextBlock b = new UITextBlock(id, new Vector2(x, y), new Vector2(35, 5), TutorialFont, text, Color.Black, TutorialTexture);
+                    return b;
+                }
+                else if(id.Contains("Num"))
+                {
+                    UITextBlock b = new UITextBlock(id, new Vector2(x, y), new Vector2(7,5), TutorialFont, text, Color.Black, TutorialTexture);
+                    return b;
+                }
+                else
+                {
+                    UITextBlock b = new UITextBlock(id, new Vector2(x, y), new Vector2(25, 5), TutorialFont, text, Color.Black, TutorialTexture);
+                    return b;
+                }
+               
             }
             else
             {

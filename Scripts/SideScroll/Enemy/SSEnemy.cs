@@ -1490,7 +1490,8 @@ namespace AUTO_Matic.SideScroll
                             animManager.isLeft = true;
                             animManager.isRight = false;
                         }
-                       
+                        prevState = EnemyStates.Attacking;
+                        enemyState = EnemyStates.GoTo;
                     }
                     else
                     {

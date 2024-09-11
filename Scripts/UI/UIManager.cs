@@ -41,7 +41,11 @@ namespace AUTO_Matic
         public List<Keys> DefaultSideScrolKeys = new List<Keys>();
         public List<Keys> DefaultTopDownKeys = new List<Keys>();
 
+        public float MasterVolume = 1;
+        public float MusicVolume = 1;
+        public float EffectVolume = 1;
 
+        bool isVolume = false;
         public void UIButton_Clicked(object sender, UIButtonArgs e)
         {
             string buttonName = e.ID;
@@ -73,6 +77,78 @@ namespace AUTO_Matic
 
                
             }
+            else if(buttonName.Contains("VolumeSettings"))
+            {
+                float volumeModifier = .02f;
+                if(buttonName.Contains("Return") && isVolume)
+                {
+
+                    SetSideKeyBinds(isSideScrollKeys);
+                    SetTopDownKeyBinds(isTopDownKeys);
+                    uiElements["WeaponWheelTitle"].Visible = true;
+                    uiElements["SwapKeys"].Visible = true;
+                    uiElements["SwapKeysDefault"].Visible = true;
+                    uiElements["SwapToVolume"].Visible = true;
+                    uiElements["SettingsReturnBtn"].Visible = true;
+                    isVolume = false;
+
+                    SetVolumeSettings(isVolume);
+
+                }
+                else if(buttonName.Contains("Master"))
+                {
+                    if(buttonName.Contains("+"))
+                    {
+                        MasterVolume += volumeModifier;
+                        if (MasterVolume > 1)
+                            MasterVolume = 1;
+                    }
+                    else if(buttonName.Contains("-"))
+                    {
+                        MasterVolume -= volumeModifier;
+                        if (MasterVolume < 0)
+                            MasterVolume = 0;
+                    }
+
+                    UIHelper.SetElementText(uiElements["VolumeSettingsMasterNum"], ((int)(MasterVolume * 100)).ToString());
+                }
+                else if(buttonName.Contains("Effects"))
+                {
+                    if(buttonName.Contains("+"))
+                    {
+                        EffectVolume += volumeModifier;
+                        if (EffectVolume > 1)
+                            EffectVolume = 1;
+                    }
+                    else if(buttonName.Contains("-"))
+                    {
+                        EffectVolume -= volumeModifier;
+                        if (EffectVolume < 0)
+                            EffectVolume = 0;
+                    }
+
+                    UIHelper.SetElementText(uiElements["VolumeSettingsEffectsNum"], ((int)(EffectVolume * 100)).ToString());
+                }
+                else if(buttonName.Contains("Music"))
+                {
+                    if (buttonName.Contains("+"))
+                    {
+                        MusicVolume += volumeModifier;
+                        if (MusicVolume > 1)
+                            MusicVolume = 1;
+                    }
+                    else if (buttonName.Contains("-"))
+                    {
+                        MusicVolume -= volumeModifier;
+                        if (MusicVolume < 0)
+                            MusicVolume = 0;
+                    }
+
+                    UIHelper.SetElementText(uiElements["VolumeSettingsMusicNum"], ((int)(MusicVolume * 100)).ToString());
+                }
+
+                
+            }
             else
             {
               
@@ -98,8 +174,11 @@ namespace AUTO_Matic
                     case "MainMenuSetting":
                         game.ChangeMenuState(Game1.MenuStates.Settings);
                         UIHelper.SetElementVisibility("Settings", true, uiElements);
+                        //SetVolumeSettings(isVolume);
                         break;
                     case "SettingsReturnBtn":
+
+                     
                         game.ChangeMenuState(Game1.MenuStates.MainMenu);
                         transition = true;
                         game.SaveKeyBinds(SideScrollInputs, TopDownInputs);
@@ -224,6 +303,20 @@ namespace AUTO_Matic
                             }
                         }
                         break;
+                    case "SwapToVolume":
+                        SetSideKeyBinds(false);
+                        SetTopDownKeyBinds(false);
+                        uiElements["WeaponWheelTitle"].Visible = false;
+                        uiElements["SwapKeys"].Visible = false;
+                        uiElements["SwapKeysDefault"].Visible = false;
+                        uiElements["SwapToVolume"].Visible = false;
+                        uiElements["SettingsReturnBtn"].Visible = false;
+                        isVolume = true;
+
+                        SetVolumeSettings(isVolume);
+
+                        break;
+                  
 
                 }
             }
@@ -451,6 +544,8 @@ namespace AUTO_Matic
                             uiElements["WeaponWheelTitle"].Visible = false;
                             uiElements["SwapKeys"].Visible = false;
                             uiElements["SwapKeysDefault"].Visible = false;
+                            uiElements["SwapToVolume"].Visible = false;
+                           
 
                         }
                             
@@ -497,11 +592,13 @@ namespace AUTO_Matic
 
 
                     }
+                   
                     break;
                 case "Settings":
                     //Move main menu elements to the left
                     //bool createKeyBinds = true;
-                    if(UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Right > -100)
+                   // SetVolumeSettings(isVolume);
+                    if (UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Right > -100)
                     {
                         //Move all Main menu elements
 
@@ -574,12 +671,18 @@ namespace AUTO_Matic
                              (UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Height)));
 
                             //CreateKeyBindsUI(game);
-                            SetSideKeyBinds(true);
-                            uiElements["WeaponWheelTitle"].Visible = true;
-                            uiElements["SwapKeys"].Visible = true;
-                            uiElements["SwapKeysDefault"].Visible = true;
+                            if(uiElements.ContainsKey("SideBindTitle") && isSideScrollKeys && isTopDownKeys == false && isVolume == false)
+                            {
+                                SetSideKeyBinds(true);
+                                uiElements["WeaponWheelTitle"].Visible = true;
+                                uiElements["SwapKeys"].Visible = true;
+                                uiElements["SwapKeysDefault"].Visible = true;
+                                uiElements["SwapToVolume"].Visible = true;
+                               // SetVolumeSettings(isVolume);
+                            }
                             //CreateKeyBindsUI(game);
                         }
+                       
                     }
                     break;
             }
@@ -776,7 +879,7 @@ namespace AUTO_Matic
             }
         }
 
-        public void CreateKeyBindsUI(Game1 game)
+        public void CreateSettingsUI(Game1 game)
         {
             if(uiElements.ContainsKey("SideBindTitle") == false)
             {
@@ -857,14 +960,20 @@ namespace AUTO_Matic
                 int height = 25;
 
                 uiElements.Add("SwapKeys", UIHelper.CreateButton("SwapKeys", "Swap to Top/Side Key Binds",
-                    (int)((UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (dims.X)) - (213 / 2)), (int)(UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Bottom - 35)));
+                    (int)((UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (dims.X)) - (213 / 5)), (int)(UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Bottom - 42)));
                 UIHelper.SetRectangle(uiElements["SwapKeys"], 213, height);
 
                 uiElements.Add("SwapKeysDefault", UIHelper.CreateButton("SwapKeysDefault", "Set to Default Keys",
                     UIHelper.GetRectangle(uiElements["SwapKeys"]).X, UIHelper.GetRectangle(uiElements["SwapKeys"]).Y - (height + 2)));
                 UIHelper.SetRectangle(uiElements["SwapKeysDefault"], 213, height);
 
+                uiElements.Add("SwapToVolume", UIHelper.CreateButton("SwapToVolume", "Volume Settings",
+                    UIHelper.GetRectangle(uiElements["SwapKeys"]).X - 145, UIHelper.GetRectangle(uiElements["SwapKeysDefault"]).Center.Y));
+                UIHelper.SetRectangle(uiElements["SwapToVolume"], 140, height);
+
                 //uiElements["SwapKeys"].Visible = true;
+
+                CreateVolumeSettings();
 
                 CreateSideScrollKeyBinds(width, height);
 
@@ -882,6 +991,93 @@ namespace AUTO_Matic
 
                 this.game = game;
             }
+        }
+
+        public void SetVolumeSettings(bool visible)
+        {
+            foreach(UIWidget widget in uiElements.Values)
+            {
+                if (widget.ID.Contains("VolumeSettings"))
+                    widget.Visible = visible;
+            }
+        }
+
+        private void CreateVolumeSettings()
+        {
+            //Title
+            uiElements.Add("VolumeSettingsTitle", UIHelper.CreateTextblock("VolumeSettingsTitle", "Volume Settings", (int)(dims.X / 2 - (150 / 2)), (int)(60)));
+            UIHelper.SetElementBGRect(uiElements["VolumeSettingsTitle"], new Rectangle(uiElements["VolumeSettingsTitle"].Position.ToPoint(), new Point(150, 25)));
+            UIHelper.SetElementRect(uiElements["VolumeSettingsTitle"], new Rectangle(uiElements["VolumeSettingsTitle"].Position.ToPoint(), new Point(150, 25)));
+
+            //Master volume title
+            uiElements.Add("VolumeSettingsMaster", UIHelper.CreateTextblock("VolumeSettingsMaster", "Master Volume", (int)(dims.X / 3.25f), (int)(dims.Y / 3)));
+            UIHelper.SetElementBGRect(uiElements["VolumeSettingsMaster"], new Rectangle(uiElements["VolumeSettingsMaster"].Position.ToPoint(), new Point(125, 25)));
+            UIHelper.SetElementRect(uiElements["VolumeSettingsMaster"], new Rectangle(uiElements["VolumeSettingsMaster"].Position.ToPoint(), new Point(125, 25)));
+
+            //Music volume title
+            uiElements.Add("VolumeSettingsMusic", UIHelper.CreateTextblock("VolumeSettingsMusic", "Music Volume", UIHelper.GetElementBGRect(uiElements["VolumeSettingsMaster"]).X,
+                UIHelper.GetElementBGRect(uiElements["VolumeSettingsMaster"]).Bottom + 5));
+            UIHelper.SetElementBGRect(uiElements["VolumeSettingsMusic"], new Rectangle(uiElements["VolumeSettingsMusic"].Position.ToPoint(), new Point(125, 25)));
+            UIHelper.SetElementRect(uiElements["VolumeSettingsMusic"], new Rectangle(uiElements["VolumeSettingsMusic"].Position.ToPoint(), new Point(125, 25)));
+
+            //Effects volume title
+            uiElements.Add("VolumeSettingsEffects", UIHelper.CreateTextblock("VolumeSettingsEffects", "Effect Volume", UIHelper.GetElementBGRect(uiElements["VolumeSettingsMaster"]).X,
+                UIHelper.GetElementBGRect(uiElements["VolumeSettingsMusic"]).Bottom + 5));
+            UIHelper.SetElementBGRect(uiElements["VolumeSettingsEffects"], new Rectangle(uiElements["VolumeSettingsEffects"].Position.ToPoint(), new Point(125, 25)));
+            UIHelper.SetElementRect(uiElements["VolumeSettingsEffects"], new Rectangle(uiElements["VolumeSettingsEffects"].Position.ToPoint(), new Point(125, 25)));
+
+
+            //Master Volume adjustment buttons
+            uiElements.Add("VolumeSettingsMasterBtn-", UIHelper.CreateButton("VolumeSettingsMasterBtn-", "Minus", UIHelper.GetElementBGRect(uiElements["VolumeSettingsMaster"]).Right + 4,
+                UIHelper.GetElementBGRect(uiElements["VolumeSettingsMaster"]).Y));
+            UIHelper.SetRectangle(uiElements["VolumeSettingsMasterBtn-"], 55, 25);
+
+            uiElements.Add("VolumeSettingsMasterNum", UIHelper.CreateTextblock("VolumeSettingsMasterNum", (MasterVolume * 100).ToString(), 
+                UIHelper.GetRectangle(uiElements["VolumeSettingsMasterBtn-"]).Right + 10, UIHelper.GetRectangle(uiElements["VolumeSettingsMasterBtn-"]).Y));
+            UIHelper.SetElementBGRect(uiElements["VolumeSettingsMasterNum"], new Rectangle(uiElements["VolumeSettingsMasterNum"].Position.ToPoint(), new Point(30, 25)));
+            UIHelper.SetElementRect(uiElements["VolumeSettingsMasterNum"], new Rectangle(uiElements["VolumeSettingsMasterNum"].Position.ToPoint(), new Point(30, 25)));
+
+            uiElements.Add("VolumeSettingsMasterBtn+", UIHelper.CreateButton("VolumeSettingsMasterBtn+", "Add", UIHelper.GetElementBGRect(uiElements["VolumeSettingsMasterNum"]).Right + 4,
+         UIHelper.GetElementBGRect(uiElements["VolumeSettingsMasterNum"]).Y));
+            UIHelper.SetRectangle(uiElements["VolumeSettingsMasterBtn+"], 55, 25);
+
+
+            //Music volume adjustment buttons
+            uiElements.Add("VolumeSettingsMusicBtn-", UIHelper.CreateButton("VolumeSettingsMusicBtn-", "Minus", UIHelper.GetElementBGRect(uiElements["VolumeSettingsMusic"]).Right + 4,
+              UIHelper.GetElementBGRect(uiElements["VolumeSettingsMusic"]).Y));
+            UIHelper.SetRectangle(uiElements["VolumeSettingsMusicBtn-"], 55, 25);
+
+            uiElements.Add("VolumeSettingsMusicNum", UIHelper.CreateTextblock("VolumeSettingsMusicNum", (MusicVolume * 100).ToString(),
+                UIHelper.GetRectangle(uiElements["VolumeSettingsMasterBtn-"]).Right + 10, UIHelper.GetRectangle(uiElements["VolumeSettingsMusicBtn-"]).Y));
+            UIHelper.SetElementBGRect(uiElements["VolumeSettingsMusicNum"], new Rectangle(uiElements["VolumeSettingsMusicNum"].Position.ToPoint(), new Point(30, 25)));
+            UIHelper.SetElementRect(uiElements["VolumeSettingsMusicNum"], new Rectangle(uiElements["VolumeSettingsMusicNum"].Position.ToPoint(), new Point(30, 25)));
+
+            uiElements.Add("VolumeSettingsMusicBtn+", UIHelper.CreateButton("VolumeSettingsMusicBtn+", "Add", UIHelper.GetElementBGRect(uiElements["VolumeSettingsMusicNum"]).Right + 4,
+         UIHelper.GetElementBGRect(uiElements["VolumeSettingsMusicNum"]).Y));
+            UIHelper.SetRectangle(uiElements["VolumeSettingsMusicBtn+"], 55, 25);
+
+
+
+            //Effects volume adjustment buttons
+            uiElements.Add("VolumeSettingsEffectsBtn-", UIHelper.CreateButton("VolumeSettingsEffectsBtn-", "Minus", UIHelper.GetElementBGRect(uiElements["VolumeSettingsEffects"]).Right + 4,
+              UIHelper.GetElementBGRect(uiElements["VolumeSettingsEffects"]).Y));
+            UIHelper.SetRectangle(uiElements["VolumeSettingsEffectsBtn-"], 55, 25);
+
+            uiElements.Add("VolumeSettingsEffectsNum", UIHelper.CreateTextblock("VolumeSettingsEffectsNum", (EffectVolume * 100).ToString(),
+                UIHelper.GetRectangle(uiElements["VolumeSettingsEffectsBtn-"]).Right + 10, UIHelper.GetRectangle(uiElements["VolumeSettingsEffectsBtn-"]).Y));
+            UIHelper.SetElementBGRect(uiElements["VolumeSettingsEffectsNum"], new Rectangle(uiElements["VolumeSettingsEffectsNum"].Position.ToPoint(), new Point(30, 25)));
+            UIHelper.SetElementRect(uiElements["VolumeSettingsEffectsNum"], new Rectangle(uiElements["VolumeSettingsEffectsNum"].Position.ToPoint(), new Point(30, 25)));
+
+            uiElements.Add("VolumeSettingsEffectsBtn+", UIHelper.CreateButton("VolumeSettingsEffectsBtn+", "Add", UIHelper.GetElementBGRect(uiElements["VolumeSettingsEffectsNum"]).Right + 4,
+         UIHelper.GetElementBGRect(uiElements["VolumeSettingsEffectsNum"]).Y));
+            UIHelper.SetRectangle(uiElements["VolumeSettingsEffectsBtn+"], 55, 25);
+
+
+            //Return Btn
+            uiElements.Add("VolumeSettingsReturnBtn", UIHelper.CreateButton("VolumeSettingsReturnBtn", "", 582,
+                UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Y));
+            UIHelper.SetRectangle(uiElements["VolumeSettingsReturnBtn"], 50, 50);
+            SetVolumeSettings(false);
         }
 
         private void CreateTopDownKeyBinds(int width, int height)
@@ -1155,6 +1351,25 @@ namespace AUTO_Matic
         {
             if (uiElements.ContainsKey("PauseMainMenuBtn") && uiElements["PauseMainMenuBtn"].Visible && uiElements["PauseMenuQuit"].Visible == false)
                 uiElements["PauseMainMenuBtn"].Visible = false;
+            if (uiElements["VolumeSettingsTitle"].Visible && uiElements["SideBindTitle"].Visible == false && isVolume == false ||
+                uiElements["VolumeSettingsTitle"].Visible && uiElements["SideBindTitle"].Visible == true && isVolume == false)
+                SetVolumeSettings(false);
+            if (isVolume)
+            {
+                uiElements["SettingsReturnBtn"].Visible = false;
+                UIHelper.SetButtonState("SettingsReturnBtn", true, uiElements);
+                uiElements["VolumeSettingsReturnBtn"].Visible = true;
+                UIHelper.SetButtonState("VolumeSettingsReturnBtn", false, uiElements);
+
+            }
+            else
+            {
+                uiElements["VolumeSettingsReturnBtn"].Visible = false;
+                UIHelper.SetButtonState("SettingsReturnBtn", false, uiElements);
+                UIHelper.SetButtonState("VolumeSettingsReturnBtn", true, uiElements);
+            }
+               
+         
             foreach (UIWidget widget in uiElements.Values)
                 widget.Draw(spriteBatch);
         }

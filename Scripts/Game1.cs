@@ -273,7 +273,7 @@ namespace AUTO_Matic
 
             HealthDrop.texture = Content.Load<Texture2D>(@"Textures\Health");
             Tile.Content = Content;
-            soundManager = new SoundManager("Level0Side", Content, true);
+            soundManager = new SoundManager("Level0Side", Content, true, UIManager.MasterVolume, UIManager.EffectVolume, UIManager.MusicVolume);
             //ssPlayer.Load(Content, Window.ClientBounds, friction);
             if (currScene == Scenes.InGame)
             {
@@ -289,7 +289,7 @@ namespace AUTO_Matic
                 SaveKeyBinds(UIManager.SideScrollInputs, UIManager.TopDownInputs);
             }
 
-            UIManager.CreateKeyBindsUI(this);
+            UIManager.CreateSettingsUI(this);
 
          
                      
@@ -2138,6 +2138,9 @@ namespace AUTO_Matic
                         {
                             healthDrops.Add(new HealthDrop(new Rectangle(enemies[i].enemyRect.X, enemies[i].enemyRect.Y, healthDropDims.X, healthDropDims.X)));
                         }
+
+                        soundManager.AddSound("SoundEffects/Enemy Dies_01", false);
+                        soundManager.PlaySound();
                         enemies.RemoveAt(i);
                     }
                 }
@@ -3194,6 +3197,10 @@ namespace AUTO_Matic
             savedData.Add(levelCount.ToString());//9
             savedData.Add((ssCamera.ViewRect.Width / 2).ToString());//10
             savedData.Add(dungeonNum.ToString());//11
+
+            savedData.Add(UIManager.MasterVolume.ToString());//12
+            savedData.Add(UIManager.MusicVolume.ToString());//13
+            savedData.Add(UIManager.EffectVolume.ToString());//14
             //savedData.Add(fadePos.X.ToString());
             //savedData.Add(fadePos.Y.ToString());
             //savedData.Add(topDownView.X.ToString());
@@ -3233,30 +3240,39 @@ namespace AUTO_Matic
             }
 
             //Saving Side Key Binds
-            using (var sw = new StreamWriter(System.IO.File.Create(SideInputPath)))
+
+            try
             {
-                for (int i = 0; i < sideInputData.Count; i++)
+                using (var sw = new StreamWriter(System.IO.File.Create(SideInputPath)))
                 {
-                    sw.Write(sideInputData[i] + "\n");
+                    for (int i = 0; i < sideInputData.Count; i++)
+                    {
+                        sw.Write(sideInputData[i] + "\n");
+                    }
+
+                    sw.Flush();
+
+                    sw.Close();
                 }
 
-                sw.Flush();
-
-                sw.Close();
-            }
-
-            //Saving TopDown Key Binds
-            using (var sw = new StreamWriter(System.IO.File.Create(TopDownInputPath)))
-            {
-                for (int i = 0; i < topInputData.Count; i++)
+                //Saving TopDown Key Binds
+                using (var sw = new StreamWriter(System.IO.File.Create(TopDownInputPath)))
                 {
-                    sw.Write(topInputData[i] + "\n");
+                    for (int i = 0; i < topInputData.Count; i++)
+                    {
+                        sw.Write(topInputData[i] + "\n");
+                    }
+
+                    sw.Flush();
+
+                    sw.Close();
                 }
-
-                sw.Flush();
-
-                sw.Close();
             }
+            catch
+            { 
+                
+            }
+          
         }
 
         public List<Keys> GetSideScrollInputs()
@@ -3290,7 +3306,7 @@ namespace AUTO_Matic
             if(System.IO.File.Exists(dataPath))
             {
                 isLoadedGame = true;
-
+                
                 string[] gameData = File.ReadAllLines(dataPath); //Data File: CurrGameState , ssPlayerX, ssPlayerY, killedBosses, Camera XYWH |||| Input Files: SideInputs, TopInputs
                 string[] sideInputData = File.ReadAllLines(SideInputPath);
                 string[] topInputData = File.ReadAllLines(TopDownInputPath);
@@ -3309,6 +3325,7 @@ namespace AUTO_Matic
                     UIManager.TopDownInputs[i] = (Keys)Enum.Parse(typeof(Keys), topInputData[i]);
                 }
 
+                soundManager.ChangeVolume(float.Parse(gameData[12]), float.Parse(gameData[14]), float.Parse(gameData[13]));
                 //ssPlayer.Load(Content, Window.ClientBounds, friction, new Vector2(int.Parse(gameData[1]), int.Parse(gameData[2])), UIManager);
                
 
