@@ -29,6 +29,20 @@ namespace AUTO_Matic
         Vector2 startPos;
         float travelDist;
         public bool delete = false;
+        public enum BulletTypes { Player, Boss, Bomb, Bullet}
+        BulletTypes bulletType = BulletTypes.Player;
+        public BulletTypes BulletType
+        {
+            set
+            {
+                bulletType = value;
+                ChangeAnimation();
+            }
+            get
+            {
+                return bulletType;
+            }
+        }
 
 
         #region Animations
@@ -39,7 +53,7 @@ namespace AUTO_Matic
         public AnimationManager animManager;
         Texture2D texture;
         Point FrameSize;//Size of frame
-        Point CurrFrame;//Location of currFram on the sheet
+        public Point CurrFrame;//Location of currFram on the sheet
         Point SheetSize;//num of frames.xy
         int fpms;
         public AnimationManager animManagerRobo;
@@ -50,23 +64,40 @@ namespace AUTO_Matic
         int fpmsRobo;
 
         public void ChangeAnimation()
-        {
+        { 
 
-            if (isPlayer || isBoss)
+            switch(BulletType)
             {
-                texture = content.Load<Texture2D>("SideScroll/Animations/EnergyBlast");
-                FrameSize = new Point(64, 64);
-                CurrFrame = new Point(3, 0);
-                SheetSize = new Point(10, 1);
-                fpms = 60;
-            }
-            else if (!isPlayer)
-            {
-                texture = content.Load<Texture2D>("SideScroll/Animations/Bullet");
-                FrameSize = new Point(64, 64);
-                CurrFrame = new Point(1, 0);
-                SheetSize = new Point(1, 1);
-                fpms = 60;
+                case BulletTypes.Player:
+                    texture = content.Load<Texture2D>("SideScroll/Animations/EnergyBlast");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(2, 0);
+                    SheetSize = new Point(10, 1);
+                    fpms = 60;
+                    break;
+                case BulletTypes.Boss:
+                    texture = content.Load<Texture2D>("SideScroll/Animations/EnergyBlast_Red");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(2, 0);
+                    SheetSize = new Point(10, 1);
+                    fpms = 60;
+                    break;
+                case BulletTypes.Bullet:
+                    texture = content.Load<Texture2D>("SideScroll/Animations/Bullet");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(1, 0);
+                    SheetSize = new Point(1, 1);
+                    fpms = 60;
+                    break;
+                case BulletTypes.Bomb:
+                    texture = content.Load<Texture2D>("SideScroll/Animations/Bomb");
+                    FrameSize = new Point(64, 64);
+                    CurrFrame = new Point(1, 0);
+                    SheetSize = new Point(1, 1);
+                    fpms = 60;
+                    break;
+
+
             }
            
 
@@ -89,7 +120,7 @@ namespace AUTO_Matic
         #endregion
 
         public Bullet(Vector2 pos, float speed, Vector2 maxSpeed, ContentManager content, bool isX, float travelDist,
-            bool isY = false, float speedY = 0, float angle = 0, int size = 14, bool isPlayer = false, bool isBoss = false)
+            bool isY = false, float speedY = 0, float angle = 0, int size = 14)
         {
             position = pos;
             startPos = pos;
@@ -104,9 +135,8 @@ namespace AUTO_Matic
             width = size;
             height = size;
             this.content = content;
-            this.isPlayer = isPlayer;
-            this.isBoss = isBoss;
-            ChangeAnimation();  
+            ChangeAnimation();
+            
         }
 
         public void Update(GameTime gameTime)
@@ -157,32 +187,43 @@ namespace AUTO_Matic
             else
                 animManager.Update(gameTime, new Vector2(position.X, position.Y));
 
-            if (bulletSpeed.X < 0)
-            {
-                animManager.isLeft = true;
-                animManager.isRight = false;
-            }
-            else if(bulletSpeed.X > 0)
-            {
-                animManager.isRight = true;
-                animManager.isLeft = false;
-            }
+            //if (bulletSpeed.X < 0)
+            //{
+            //    animManager.isLeft = true;
+            //    animManager.isRight = false;
+            //}
+            //else if(bulletSpeed.X > 0)
+            //{
+            //    animManager.isRight = true;
+            //    animManager.isLeft = false;
+            //}
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             //spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), Color.White);
-            animManager.Draw(spriteBatch, Color.White, angle, rect);
+            switch(BulletType)
+            {
+                case BulletTypes.Player:
+                    animManager.DrawSpriteSheet(spriteBatch, Color.White, angle, rect);
+                    //spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), color);
+                    break;
+                case BulletTypes.Bullet:
+                    animManager.DrawCheat(spriteBatch, angle, rect);
+                    break;
+                default:
+                    animManager.Draw(spriteBatch, Color.White, angle, rect);
+                    break;
+            }
+
+          
 
 
         }
         public void Draw(SpriteBatch spriteBatch, Color color)
         {
             //spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), color);
-            if(isPlayer)
-                animManager.Draw(spriteBatch, color, angle,rect);
-            else
-                animManager.Draw(spriteBatch, color);
+            animManager.Draw(spriteBatch, Color.White, angle: angle, originRect: rect);
         }
 
         public float Distance(Vector2 pos1, Vector2 pos2)

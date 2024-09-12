@@ -271,7 +271,7 @@ namespace AUTO_Matic.Scripts.Effects
             Random r = new Random();
             float decimalNumber;
             string beforePoint = r.Next(min, max).ToString();//number before decimal point
-            string afterPoint = r.Next(9, 10).ToString();
+            string afterPoint = r.Next(5, 8).ToString();
             string afterPoint2 = r.Next(0, 10).ToString();
             string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
                                                           //string secondDP = r.Next(0, 9).ToString();//2nd decimal point

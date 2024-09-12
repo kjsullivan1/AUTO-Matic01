@@ -192,8 +192,11 @@ namespace AUTO_Matic.TopDown
             get { return health; }
             set {
                 if(value < health && playerState != PlayerState.Dash)
+                {
                     damaged = true;
-                if(playerState != PlayerState.Dash)
+                    health = value;
+                }
+                else if(value > health)
                     health = value;
                 if (health <= 0)
                 {
@@ -281,7 +284,7 @@ namespace AUTO_Matic.TopDown
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = 1.2f;
-        public float bulletTravelDist = 64 * 4;
+        public float bulletTravelDist = 64 * 4.75f;
         #endregion
 
 
@@ -676,6 +679,7 @@ namespace AUTO_Matic.TopDown
                                         rectangle.X -= 1;
                                         position.X -= 1;
                                     }
+                                    isColliding = true;
                                 }
                                 if (rectangle.TouchRightOf(boss.worldRect))
                                 {
@@ -684,6 +688,7 @@ namespace AUTO_Matic.TopDown
                                         rectangle.X += 1;
                                         position.X += 1;
                                     }
+                                    isColliding = true;
                                 }
                                 if (rectangle.TouchBottomOf(boss.worldRect))
                                 {
@@ -692,6 +697,7 @@ namespace AUTO_Matic.TopDown
                                         rectangle.Y += 1;
                                         position.Y += 1;
                                     }
+                                    isColliding = true;
                                 }
                                 if (rectangle.TouchTopOf(boss.worldRect))
                                 {
@@ -700,6 +706,7 @@ namespace AUTO_Matic.TopDown
                                         rectangle.Y -= 1;
                                         position.Y -= 1;
                                     }
+                                    isColliding = true;
                                 }
                             }
 
@@ -751,50 +758,7 @@ namespace AUTO_Matic.TopDown
                                 break;
                         }
                     }
-                    else if (levelInY > 1 && levelInX > 1)
-                    {
-                        foreach (WallTiles tile in map.WallTiles)
-                        {
-                            Collision(tile.Rectangle, map.Width + (map.Width * (levelInX - 1)), map.Height - (map.Height * (levelInY - 1)), bounds);
-                            if (boss != null)
-                            {
-                                if (rectangle.TouchLeftOf(boss.worldRect))
-                                {
-                                    while (rectangle.Right > boss.worldRect.Left)
-                                    {
-                                        rectangle.X -= 1;
-                                        position.X -= 1;
-                                    }
-                                }
-                                if (rectangle.TouchRightOf(boss.worldRect))
-                                {
-                                    while (rectangle.Left < boss.worldRect.Right)
-                                    {
-                                        rectangle.X += 1;
-                                        position.X += 1;
-                                    }
-                                }
-                                if (rectangle.TouchBottomOf(boss.worldRect))
-                                {
-                                    while (rectangle.Top < boss.worldRect.Bottom)
-                                    {
-                                        rectangle.Y += 1;
-                                        position.Y += 1;
-                                    }
-                                }
-                                if (rectangle.TouchTopOf(boss.worldRect))
-                                {
-                                    while (rectangle.Bottom > boss.worldRect.Top)
-                                    {
-                                        rectangle.Y -= 1;
-                                        position.Y -= 1;
-                                    }
-                                }
-                            }
-                            if (changeLevel)
-                                break;
-                        }
-                    }
+                    
                     #endregion
                     if(isColliding)
                     {
@@ -956,19 +920,23 @@ namespace AUTO_Matic.TopDown
                     switch (lockedDirection)
                     {
                         case "up":
-                            bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
+                            bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (22), rectangle.Y), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed, 
+                                angle: MathHelper.ToRadians(-90)));
+
                             break;
                         case "down":
-                            bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
+                            bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (22), rectangle.Bottom), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed,
+                                angle:MathHelper.ToRadians(90)));
                             break;
                         case "left":
-                            bullets.Add(new Bullet(new Vector2(rectangle.Left, rectangle.Y + (rectangle.Height / 2)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                            bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist,
+                                angle:MathHelper.ToRadians(180)));
                             break;
                         case "right":
-                            bullets.Add(new Bullet(new Vector2(rectangle.Right, rectangle.Y + (rectangle.Height / 2)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                            bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y - (22)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
                             break;
                     }
-
+                    bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
 
                     //if (animManager.isUp)
                     //    bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, 

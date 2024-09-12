@@ -623,7 +623,6 @@ namespace AUTO_Matic.SideScroll
                     attackDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                 }
               
-                
             }
 
             switch(enemyState)
@@ -880,7 +879,7 @@ namespace AUTO_Matic.SideScroll
                     {
                         if(isShoot && !outOfRange && blockBottom)
                         {
-                            if (MathHelper.Distance(enemyRect.Right, player.playerRect.Left) > attackOffsetFromPlayer)
+                            if (MathHelper.Distance(enemyRect.Right, player.playerRect.Left) < attackOffsetFromPlayer)
                             {
                                 //attackLeft = false;
                                 //attackRight = true;
@@ -1472,7 +1471,9 @@ namespace AUTO_Matic.SideScroll
                         {
                             if(shootDelay <= 0)  //If can shooot shoot to the left
                             {
-                                bullets.Add(new Bullet(new Vector2(enemyRect.Left + 14, enemyRect.Y + enemyRect.Height / 2), -bulletSpeed, new Vector2(-maxBulletSpeed.X, maxBulletSpeed.Y), content, true, bulletTravelDist));
+                                bullets.Add(new Bullet(new Vector2(enemyRect.Center.X - 14, enemyRect.Y + enemyRect.Height / 1.85f), -bulletSpeed, new Vector2(-maxBulletSpeed.X, maxBulletSpeed.Y), 
+                                    content, true, bulletTravelDist, angle: MathHelper.ToRadians(180), size: 64));
+                                bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Bullet;
                                 shootDelay = maxShootDelay;
                             }
                             animManager.isRight = true;
@@ -1483,7 +1484,8 @@ namespace AUTO_Matic.SideScroll
                         {
                             if(shootDelay <= 0)//If delay is over, shoot right
                             {
-                                bullets.Add(new Bullet(new Vector2(enemyRect.Right - 14, enemyRect.Y + enemyRect.Height / 2), bulletSpeed, maxBulletSpeed, content, true, bulletTravelDist));
+                                bullets.Add(new Bullet(new Vector2(enemyRect.Center.X + 14, enemyRect.Y + enemyRect.Height / 1.85f), bulletSpeed, maxBulletSpeed, content, true, bulletTravelDist, size: 64));
+                                bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Bullet;
                                 shootDelay = maxShootDelay;
                             }
                 
@@ -1663,7 +1665,15 @@ namespace AUTO_Matic.SideScroll
                 case EnemyStates.Knockback:
 
                     if (isShoot)
+                    {
                         knockbackForce = new Vector2(knockbackForce.X / 2, knockbackForce.Y);
+
+                        if (prevState == EnemyStates.Attacking)
+                            shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    }
+                    else if (!isShoot && prevState == EnemyStates.Attacking)
+                        attackDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                       
 
                     if (player.killEnemy)
                     {
@@ -1765,7 +1775,7 @@ namespace AUTO_Matic.SideScroll
 
                     if(!damaged && !launch)
                     {
-                        enemyState = EnemyStates.GoTo;
+                        enemyState = prevState;
                         gravX = 0;
                     }
 

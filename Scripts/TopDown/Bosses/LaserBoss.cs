@@ -1379,7 +1379,8 @@ namespace AUTO_Matic.Scripts.TopDown
                 float bulletSpeedX = (float)Math.Cos((double)angle) * 8;
                 float bulletSpeedY = (float)Math.Sin((double)angle) * 8;
                 boss.bullets.Add(new Bullet(new Vector2(boss.destRect.X, boss.destRect.Y), bulletSpeedX,
-                    new Vector2(bulletSpeedX, bulletSpeedY), content, true, bounds.Width, true, bulletSpeedY, size: 30, isPlayer: true, angle: angle));
+                    new Vector2(bulletSpeedX, bulletSpeedY), content, true, bounds.Width, true, bulletSpeedY, size: 30, angle: angle));
+                boss.bullets[boss.bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
 
 
 

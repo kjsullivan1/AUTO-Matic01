@@ -18,6 +18,8 @@ namespace AUTO_Matic.Scripts.TopDown
         EnemyStates enemyState = EnemyStates.Movement;
 
         private Texture2D texture;
+        Texture2D turretTexture;
+   
         private Vector2 position;
         private Vector2 velocity;
         private Rectangle rectangle;
@@ -28,6 +30,7 @@ namespace AUTO_Matic.Scripts.TopDown
         float health = 5f;
         int pixelSize = 64;
         public bool dead;
+        float angle = 0;
         public float Health
         {
             get { return health; }
@@ -179,7 +182,8 @@ namespace AUTO_Matic.Scripts.TopDown
         public TDEnemy(ContentManager Content, Vector2 spawnPos, TopDownMap map, int[,] mapDims, GraphicsDevice graphics)
         {
             content = Content;
-            texture = Content.Load<Texture2D>("TopDown/Animations/TankTopDown");
+            texture = Content.Load<Texture2D>("TopDown/Animations/TankTopDownBody");
+            turretTexture = Content.Load<Texture2D>("TopDown/Animations/TankTopDownTurret");
             this.map = map;
             this.mapDims = mapDims;
             position = spawnPos;
@@ -338,7 +342,7 @@ namespace AUTO_Matic.Scripts.TopDown
             rectangle = new Rectangle((int)position.X, (int)position.Y, tileSize, tileSize);
 
             Vector2 targetDir = new Vector2(playerRect.rectangle.X, playerRect.rectangle.Y) - position;
-            float angle = (float)Math.Atan2(targetDir.Y, targetDir.X); //sub by 90 if problems occur
+            angle = (float)Math.Atan2(targetDir.Y, targetDir.X); //sub by 90 if problems occur
             destRect = new Rectangle(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2,
                   distForm(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2),
                   new Vector2(playerRect.rectangle.X + playerRect.rectangle.Width / 2, playerRect.rectangle.Y + playerRect.rectangle.Height)), 1);
@@ -1477,9 +1481,12 @@ namespace AUTO_Matic.Scripts.TopDown
                         {
                             float bulletSpeedX = (float)Math.Cos((double)angle) * 8;
                             float bulletSpeedY = (float)Math.Sin((double)angle) * 8;
+                            
+                            float angleNum = (float)MathHelper.ToDegrees(angle);
 
                             bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y), bulletSpeedX,
-                                new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY, angle:angle));
+                                new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY, angle:angle, size: 64));
+                            bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Bullet;
                             //    if (angle <= 205 && angle >= 165) //Fire left
                             //    {
                             //        bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height / 2 - 15 / 2), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
@@ -3663,17 +3670,23 @@ namespace AUTO_Matic.Scripts.TopDown
         public void Draw(SpriteBatch spriteBatch)
         {
 
-           //spriteBatch.Draw(line, destinationRectangle: destRect, color: Color.White,rotation: angleOfLine);
+            //spriteBatch.Draw(line, destinationRectangle: destRect, color: Color.White,rotation: angleOfLine);
 
-            if(animManager.isUp)
-            {
-                spriteBatch.Draw(texture, destinationRectangle: rectangle,color: Color.White, effects: SpriteEffects.FlipVertically);
-            }
-            else
-            {
-                spriteBatch.Draw(texture, rectangle, Color.White);
-            }
+            //if (animManager.isUp)
+            //{
+            //    spriteBatch.Draw(texture, destinationRectangle: rectangle, color: Color.White, effects: SpriteEffects.FlipVertically);
+            //}
+            //else
+            //{
+            //    spriteBatch.Draw(texture, rectangle, Color.White);
+            //}
 
+            //spriteBatch.Draw(texture, rectangle, Color.White);
+            spriteBatch.Draw(texture, position: new Vector2(rectangle.Center.X, rectangle.Center.Y), sourceRectangle: new Rectangle(0, 0, rectangle.Width, rectangle.Height), color: Color.White,
+                origin: new Vector2(rectangle.Width / 2, rectangle.Height / 2), rotation: (float)Math.Atan2(velocity.Y, velocity.X));
+
+            spriteBatch.Draw(turretTexture, position: new Vector2(rectangle.Center.X, rectangle.Center.Y), sourceRectangle: new Rectangle(0, 0, rectangle.Width, rectangle.Height), color: Color.White,
+                origin: new Vector2(rectangle.Width / 2, rectangle.Height / 2), rotation: angle);
         
             foreach(Bullet bullet in bullets)
             {

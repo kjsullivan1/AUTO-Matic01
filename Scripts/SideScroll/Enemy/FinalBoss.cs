@@ -642,16 +642,18 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
             float bulletDownSpeedX = (float)Math.Cos((double)angle + .15f) * bulletSpeed;
             float bulletDownSpeedY = (float)Math.Sin((double)angle + .15f) * bulletSpeed;
-
+            
             bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
-                content, true, bulletTravelDist, true, bulletSpeedY,isPlayer: true, angle: angle));
+                content, true, bulletTravelDist, true, bulletSpeedY, angle: angle));
+            bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
 
             bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletUpSpeedX, new Vector2(bulletUpSpeedX, bulletUpSpeedY),
-             content, true, bulletTravelDist, true, bulletUpSpeedY, isPlayer: true, angle: angle));
-
+             content, true, bulletTravelDist, true, bulletUpSpeedY,  angle: angle));
+            bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
 
             bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletDownSpeedX, new Vector2(bulletDownSpeedX, bulletDownSpeedY),
-             content, true, bulletTravelDist, true, bulletDownSpeedY, isPlayer: true, angle: angle));
+             content, true, bulletTravelDist, true, bulletDownSpeedY, angle: angle));
+            bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
 
             //if (angle < 18 || angle >= 155)//Right
             //{
@@ -951,13 +953,14 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             {
                 #region BurstShot
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
-                    content, true, bulletTravelDist, true, bulletSpeedY, angle: angle, isPlayer: true));
-
+                    content, true, bulletTravelDist, true, bulletSpeedY, angle: angle));
+                bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX * 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
-               content, true, bulletTravelDist, true, bulletSpeedY * 1.5f, angle: angle, isPlayer: true));
-
+               content, true, bulletTravelDist, true, bulletSpeedY * 1.5f, angle: angle));
+                bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX / 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
-              content, true, bulletTravelDist, true, bulletSpeedY / 1.5f, angle: angle, isPlayer: true));
+              content, true, bulletTravelDist, true, bulletSpeedY / 1.5f, angle: angle));
+                bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
                 #endregion
                 burstDelay = .05f;
             }
@@ -1092,6 +1095,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
             bombs.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
                 content, true, bulletTravelDist, true, bulletSpeedY, size: 42));
+            bombs[bombs.Count - 1].BulletType = Bullet.BulletTypes.Bomb;
             //     if (angle < 15 || angle >= 170)//Right
             //     {
             //         if (angle < 15)
@@ -1411,7 +1415,8 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 float bulletSpeedX = (float)Math.Cos((double)angle) * 8;
                 float bulletSpeedY = (float)Math.Sin((double)angle) * 8;
                 bullets.Add(new Bullet(new Vector2(destRect.X, destRect.Y), bulletSpeedX,
-                    new Vector2(bulletSpeedX, bulletSpeedY), content, true, bounds.Width, true, bulletSpeedY, size: 20, isPlayer: true, angle: angle));
+                    new Vector2(bulletSpeedX, bulletSpeedY), content, true, bounds.Width, true, bulletSpeedY, size: 20, angle: angle));
+                bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
 
 
 

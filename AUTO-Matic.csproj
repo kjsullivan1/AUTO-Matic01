@@ -124,9 +124,11 @@
     <Content Include="Content\SaveData\Test.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\SideScroll\Animations\Bomb.png" />
     <Content Include="Content\SideScroll\Animations\Bullet.png" />
     <Content Include="Content\SideScroll\Animations\DroneEnemy.png" />
     <Content Include="Content\SideScroll\Animations\EnergyBlast.png" />
+    <Content Include="Content\SideScroll\Animations\EnergyBlast_Red.png" />
     <Content Include="Content\SideScroll\Animations\FinalBoss\BossGun.png" />
     <Content Include="Content\SideScroll\Animations\FinalBoss\MonoBoss.png" />
     <Content Include="Content\SideScroll\Animations\MeleeEnemyWalk.png" />
@@ -273,6 +275,7 @@
     <Content Include="Content\TopDown\Animations\BombBossShoot.png" />
     <Content Include="Content\TopDown\Animations\BombBossSquirm.png" />
     <Content Include="Content\TopDown\Animations\LaserBoss.png" />
+    <Content Include="Content\TopDown\Animations\LaserBossShoot.png" />
     <Content Include="Content\TopDown\Animations\PilotDownWalk.png" />
     <Content Include="Content\TopDown\Animations\PilotLeftWalk.png" />
     <Content Include="Content\TopDown\Animations\PilotRightWalk.png" />
@@ -281,6 +284,8 @@
     <Content Include="Content\TopDown\Animations\ShotGunBossTurret.png" />
     <Content Include="Content\TopDown\Animations\SlimeBurstBoss.png" />
     <Content Include="Content\TopDown\Animations\TankTopDown.png" />
+    <Content Include="Content\TopDown\Animations\TankTopDownBody.png" />
+    <Content Include="Content\TopDown\Animations\TankTopDownTurret.png" />
     <Content Include="Content\TopDown\BossHealthBar\BossHealth0.png" />
     <Content Include="Content\TopDown\BossHealthBar\BossHealth1.png" />
     <Content Include="Content\TopDown\BossHealthBar\BossHealth10.png" />

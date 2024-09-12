@@ -121,7 +121,7 @@ namespace AUTO_Matic.Scripts
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), circle.Bounds, Color.White);
+            spriteBatch.Draw(content.Load<Texture2D>("SideScroll/Animations/Bomb"), circle.Bounds, Color.White);
         }
     }
 

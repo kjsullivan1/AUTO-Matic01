@@ -522,13 +522,16 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 //bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
                 #region BurstShot
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
-                    content, true, bulletTravelDist, true, bulletSpeedY, angle: angle, isPlayer: true));
+                    content, true, bulletTravelDist, true, bulletSpeedY, angle: angle));
+                bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
 
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX * 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
-               content, true, bulletTravelDist, true, bulletSpeedY * 1.5f, angle: angle, isPlayer: true));
+               content, true, bulletTravelDist, true, bulletSpeedY * 1.5f, angle: angle));
+                bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
 
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX / 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
-              content, true, bulletTravelDist, true, bulletSpeedY / 1.5f, angle: angle, isPlayer: true));
+              content, true, bulletTravelDist, true, bulletSpeedY / 1.5f, angle: angle));
+                bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
                 #endregion
 
                 //if (angle < 16 || angle >= 155)//Right

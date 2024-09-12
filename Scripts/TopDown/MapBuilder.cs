@@ -63,7 +63,7 @@ namespace AUTO_Matic.Scripts.TopDown
                         mapObjectEffect = MapEffectObjects.RemoveWall;
                         selected = true;
                     }
-                    else if (num >= 75 && num < 87 && numEnemies < 8)
+                    else if (num >= 75 && num < 87 && numEnemies < 7)
                     {
                         mapObjectEffect = MapEffectObjects.AddEnemy;
                         selected = true;

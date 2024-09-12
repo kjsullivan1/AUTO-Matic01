@@ -631,6 +631,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
                 bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
                     content, true, bulletTravelDist, true, bulletSpeedY, size: 21));
+            bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Bomb;
             
         }
 

@@ -509,14 +509,17 @@ namespace AUTO_Matic.Scripts.TopDown
             float bulletDownSpeedY = (float)Math.Sin((double)angle + .15f) * bulletSpeed;
 
             bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
-                content, true, bulletTravelDist, true, bulletSpeedY, isPlayer: true, angle: angle));
+                content, true, bulletTravelDist, true, bulletSpeedY, angle: angle));
+            bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
 
             bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletUpSpeedX, new Vector2(bulletUpSpeedX, bulletUpSpeedY),
-             content, true, bulletTravelDist, true, bulletUpSpeedY, isPlayer: true, angle: angle));
+             content, true, bulletTravelDist, true, bulletUpSpeedY, angle: angle));
+            bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
 
 
             bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletDownSpeedX, new Vector2(bulletDownSpeedX, bulletDownSpeedY),
-             content, true, bulletTravelDist, true, bulletDownSpeedY, isPlayer: true, angle: angle));
+             content, true, bulletTravelDist, true, bulletDownSpeedY, angle: angle));
+            bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
 
 
             //if (angle < 18 || angle >= 155)//Right

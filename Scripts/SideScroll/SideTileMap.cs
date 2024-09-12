@@ -332,7 +332,7 @@ namespace AUTO_Matic
                     {
                         if(flyingBeacons.Contains(new ControllBeacon(num, new Rectangle(x * size, y * size, size, size))) == false)
                         {
-                            flyingBeacons.Add(new ControllBeacon(num, new Rectangle(x * size, y * size, size, size)));
+                            //flyingBeacons.Add(new ControllBeacon(num, new Rectangle(x * size, y * size, size, size)));
                             backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
                         }
                   
