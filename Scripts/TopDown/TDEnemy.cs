@@ -22,6 +22,7 @@ namespace AUTO_Matic.Scripts.TopDown
    
         private Vector2 position;
         private Vector2 velocity;
+        public Vector2 targetOffset = Vector2.Zero;
         private Rectangle rectangle;
         public float moveSpeed = 2.75f;
         private bool hasJumped = false;
@@ -31,15 +32,22 @@ namespace AUTO_Matic.Scripts.TopDown
         int pixelSize = 64;
         public bool dead;
         float angle = 0;
+
+        HealthBar healthBar;
+        float healthBarDelay = .25f;
         public float Health
         {
             get { return health; }
-            set { health = value;
+            set {
+                healthBar.RecieveDamage(health - value);
+                health = value;
+                
                 if(health <= 0)
                 {
                     health = 0;
                     dead = true;
                 }
+                healthBarDelay = .25f;
             }
         }
 
@@ -121,6 +129,8 @@ namespace AUTO_Matic.Scripts.TopDown
         float pauseX = 0;
         float pauseY = 0;
 
+        bool pause = false;
+
         Tiles collidingTileX;
         Tiles collidingTileY;
 
@@ -194,6 +204,9 @@ namespace AUTO_Matic.Scripts.TopDown
             line.SetData(new[] { Color.Crimson });
             animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, new Vector2(rectangle.X, rectangle.Y));
 
+            healthBar = new HealthBar(new Rectangle(rectangle.X, rectangle.Y, 62, 5), content, Health);
+
+            SetTargetPersonality();
         }
 
         //List<Vector2> GetTargets(List<SkullTiles> targets)
@@ -333,20 +346,37 @@ namespace AUTO_Matic.Scripts.TopDown
 
             }
         }
-        public void SetTarget(Vector2 playerPos)
+        public void SetTargetPersonality()
         {
-            target = playerPos;
+            //Will determine a target personality of targeting left right up or down of the player
+            Random rand = new Random();
+            switch(rand.Next(4))
+            {
+                case 0: //Target right
+                    targetOffset.X += 64;
+                    break;
+                case 1://Left
+                    targetOffset.X -= 64;
+                    break;
+                case 2://Up
+                    targetOffset.Y -= 64;
+                    break;
+                case 3://Down
+                    targetOffset.Y += 64;
+                    break;
+            }
         }
-        public void Upate(GameTime gameTime, TDPlayer playerRect, TopDownMap tdMap)
+        public void Upate(GameTime gameTime, TDPlayer playerRect, TopDownMap tdMap, Rectangle bounds)
         { 
             rectangle = new Rectangle((int)position.X, (int)position.Y, tileSize, tileSize);
-
-            Vector2 targetDir = new Vector2(playerRect.rectangle.X, playerRect.rectangle.Y) - position;
+            healthBar.Update(new Point(rectangle.X, rectangle.Y - 5));
+            healthBarDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Vector2 targetDir = new Vector2(playerRect.rectangle.Center.X, playerRect.rectangle.Center.Y) - new Vector2(rectangle.Center.X, rectangle.Center.Y);
             angle = (float)Math.Atan2(targetDir.Y, targetDir.X); //sub by 90 if problems occur
-            destRect = new Rectangle(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2,
-                  distForm(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2),
-                  new Vector2(playerRect.rectangle.X + playerRect.rectangle.Width / 2, playerRect.rectangle.Y + playerRect.rectangle.Height)), 1);
-            SetRay(angle, playerRect);
+            destRect = new Rectangle(rectangle.Center.X, rectangle.Center.Y,
+                  distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y),
+                  new Vector2(playerRect.rectangle.Center.X, playerRect.rectangle.Center.Y)), 5);
+            //SetRay(angle, playerRect);
             //destRect = new Rectangle(Vector2.Transform(new Vector2(destRect.X, destRect.Y), Matrix.CreateRotationZ(MathHelper.ToRadians(angleOfLine))).ToPoint(), new Point(destRect.Width, destRect.Height));
 
             bool wallBlock = false;
@@ -354,15 +384,15 @@ namespace AUTO_Matic.Scripts.TopDown
             {
                 shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                
-                foreach (WallTiles tile in tdMap.WallTiles)
-                {
-                    if (destRect.Intersects(tile.Rectangle))
-                    {
-                        destRect.Width = distForm(new Vector2(destRect.X, destRect.Y), new Vector2(tile.Rectangle.X, tile.Rectangle.Y));
-                        wallBlock = true;
+                //foreach (WallTiles tile in tdMap.WallTiles)
+                //{
+                //    if (destRect.Intersects(tile.Rectangle))
+                //    {
+                //        destRect.Width = distForm(new Vector2(destRect.X, destRect.Y), new Vector2(tile.Rectangle.X, tile.Rectangle.Y));
+                //        wallBlock = true;
 
-                    }
-                }
+                //    }
+                //}
             }
 
             switch (enemyState)
@@ -401,18 +431,49 @@ namespace AUTO_Matic.Scripts.TopDown
                     {
                         if (rect.Intersects(playerRect.rectangle))
                         {
+                      
                             inSight = true;
                         }
 
 
                     }
-                    if (inSight)
+                    
+
+                    if(distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(target.X, target.Y)) < 64 && 
+                        distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(playerRect.rectangle.Center.X, playerRect.rectangle.Center.Y)) < bulletTravelDist)
                     {
-                        target = new Vector2(playerRect.rectangle.X, playerRect.rectangle.Y);
+                        //inSight = false;
+                        if(playerRect.rectangle.Center.Y < rectangle.Center.Y && !blockedTop || playerRect.rectangle.Center.Y > rectangle.Center.Y && !blockedBottom
+                            || playerRect.rectangle.Center.X > rectangle.Center.X && !blockedRight || playerRect.rectangle.Center.X < rectangle.Center.X && !blockedLeft)
+                        {
+                            pause = true;
+                            enemyState = EnemyStates.Shoot;
+                        }
+                        
+                        if(!pause)
+                        {
+                            target = new Vector2(((playerRect.rectangle.Center.X / 64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
+                            //SetTargetPersonality();
+                        }
+                          
+
+
+                    }
+                    else if(distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(playerRect.rectangle.Center.X, playerRect.rectangle.Center.Y)) < bulletTravelDist)
+                    {
+                        target = new Vector2(((playerRect.rectangle.Center.X / 64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
+                        //SetTargetPersonality();
+                        enemyState = EnemyStates.Shoot;
+                    }
+                    else if (inSight)
+                    {
+                        target = new Vector2(((playerRect.rectangle.Center.X / 64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
+                        //SetTargetPersonality();
+                        pause = false;
                         //target = new Vector2(playerRect.rectangle.X, (playerRect.rectangle.Y) / (64 * playerRect.levelInY - 1) * (64 * playerRect.levelInY - 1));
                         //           target = new Vector2((playerRect.rectangle.X / (64 * playerRect.levelInX - 1) * (64 * playerRect.levelInX - 1)),
                         //(playerRect.rectangle.Y) / (64 * playerRect.levelInY - 1) * (64 * playerRect.levelInY - 1));
-                        enemyState = EnemyStates.Shoot;
+             
                     }
                     else
                     {
@@ -713,7 +774,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     }
 
 
-                    if (fixer && !stopper)
+                    if (fixer && !stopper && !pause)
                     {
                         if (pauseX > 0)
                             pauseX -= moveSpeed;
@@ -1485,8 +1546,19 @@ namespace AUTO_Matic.Scripts.TopDown
                             float angleNum = (float)MathHelper.ToDegrees(angle);
 
                             bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y), bulletSpeedX,
-                                new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY, angle:angle, size: 64));
+                                new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY, angle:angle, size: 40));
                             bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Bullet;
+                            
+
+                            Random rand = new Random();
+                            if(rand.Next(0,101) <51)
+                            {
+                                targetOffset = -targetOffset;
+                            }
+                            
+                            //SetTargetPersonality();
+                            target = new Vector2(((playerRect.rectangle.Center.X / 64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
+                            shootDelay = RandFloat(2, 4);
                             //    if (angle <= 205 && angle >= 165) //Fire left
                             //    {
                             //        bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height / 2 - 15 / 2), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
@@ -1539,7 +1611,7 @@ namespace AUTO_Matic.Scripts.TopDown
                             //        }
 
                             //    }
-                            shootDelay = RandFloat(2,4);
+                            //
                         }
 
 
@@ -3682,16 +3754,23 @@ namespace AUTO_Matic.Scripts.TopDown
             //}
 
             //spriteBatch.Draw(texture, rectangle, Color.White);
-            spriteBatch.Draw(texture, position: new Vector2(rectangle.Center.X, rectangle.Center.Y), sourceRectangle: new Rectangle(0, 0, rectangle.Width, rectangle.Height), color: Color.White,
-                origin: new Vector2(rectangle.Width / 2, rectangle.Height / 2), rotation: (float)Math.Atan2(velocity.Y, velocity.X));
-
-            spriteBatch.Draw(turretTexture, position: new Vector2(rectangle.Center.X, rectangle.Center.Y), sourceRectangle: new Rectangle(0, 0, rectangle.Width, rectangle.Height), color: Color.White,
-                origin: new Vector2(rectangle.Width / 2, rectangle.Height / 2), rotation: angle);
-        
-            foreach(Bullet bullet in bullets)
+            foreach (Bullet bullet in bullets)
             {
                 bullet.Draw(spriteBatch);
             }
+
+            spriteBatch.Draw(texture, position: new Vector2(rectangle.Center.X, rectangle.Center.Y), sourceRectangle: new Rectangle(0, 0, 64, 64), color: Color.White,
+                origin: new Vector2(rectangle.Width / 2, rectangle.Height / 2), rotation: (float)Math.Atan2(velocity.Y, velocity.X));
+
+            spriteBatch.Draw(turretTexture, position: new Vector2(rectangle.Center.X, rectangle.Center.Y), sourceRectangle: new Rectangle(0, 0, 64, 64), color: Color.White,
+                origin: new Vector2(rectangle.Width / 2, rectangle.Height / 2), rotation: angle);
+
+            if(healthBarDelay >= 0)
+            {
+                healthBar.Draw(spriteBatch);
+            }
+        
+        
             //foreach (Rectangle rect in vision)
             //{
             //    spriteBatch.Draw(visionTxture, rect, Color.White * .25f);

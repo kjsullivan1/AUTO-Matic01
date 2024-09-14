@@ -147,8 +147,8 @@ namespace AUTO_Matic
         //This is made to spite the fact spriteBatch cant consistantly use 'rotation:' as the variable will constantly shift in and out of existance depending on the overload
         public void DrawCheat(SpriteBatch spriteBatch, float angle, Rectangle originRect)
         {
-            spriteBatch.Draw(CurrTexture, position: new Vector2(originRect.X, originRect.Y), sourceRectangle: new Rectangle(0, 0, originRect.Width, originRect.Height), color: Color.White,
-                origin: new Vector2(originRect.Width / 2, originRect.Height / 2), rotation: angle);
+            spriteBatch.Draw(CurrTexture, position: new Vector2(position.X, position.Y), sourceRectangle: new Rectangle(0, 0, 64, 64), color: Color.White,
+                origin: new Vector2(64 / 2, 64 / 2), rotation: angle);
         }
 
         public void DrawSpriteSheet(SpriteBatch spriteBatch, Color color, float angle, Rectangle originRect)

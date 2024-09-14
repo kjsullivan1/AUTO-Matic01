@@ -50,7 +50,13 @@ namespace AUTO_Matic.Scripts.Effects
             EffectVolume = effectVolume;
             MusicVolume = musicVolume;
         }
-
+        public SoundManager(ContentManager content, float masterVolume, float effectVolume, float musicVolume)
+        {
+            this.content = content;
+            MasterVolume = masterVolume;
+            EffectVolume = effectVolume;
+            MusicVolume = musicVolume;
+        }
         public void ChangeVolume(float master, float effect,float music)
         {
             MasterVolume = master;
@@ -67,16 +73,19 @@ namespace AUTO_Matic.Scripts.Effects
 
             for(int i = 0; i < EffectList.Count; i++)
             {
-                EffectList[i].Volume = master + (effect - 1);
 
-                if (EffectList[i].Volume < 0)
+                if (master + (effect - 1) < 0)
                     EffectList[i].Volume = 0;
+                else 
+                    EffectList[i].Volume = master + (effect - 1);
             }
             for(int i = 0; i < MusicList.Count; i++)
-            {
-                MusicList[i].Volume = master + (music - 1);
-                if (MusicList[i].Volume < 0)
+            { 
+                if (master + (music - 1) < 0)
                     MusicList[i].Volume = 0;
+                else
+                    MusicList[i].Volume = master + (music - 1);
+               
             }
         }
 

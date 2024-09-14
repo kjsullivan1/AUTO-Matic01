@@ -16,7 +16,9 @@ namespace AUTO_Matic
         private Rectangle rectangle;
         public Vector2 position;
         public int[,] mapPoint;
+        public int[] MapPoint;
         public bool active = true;
+        public int index = 0;
         public Rectangle Rectangle
         {
             get { return rectangle; }
@@ -92,6 +94,7 @@ namespace AUTO_Matic
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
             this.Rectangle = newRect;
             this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+            this.MapPoint = new[] { newRect.Y / newRect.Height, newRect.X / newRect.Width };
             position = new Vector2(newRect.X, newRect.Y);
         }
     }
@@ -99,13 +102,16 @@ namespace AUTO_Matic
     class BackgroundTile: Tile
     {
         BackgroundTile tile;
+        public bool active = true;
         public BackgroundTile(int i, Rectangle newRect)
         {
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile" + i);
             this.Rectangle = newRect;
             this.mapPoint = new int[newRect.Y / newRect.Height, newRect.X / newRect.Width];
+            this.MapPoint = new[] { mapPoint.GetLength(0), mapPoint.GetLength(1)};
             tile = this;
             position = new Vector2(newRect.X, newRect.Y);
+            index = i;
         }
     }
 

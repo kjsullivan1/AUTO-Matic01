@@ -281,7 +281,7 @@ namespace AUTO_Matic.SideScroll
         #region Attacks
         float attackOffsetFromPlayer = 10f;
         float attackOffset = 10f;
-        float attackDelay = 2.25f;
+        float attackDelay = 1.85f;
         float attackDelayMax;
         bool attackLeft = false, attackRight = false;
         int attackBoxWidth = 40, attackBoxHeight = 40;

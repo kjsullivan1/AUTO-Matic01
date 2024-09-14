@@ -46,6 +46,7 @@ namespace AUTO_Matic
         public float EffectVolume = 1;
 
         bool isVolume = false;
+        public Rectangle SelectedRect = Rectangle.Empty;
         public void UIButton_Clicked(object sender, UIButtonArgs e)
         {
             string buttonName = e.ID;
@@ -1269,6 +1270,26 @@ namespace AUTO_Matic
 
             UIHelper.SetElementVisibility("InteractBox", false, uiElements);
 
+        }
+
+        public void CreateEndGameUI(Rectangle viewRect)
+        {
+            if(uiElements.ContainsKey("EndGame") == false)
+            {
+                uiElements.Add("EndGameBackground", UIHelper.CreateTextblock("EndGameBackground", "", 0, 0));
+                UIHelper.SetElementBGRect(uiElements["EndGameBackground"], new Rectangle(uiElements["EndGameBackground"].Position.ToPoint(), new Point(viewRect.Width, viewRect.Height)));
+                UIHelper.SetElementRect(uiElements["EndGameBackground"], new Rectangle(uiElements["EndGameBackground"].Position.ToPoint(), new Point(viewRect.Width, viewRect.Height)));
+
+                uiElements["EndGameBackground"].Visible = true;
+
+
+                UIHelper.SetRectangle(uiElements["PauseMenuReturn"], new Rectangle(viewRect.Center.X - (150/2), viewRect.Center.Y + (viewRect.Height/3), 150, 30));
+                UIHelper.SetRectangle(uiElements["PauseMenuQuit"], new Rectangle((int)uiElements["PauseMenuReturn"].Position.X, UIHelper.GetRectangle(uiElements["PauseMenuReturn"]).Bottom + 5, 150, 30));
+
+                uiElements["PauseMenuReturn"].Visible = true;
+                uiElements["PauseMenuQuit"].Visible = true;
+                uiElements["PauseMainMenuBtn"].Visible = false;
+            }
         }
 
         public void CreatePauseMenu(Rectangle viewRect)

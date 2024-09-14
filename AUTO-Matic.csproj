@@ -246,6 +246,7 @@
     <Content Include="Content\SideScroll\MapTiles\Tile59.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile6.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile60.png" />
+    <Content Include="Content\SideScroll\MapTiles\Tile61.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile7.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile8.png" />
     <Content Include="Content\SideScroll\MapTiles\Tile9.png" />
@@ -266,8 +267,10 @@
     <Content Include="Content\Textures\TitleScreen.png" />
     <Content Include="Content\Textures\UI\BackButton.png" />
     <Content Include="Content\Textures\UI\ExitButton.png" />
+    <Content Include="Content\Textures\UI\LoadGameButton.png" />
     <Content Include="Content\Textures\UI\PlayButton.png" />
     <Content Include="Content\Textures\UI\SettingsButton.png" />
+    <Content Include="Content\Textures\UI\StartGameButton.png" />
     <Content Include="Content\Textures\white.png" />
     <Content Include="Content\TopDown\Animations\BombBossIdle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

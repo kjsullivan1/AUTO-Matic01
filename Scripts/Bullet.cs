@@ -62,6 +62,7 @@ namespace AUTO_Matic
         Point CurrFrameRobo;//Location of currFram on the sheet
         Point SheetSizeRobo;//num of frames.xy
         int fpmsRobo;
+        public Vector2 animOffset = Vector2.Zero;
 
         public void ChangeAnimation()
         { 
@@ -71,16 +72,16 @@ namespace AUTO_Matic
                 case BulletTypes.Player:
                     texture = content.Load<Texture2D>("SideScroll/Animations/EnergyBlast");
                     FrameSize = new Point(64, 64);
-                    CurrFrame = new Point(2, 0);
+                    CurrFrame = new Point(1, 0);
                     SheetSize = new Point(10, 1);
-                    fpms = 60;
+                    fpms = 10;
                     break;
                 case BulletTypes.Boss:
                     texture = content.Load<Texture2D>("SideScroll/Animations/EnergyBlast_Red");
                     FrameSize = new Point(64, 64);
-                    CurrFrame = new Point(2, 0);
+                    CurrFrame = new Point(0, 0);
                     SheetSize = new Point(10, 1);
-                    fpms = 60;
+                    fpms = 10;
                     break;
                 case BulletTypes.Bullet:
                     texture = content.Load<Texture2D>("SideScroll/Animations/Bullet");
@@ -92,7 +93,7 @@ namespace AUTO_Matic
                 case BulletTypes.Bomb:
                     texture = content.Load<Texture2D>("SideScroll/Animations/Bomb");
                     FrameSize = new Point(64, 64);
-                    CurrFrame = new Point(1, 0);
+                    CurrFrame = new Point(0, 0);
                     SheetSize = new Point(1, 1);
                     fpms = 60;
                     break;
@@ -181,12 +182,14 @@ namespace AUTO_Matic
                 delete = true;
             }
             rect = new Rectangle((int)position.X, (int)position.Y, width, height);
-            
-            if(isPlayer)
-                animManager.Update(gameTime, new Vector2(position.X, position.Y - 28));
-            else
-                animManager.Update(gameTime, new Vector2(position.X, position.Y));
 
+            animManager.Update(gameTime, new Vector2(position.X, position.Y) + animOffset);
+
+
+            if (animManager.GetCurrFrame().X >= animManager.GetSheetSize().X - 1)
+            {
+                animManager.StopLoop();
+            }
             //if (bulletSpeed.X < 0)
             //{
             //    animManager.isLeft = true;

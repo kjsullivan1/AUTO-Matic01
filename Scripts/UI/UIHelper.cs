@@ -108,6 +108,14 @@ namespace AUTO_Matic
                             ButtonFont, "", Color.White, ReturnBtn);
                         f.Disabled = false;
                         return f;
+                    case "StartNewGame":
+                        UIButton g = new UIButton(id, new Vector2(x, y), new Vector2(200, 75),
+                            ButtonFont, "", Color.White, StartGameBtn);
+                        return g;
+                    case "LoadGame":
+                        UIButton h = new UIButton(id, new Vector2(x, y), new Vector2(200, 75),
+                          ButtonFont, "", Color.White, LoadGameBtn);
+                        return h;
                     default:
                         UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(200, 75), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
                         a.Disabled = false;

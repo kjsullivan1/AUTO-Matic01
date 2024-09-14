@@ -21,12 +21,19 @@ namespace AUTO_Matic.TopDown
 
         public enum PlayerState {Movement, Shooting, Death, Hit, Dash}
         public PlayerState playerState = PlayerState.Movement;
+        enum WeaponType { Pistol, Shotgun, Laser, Burst, Bomb }
+        WeaponType currWeapon = WeaponType.Pistol;
 
+        GamePadState joystick = GamePad.GetState(0);
+        WeaponWheel weaponWheel;
+        int selectedWeapon = 0;
+        float weaponWheelActiveDelay = .25f;
+        float wwActiveDelayMax = .25f;
         Vector2 controllerMoveDir;
         public Vector2 velocity;
         GamePadButtons currButtons;
         GamePadButtons prevButtons;
-        public int bossRoom = 2;
+        public int bossRoom = 1;
         bool lockDir = false;
         Vector2 startPos;
 
@@ -53,6 +60,8 @@ namespace AUTO_Matic.TopDown
         UIManager KeyBinds; 
 
         ParticleManager particles;
+        SoundManager sounds;
+
         
         Rectangle MeleeHitbox
         {
@@ -214,7 +223,7 @@ namespace AUTO_Matic.TopDown
         #endregion
 
         #region Constructor
-        public TDPlayer(Game1 game, int pixelSize, int levelInX, int levelInY, UIManager uiManager)
+        public TDPlayer(Game1 game, int pixelSize, int levelInX, int levelInY, UIManager uiManager, ContentManager content)
         {
             this.game = game;
             this.pixelSize = pixelSize - 12;
@@ -237,6 +246,8 @@ namespace AUTO_Matic.TopDown
             iMeleeDelay = meleeDelay;
 
             KeyBinds = uiManager;
+
+            sounds = new SoundManager(content, uiManager.MasterVolume, uiManager.EffectVolume, uiManager.MusicVolume);
         }
 
         #endregion
@@ -275,6 +286,7 @@ namespace AUTO_Matic.TopDown
         #region Shooting
         Texture2D gunTexture;
         public List<Bullet> bullets = new List<Bullet>();
+        public List<Bullet> bombs = new List<Bullet>();
         MouseState prevMs;
         float bulletSpeed = 2f;
         float bulletMaxX = 10f;
@@ -282,6 +294,27 @@ namespace AUTO_Matic.TopDown
         bool isShootDelay = false;
         float shootDelay = .35f;//In seconds
         float iShootDelay;
+
+        float pistolDelay = .35f;
+        float maxPistolDelay = .35f;
+        float pistolDmg = 1.2f;
+
+        float shotGunDelay = 1.15f;
+        float maxShotgunDelay = 1.15f;
+        float shotGunDmg = 1.85f;
+
+        float burstDelay = .65f;
+        float maxBurstDelay = .65f;
+        float burstDmg = 2;
+
+        float laserDelay = 1.35f;
+        float maxLaserDelay = 1.35f;
+        float laserDmg = .75f;
+
+        float bombDelay = 1.5f;
+        float maxBombDelay = 1.5f;
+        float bombDmg = .5f;
+
         bool startShoot = false;
         public float bulletDmg = 1.2f;
         public float bulletTravelDist = 64 * 4.75f;
@@ -310,6 +343,10 @@ namespace AUTO_Matic.TopDown
             //iFireDmgRate = fireDmgRate;
 
             particles = new ParticleManager();
+           
+            weaponWheel = new WeaponWheel(this, 25);
+
+        
         }
 
         public int DashIndex()//Returns the index needed for the dash icon    0: Full, 1: Empty, 2+ Growing rate
@@ -771,6 +808,37 @@ namespace AUTO_Matic.TopDown
             {
                 for (int i = bullets.Count - 1; i >= 0; i--)
                 {
+                    if (currWeapon == WeaponType.Burst)
+                    {
+                        for (int j = i - 1; j >= 0; j--)
+                        {
+                            if (bullets[j].rect.Intersects(bullets[i].rect))
+                            {
+                                if (bullets[j].bulletSpeed.X > 0)
+                                    bullets[j].maxSpeed.X = bulletMaxX / 100;
+                                else
+                                    bullets[j].maxSpeed.X = -bulletMaxX / 100;
+
+                                if (bullets[j].bulletSpeed.Y < 0)
+                                    bullets[j].maxSpeed.Y = -bulletMaxY / 100;
+                                else
+                                    bullets[j].maxSpeed.Y = bulletMaxY / 100;
+                            }
+                            else
+                            {
+                                if (bullets[j].maxSpeed.X > 0)
+                                    bullets[j].maxSpeed.X = bulletMaxX;
+                                else
+                                    bullets[j].maxSpeed.X = -bulletMaxX;
+
+                                if (bullets[j].bulletSpeed.Y < 0)
+                                    bullets[j].maxSpeed.Y = -bulletMaxY;
+                                else
+                                    bullets[j].maxSpeed.Y = bulletMaxY;
+                            }
+                        }
+                    }
+                    
                     bullets[i].Update(gameTime);
                     if (bullets[i].delete)
                     {
@@ -792,6 +860,7 @@ namespace AUTO_Matic.TopDown
             }
             animManager.Update(gameTime, new Vector2(rectangle.X, rectangle.Y - (64 - rectangle.Height)));
             particles.Update(gameTime, this, true);
+            weaponWheel.Update(this);
         }
 
         private void Input(List<TDEnemy> enemies, GameTime gameTime, TopDownMap map)
@@ -903,58 +972,394 @@ namespace AUTO_Matic.TopDown
             }
 
             
+            if(GamePad.GetState(0).ThumbSticks.Right != Vector2.Zero || kb.IsKeyDown(KeyBinds.TopDownInputs[7]) || kb.IsKeyDown(KeyBinds.TopDownInputs[8]) || kb.IsKeyDown(KeyBinds.TopDownInputs[9])
+                || kb.IsKeyDown(KeyBinds.TopDownInputs[10]) || kb.IsKeyDown(KeyBinds.TopDownInputs[11]))
+            {
+                weaponWheelActiveDelay = wwActiveDelayMax;
+
+                weaponWheel.active = true;
+            }
+            else if(GamePad.GetState(0).ThumbSticks.Right == Vector2.Zero || kb.IsKeyUp(KeyBinds.TopDownInputs[7]) && kb.IsKeyUp(KeyBinds.TopDownInputs[8]) && kb.IsKeyUp(KeyBinds.TopDownInputs[9])
+                && kb.IsKeyUp(KeyBinds.TopDownInputs[10]) && kb.IsKeyUp(KeyBinds.TopDownInputs[11]))
+            {
+                weaponWheelActiveDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if(weaponWheelActiveDelay < 0)
+                {
+                    weaponWheel.active = false;
+                }
+            }
+            
+
+            if(weaponWheel.active)
+            {
+                Vector2 rightDir = GamePad.GetState(0).ThumbSticks.Right;
+
+                if (GamePad.GetState(0).IsButtonDown(Buttons.RightStick) || GamePad.GetState(0).IsButtonDown(Buttons.RightTrigger) ||
+                   kb.IsKeyDown(KeyBinds.TopDownInputs[7]))
+                {
+                    currWeapon = WeaponType.Pistol;
+                    selectedWeapon = 0;
+
+                    bulletDmg = pistolDmg;
+                    SetShootDelays();
+                }
+                else if (kb.IsKeyDown(KeyBinds.TopDownInputs[9]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[9]) && game.bossKillCount >= 2 ||
+                    rightDir.X > 0 && game.bossKillCount >= 2)
+                {
+                    currWeapon = WeaponType.Burst;
+                    selectedWeapon = 2;
+
+                    bulletDmg = burstDmg;
+                    SetShootDelays();
+
+
+                }
+                else if (kb.IsKeyDown(KeyBinds.TopDownInputs[8]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[8]) && game.bossKillCount >= 4 ||
+                    rightDir.X < 0 && game.bossKillCount >= 4)
+                {
+
+                    currWeapon = WeaponType.Laser;
+                    selectedWeapon = 1;
+
+                    bulletDmg = laserDmg;
+                    SetShootDelays();
+                }
+                else if (kb.IsKeyDown(KeyBinds.TopDownInputs[10]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[10]) && game.bossKillCount >= 3 ||
+                   rightDir.Y > 0 && game.bossKillCount >= 3)
+                {
+                    currWeapon = WeaponType.Bomb;
+                    selectedWeapon = 3;
+
+                    bulletDmg = bombDmg;
+                    SetShootDelays();
+                }
+                else if (kb.IsKeyDown(KeyBinds.TopDownInputs[11]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[11]) && game.bossKillCount >= 1 ||
+                    rightDir.Y < 0 && game.bossKillCount >= 1)
+                {
+                    currWeapon = WeaponType.Shotgun;
+                    selectedWeapon = 4;
+
+                    bulletDmg = shotGunDmg;
+                    SetShootDelays();
+                }
+            }
+
+
 
             //if(kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D) && kb.IsKeyUp(Keys.S) && kb.IsKeyUp(Keys.W))
             //{
             //    moveDirs = new string[2];
             //}
+           
 
-          
-            shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        
+            switch(currWeapon)
+            {
+                case WeaponType.Pistol:
+                    pistolDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    break;
+                case WeaponType.Shotgun:
+                    shotGunDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    break;
+                case WeaponType.Burst:
+                    burstDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    break;
+                case WeaponType.Bomb:
+                    bombDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    break;
+                case WeaponType.Laser:
+                    laserDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    break;
+            }
+        //shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
             {
+                float num1 = 180;
 
-
-                if (shootDelay <= 0)
+                switch (currWeapon)
                 {
-                    switch (lockedDirection)
-                    {
-                        case "up":
-                            bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (22), rectangle.Y), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed, 
-                                angle: MathHelper.ToRadians(-90)));
+                    case WeaponType.Pistol:
+                       
 
-                            break;
-                        case "down":
-                            bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (22), rectangle.Bottom), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed,
-                                angle:MathHelper.ToRadians(90)));
-                            break;
-                        case "left":
-                            bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist,
-                                angle:MathHelper.ToRadians(180)));
-                            break;
-                        case "right":
-                            bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y - (22)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                            break;
-                    }
-                    bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
+                        if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) && pistolDelay <= 0
+                            || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released && pistolDelay <= 0)
+                        {
+                            bulletTravelDist = 64 * 4.75f;
+                            switch (lockedDirection)
+                            {
+                                case "up":
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14/2), rectangle.Center.Y + (14/2)), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed,
+                                        angle: MathHelper.ToRadians(-90)));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Height / 4, 0);
+                                    break;
+                                case "down":
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed,
+                                        angle: MathHelper.ToRadians(90)));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Height / 3f, 0);
+                                    break;
+                                case "left":
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X + (14), rectangle.Center.Y - (14 / 2)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist,
+                                        angle: MathHelper.ToRadians(180)));
+                                    break;
+                                case "right":
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(0, -rectangle.Height / 3);
+                                    break;
+                            }
 
-                    //if (animManager.isUp)
-                    //    bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, 
-                    //        new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
-                    //else if(animManager.isDown)
-                    //    bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Bottom), bulletSpeed, 
-                    //        new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
-                    //else if(animManager.isLeft)
-                    //    bullets.Add(new Bullet(new Vector2(rectangle.Left, rectangle.Y + (rectangle.Height / 2)), -bulletSpeed, 
-                    //        new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                    //else if(animManager.isRight)
-                    //    bullets.Add(new Bullet(new Vector2(rectangle.Right, rectangle.Y + (rectangle.Height / 2)), bulletSpeed, 
-                    //        new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                            sounds.AddSound("SoundEffects/Shoot", false);
+                            sounds.PlaySound();
+                            bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
+                            pistolDelay = maxPistolDelay;
+                        }
+                        break;
+                    case WeaponType.Shotgun:
+
+                        //bulletTravelDist = 64 * 2.75f;
+                        if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) && shotGunDelay <= 0
+                           || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released && shotGunDelay <= 0)
+                        {
+                            sounds.AddSound("SoundEffects/Shoot", false, -1f);
+                            sounds.PlaySound();
+                            sounds.AddSound("SoundEffects/Shoot", false, -1f);
+                            sounds.PlaySound();
+
+                            bulletTravelDist = 64 * 2.75f;
+                            float speedOffset = 3f;
+                            switch (lockedDirection)
+                            {
+                                case "up":
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y + (14 / 2)), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed,
+                                        angle: MathHelper.ToRadians(-90)));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Height / 4, 0);
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), -bulletSpeed/speedOffset, new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed,
+                                        angle: MathHelper.ToRadians(-90)));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Height / 4, 0);
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed/speedOffset, new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed,
+                                   angle: MathHelper.ToRadians(-90)));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Height / 4, 0);
+                                    break;
+                                case "down":
+                                    
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed,
+                                        angle: MathHelper.ToRadians(90)));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Height/3f, 0);
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), -bulletSpeed / speedOffset, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed,
+                                       angle: MathHelper.ToRadians(90)));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Height/3f, 0);
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed / speedOffset, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed,
+                                   angle: MathHelper.ToRadians(90)));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Height/3f, 0);
+
+                                    break;
+                                case "left":
+
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X + (14 / 2), rectangle.Center.Y - (14 / 2)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist,
+                                        angle: MathHelper.ToRadians(180)));
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X + (14 / 2), rectangle.Center.Y - (14 / 2)), -bulletSpeed, new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed/speedOffset,
+                                       angle: MathHelper.ToRadians(180)));
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X + (14 / 2), rectangle.Center.Y - (14 / 2)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed/speedOffset,
+                                   angle: MathHelper.ToRadians(180)));
+
+                                    break;
+                                case "right":
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(0, -rectangle.Height / 3);
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed, 
+                                        new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / speedOffset));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(0, -rectangle.Height / 3);
+                                    bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y - 22), bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY),
+                                        content, true, bulletTravelDist, true, -bulletSpeed / speedOffset));
+                                    bullets[bullets.Count - 1].animOffset = new Vector2(0, -rectangle.Height / 3);
+                                    break;
+                            }
+
+                            shotGunDelay = maxShotgunDelay;
+                        }
+
+                        break;
+                    case WeaponType.Burst:
+                       
+
+                        if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) && burstDelay <= 0
+                         || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released && burstDelay <= 0)
+                        {
+                            bulletTravelDist = 64 * 5.5f;
+                            switch(lockedDirection)
+                            {
+                                case "up":
+                                    for (int j = 0; j < 3; j++)
+                                    {
+                                        bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed,
+                                      new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed, angle: MathHelper.ToRadians(-90)));
+                                        bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
+                                        bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Height/4, 0);
 
 
+                                        sounds.AddSound("SoundEffects/Shoot", false, -.5f);
+                                        sounds.PlaySound();
+                                    }
+                                    break;
+                                case "down":
+                                    for (int j = 0; j < 3; j++)
+                                    {
+                                        bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y - (14 / 2)), bulletSpeed,
+                                      new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed, angle: MathHelper.ToRadians(90)));
+                                        bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
+                                        bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Width/2, 0);
+                                        sounds.AddSound("SoundEffects/Shoot", false, -.5f);
+                                        sounds.PlaySound();
+                                    }
+                                    break;
+                                case "right":
+                                    for (int j = 0; j < 3; j++)
+                                    {
+                                        bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed,
+                                      new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, false, bulletSpeed, angle: MathHelper.ToRadians(0)));
+                                        bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
+                                        bullets[bullets.Count - 1].animOffset = new Vector2(0, -rectangle.Height / 3);
+                                        sounds.AddSound("SoundEffects/Shoot", false, -.5f);
+                                        sounds.PlaySound();
+                                    }
+                                    break;
+                                case "left":
+                                    for (int j = 0; j < 3; j++)
+                                    {
+                                        bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), -bulletSpeed,
+                                      new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, false, bulletSpeed, angle: MathHelper.ToRadians(180)));
+                                        bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
+                                        sounds.AddSound("SoundEffects/Shoot", false, -.5f);
+                                        sounds.PlaySound();
+                                    }
+                                    break;
+                            }
 
-                    shootDelay = iShootDelay;
+
+                            burstDelay = maxBurstDelay;
+                        }
+                        break;
+                    case WeaponType.Bomb:
+
+                        switch (lockedDirection)
+                        {
+                            case "up":
+                                break;
+                            case "down":
+                                break;
+                            case "right":
+                                break;
+                            case "left":
+                                break;
+                        }
+
+                    //     if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) && bombDelay <= 0
+                    //|| currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released && bombDelay <= 0)
+                    //     {
+                    //         if (animManager.isRight)
+                    //         {
+                    //             sounds.AddSound("SoundEffects/ThrowBomb", false);
+                    //             sounds.PlaySound();
+
+                    //             bulletSpeed = 3.5f;
+                    //             bombs.Add(new Bomb(new Circle(new Vector2(position.X + rectangle.Width,
+                    //               (rectangle.Center.Y - (15) + rectangle.Height / 2f)), 15), bulletSpeed, -bulletSpeed * 5f, content));
+                    //         }
+                    //         else if (animManager.isLeft)
+                    //         {
+                    //             sounds.AddSound("SoundEffects/ThrowBomb", false);
+                    //             sounds.PlaySound();
+
+                    //             bulletSpeed = 3.5f;
+                    //             bombs.Add(new Bomb(new Circle(new Vector2(position.X/* - (18 / 2)*/,
+                    //                 (rectangle.Center.Y - (15) + rectangle.Height / 2f)), 15), -bulletSpeed, -bulletSpeed * 5f, content));
+                    //         }
+
+                    //         bombDelay = maxBombDelay;
+                    //     }
+                         break;
+                    case WeaponType.Laser:
+
+                      
+
+                   //     if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) && laserDelay <= 0
+                   //|| currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released && laserDelay <= 0)
+                   //     {
+                   //         if (animManager.isRight)
+                   //         {
+                   //             bulletSpeed = 4.5f;
+                   //             bulletTravelDist = 64 * 4f;
+                   //             for (int j = 0; j < 8; j++)
+                   //             {
+                   //                 bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width,
+                   //               rectangle.Center.Y - (14 / 2)), bulletSpeed,
+                   //               new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
+                   //                 bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
+                   //                 sounds.AddSound("SoundEffects/Shoot", false, .5f);
+                   //                 sounds.PlaySound();
+                   //             }
+                   //         }
+                   //         else if (animManager.isLeft)
+                   //         {
+                   //             bulletSpeed = 4.5f;
+                   //             bulletTravelDist = 64 * 4f;
+                   //             for (int j = 0; j < 8; j++)
+                   //             {
+                   //                 bullets.Add(new Bullet(new Vector2(position.X /*- (18 / 2)*/,
+                   //               rectangle.Center.Y - (14 / 2)), -bulletSpeed,
+                   //               new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, angle: num1));
+                   //                 bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
+                   //                 sounds.AddSound("SoundEffects/Shoot", false, .5f);
+                   //                 sounds.PlaySound();
+                   //             }
+                   //         }
+
+                   //         laserDelay = maxLaserDelay;
+                   //     }
+                        break;
                 }
+
+
+                //if (shootDelay <= 0)
+                //{
+                //    switch (lockedDirection)
+                //    {
+                //        case "up":
+                //            bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (22), rectangle.Y), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed, 
+                //                angle: MathHelper.ToRadians(-90)));
+
+                //            break;
+                //        case "down":
+                //            bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (22), rectangle.Bottom), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed,
+                //                angle:MathHelper.ToRadians(90)));
+                //            break;
+                //        case "left":
+                //            bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist,
+                //                angle:MathHelper.ToRadians(180)));
+                //            break;
+                //        case "right":
+                //            bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y - (22)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                //            break;
+                //    }
+                //    bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
+
+                //    //if (animManager.isUp)
+                //    //    bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, 
+                //    //        new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
+                //    //else if(animManager.isDown)
+                //    //    bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Bottom), bulletSpeed, 
+                //    //        new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
+                //    //else if(animManager.isLeft)
+                //    //    bullets.Add(new Bullet(new Vector2(rectangle.Left, rectangle.Y + (rectangle.Height / 2)), -bulletSpeed, 
+                //    //        new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+                //    //else if(animManager.isRight)
+                //    //    bullets.Add(new Bullet(new Vector2(rectangle.Right, rectangle.Y + (rectangle.Height / 2)), bulletSpeed, 
+                //    //        new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
+
+
+
+                //    shootDelay = iShootDelay;
+                //}
 
 
             }
@@ -1145,6 +1550,15 @@ namespace AUTO_Matic.TopDown
            
         }
 
+        private void SetShootDelays()
+        {
+            shotGunDelay = maxShotgunDelay;
+            pistolDelay = maxPistolDelay;
+            burstDelay = maxBurstDelay;
+            laserDelay = maxLaserDelay;
+            bombDelay = maxBombDelay;
+        }
+
         public void Collision(Rectangle newRect, int xOffset, int yOffset, Rectangle bounds)
         {
 
@@ -1281,7 +1695,7 @@ namespace AUTO_Matic.TopDown
         {
 
 
-            position.X += pixelSize;
+            position.X += pixelSize * 2;
             if (levelInY == 1)
             {
                 if (CanMove(newRect))
@@ -1381,7 +1795,7 @@ namespace AUTO_Matic.TopDown
         }
         void CheckBorderCollisionLeft(int xOffset, Rectangle rect, int border)
         {
-            position.X -= pixelSize;
+            position.X -= pixelSize * 2;
 
 
             if (levelInY == 1)
@@ -1495,7 +1909,7 @@ namespace AUTO_Matic.TopDown
 
         void CheckBorderCollisionTop(int bounds, Rectangle rect, int border) // missing check for x because to max top
         {
-            position.Y -= pixelSize;
+            position.Y -= pixelSize * 2;
 
             if (levelInX == 1)
             {
@@ -1574,7 +1988,7 @@ namespace AUTO_Matic.TopDown
         void CheckBorderCollisionBottom(int bounds, Rectangle rect, int border)
         {
 
-            position.Y += pixelSize;
+            position.Y += pixelSize * 2;
             if (levelInX == 1 && position.Y < bounds)
             {
                 if (CanMove(rect))
@@ -1757,7 +2171,7 @@ namespace AUTO_Matic.TopDown
             {
                 bullet.Draw(spriteBatch);
             }
-
+            weaponWheel.Draw(spriteBatch, content, selectedWeapon);
             particles.Draw(spriteBatch);
         }
         int DistForm(Vector2 pos1, Vector2 pos2)
@@ -1766,5 +2180,72 @@ namespace AUTO_Matic.TopDown
             return num;
 
         }
+    }
+
+    class WeaponWheel
+    {
+        public List<WeaponSlot> WeaponSlots = new List<WeaponSlot>();
+        public bool active;
+        int size;
+        public WeaponWheel(TDPlayer player, int size)
+        {
+            WeaponSlots = new List<WeaponSlot>();
+            active = false;
+            this.size = size;
+            for (int i = 0; i < 5; i++)
+            {
+                WeaponSlots.Add(new WeaponSlot());
+
+            }
+            WeaponSlots[0].rect = new Rectangle(player.rectangle.Center.X - size / 2,
+                (int)(player.rectangle.Center.Y - (size * 3f)), size, size); //Center
+            WeaponSlots[1].rect = new Rectangle(WeaponSlots[0].rect.X - (size + 2),
+                WeaponSlots[0].rect.Y, size, size);//Left
+            WeaponSlots[2].rect = new Rectangle(WeaponSlots[0].rect.Right + 2,
+                WeaponSlots[0].rect.Y, size, size);//Right
+            WeaponSlots[3].rect = new Rectangle(WeaponSlots[0].rect.X,
+                WeaponSlots[0].rect.Y - (size + 2), size, size);//Top
+            WeaponSlots[4].rect = new Rectangle(player.rectangle.Center.X - size / 2,
+                WeaponSlots[0].rect.Bottom + 2, size, size);//Bottom
+
+        }
+
+        public void Update(TDPlayer player)
+        {
+
+
+            WeaponSlots[0].rect = new Rectangle(player.rectangle.Center.X - size / 4,
+                       (int)(player.rectangle.Center.Y - (size * 3.75f)), size, size); //Center
+            WeaponSlots[1].rect = new Rectangle(WeaponSlots[0].rect.X - (size + 2),
+                WeaponSlots[0].rect.Y, size, size);//Left
+            WeaponSlots[2].rect = new Rectangle(WeaponSlots[0].rect.Right + 2,
+                WeaponSlots[0].rect.Y, size, size);//Right
+            WeaponSlots[3].rect = new Rectangle(WeaponSlots[0].rect.X,
+                WeaponSlots[0].rect.Y - (size + 2), size, size);//Top
+            WeaponSlots[4].rect = new Rectangle(player.rectangle.Center.X - size / 4,
+                WeaponSlots[0].rect.Bottom + 2, size, size);//Bottom
+        }
+
+        public void Draw(SpriteBatch spriteBatch, ContentManager content, int selectedWeapon)
+        {
+            if (active)
+            {
+                for (int i = 0; i < WeaponSlots.Count; i++)
+                {
+                    if (selectedWeapon == i)
+                        spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), WeaponSlots[i].rect, Color.Blue * .35f);
+                    else
+                        spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), WeaponSlots[i].rect, Color.White * .35f);
+
+                }
+
+            }
+        }
+    }
+
+    class WeaponSlot
+    {
+        public Rectangle rect;
+        public Texture2D texture;
     }
 }

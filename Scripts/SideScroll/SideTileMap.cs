@@ -35,10 +35,20 @@ namespace AUTO_Matic
         public static List<int> WallTilesIndexes = new List<int>(); //List of indexes that contain the wall tiles
         public static List<int> BackgroundIndexes = new List<int>();//List of indexes that contain the background tiles
         public static List<int> PlatformIndexes = new List<int>();//List of the indexes of the platform tiles
+        public static List<int> TopDoorIndexes = new List<int>();
+        public static List<int> BottomDoorIndexes = new List<int>();
+        public static List<int> EnemySpawnIndexes = new List<int>();
+        public static List<int> PlayerSpawnIndexes = new List<int>();
+        public static List<int> DungeonIndexes = new List<int>();
         public static List<RepeatBackground> repeatBG = new List<RepeatBackground>();
         public static List<ControllBeacon> flyingBeacons = new List<ControllBeacon>();
         public static List<Vector2> Textboxes = new List<Vector2>();
         public static List<BorderTile> BorderTiles = new List<BorderTile>();
+
+        int[,] level0MaxPoint = new int[0,0];
+        int[,] level1MaxPoint = new int[0, 0];
+        int[,] level2MaxPoint = new int[0, 0];
+        int[,] level3MaxPoint = new int[0, 0];
 
         //int backgroundIndex = 1;
 
@@ -153,7 +163,7 @@ namespace AUTO_Matic
         }
         public static void Generate(int[,] map, int size, bool isFinal)
         {
-          
+
             //pixelSize = size;
             //Map = map;
 
@@ -169,11 +179,64 @@ namespace AUTO_Matic
             wallTiles.Clear();
             flyingBeacons.Clear();
             BorderTiles.Clear();
-
+            List<BackgroundTile> tempBGTils = new List<BackgroundTile>();
 
             int count = 0;//Repeat background are 4 tiles long so must make every 4
             int count2 = 0;//Repeat is 2 tiles tall so must make every 2
-          
+
+            for (int y = 0; y < map.GetLength(0); y++)
+            {
+                for (int x = 0; x < map.GetLength(1); x++)
+                {
+                    int num = map[y, x];
+                    if (num == 1 || num == 35 || num == 39 || num == 58) //Background
+                    {
+                        //if(backgroundTiles.Contains(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                        //    backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
+
+                        backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
+
+
+                        //if(x < map.GetLength(1) -1 && y < map.GetLength(0) - 1 && map[y,x + 1] == num || x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && PlayerSpawnIndexes.Contains(map[y, x + 1]) ||
+                        //     x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && TopDoorIndexes.Contains(map[y, x + 1]) || x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && BottomDoorIndexes.Contains(map[y, x + 1]) ||
+                        //      x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && PlatformIndexes.Contains(map[y, x + 1]) || x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && EnemySpawnIndexes.Contains(map[y, x + 1]) ||
+                        //       x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && map[y, x + 1] >= 27 )
+                        //{
+                        //    backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size * 2, size * 2)));
+                        //    if(BackgroundIndexes.Contains(map[y + 1, x + 1]))
+                        //        map[y + 1, x + 1] = 69;
+                        //    if(BackgroundIndexes.Contains(map[y + 1, x]))
+                        //        map[y + 1, x] = 69;
+                        //    if(BackgroundIndexes.Contains(map[y, x + 1]))
+                        //        map[y, x + 1] = 69;
+                        //}
+                        //This was a way to track where the levels end
+                        if (backgroundTiles[backgroundTiles.Count - 1].mapPoint.GetLength(1) > tileMap.level0MaxPoint.GetLength(1) && num == 1)
+                        {
+                            tileMap.level0MaxPoint = backgroundTiles[backgroundTiles.Count - 1].mapPoint;
+                        }
+                        else if (num == 35 && backgroundTiles[backgroundTiles.Count - 1].mapPoint.GetLength(1) > tileMap.level1MaxPoint.GetLength(1))
+                        {
+                            tileMap.level1MaxPoint = backgroundTiles[backgroundTiles.Count - 1].mapPoint;
+                        }
+                        else if (num == 39 && backgroundTiles[backgroundTiles.Count - 1].mapPoint.GetLength(1) > tileMap.level2MaxPoint.GetLength(1))
+                        {
+                            tileMap.level2MaxPoint = backgroundTiles[backgroundTiles.Count - 1].mapPoint;
+                        }
+                        else if (num == 58 && backgroundTiles[backgroundTiles.Count - 1].mapPoint.GetLength(1) > tileMap.level2MaxPoint.GetLength(1))
+                        {
+                            tileMap.level3MaxPoint = backgroundTiles[backgroundTiles.Count - 1].mapPoint;
+                        }
+                        if (BackgroundIndexes.Contains(num) == false)
+                        {
+                            BackgroundIndexes.Add(num);
+
+                        }
+
+                    }
+                }
+            }
+
             for (int y = 0; y < map.GetLength(0); y++)
             {
 
@@ -202,52 +265,137 @@ namespace AUTO_Matic
                     //}
                     if (num == 0)
                     {
-                        if(Textboxes.Contains(new Vector2(x * size, y * size)) == false)
+                        if (Textboxes.Contains(new Vector2(x * size, y * size)) == false)
                         {
                             Textboxes.Add(new Vector2(x * size, y * size));
-                           
+
                         }
-                        if(backgroundTiles.Contains(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size))) == false)
                         backgroundTiles.Add(new BackgroundTile(1, new Rectangle(x * size, y * size, size, size)));
 
                     }
-                    else if(num == 60)
+                    else if (num == 60)
                     {
-                        if(BorderTiles.Contains(new BorderTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                        if (BorderTiles.Contains(new BorderTile(num, new Rectangle(x * size, y * size, size, size))) == false)
                             BorderTiles.Add(new BorderTile(num, new Rectangle(x * size, y * size, size, size)));
-                        backgroundTiles.Add(new BackgroundTile(map[y - 2, x], new Rectangle(x * size, y * size, size, size)));
+                        if (x <= tileMap.level0MaxPoint.GetLength(1))
+                        {
+                            backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[0], new Rectangle(x * size, y * size, size, size)));
+                        }
+                        else if (x > tileMap.level0MaxPoint.GetLength(1) && x <= tileMap.level1MaxPoint.GetLength(1))
+                        {
+                            backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[1], new Rectangle(x * size, y * size, size, size)));
+                        }
+                        else if (x > tileMap.level1MaxPoint.GetLength(1) && x <= tileMap.level2MaxPoint.GetLength(1))
+                        {
+                            backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[2], new Rectangle(x * size, y * size, size, size)));
+                        }
+                        else if (x > tileMap.level2MaxPoint.GetLength(1) && x <= tileMap.level3MaxPoint.GetLength(1))
+                        {
+                            backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[3], new Rectangle(x * size, y * size, size, size)));
+                        }
                     }
                     else if (num == 2 || num == 5 || num == 6 || num == 13 || num == 14 || num == 15 || num == 16 ||
                         num == 17 || num == 18 || num == 19 || num == 20 || num == 21 || num == 22 || num == 23 || num == 46 || num == 47 || num == 52 || num == 53
                         || num == 33 || num == 34 || num == 27 || num == 32 || num == 36 || num == 40 || num == 41 || num == 43 || num == 49 || num == 54 || num == 55
-                        || num == 37 || num == 56 /*|| num == 29*/ || num == 28 /*|| num == 30*/ || num == 45 /*|| num == 42 */|| num == 48 /*|| num == 44 */|| num == 45 
+                        || num == 37 || num == 56 /*|| num == 29*/ || num == 28 /*|| num == 30*/ || num == 45 /*|| num == 42 */|| num == 48 /*|| num == 44 */|| num == 45
                         /*|| num == 51*/ || num == 38 /*|| num == 50*/) //Corner tiles need to be moved to Platform tiles 
                     {
                         //If at the top of the map
-                     
-                        if(num >= 27 && num < 35 || num == 36 )
+
+                        if (num >= 27 && num < 35 || num == 36)
                         {
-                            if(backgroundTiles.Contains(new BackgroundTile(35, new Rectangle(x * size, y * size, size, size))) == false)
-                            backgroundTiles.Add(new BackgroundTile(35, new Rectangle(x * size, y * size, size, size)));
+                            if (x <= tileMap.level0MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[0], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level0MaxPoint.GetLength(1) && x <= tileMap.level1MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[1], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level1MaxPoint.GetLength(1) && x <= tileMap.level2MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[2], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level2MaxPoint.GetLength(1) && x <= tileMap.level3MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[3], new Rectangle(x * size, y * size, size, size)));
+                            }
+
+                            if (backgroundTiles.Contains(new BackgroundTile(35, new Rectangle(x * size, y * size, size, size))) == false)
+                                backgroundTiles.Add(new BackgroundTile(35, new Rectangle(x * size, y * size, size, size)));
                         }
 
-                        if (y==0)
+                        if (y == 0)
                         {
-                            if(groundTiles.Contains(new GroundTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                            if (x <= tileMap.level0MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[0], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level0MaxPoint.GetLength(1) && x <= tileMap.level1MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[1], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level1MaxPoint.GetLength(1) && x <= tileMap.level2MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[2], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level2MaxPoint.GetLength(1) && x <= tileMap.level3MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[3], new Rectangle(x * size, y * size, size, size)));
+                            }
+
+
+                            if (groundTiles.Contains(new GroundTile(num, new Rectangle(x * size, y * size, size, size))) == false)
                                 groundTiles.Add(new GroundTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (GroundIndexes.Contains(num) == false)
                                 GroundIndexes.Add(num);
                         }
-                        else if(y > 0 && GroundIndexes.Contains(num2))//If there is a tile above this one
+                        else if (y > 0 && GroundIndexes.Contains(num2))//If there is a tile above this one
                         {
-                            if(wallTiles.Contains(new WallTile(num, new Rectangle(x * size, y * size, size, size))) == false)
-                            wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if (x <= tileMap.level0MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[0], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level0MaxPoint.GetLength(1) && x <= tileMap.level1MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[1], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level1MaxPoint.GetLength(1) && x <= tileMap.level2MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[2], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level2MaxPoint.GetLength(1) && x <= tileMap.level3MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[3], new Rectangle(x * size, y * size, size, size)));
+                            }
+
+
+                            if (wallTiles.Contains(new WallTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                                wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
                             //Add indexes?
                             if (GroundIndexes.Contains(num) == false)
                                 GroundIndexes.Add(num);
                         }
                         else //Make it a ground tile
                         {
+
+                            if (x <= tileMap.level0MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[0], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level0MaxPoint.GetLength(1) && x <= tileMap.level1MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[1], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level1MaxPoint.GetLength(1) && x <= tileMap.level2MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[2], new Rectangle(x * size, y * size, size, size)));
+                            }
+                            else if (x > tileMap.level2MaxPoint.GetLength(1) && x <= tileMap.level3MaxPoint.GetLength(1))
+                            {
+                                backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[3], new Rectangle(x * size, y * size, size, size)));
+                            }
+
                             if (num == 21 && x == 25 && y == 7)
                             {
                                 num = 15;
@@ -257,90 +405,116 @@ namespace AUTO_Matic
                             if (GroundIndexes.Contains(num) == false /*&& num != 21*/)
                                 GroundIndexes.Add(num);
 
-                          
+
                         }
-                      
-                       
+
+
                     }
                     else if (num == 3 || num == 4 || num == 26 || num == 31 || num == 29 || num == 30 || num == 42 || num == 44 || num == 51 || num == 50) //Platforms
                     {
-                        if (backgroundTiles.Contains(new BackgroundTile(map[y - 2, x], new Rectangle(x * size, y * size, size, size))) == false)
-                            backgroundTiles.Add(new BackgroundTile(map[y - 2, x], new Rectangle(x * size, y * size, size, size)));
+                        if (x <= tileMap.level0MaxPoint.GetLength(1))
+                        {
+                            backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[0], new Rectangle(x * size, y * size, size, size)));
+                        }
+                        else if (x > tileMap.level0MaxPoint.GetLength(1) && x <= tileMap.level1MaxPoint.GetLength(1))
+                        {
+                            backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[1], new Rectangle(x * size, y * size, size, size)));
+                        }
+                        else if (x > tileMap.level1MaxPoint.GetLength(1) && x <= tileMap.level2MaxPoint.GetLength(1))
+                        {
+                            backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[2], new Rectangle(x * size, y * size, size, size)));
+                        }
+                        else if (x > tileMap.level2MaxPoint.GetLength(1) && x <= tileMap.level3MaxPoint.GetLength(1))
+                        {
+                            backgroundTiles.Add(new BackgroundTile(BackgroundIndexes[3], new Rectangle(x * size, y * size, size, size)));
+                        }
+
+
                         if (y == 0)//If at the top of the map
                         {
-                            if(platformTiles.Contains(new PlatformTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                            if (platformTiles.Contains(new PlatformTile(num, new Rectangle(x * size, y * size, size, size))) == false)
                                 platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (PlatformIndexes.Contains(num) == false)
                                 PlatformIndexes.Add(num);
                         }
-                        else if(y > 0 && PlatformIndexes.Contains(num2)) //If there is one above it 
+                        else if (y > 0 && PlatformIndexes.Contains(num2)) //If there is one above it 
                         {
-                            if(wallTiles.Contains(new WallTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                            if (wallTiles.Contains(new WallTile(num, new Rectangle(x * size, y * size, size, size))) == false)
                                 wallTiles.Add(new WallTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (PlatformIndexes.Contains(num) == false)
                                 PlatformIndexes.Add(num);
                         }
                         else //Regular platform
                         {
-                            if(platformTiles.Contains(new PlatformTile(num, new Rectangle(x * size, y * size, size, size))) == false)
-                             platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
+                            if (platformTiles.Contains(new PlatformTile(num, new Rectangle(x * size, y * size, size, size))) == false)
+                                platformTiles.Add(new PlatformTile(num, new Rectangle(x * size, y * size, size, size)));
                             if (PlatformIndexes.Contains(num) == false)
                                 PlatformIndexes.Add(num);
                         }
-                       
+
                     }
-                    else if(num == 1 || num == 35 || num == 39 || num == 58) //Background
+                    else if (num == 9 || num == 12)//Top of doors
                     {
-                        if(backgroundTiles.Contains(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size))) == false)
-                            backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
-                        if (BackgroundIndexes.Contains(num) == false)
-                            BackgroundIndexes.Add(num);
-                    }
-                    else if(num == 9 || num == 12)//Top of doors
-                    {
-                       if(x <= 0)
+                        if (x <= 0)
                             backgroundTiles.Add(new BackgroundTile(map[y, x + 1], new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
-                       else
+                        else
                             backgroundTiles.Add(new BackgroundTile(map[y, x - 1], new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
                         topDoorTiles.Add(new TopDoorTile(num, new Rectangle(x * size, y * size, size, size)));
+                        if (TopDoorIndexes.Contains(num) == false)
+                            TopDoorIndexes.Add(num);
                     }
-                    else if(num == 8 || num == 11)//Bottom doors
+                    else if (num == 8 || num == 11)//Bottom doors
                     {
                         if (x <= 0)
                             backgroundTiles.Add(new BackgroundTile(map[y, x + 1], new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
                         else
                             backgroundTiles.Add(new BackgroundTile(map[y, x - 1], new Rectangle(x * size, y * size, size, size))); //Place background tile in the spot
                         bottomDoorTiles.Add(new BottomDoorTile(num, new Rectangle(x * size, y * size, size, size)));
+
+                        if (BottomDoorIndexes.Contains(num) == false)
+                            BottomDoorIndexes.Add(num);
                     }
-                    else if(num == 25) //Enemy spawns
+                    else if (num == 25) //Enemy spawns
                     {
-                        if(enemySpawns.Contains(new Vector2(x * size, y * size)) == false)
+                        if (enemySpawns.Contains(new Vector2(x * size, y * size)) == false)
                             enemySpawns.Add(new Vector2(x * size, y * size));
                         backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
+
+                        if (EnemySpawnIndexes.Contains(num) == false)
+                            EnemySpawnIndexes.Add(num);
                     }
-                    else if(num == 57)//Dungeon entrance
+                    else if (num == 57)//Dungeon entrance
                     {
                         backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
                         dungeonEntrances.Add(new DungeonEntrance(num, new Rectangle(x * size, y * size, size, size)));
+                        if (DungeonIndexes.Contains(num) == false)
+                            DungeonIndexes.Add(num);
                     }
-                    else if(num == 24)//Player spawn
+                    else if (num == 24)//Player spawn
                     {
                         playerSpawns.Add(new Vector2(x * size, y * size));
                         backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
+
+                        if (PlayerSpawnIndexes.Contains(num) == false)
+                            PlayerSpawnIndexes.Add(num);
                     }
-                    else if(num == 59)
+                    else if (num == 59)
                     {
-                        if(flyingBeacons.Contains(new ControllBeacon(num, new Rectangle(x * size, y * size, size, size))) == false)
+                        if (flyingBeacons.Contains(new ControllBeacon(num, new Rectangle(x * size, y * size, size, size))) == false)
                         {
                             //flyingBeacons.Add(new ControllBeacon(num, new Rectangle(x * size, y * size, size, size)));
+                            if (enemySpawns.Contains(new Vector2(x * size, y * size)) == false)
+                                enemySpawns.Add(new Vector2(x * size, y * size));
                             backgroundTiles.Add(new BackgroundTile(map[y - 1, x], new Rectangle(x * size, y * size, size, size)));
+                            if (EnemySpawnIndexes.Contains(num) == false)
+                                EnemySpawnIndexes.Add(num);
                         }
-                  
+
                     }
-                    else if(num == 99)
+                    else if (num == 99)
                     {
                         BorderTiles.Add(new BorderTile(num, new Rectangle(x * size, y * size, size, size)));
-                        backgroundTiles.Add(new BackgroundTile(map[y - 2, x], new Rectangle(x * size, y * size, size, size)));
+                        //backgroundTiles.Add(new BackgroundTile(map[y - 2, x], new Rectangle(x * size, y * size, size, size)));
                     }
 
 
@@ -353,12 +527,110 @@ namespace AUTO_Matic
             tileMap.SetMap(map);
             tileMap.SetWorldDims(map.GetLength(1) * 64, map.GetLength(0) * 64);
 
+            int sizeMod = 2;
+
+            SetBackgroundTiles(map, size, tempBGTils, sizeMod);
+
+
+
+
+
+
+            //for (int i = 0; i < platformTiles.Count; i++)
+            //{
+            //    bool covered = false;
+            //    for (int j = 0; j < tempBGTils.Count; j++)
+            //    {
+            //        if (tempBGTils[j].Rectangle.Contains(platformTiles[i].Rectangle.Center))
+            //            covered = true;
+            //    }
+
+            //    if (!covered)
+            //    {
+            //        if (platformTiles[i].MapPoint[1] < tileMap.level0MaxPoint.GetLength(1))
+            //        {
+            //            tempBGTils.Add(new BackgroundTile(BackgroundIndexes[0], new Rectangle(platformTiles[i].MapPoint[1], platformTiles[i].MapPoint[0], size, size)));
+            //        }
+            //    }
+            //}
+
+
+
+            //for (int i = backgroundTiles.Count - 1; i >= 0; i--)
+            //{
+            //    for (int j = 0; j < backgroundTiles.Count - 1; j++)
+            //    {
+            //        if (backgroundTiles[i].Rectangle.Intersects(backgroundTiles[j].Rectangle) && backgroundTiles[i].Rectangle != backgroundTiles[j].Rectangle)
+            //        {
+            //            backgroundTiles.Remove(backgroundTiles[j]);
+            //            break;
+            //        }
+            //    }
+            //}
+
             //for(int i = 0; i < map.GetLength(1); i += 4)
             //{
             //    repeatBG.Add(new RepeatBackground(new Rectangle(i * 64, )))
             //}
 
 
+        }
+
+        private static void SetBackgroundTiles(int[,] map, int size, List<BackgroundTile> tempBGTils, int sizeMod)
+        {
+            List<BackgroundTile> copy = backgroundTiles;
+            for (int y = 0; y < map.GetLength(0); y++)
+            {
+                for (int x = 0; x < map.GetLength(1); x++)
+                {
+                    for (int i = 0; i < copy.Count; i++)
+                    {
+                        if (copy[i].MapPoint[0] == y && copy[i].MapPoint[1] == x && map[copy[i].MapPoint[0], copy[i].MapPoint[1]] != 69)
+                        {
+
+                            for (int j = 1; j < sizeMod; j++)
+                            {
+                                if (copy[i].MapPoint[1] + j < map.GetLength(1))
+                                {
+                                    map[copy[i].MapPoint[0], copy[i].MapPoint[1] + j] = 69;
+                                }
+                                if (copy[i].MapPoint[0] + j < map.GetLength(0) && copy[i].MapPoint[1] + j < map.GetLength(1))
+                                {
+                                    map[copy[i].MapPoint[0] + j, copy[i].MapPoint[1] + j] = 69;
+                                }
+                                if (copy[i].MapPoint[0] + j < map.GetLength(0))
+                                {
+                                    map[copy[i].MapPoint[0] + j, copy[i].MapPoint[1]] = 69;
+                                }
+                            }
+
+
+                        }
+
+
+                    }
+                }
+            }
+
+
+            for (int y = 0; y < map.GetLength(0); y++)
+            {
+                for (int x = 0; x < map.GetLength(1); x++)
+                {
+                    int num = map[y, x];
+
+                    for (int i = 0; i < copy.Count; i++)
+                    {
+                        if (copy[i].MapPoint[0] == y && copy[i].MapPoint[1] == x && num != 69)
+                        {
+                            tempBGTils.Add(new BackgroundTile(copy[i].index, new Rectangle(x * size, y * size, size * sizeMod, size * sizeMod)));
+                        }
+                    }
+                }
+
+
+            }
+            backgroundTiles = tempBGTils;
         }
 
         public static Vector2 GetNumTilesOfGround(int row, int col) //Will be recieving tile landed on

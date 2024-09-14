@@ -15,6 +15,8 @@ namespace AUTO_Matic.TopDown
 
         private Rectangle rectangle;
         public int[] mapPoint;
+
+        public Color barrier = Color.White;
         public Rectangle Rectangle
         {
             get { return rectangle; }
@@ -40,7 +42,7 @@ namespace AUTO_Matic.TopDown
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture, rectangle, Color.White);
+            spriteBatch.Draw(texture, rectangle, barrier);
         }
         public void Draw(SpriteBatch spriteBatch, string dir)
         {
@@ -90,6 +92,12 @@ namespace AUTO_Matic.TopDown
             texture = Content.Load<Texture2D>("TopDown/MapTiles/Tile" + i);
             this.Rectangle = newRect;
            // mapPoint = i;
+        }
+        public WallTiles(Rectangle newRect)
+        {
+            texture = Content.Load<Texture2D>("Textures/white");
+            this.Rectangle = newRect;
+            this.barrier = Color.Blue * .5f;
         }
     }
 
