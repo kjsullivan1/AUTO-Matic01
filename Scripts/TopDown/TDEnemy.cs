@@ -24,17 +24,23 @@ namespace AUTO_Matic.Scripts.TopDown
         private Vector2 velocity;
         public Vector2 targetOffset = Vector2.Zero;
         private Rectangle rectangle;
-        public float moveSpeed = 2.75f;
+        public float moveSpeed = .75f;
+        public float iMoveSpeed = .75f;
         private bool hasJumped = false;
         public bool isColliding = false;
         int visionLength = 10;
-        float health = 5f;
+        float health = 3f;
         int pixelSize = 64;
         public bool dead;
         float angle = 0;
 
+        bool isRunAway = false;
+        float runAwayTime = 0;
+        FloorTiles selectedRunAway;
+        public float dmgResistance = 1.25f;
         HealthBar healthBar;
         float healthBarDelay = .25f;
+        TDPlayer tdPlayer;
         public float Health
         {
             get { return health; }
@@ -48,6 +54,38 @@ namespace AUTO_Matic.Scripts.TopDown
                     dead = true;
                 }
                 healthBarDelay = .25f;
+
+                pause = false;
+
+                //isRunAway = true;
+
+                if(runAwayTime <= 0)
+                {
+                    Random rand = new Random();
+                    int randSelect = rand.Next(0, map.FloorTiles.Count);
+                    bool selected = false;
+                    int i = 0;
+                    foreach (FloorTiles tile in map.FloorTiles)
+                    {
+                       
+                        if (tile.barrier != Color.Blue * .5f && i == randSelect && velocity.X < 0 && tile.Rectangle.X > rectangle.X ||
+                            tile.barrier != Color.Blue * .5f && i == randSelect && velocity.X > 0 && tile.Rectangle.X < rectangle.X ||
+                            tile.barrier != Color.Blue * .5f && i == randSelect && tdPlayer.rectangle.X < rectangle.X && tile.Rectangle.X > rectangle.X ||
+                             tile.barrier != Color.Blue * .5f && i == randSelect && tdPlayer.rectangle.X > rectangle.X && tile.Rectangle.X < rectangle.X)
+                        {
+                            selectedRunAway = tile;
+                            selected = true;
+                            runAwayTime = RandFloat(1, 4);
+                        }
+                        i++;
+                    }
+
+                    isRunAway = selected;
+                }
+              
+
+                enemyState = EnemyStates.Movement;
+                
             }
         }
 
@@ -189,7 +227,7 @@ namespace AUTO_Matic.Scripts.TopDown
             return Math.Abs((int)((position.X + xMod) / tileSize));
         }
 
-        public TDEnemy(ContentManager Content, Vector2 spawnPos, TopDownMap map, int[,] mapDims, GraphicsDevice graphics)
+        public TDEnemy(ContentManager Content, Vector2 spawnPos, TopDownMap map, int[,] mapDims, GraphicsDevice graphics, int levelNum)
         {
             content = Content;
             texture = Content.Load<Texture2D>("TopDown/Animations/TankTopDownBody");
@@ -207,6 +245,26 @@ namespace AUTO_Matic.Scripts.TopDown
             healthBar = new HealthBar(new Rectangle(rectangle.X, rectangle.Y, 62, 5), content, Health);
 
             SetTargetPersonality();
+
+            switch(levelNum)
+            {
+                case 0:
+                    moveSpeed = 1.25f;
+                    iMoveSpeed = moveSpeed;
+                    break;
+                case 1:
+                    moveSpeed = 1.75f;
+                    iMoveSpeed = moveSpeed;
+                    break;
+                case 2:
+                    moveSpeed = 2.25f;
+                    iMoveSpeed = moveSpeed;
+                    break;
+                case 3:
+                    moveSpeed = 2.75f;
+                    iMoveSpeed = moveSpeed;
+                    break;
+            }
         }
 
         //List<Vector2> GetTargets(List<SkullTiles> targets)
@@ -367,7 +425,9 @@ namespace AUTO_Matic.Scripts.TopDown
             }
         }
         public void Upate(GameTime gameTime, TDPlayer playerRect, TopDownMap tdMap, Rectangle bounds)
-        { 
+        {
+            this.map = tdMap;
+            this.tdPlayer = playerRect;
             rectangle = new Rectangle((int)position.X, (int)position.Y, tileSize, tileSize);
             healthBar.Update(new Point(rectangle.X, rectangle.Y - 5));
             healthBarDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -399,6 +459,22 @@ namespace AUTO_Matic.Scripts.TopDown
             {
                 #region Movement
                 case EnemyStates.Movement:
+
+                    if (isRunAway)
+                    {
+                        target = new Vector2(selectedRunAway.Rectangle.X, selectedRunAway.Rectangle.Y);
+
+                        runAwayTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                        if (runAwayTime <= 0)
+                        {
+                            isRunAway = false;
+                            target = new Vector2(((playerRect.rectangle.Center.X / 64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
+                        }
+                            
+                    }
+                       
+
                     if(rectangle.Intersects(playerRect.rectangle))
                     {
                         enemyState = EnemyStates.Shoot;
@@ -440,7 +516,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     
 
                     if(distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(target.X, target.Y)) < 64 && 
-                        distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(playerRect.rectangle.Center.X, playerRect.rectangle.Center.Y)) < bulletTravelDist)
+                        distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(target.X, target.Y)) < bulletTravelDist && !isRunAway)
                     {
                         //inSight = false;
                         if(playerRect.rectangle.Center.Y < rectangle.Center.Y && !blockedTop || playerRect.rectangle.Center.Y > rectangle.Center.Y && !blockedBottom
@@ -459,13 +535,13 @@ namespace AUTO_Matic.Scripts.TopDown
 
 
                     }
-                    else if(distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(playerRect.rectangle.Center.X, playerRect.rectangle.Center.Y)) < bulletTravelDist)
+                    else if(distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(target.X, target.Y)) < bulletTravelDist && !isRunAway)
                     {
                         target = new Vector2(((playerRect.rectangle.Center.X / 64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
                         //SetTargetPersonality();
                         enemyState = EnemyStates.Shoot;
                     }
-                    else if (inSight)
+                    else if (inSight && !isRunAway)
                     {
                         target = new Vector2(((playerRect.rectangle.Center.X / 64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
                         //SetTargetPersonality();
@@ -475,9 +551,9 @@ namespace AUTO_Matic.Scripts.TopDown
                         //(playerRect.rectangle.Y) / (64 * playerRect.levelInY - 1) * (64 * playerRect.levelInY - 1));
              
                     }
-                    else
+                    else if(!isRunAway)
                     {
-                        target = new Vector2(position.X, position.Y);
+                        target = new Vector2(((playerRect.rectangle.Center.X /64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
                     }
                     //for (int i = vision.Count - 1; i >= 0; i--)
                     //{
@@ -1553,11 +1629,16 @@ namespace AUTO_Matic.Scripts.TopDown
                             Random rand = new Random();
                             if(rand.Next(0,101) <51)
                             {
-                                targetOffset = -targetOffset;
+                                targetOffset = Vector2.Zero;
+                                SetTargetPersonality();
                             }
                             
                             //SetTargetPersonality();
-                            target = new Vector2(((playerRect.rectangle.Center.X / 64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
+                            if(!isRunAway)
+                            {
+                                target = new Vector2(((playerRect.rectangle.Center.X / 64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
+                            }
+                
                             shootDelay = RandFloat(2, 4);
                             //    if (angle <= 205 && angle >= 165) //Fire left
                             //    {

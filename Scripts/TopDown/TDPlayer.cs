@@ -33,9 +33,11 @@ namespace AUTO_Matic.TopDown
         public Vector2 velocity;
         GamePadButtons currButtons;
         GamePadButtons prevButtons;
-        public int bossRoom = 1;
+        public int bossRoom = 8;
         bool lockDir = false;
         Vector2 startPos;
+
+
 
         float meleeDmg = 2.25f;
         bool melee = false;
@@ -48,13 +50,13 @@ namespace AUTO_Matic.TopDown
         float boostedSpeed = 0;
         float speedBoostTime = 1.75f;
         float iSpeedBoostTime;
-        float speedBoostInputDelay = .3f;
+        float speedBoostInputDelay = .65f;
         float iSpeedBoostInputDelay;
         bool inputDelay = false;
 
         float fireDmg = .5f;
         float fireDmgRate = .15f;
-        float iFireDmgRate = .25f;
+        float iFireDmgRate = .15f;
         bool inDOT = false; //Is inside the DamageOverTime tile
 
         UIManager KeyBinds; 
@@ -196,6 +198,8 @@ namespace AUTO_Matic.TopDown
         int whiteFrames = 45;
         int whiteCount = 0;
 
+        //List<Bullet> bombs = new List<Bullet>();
+
         public float Health
         {
             get { return health; }
@@ -223,7 +227,7 @@ namespace AUTO_Matic.TopDown
         #endregion
 
         #region Constructor
-        public TDPlayer(Game1 game, int pixelSize, int levelInX, int levelInY, UIManager uiManager, ContentManager content)
+        public TDPlayer(Game1 game, int pixelSize, int levelInX, int levelInY, UIManager uiManager, ContentManager content, int levelCount)
         {
             this.game = game;
             this.pixelSize = pixelSize - 12;
@@ -248,6 +252,22 @@ namespace AUTO_Matic.TopDown
             KeyBinds = uiManager;
 
             sounds = new SoundManager(content, uiManager.MasterVolume, uiManager.EffectVolume, uiManager.MusicVolume);
+
+            switch (levelCount)
+            {
+                case 0:
+                    bossRoom = 4;
+                    break;
+                case 1:
+                    bossRoom = 6;
+                    break;
+                case 2:
+                    bossRoom = 8;
+                    break;
+                case 3:
+                    bossRoom = 10;
+                    break;
+            }
         }
 
         #endregion
@@ -287,6 +307,7 @@ namespace AUTO_Matic.TopDown
         Texture2D gunTexture;
         public List<Bullet> bullets = new List<Bullet>();
         public List<Bullet> bombs = new List<Bullet>();
+        public List<Explosion> explosions = new List<Explosion>();
         MouseState prevMs;
         float bulletSpeed = 2f;
         float bulletMaxX = 10f;
@@ -295,21 +316,21 @@ namespace AUTO_Matic.TopDown
         float shootDelay = .35f;//In seconds
         float iShootDelay;
 
-        float pistolDelay = .35f;
-        float maxPistolDelay = .35f;
+        float pistolDelay = .5f;
+        float maxPistolDelay = .5f;
         float pistolDmg = 1.2f;
 
         float shotGunDelay = 1.15f;
         float maxShotgunDelay = 1.15f;
-        float shotGunDmg = 1.85f;
+        float shotGunDmg = .85f;
 
         float burstDelay = .65f;
         float maxBurstDelay = .65f;
-        float burstDmg = 2;
+        float burstDmg = 1.2f;
 
         float laserDelay = 1.35f;
         float maxLaserDelay = 1.35f;
-        float laserDmg = .75f;
+        float laserDmg = 1.35f;
 
         float bombDelay = 1.5f;
         float maxBombDelay = 1.5f;
@@ -326,6 +347,37 @@ namespace AUTO_Matic.TopDown
         Vector2 dashVelocity;
 
         string lockedDirection;
+
+        float RandomPitch
+        {
+            get
+            {
+                Random rand = new Random();
+                float num = 0;
+                switch (rand.Next(0, 4))
+                {
+                    case 0:
+                        num = 1;
+                        break;
+                    case 1:
+                        num = .5f;
+                        break;
+                    case 2:
+                        num = -1;
+                        break;
+                    case 3:
+                        num = -.5f;
+                        break;
+                    default:
+                        return 0;
+
+                }
+
+                return num;
+            }
+
+
+        }
 
         public void Load(ContentManager Content, Rectangle bounds)
         {
@@ -345,6 +397,8 @@ namespace AUTO_Matic.TopDown
             particles = new ParticleManager();
            
             weaponWheel = new WeaponWheel(this, 25);
+
+           
 
         
         }
@@ -858,8 +912,41 @@ namespace AUTO_Matic.TopDown
 
                 }
             }
+
+            for(int i = bombs.Count - 1; i >= 0; i--)
+            {
+                bombs[i].Update(gameTime);
+
+                if (bombs[i].delete)
+                {
+                    explosions.Add(new Explosion(new Circle(new Vector2(bombs[i].rect.X, bombs[i].rect.Y), bombs[i].rect.Width),
+                        1, (int)(bombs[i].rect.Width * 2.5f)));
+
+                    int radiusDif = explosions[explosions.Count - 1].maxSize - explosions[explosions.Count - 1].rect.Radius;
+
+                    particles.MakeExplosion(explosions[explosions.Count - 1].rect.Bounds,
+                           new Circle(new Vector2(explosions[explosions.Count - 1].rect.Bounds.X - radiusDif,
+                           explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif), explosions[explosions.Count - 1].maxSize / 2),
+                           20);
+
+                    bombs.RemoveAt(i);
+                }
+            }
+
+            for (int i = explosions.Count - 1; i >= 0; i--)
+            {
+                explosions[i].Update(gameTime);
+                if (explosions[i].rect.Radius >= explosions[i].maxSize)
+                {
+                    //particles.CreateEffect(20);
+
+                    explosions.RemoveAt(i);
+
+                }
+            }
+
             animManager.Update(gameTime, new Vector2(rectangle.X, rectangle.Y - (64 - rectangle.Height)));
-            particles.Update(gameTime, this, true);
+            particles.Update(gameTime);
             weaponWheel.Update(this);
         }
 
@@ -1120,9 +1207,9 @@ namespace AUTO_Matic.TopDown
                         if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) && shotGunDelay <= 0
                            || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released && shotGunDelay <= 0)
                         {
-                            sounds.AddSound("SoundEffects/Shoot", false, -1f);
+                            sounds.AddSound("SoundEffects/Shoot", false, -.7f);
                             sounds.PlaySound();
-                            sounds.AddSound("SoundEffects/Shoot", false, -1f);
+                            sounds.AddSound("SoundEffects/Shoot", false, -.7f);
                             sounds.PlaySound();
 
                             bulletTravelDist = 64 * 2.75f;
@@ -1197,7 +1284,7 @@ namespace AUTO_Matic.TopDown
                                         bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Height/4, 0);
 
 
-                                        sounds.AddSound("SoundEffects/Shoot", false, -.5f);
+                                        sounds.AddSound("SoundEffects/Shoot", false, -.25f);
                                         sounds.PlaySound();
                                     }
                                     break;
@@ -1208,7 +1295,7 @@ namespace AUTO_Matic.TopDown
                                       new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed, angle: MathHelper.ToRadians(90)));
                                         bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
                                         bullets[bullets.Count - 1].animOffset = new Vector2(-rectangle.Width/2, 0);
-                                        sounds.AddSound("SoundEffects/Shoot", false, -.5f);
+                                        sounds.AddSound("SoundEffects/Shoot", false, -.25f);
                                         sounds.PlaySound();
                                     }
                                     break;
@@ -1218,8 +1305,8 @@ namespace AUTO_Matic.TopDown
                                         bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed,
                                       new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, false, bulletSpeed, angle: MathHelper.ToRadians(0)));
                                         bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
-                                        bullets[bullets.Count - 1].animOffset = new Vector2(0, -rectangle.Height / 3);
-                                        sounds.AddSound("SoundEffects/Shoot", false, -.5f);
+                                        bullets[bullets.Count - 1].animOffset = new Vector2(rectangle.Height/4, -rectangle.Height / 3);
+                                        sounds.AddSound("SoundEffects/Shoot", false, -.25f);
                                         sounds.PlaySound();
                                     }
                                     break;
@@ -1229,7 +1316,7 @@ namespace AUTO_Matic.TopDown
                                         bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), -bulletSpeed,
                                       new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, false, bulletSpeed, angle: MathHelper.ToRadians(180)));
                                         bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
-                                        sounds.AddSound("SoundEffects/Shoot", false, -.5f);
+                                        sounds.AddSound("SoundEffects/Shoot", false, -.25f);
                                         sounds.PlaySound();
                                     }
                                     break;
@@ -1241,17 +1328,53 @@ namespace AUTO_Matic.TopDown
                         break;
                     case WeaponType.Bomb:
 
-                        switch (lockedDirection)
+                        if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) && bombDelay <= 0
+                       || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released && bombDelay <= 0)
                         {
-                            case "up":
-                                break;
-                            case "down":
-                                break;
-                            case "right":
-                                break;
-                            case "left":
-                                break;
+                            bulletTravelDist = 64 * 3.5f;
+
+                            switch (lockedDirection)
+                            {
+                                case "up":
+                                    bombs.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed,
+                                new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
+                                    bombs[bombs.Count - 1].BulletType = Bullet.BulletTypes.Bomb;
+                                    bombs[bombs.Count - 1].animOffset = new Vector2(-14/2, 0);
+                                    sounds.AddSound("SoundEffects/ThrowBomb", false, RandomPitch);
+                                    sounds.PlaySound();
+                                    break;
+                                case "down":
+                                    bombs.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y - (14 / 2)), bulletSpeed,
+                                      new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
+                                    bombs[bombs.Count - 1].BulletType = Bullet.BulletTypes.Bomb;
+                                    bombs[bombs.Count - 1].animOffset = new Vector2(-14 / 2, 0);
+                                    sounds.AddSound("SoundEffects/ThrowBomb", false, RandomPitch);
+                                    sounds.PlaySound();
+                                    break;
+                                case "right":
+                                    bombs.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), bulletSpeed,
+                                      new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, false, bulletSpeed));
+
+                                    bombs[bombs.Count - 1].BulletType = Bullet.BulletTypes.Bomb;
+                                    bombs[bombs.Count - 1].animOffset = new Vector2(0, -14/2);
+                                    sounds.AddSound("SoundEffects/ThrowBomb", false, RandomPitch);
+                                    sounds.PlaySound();
+                                    break;
+                                case "left":
+
+                                    bombs.Add(new Bullet(new Vector2(rectangle.Center.X - (14 / 2), rectangle.Center.Y - (14 / 2)), -bulletSpeed,
+                                      new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, false, bulletSpeed));
+
+                                    bombs[bombs.Count - 1].BulletType = Bullet.BulletTypes.Bomb;
+                                   // bombs[bombs.Count - 1].animOffset = new Vector2(0, -14 / 2);
+                                    sounds.AddSound("SoundEffects/ThrowBomb", false, RandomPitch);
+                                    sounds.PlaySound();
+                                    break;
+                            }
+
+                            bombDelay = maxBombDelay;
                         }
+                           
 
                     //     if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) && bombDelay <= 0
                     //|| currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released && bombDelay <= 0)
@@ -1401,12 +1524,11 @@ namespace AUTO_Matic.TopDown
             int currFireTile = 0;
             foreach(EnvironmentTile environmentTile in map.EnvironmentTiles)
             {
-              
-                if (new Rectangle(environmentTile.Rectangle.Center.X - 10, environmentTile.Rectangle.Center.Y - 10, 10,10).Intersects(rectangle) /*&& !speedBoosted*/)
+                switch (environmentTile.effectType)
                 {
-                    switch(environmentTile.effectType)
-                    {
-                        case EnvironmentTile.Type.SpeedBoost:
+                    case EnvironmentTile.Type.SpeedBoost:
+                        if (new Rectangle(environmentTile.Rectangle.Center.X - 10, environmentTile.Rectangle.Center.Y - 10, 20, 20).Intersects(rectangle) /*&& !speedBoosted*/)
+                        {
                             boostedSpeed = moveSpeed * 1.75f;
                             speedBoosted = true;
                             inputDelay = true;
@@ -1414,28 +1536,32 @@ namespace AUTO_Matic.TopDown
                             {
                                 case "right":
                                     velocity.Y = 0;
-                                    velocity.X = boostedSpeed;
+                                    velocity.X += boostedSpeed;
                                     break;
                                 case "left":
                                     velocity.Y = 0;
-                                    velocity.X = -boostedSpeed;
+                                    velocity.X += -boostedSpeed;
                                     break;
                                 case "up":
                                     velocity.Y = -boostedSpeed;
-                                    velocity.X = 0;
+                                    velocity.X += 0;
                                     break;
                                 case "down":
                                     velocity.X = 0;
-                                    velocity.Y = boostedSpeed;
+                                    velocity.Y += boostedSpeed;
                                     break;
                             }
-                            break;
-                        case EnvironmentTile.Type.DamageOverTime:
+                        }
+                       
+                        break;
+                    case EnvironmentTile.Type.DamageOverTime:
+                        if (new Rectangle(environmentTile.Rectangle.Center.X - 20, environmentTile.Rectangle.Center.Y - 20, 40, 40).Intersects(rectangle) /*&& !speedBoosted*/)
+                        {
                             triggerEnter = true;
                             currFireTile = i;
                             if (inDOT)
                             {
-                                
+
                             }
                             else
                             {
@@ -1443,9 +1569,11 @@ namespace AUTO_Matic.TopDown
                                 inDOT = true;
                                 fireDmgRate = iFireDmgRate;
                             }
-                            break;
-                    }
+                        }
+                           
+                        break;
                 }
+               
                 i++;
             }
             if (!triggerEnter)
@@ -1694,7 +1822,8 @@ namespace AUTO_Matic.TopDown
         void CheckBorderCollisionRight(int xOffset, Rectangle newRect, int border) // No Y because in max right
         {
 
-
+            if (game.levelCount == 0)
+                game.levelCount++;
             position.X += pixelSize * 2;
             if (levelInY == 1)
             {
@@ -1795,6 +1924,10 @@ namespace AUTO_Matic.TopDown
         }
         void CheckBorderCollisionLeft(int xOffset, Rectangle rect, int border)
         {
+
+            if (game.levelCount == 0)
+                game.levelCount++;
+
             position.X -= pixelSize * 2;
 
 
@@ -1909,6 +2042,11 @@ namespace AUTO_Matic.TopDown
 
         void CheckBorderCollisionTop(int bounds, Rectangle rect, int border) // missing check for x because to max top
         {
+
+
+            if (game.levelCount == 0)
+                game.levelCount++;
+
             position.Y -= pixelSize * 2;
 
             if (levelInX == 1)
@@ -1987,6 +2125,10 @@ namespace AUTO_Matic.TopDown
 
         void CheckBorderCollisionBottom(int bounds, Rectangle rect, int border)
         {
+
+            if (game.levelCount == 0)
+                game.levelCount++;
+
 
             position.Y += pixelSize * 2;
             if (levelInX == 1 && position.Y < bounds)
@@ -2139,6 +2281,14 @@ namespace AUTO_Matic.TopDown
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            foreach (Bullet bullet in bullets)
+            {
+                bullet.Draw(spriteBatch);
+            }
+            foreach (Bullet bomb in bombs)
+            {
+                bomb.Draw(spriteBatch);
+            }
             if (damaged)
             {
                 if (redCount <= whiteCount || redCount == 0 && whiteCount == 0)
@@ -2167,10 +2317,7 @@ namespace AUTO_Matic.TopDown
             //spriteBatch.Draw(texture, rectangle, Color.White);
             //animManager.Draw(spriteBatch, Color.White);
 
-            foreach(Bullet bullet in bullets)
-            {
-                bullet.Draw(spriteBatch);
-            }
+      
             weaponWheel.Draw(spriteBatch, content, selectedWeapon);
             particles.Draw(spriteBatch);
         }
@@ -2181,6 +2328,10 @@ namespace AUTO_Matic.TopDown
 
         }
     }
+
+
+    
+
 
     class WeaponWheel
     {

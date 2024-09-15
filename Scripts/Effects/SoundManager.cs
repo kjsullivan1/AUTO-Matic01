@@ -114,16 +114,20 @@ namespace AUTO_Matic.Scripts.Effects
         {
 
             StopCurrSounds();
-            soundList.Clear();
+            EffectList.Clear();
+            MusicList.Clear();
             currEffectName = "";
            
         }
 
         public void StopCurrSounds()
         {
-            for(int i = 0; i < soundList.Count; i++)
+            for (int i = 0; i < MasterList.Count; i++)
             {
-                soundList[i].Stop();
+                for (int j = 0; j < MasterList[i].Count; j++)
+                {
+                    MasterList[i][j].Stop();
+                }
             }
         }
 
@@ -134,16 +138,20 @@ namespace AUTO_Matic.Scripts.Effects
             {
                 //soundInstance.Volume = MusicVolume;
                 MusicList.Add(soundInstance);
+                MusicList[MusicList.Count - 1].Play();
             }
             else if(currEffectName.Contains("SoundEffects"))
             {
                 EffectList.Add(soundInstance);
+                EffectList[EffectList.Count - 1].Play();
             }
 
             ChangeVolume(MasterVolume, EffectVolume, MusicVolume);
 
-            soundList.Add(soundInstance);
-            soundList[soundList.Count - 1].Play();
+
+
+            //soundList.Add(soundInstance);
+            //soundList[soundList.Count - 1].Play();
         }
 
         public void Update(GameTime gameTime)

@@ -111,6 +111,7 @@
     <Content Include="Content\Audio\Level1Side.mp3" />
     <Content Include="Content\Audio\Level2Side.mp3" />
     <Content Include="Content\Audio\Level3Side.mp3" />
+    <Content Include="Content\Audio\menuTheme.mp3" />
     <Content Include="Content\Audio\SoundEffects\Shoot.mp3" />
     <Content Include="Content\Audio\SoundEffects\AirDashSound.mp3" />
     <Content Include="Content\Audio\SoundEffects\Enemy Dies_01.mp3" />
@@ -272,6 +273,7 @@
     <Content Include="Content\Textures\UI\SettingsButton.png" />
     <Content Include="Content\Textures\UI\StartGameButton.png" />
     <Content Include="Content\Textures\white.png" />
+    <Content Include="Content\Textures\WhiteCircle.png" />
     <Content Include="Content\TopDown\Animations\BombBossIdle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

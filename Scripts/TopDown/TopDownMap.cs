@@ -814,7 +814,7 @@ namespace AUTO_Matic.TopDown
                         if (num == 0)
                         {
                            
-                            slamTiles.Add(new TopDown.SlamTiles(9, new Rectangle((levelInX * screenWidth) + (x * size),
+                            slamTiles.Add(new TopDown.SlamTiles(27, new Rectangle((levelInX * screenWidth) + (x * size),
                                 (y * size) - (levelInY * screenHeight), size, size)));
                             slamTiles[slamTiles.Count - 1].mapPoint = new int[] { y, x };
                             if (SlamIndexes.Contains(num) == false)

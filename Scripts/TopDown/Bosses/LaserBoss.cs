@@ -834,6 +834,28 @@ namespace AUTO_Matic.Scripts.TopDown
                     }
                 }
 
+                for (int i = tdPlayer.bombs.Count - 1; i >= 0; i--)
+                {
+                    if (tdPlayer.bombs[i].rect.Intersects(boss.rect))
+                    {
+                        boss.health -= tdPlayer.bulletDmg / boss.dmgResistance;
+                        boss.healthBar.RecieveDamage(tdPlayer.bulletDmg / boss.dmgResistance);
+                        tdPlayer.bombs[i].delete = true;
+                    }
+                }
+
+                for (int i = tdPlayer.explosions.Count - 1; i >= 0; i--)
+                {
+                    if (tdPlayer.explosions[i].rect.Intersects(boss.rect))
+                    {
+                        boss.health -= tdPlayer.bulletDmg / boss.dmgResistance;
+                        boss.healthBar.RecieveDamage(tdPlayer.bulletDmg / boss.dmgResistance);
+                        //tdPlayer.bullets[i].delete = true;
+                    }
+                      
+
+                }
+
                 boss.healthBar.Update(new Point(boss.rect.X, boss.rect.Y - 20));
             }
         }
@@ -1695,7 +1717,7 @@ namespace AUTO_Matic.Scripts.TopDown
             healthBar = new HealthBar(new Rectangle(rect.X, rect.Y - 10, rect.Width, 5), content, health);
 
             bool picked = false;
-            dmgResistance = RandFloat(1, 2);
+            dmgResistance = 3.5f;
 
             while(!picked)
             {

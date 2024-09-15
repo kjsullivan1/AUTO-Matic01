@@ -112,6 +112,8 @@ namespace AUTO_Matic
                     }
 
                     UIHelper.SetElementText(uiElements["VolumeSettingsMasterNum"], ((int)(MasterVolume * 100)).ToString());
+
+                    game.UpdateSounds();
                 }
                 else if(buttonName.Contains("Effects"))
                 {
@@ -129,6 +131,7 @@ namespace AUTO_Matic
                     }
 
                     UIHelper.SetElementText(uiElements["VolumeSettingsEffectsNum"], ((int)(EffectVolume * 100)).ToString());
+                    game.UpdateSounds();
                 }
                 else if(buttonName.Contains("Music"))
                 {
@@ -146,6 +149,7 @@ namespace AUTO_Matic
                     }
 
                     UIHelper.SetElementText(uiElements["VolumeSettingsMusicNum"], ((int)(MusicVolume * 100)).ToString());
+                    game.UpdateSounds();
                 }
 
                 
@@ -391,7 +395,10 @@ namespace AUTO_Matic
                     UIHelper.SetElementText(uiElements[keyWord], text1);
                     break;
                 case "BossRoomCounter":
-                    UIHelper.SetElementText(uiElements[keyWord], "\n\n          " + (bossRooms - 1) + " / "+ UIHelper.DungeonLevels + " Rooms Completed");
+                    int num = bossRooms - 1;
+                    if (num < 0)
+                        num = 0;
+                    UIHelper.SetElementText(uiElements[keyWord], "\n\n          " + num + " / "+ UIHelper.DungeonLevels + " Rooms Completed");
 
                     UIHelper.SetElementBGRect(uiElements[keyWord], new Rectangle(currBounds.Right - 290, currBounds.Top + 30,
                         UIHelper.GetElementBGRect(uiElements[keyWord]).Width, UIHelper.GetElementBGRect(uiElements[keyWord]).Height));
@@ -1001,6 +1008,34 @@ namespace AUTO_Matic
                 if (widget.ID.Contains("VolumeSettings"))
                     widget.Visible = visible;
             }
+        }
+
+        public void CreateTopDownTutorial(Rectangle bounds)
+        {
+            int width = 64 * 5;
+            int height = 64 * 3;
+            if(uiElements.ContainsKey("TDTutorialBoxIntro") == false)
+            {
+                uiElements.Add("TDTutorialBoxIntro", UIHelper.CreateTextblock("TDTutorialBoxIntro", "    \n\n\n\n               Rooms until the boss " + UIHelper.DungeonLevels, bounds.Center.X - (width / 2), bounds.Y + (bounds.Height / 4)));// 4x3
+                UIHelper.SetElementBGRect(uiElements["TDTutorialBoxIntro"], new Rectangle(uiElements["TDTutorialBoxIntro"].Position.ToPoint(), new Point(width, height)));
+                UIHelper.SetElementRect(uiElements["TDTutorialBoxIntro"], new Rectangle(uiElements["TDTutorialBoxIntro"].Position.ToPoint(), new Point(width, height)));
+
+
+                UIHelper.SetElementVisibility("TDTutorial", true, uiElements);
+            }
+            else
+            {
+                UIHelper.SetElementText(uiElements["TDTutorialBoxIntro"], "    \n\n\n\n                                      Rooms until the boss " + UIHelper.DungeonLevels + "\n\n" 
+                    + "   For Controller, use the Left and Right sticks to move and\n   navigate weapon wheel. B to Dash and X to Shoot.  Use the\n   Right Shoulder button to lock direction" + 
+                    "\n\n" +  "   For Keyboard, use " + TopDownInputs[2] + TopDownInputs[0] + TopDownInputs[3] + TopDownInputs[1] + " to move.  " + TopDownInputs[4] 
+                    + " to dash and " + TopDownInputs[5] + "\n   to shoot.  Use the " + TopDownInputs[6] + " key to lock direction");
+                UIHelper.SetElementVisibility("TDTutorial", true, uiElements);
+            }
+        }
+
+        public void UpdateTopDownTutorial(Rectangle bounds)
+        {
+   
         }
 
         private void CreateVolumeSettings()

@@ -134,6 +134,7 @@ namespace AUTO_Matic.Scripts.SideScroll
                 //}
                 if ((int)center.Y < (int)position.Y && (center.Y + 620 / 2) + moveSpeed < height && center.Y + moveSpeed < (int)position.Y)
                 {
+                    
                     center.Y += moveSpeed;
                     reached = false;
                 }
@@ -380,6 +381,8 @@ namespace AUTO_Matic.Scripts.SideScroll
             if (viewRect.Bottom > height)
             {
                  center.Y -= moveSpeedY;
+                if (paused)
+                    center.Y = height - viewRect.Height / 2;
                 //center.Y = height - viewRect.Height / 2;
                 reached = false;
             }

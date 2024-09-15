@@ -133,8 +133,8 @@ namespace AUTO_Matic.SideScroll
         float pistolDelay = 0f;
         float maxPistolDelay = 1.55f;
 
-        float burstDelay = .65f;
-        float maxBurstDelay = .65f;
+        float burstDelay = 1.25f;
+        float maxBurstDelay = 1.25f;
 
         float shotGunDelay = 2.45f;
         float maxShotgunDelay = 2.45f;
@@ -902,8 +902,8 @@ namespace AUTO_Matic.SideScroll
                                explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif), explosions[explosions.Count - 1].maxSize / 2),
                                20);
 
-                        sounds.AddSound("SoundEffects/explosion", false);
-                        sounds.PlaySound();
+                        //sounds.AddSound("SoundEffects/explosion", false);
+                        //sounds.PlaySound();
 
                         bombs.RemoveAt(i);
                     }

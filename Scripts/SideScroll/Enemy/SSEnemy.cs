@@ -1668,8 +1668,8 @@ namespace AUTO_Matic.SideScroll
                     {
                         knockbackForce = new Vector2(knockbackForce.X / 2, knockbackForce.Y);
 
-                        if (prevState == EnemyStates.Attacking)
-                            shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                        //if (prevState == EnemyStates.Attacking)
+                        //    shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                     }
                     else if (!isShoot && prevState == EnemyStates.Attacking)
                         attackDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;

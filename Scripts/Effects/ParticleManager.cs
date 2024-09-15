@@ -61,6 +61,25 @@ namespace AUTO_Matic.Scripts.Effects
 
         }
 
+        public void MakeSplash(Rectangle startRect, Circle boundRect, int width)
+        {
+            particles.Clear();
+
+            for (int i = 0; i < particleCount; i++)
+            {
+                particles.Add(new Particle(startRect, rand, width, ParticleEffect.Type.Splash));
+            }
+
+            ParticleEffect effect;
+            effect.effectType = ParticleEffect.Type.Splash;
+            effect.particles = particles;
+            effect.boundingRect = new Rectangle();
+            effect.boundingCircle = new Circle(new Vector2(boundRect.Bounds.X + boundRect.Bounds.Width / 2, boundRect.Bounds.Y + boundRect.Bounds.Height / 2), boundRect.Radius);
+
+            particleEffects.Add(effect);
+
+        }
+
         public void MakeFireSpit(Rectangle startRect, Circle boundRect, int width)
         {
             particles.Clear();
@@ -129,6 +148,25 @@ namespace AUTO_Matic.Scripts.Effects
                                 MathHelper.Distance(particleEffects[j].particles[i].startPos.Y, particleEffects[j].particles[i].position.Y) > 64)
                             {
                                 particleEffects[j].particles.RemoveAt(i);
+                            }
+                            break;
+                        case ParticleEffect.Type.Splash:
+                            if(!CollideCircleTop(particleEffects[j].boundingCircle, particleEffects[j].particles[i], tdPlayer) || particleEffects[j].particles[i].duration <= 0)
+                            {
+                                particleEffects[j].particles.RemoveAt(i);
+                            }
+                            else if(particleEffects[j].particles[i].rect.Width < particleEffects[j].particles[i].maxWidth)
+                            {
+                                particleEffects[j].particles[i].position -= new Vector2(1, 1);
+                                particleEffects[j].particles[i].rect = new Rectangle(particleEffects[j].particles[i].position.ToPoint(),
+                                    new Point(particleEffects[j].particles[i].rect.Width + 1, particleEffects[j].particles[i].rect.Height + 1));
+                            }
+                            else if(particleEffects[j].particles[i].rect.Width >= particleEffects[j].particles[i].maxWidth || particleEffects[j].particles[i].reahcedPeak)
+                            {
+                                particleEffects[j].particles[i].reahcedPeak = true;
+                                particleEffects[j].particles[i].position += new Vector2(1, 1);
+                                particleEffects[j].particles[i].rect = new Rectangle(particleEffects[j].particles[i].position.ToPoint(),
+                                    new Point(particleEffects[j].particles[i].rect.Width - 1, particleEffects[j].particles[i].rect.Height - 1));
                             }
                             break;
                     }
@@ -204,7 +242,7 @@ namespace AUTO_Matic.Scripts.Effects
         public Rectangle boundingRect;
         public Circle boundingCircle;
 
-        public enum Type { Explosion, Pillar}
+        public enum Type { Explosion, Pillar, Splash}
         public Type effectType; 
     }
 
@@ -217,6 +255,9 @@ namespace AUTO_Matic.Scripts.Effects
         public Vector2 position;
         public Color color;
         public Vector2 startPos;
+        public int maxWidth;
+        public int minWidth;
+        public bool reahcedPeak = false;
 
         public Particle(Rectangle rect, Random rand, int width, ParticleEffect.Type effectType)
         {
@@ -239,6 +280,15 @@ namespace AUTO_Matic.Scripts.Effects
                     position = new Vector2(rect.Center.X, rect.Center.Y);
 
                     RandomColor(rand);
+                    break;
+                case ParticleEffect.Type.Splash:
+                    velocity = new Vector2(rand.Next((int)(-maxVel / 1.5f), (int)(maxVel / 1.5f)), rand.Next((int)(-maxVel / 1.5f), (int)(maxVel / 1.5f)));
+                    duration = RandExplosion(1, 2);
+                    position = new Vector2(rect.Center.X, rect.Center.Y);
+                    minWidth = width;
+                    maxWidth = rand.Next((int)(width * 1.25f), (int)(width * 2.5f));
+
+                    RandomSplashColor(rand);
                     break;
             }
 
@@ -266,12 +316,31 @@ namespace AUTO_Matic.Scripts.Effects
             }
         }
 
+        private void RandomSplashColor(Random rand)
+        {
+            switch(rand.Next(0,4))
+            {
+                case 0:
+                    color = Color.CornflowerBlue;
+                    break;
+                case 1:
+                    color = Color.LightSkyBlue;
+                    break;
+                case 2:
+                    color = Color.LightSteelBlue;
+                    break;
+                case 3:
+                    color = Color.MediumBlue;
+                    break;
+            }
+        }
+
         public float RandExplosion(int min, int max)
         {
             Random r = new Random();
             float decimalNumber;
             string beforePoint = r.Next(min, max).ToString();//number before decimal point
-            string afterPoint = r.Next(5, 8).ToString();
+            string afterPoint = r.Next(3, 4).ToString();
             string afterPoint2 = r.Next(0, 10).ToString();
             string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
                                                           //string secondDP = r.Next(0, 9).ToString();//2nd decimal point

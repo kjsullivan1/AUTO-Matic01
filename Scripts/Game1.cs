@@ -33,8 +33,8 @@ namespace AUTO_Matic
         UIManager UIManager = new UIManager();
         List<HealthDrop> healthDrops = new List<HealthDrop>();
         Random rand = new Random();
-        int dropRateSS = 15;
-        int dropRateTD = 35;
+        int dropRateSS = 40;
+        int dropRateTD = 42;
         float healAmount = 2.25f;
         public int openDoorCount = 0; //Counts how many times opened doors in the main SideScroll section
         public int bossKillCount = 0; //How many bosses defeated
@@ -239,7 +239,7 @@ namespace AUTO_Matic
             TopDownInputPath = Content.RootDirectory + "/SaveData/TopDownInputSave";
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            tdPlayer = new TDPlayer(this, 64, 200, 200, UIManager, Content);
+            tdPlayer = new TDPlayer(this, 64, 200, 200, UIManager, Content, bossKillCount);
             List<Texture2D> healthbars = new List<Texture2D>();
             for (int i = 0; i <= 10; i++)
             {
@@ -280,6 +280,8 @@ namespace AUTO_Matic
             UIHelper.SetElementVisibility("SettingsMenuTitle", true, UIManager.uiElements);
             UIHelper.SetElementVisibility("MainMenuBackground", true, UIManager.uiElements);
             UIHelper.DungeonLevels = tdPlayer.bossRoom;
+
+           
             #endregion
 
             HealthDrop.texture = Content.Load<Texture2D>(@"Textures\Health");
@@ -294,19 +296,29 @@ namespace AUTO_Matic
                 
             }
 
+            //If keyBindFile exists...Do same to Sound Settings
             if (File.Exists(SideInputPath) == false)
             {
                 UIManager.SetToDefaultKeyBinds();
                 SaveKeyBinds(UIManager.SideScrollInputs, UIManager.TopDownInputs);
             }
 
+            if(File.Exists(dataPath))
+            {
+                string[] gameData = File.ReadAllLines(dataPath);
+                UIManager.MasterVolume = float.Parse(gameData[12]);
+                UIManager.EffectVolume = float.Parse(gameData[14]);
+                UIManager.MusicVolume = float.Parse(gameData[13]);
+            }
             UIManager.CreateSettingsUI(this);
+            //UIHelper.SetElementText("VolumeSettingsMasterNum")
 
-         
-                     
+            UIManager.CreateTopDownTutorial(new Rectangle(new Point(0 + ((64 * 25) * (tdPlayer.levelInX - 1)), 0 - ((64 * 15) * (tdPlayer.levelInY - 1))),
+                      new Point(64 * 25, 64 * 15)));
+
 
             prevGamePad = GamePad.GetState(0);
-
+        
 
 
 
@@ -331,7 +343,49 @@ namespace AUTO_Matic
         {
 
             healthDrops.Clear();
-            if(!isBoss && tdPlayer.bossRoom > levelCount)
+            if(!isBoss && levelCount == 0)
+            {
+                tdMap.setBarrier = false;
+                //levelCount++;
+                //graphics.PreferredBackBufferWidth = 64 * 15; //1600  // pixelBits * col
+                //graphics.PreferredBackBufferHeight = 64 * 15; //960  // pixelBits * row
+                //graphics.IsFullScreen = false;
+                //graphics.ApplyChanges();
+                //camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)), graphics.PreferredBackBufferHeight - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
+                //camera.Zoom = .5f;
+
+                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 0 + ".txt";
+
+                if (xLevel)
+                    tdPlayer.PosXLevels.xLevels.Add(tdMap.GenerateMap(filePath));
+                if (yLevel)
+                    tdPlayer.PosYLevels.yLevels.Add(tdMap.GenerateMap(filePath));
+                if (dLevel)
+                    tdPlayer.DiagLevels.dLevels.Add(tdMap.GenerateMap(filePath));
+
+                tdEnemies.Clear();
+
+                //tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                //    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points);
+
+                Rectangle currBounds = new Rectangle(new Point((0) + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)),
+                     (0) - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                     new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                int[,] mapDims = (tdMap.GenerateMap(filePath));
+
+                healthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, currBounds.Y + 64 * 2, healthDropDims.X, healthDropDims.X)));
+                healthDrops.Add(new HealthDrop(new Rectangle(currBounds.X + 64 * 2, (currBounds.Y + currBounds.Height) - 64 * 3, healthDropDims.X, healthDropDims.X)));
+                healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y + currBounds.Height) - 64 * 3, healthDropDims.X, healthDropDims.X)));
+                healthDrops.Add(new HealthDrop(new Rectangle((currBounds.X + currBounds.Width) - 64 * 3, (currBounds.Y) + 64 * 2, healthDropDims.X, healthDropDims.X)));
+
+                tdMap.Refresh(tdPlayer.PosXLevels.xLevels, tdPlayer.PosYLevels.yLevels, tdPlayer.DiagLevels.dLevels, 64, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight,
+                    tdPlayer.PosXLevels.Points, tdPlayer.PosYLevels.Points, tdPlayer.DiagLevels.Points, dungeonNum);
+
+                SaveGame();
+                //if (levelCount == 0)
+                //    levelCount++;
+            }
+            else if(!isBoss && tdPlayer.bossRoom > levelCount)
             {
                 tdMap.setBarrier = true;
                 levelCount++;
@@ -406,7 +460,7 @@ namespace AUTO_Matic
                 //camera = new Camera(GraphicsDevice.Viewport, new Vector2(graphics.PreferredBackBufferWidth + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)), graphics.PreferredBackBufferHeight - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))));
                 //camera.Zoom = .5f;
 
-                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 59 + ".txt";
+                string filePath = Content.RootDirectory + "/TopDown/Maps/Map" + 0 + ".txt";
 
                 if (xLevel)
                     tdPlayer.PosXLevels.xLevels.Add(tdMap.GenerateMap(filePath));
@@ -546,7 +600,9 @@ namespace AUTO_Matic
             }
                
 
-            tdPlayer = new TDPlayer(this, 64, 200, 200, UIManager, Content);
+            tdPlayer = new TDPlayer(this, 64, 200, 200, UIManager, Content, bossKillCount);
+            UIHelper.DungeonLevels = tdPlayer.bossRoom;
+            //Update tutorial text
             tdMap = new TopDownMap();
             //Boss = new Rectangle();
      
@@ -569,7 +625,14 @@ namespace AUTO_Matic
             mapBuilder = new MapBuilder(maps); //Giving maps
 
             if (levelCount == 0)
+            {
                 loadGame = false;
+                UIManager.CreateTopDownTutorial(new Rectangle(new Point(0 + (graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)), 0 - (graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1))),
+                      new Point(camera.viewport.Bounds.Width, camera.viewport.Bounds.Width)));
+
+               // UIHelper.SetElementText(UIManager.uiElements["TDTutorialBoxIntro"])
+            }
+               
 
             if (tdPlayer.levelInX == 1 && tdPlayer.levelInY == 1)
             {
@@ -590,7 +653,7 @@ namespace AUTO_Matic
             BoundIndexes.Clear();
             BoundIndexes.Add(camera.Position);
             tdPlayer.Load(Content, camera.viewport.Bounds);
-            tdPlayer.position = new Vector2((graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) + (64 * 2), -(graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) + (64 * 2));
+            tdPlayer.position = new Vector2((graphics.PreferredBackBufferWidth * (tdPlayer.levelInX - 1)) + (64 * 12), -(graphics.PreferredBackBufferHeight * (tdPlayer.levelInY - 1)) + (64 * 10));
 
             UIManager.uiElements["BossRoomCounter"].Visible = true;
 
@@ -711,6 +774,8 @@ namespace AUTO_Matic
             openDoorCount = 0;
             dungeonNum = 0;
             soundManager.ClearSounds();
+            soundManager.ChangeVolume(UIManager.MasterVolume, UIManager.EffectVolume, UIManager.MusicVolume);
+
 
             fadePos = SideTileMap.playerSpawns[0];
             int k = 1;
@@ -984,7 +1049,7 @@ namespace AUTO_Matic
                 openDoorCount = 0;
             }
 
-            ssPlayer.Health = 10;
+            //ssPlayer.Health = 10;
             UIHelper.ChangeHealthBar(UIManager.uiElements["HealthBar"], (int)ssPlayer.Health);
             UIHelper.ChangeDashIcon(UIManager.uiElements["DashIcon"], ssPlayer.DashIndex());
             UIHelper.SetElementVisibility("HealthBar", true, UIManager.uiElements);
@@ -1415,8 +1480,8 @@ namespace AUTO_Matic
                                         {
                                             if (currBounds.Contains(tdMap.EnemySpawns[i]))
                                             {
-                                                if (tdEnemies.Contains(new TDEnemy(Content, tdMap.EnemySpawns[i], tdMap, currMap, GraphicsDevice)) == false)
-                                                    tdEnemies.Add(new TDEnemy(Content, tdMap.EnemySpawns[i], tdMap, currMap, GraphicsDevice));
+                                                if (tdEnemies.Contains(new TDEnemy(Content, tdMap.EnemySpawns[i], tdMap, currMap, GraphicsDevice, bossKillCount)) == false)
+                                                    tdEnemies.Add(new TDEnemy(Content, tdMap.EnemySpawns[i], tdMap, currMap, GraphicsDevice, bossKillCount));
                                             }
                                             else
                                             {
@@ -1504,19 +1569,36 @@ namespace AUTO_Matic
                                             {
                                                 if (tdPlayer.bullets[i].rect.Intersects(tdEnemies[j].Rectangle))
                                                 {
-                                                    tdEnemies[j].Health -= tdPlayer.bulletDmg;
+                                                    tdEnemies[j].Health -= tdPlayer.bulletDmg / (tdEnemies[j].dmgResistance * (bossKillCount + 1));
                                                     //if(tdEnemies[j].Health <= 0)
                                                     //{
                                                     //    tdEnemies.RemoveAt(j);
                                                     //    hardBreak = true;
                                                     //}
-                                                    tdPlayer.bullets.RemoveAt(i);
+                                                    tdPlayer.bullets[i].delete = true;
                                                     break;
 
                                                 }
                                             }
                                             if (hardBreak)
                                                 break;
+                                        }
+
+                                        for(int i = tdPlayer.bombs.Count - 1; i>= 0; i--)
+                                        {
+                                            if(tdPlayer.bombs[i].rect.Intersects(tdEnemies[j].Rectangle))
+                                            {
+                                                tdEnemies[j].Health -= tdPlayer.bulletDmg / (tdEnemies[j].dmgResistance * (bossKillCount + 1));
+
+                                                tdPlayer.bombs[i].delete = true;
+                                            }
+                                        }
+
+                                        for(int i = tdPlayer.explosions.Count - 1; i >= 0; i--)
+                                        {
+                                            if(tdPlayer.explosions[i].rect.Intersects(tdEnemies[j].Rectangle))
+                                                tdEnemies[j].Health -= tdPlayer.bulletDmg / (tdEnemies[j].dmgResistance * (bossKillCount + 1));
+
                                         }
                                     }
                                 }
@@ -1537,7 +1619,7 @@ namespace AUTO_Matic
                                         }
                                         else
                                         {
-                                            tdEnemies[j].moveSpeed = 2.75f;
+                                            tdEnemies[j].moveSpeed = tdEnemies[i].iMoveSpeed;
                                         }
                                     }
                                     tdEnemies[i].Upate(gameTime, tdPlayer, tdMap, currBounds);
@@ -1573,13 +1655,13 @@ namespace AUTO_Matic
                                     }
                                 }
 
-                                if (tdPlayer.bullets.Count != 0)
-                                {
-                                    for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
-                                    {
-                                        tdPlayer.bullets[i].Update(gameTime);
-                                    }
-                                }
+                                //if (tdPlayer.bullets.Count != 0)
+                                //{
+                                //    for (int i = tdPlayer.bullets.Count - 1; i >= 0; i--)
+                                //    {
+                                //        tdPlayer.bullets[i].Update(gameTime);
+                                //    }
+                                //}
 
 
 
@@ -1594,6 +1676,11 @@ namespace AUTO_Matic
                                                 tdPlayer.bullets.RemoveAt(i);
                                             }
                                         }
+                                    }
+                                    for(int i = tdPlayer.bombs.Count -1; i >= 0; i--)
+                                    {
+                                        if (tdPlayer.bombs[i].rect.Intersects(tile.Rectangle))
+                                            tdPlayer.bombs[i].delete = true;
                                     }
                                 }
 
@@ -2003,7 +2090,9 @@ namespace AUTO_Matic
                                 //UIManager.uiElements["PauseMenuReturn"].Visible = true;
                                 //UIManager.CreatePauseMenu(ssCamera.ViewRect);
                                 UIManager.UpdatePauseUI(ssCamera.ViewRect);
+                                UIManager.uiElements["DashIcon"].Visible = false;
                                 UIHelper.SetElementVisibility("TutorialBox", false, UIManager.uiElements);
+                                UIHelper.SetElementVisibility("InteractBox", false, UIManager.uiElements);
                                 ssCamera.Update(new Vector2(ssPlayer.Rectangle.X, ssPlayer.Rectangle.Y), dont, fade);
 
                                
@@ -2031,6 +2120,8 @@ namespace AUTO_Matic
 
                                 if(GameState == GameStates.Tutorial)
                                     UIHelper.SetElementVisibility("TutorialBox", true, UIManager.uiElements);
+                                else if(GameState == GameStates.SideScroll)
+                                    UIHelper.SetElementVisibility("InteractBox", true, UIManager.uiElements);
                             }
 
                             if (kb.IsKeyDown(Keys.Up) && prevKB.IsKeyUp(Keys.Up) || GamePad.GetState(0).ThumbSticks.Left.Y < -.9 && prevGamePad.ThumbSticks.Left.Y == 0 ||
@@ -3056,7 +3147,7 @@ namespace AUTO_Matic
                             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, ssCamera.transform);
                             SideTileMap.Draw(spriteBatch, Content, ssCamera);
                             ssPlayer.Draw(spriteBatch);
-                            spriteBatch.Draw(Content.Load<Texture2D>("Textures/white"), selectedBox, Color.CornflowerBlue);
+                            spriteBatch.Draw(Content.Load<Texture2D>("Textures/white"), selectedBox, Color.SteelBlue);
                             UIManager.Draw(spriteBatch);
                             spriteBatch.End();
 
@@ -3066,7 +3157,7 @@ namespace AUTO_Matic
                             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
                             tdMap.Draw(spriteBatch);
                             tdPlayer.Draw(spriteBatch);
-                            spriteBatch.Draw(Content.Load<Texture2D>("Textures/white"), selectedBox, Color.CornflowerBlue);
+                            spriteBatch.Draw(Content.Load<Texture2D>("Textures/white"), selectedBox, Color.SteelBlue);
                             UIManager.Draw(spriteBatch);
                             spriteBatch.End();
                         }
@@ -3075,7 +3166,7 @@ namespace AUTO_Matic
                     else if(GameState == GameStates.EndGame)
                     {
                         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, null, null, null, null, camera.transform);
-                        spriteBatch.Draw(Content.Load<Texture2D>("Textures/white"), selectedBox, Color.CornflowerBlue);
+                        spriteBatch.Draw(Content.Load<Texture2D>("Textures/white"), selectedBox, Color.SteelBlue);
                         UIManager.Draw(spriteBatch);
                         //Draw Image of player
                         spriteBatch.End();
@@ -3114,13 +3205,16 @@ namespace AUTO_Matic
                     {
                         UIManager.UpdateTextBlock("TitleCrawl", Rectangle.Empty);
 
-                        if (kb.IsKeyDown(Keys.G) && prevKB.IsKeyUp(Keys.G) || currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released
+                        if ( kb.GetPressedKeys().Length > 0
+                            || currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released
                             || currButtons.Y == ButtonState.Pressed && prevButtons.Y == ButtonState.Released || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released ||
                             UIHelper.GetElementBGRect(UIManager.uiElements["TitleCrawl"]).Bottom <= 0)
                         {
                             UIManager.SkipCrawl("TitleCrawl");
                             startCrawl = false;
                             MenuState = MenuStates.MainMenu;
+                            soundManager.AddSound("menuTheme", true);
+                            soundManager.PlaySound();
                             //UIHelper.SetElementVisibility("MainMenuBackground", false, UIManager.ui)
                         }
                     }
@@ -3166,6 +3260,13 @@ namespace AUTO_Matic
                     //    count++;
                     //}
                    
+                    if(soundManager.currEffectName != "menuTheme")
+                    {
+                        soundManager.ClearSounds();
+                        soundManager.AddSound("menuTheme", true);
+                        soundManager.PlaySound();
+                    }
+
                     UIHelper.SetElementVisibility("MainMenu", true, UIManager.uiElements);
                     UseMouse(kb, crawlSpeed);
                     UpdateCamera(mainMenuPos, 10);
@@ -3520,6 +3621,7 @@ namespace AUTO_Matic
             savedData.Add(UIManager.MasterVolume.ToString());//12
             savedData.Add(UIManager.MusicVolume.ToString());//13
             savedData.Add(UIManager.EffectVolume.ToString());//14
+            savedData.Add(ssPlayer.Health.ToString()); //15
             //savedData.Add(fadePos.X.ToString());
             //savedData.Add(fadePos.Y.ToString());
             //savedData.Add(topDownView.X.ToString());
@@ -3647,9 +3749,9 @@ namespace AUTO_Matic
                 if (!isLoadedGame)
                 {
                     soundManager.ChangeVolume(float.Parse(gameData[12]), float.Parse(gameData[14]), float.Parse(gameData[13]));
-                    UIManager.MasterVolume = float.Parse(gameData[12]);
-                    UIManager.EffectVolume = float.Parse(gameData[14]);
-                    UIManager.MusicVolume = float.Parse(gameData[13]);
+                    //UIManager.MasterVolume = float.Parse(gameData[12]);
+                    //UIManager.EffectVolume = float.Parse(gameData[14]);
+                    //UIManager.MusicVolume = float.Parse(gameData[13]);
                 }
                 else if (isLoadedGame)
                     soundManager.ChangeVolume(UIManager.MasterVolume, UIManager.EffectVolume, UIManager.MusicVolume);
@@ -3666,6 +3768,21 @@ namespace AUTO_Matic
                 {
                     StartNewGame(true, true);
                     ssPlayer.Load(Content, Window.ClientBounds, friction, new Vector2(int.Parse(gameData[1]), int.Parse(gameData[2])), UIManager);
+
+                    if(isLoadedGame && ssPlayer.Health <= 0)
+                    {
+                        ssPlayer.Health = 10;
+                    }
+                    else if(!isLoadedGame)
+                    {
+                        ssPlayer.Health = float.Parse(gameData[15]);
+                        if (ssPlayer.Health <= 0)
+                        {
+                            ssPlayer.Health = 10;
+                        }
+                    }
+                  
+                 
                     //ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(int.Parse(gameData[4]), int.Parse(gameData[5])), int.Parse(gameData[6]), int.Parse(gameData[7]));
                     openDoorCount = int.Parse(gameData[8]);
                     if (openDoorCount >= 0)
@@ -3674,7 +3791,7 @@ namespace AUTO_Matic
                         //ssCamera.SetBounds(new Rectangle(int.Parse(gameData[4]), int.Parse(gameData[5]), int.Parse(gameData[6]), int.Parse(gameData[7])));
 
                         if (openDoorCount == 1)
-                            fadePos = new Vector2(int.Parse(gameData[1]) /*- int.Parse(gameData[10])*/, int.Parse(gameData[2]));
+                            fadePos = new Vector2(int.Parse(gameData[1]) - (int.Parse(gameData[10])/2), int.Parse(gameData[2]));
                         else if (openDoorCount == 4)
                             fadePos = new Vector2(int.Parse(gameData[1]) - int.Parse(gameData[10]), int.Parse(gameData[2]));
                         else
@@ -3696,7 +3813,7 @@ namespace AUTO_Matic
                     if (((GameStates)gameState) == GameStates.TopDown)
                     {
                         int levelCount = int.Parse(gameData[9]);
-                        tdPlayer = new TDPlayer(this, 64, 200, 200, UIManager, Content);
+                        tdPlayer = new TDPlayer(this, 64, 200, 200, UIManager, Content, dungeonNum);
                         if (levelCount > tdPlayer.bossRoom)
                             this.levelCount = levelCount - 1;
                         else
@@ -3718,6 +3835,11 @@ namespace AUTO_Matic
                 }
                 
             }
+        }
+
+        public void UpdateSounds()
+        {
+            soundManager.ChangeVolume(UIManager.MasterVolume, UIManager.EffectVolume, UIManager.MusicVolume);
         }
     }
 

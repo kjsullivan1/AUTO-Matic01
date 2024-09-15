@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AUTO_Matic.TopDown;
 using Microsoft.Xna.Framework.Content;
+using AUTO_Matic.Scripts.Effects;
 
 namespace AUTO_Matic.Scripts.TopDown.Bosses
 {
@@ -28,6 +29,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         public float health = 20;
 
         Random rand = new Random();
+        ParticleManager particles;
 
         Explosion slam;
         int growthRate = 3;
@@ -107,7 +109,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         float bulletMaxY = 10f;
         int spread = 3;
         bool isShootDelay = false;
-        float shootDelay = .75f;//In seconds
+        float shootDelay = .9f;//In seconds
         float iShootDelay;
         bool startShoot = false;
         public float bulletDmg = .7f;
@@ -133,6 +135,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             BreakableWalls = walls;
             iSlamDelay = slamDelay;
             iShootDelay = shootDelay;
+            particles = new ParticleManager();
+            particles.Initialize(content.Load<Texture2D>("Textures/WhiteCircle"));
             int sizeMod = 3;
             int width = 64 * sizeMod;
             int height = 64 * sizeMod;
@@ -309,6 +313,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                             slam.rect.SetWidth(3);
 
                             slamReady = true;
+
+                            particles.MakeSplash(bossRect, new Circle(new Vector2(slam.rect.Position.X + 20 / 2, slam.rect.Position.Y + 20/2), slam.rect.Radius / 4), 20);
                             BrokenWalls.Clear();
                         }
                     }
@@ -339,7 +345,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                                 //tdMap.FloorTiles.Add());
                                 if(tdMap.dMapDims[tdMap.dMapDims.Count - 1][tdMap.WallTiles[i].mapPoint[0], tdMap.WallTiles[i].mapPoint[1]] == 10)
                                 {
-                                    floors.Add(new FloorTiles(9, tdMap.WallTiles[i].Rectangle));
+                                    floors.Add(new FloorTiles(27, tdMap.WallTiles[i].Rectangle));
                                     tdMap.WallTiles.Remove(tdMap.WallTiles[i]);
                                 }
                         
@@ -496,6 +502,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 }
             }
 
+            particles.Update(gameTime, tdPlayer, true);
             animManager.Update(gameTime, new Vector2(bossRect.X, bossRect.Y));
             healthBar.Update(new Point(bossRect.X, bossRect.Y - 32));
         }
@@ -520,18 +527,35 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 float bulletSpeedY = (float)Math.Sin((double)angle) * 2;
 
                 //bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
+                int i = 1;
+                int xOffset = 0;
+                int yOffset = 0;
+                if(bossRect.Center.Y < tdPlayer.rectangle.Center.Y)
+                {
+                    xOffset = bossRect.Width / 5 * i;
+                }
+                else if(bossRect.Center.Y > tdPlayer.rectangle.Center.Y)
+                {
+                    xOffset = bossRect.Width / 5 * -i;
+                }
+         
                 #region BurstShot
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
                     content, true, bulletTravelDist, true, bulletSpeedY, angle: angle));
                 bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
+                bullets[bullets.Count - 1].animOffset = new Vector2(xOffset, yOffset);
+
 
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX * 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
                content, true, bulletTravelDist, true, bulletSpeedY * 1.5f, angle: angle));
                 bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
+                bullets[bullets.Count - 1].animOffset = new Vector2(xOffset, yOffset);
 
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX / 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
               content, true, bulletTravelDist, true, bulletSpeedY / 1.5f, angle: angle));
                 bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
+                bullets[bullets.Count - 1].animOffset = new Vector2(xOffset, yOffset);
+
                 #endregion
 
                 //if (angle < 16 || angle >= 155)//Right
@@ -645,11 +669,12 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             {
                 tile.Draw(spriteBatch);
             }
-            if (slamReady)
-            {
-                spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), slam.rect.Bounds, Color.White * .25f);
-            }
+            //if (slamReady)
+            //{
+            //    spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), slam.rect.Bounds, Color.White * .25f);
+            //}
 
+            particles.Draw(spriteBatch);
             healthBar.Draw(spriteBatch);
             //foreach (GroundLoc loc in slamLocs)
             //{
@@ -660,6 +685,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
             //}
             //spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), bossRect, Color.White);
+            
             animManager.Draw(spriteBatch, Color.White);
 
             for(int i = 0; i < bullets.Count; i++)

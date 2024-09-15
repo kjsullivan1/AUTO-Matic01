@@ -49,6 +49,12 @@
 /processorParam:Quality=Best
 /build:Audio/Level3Side.mp3
 
+#begin Audio/menuTheme.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Audio/menuTheme.mp3
+
 #begin Audio/SoundEffects/AirDashSound.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
@@ -1623,6 +1629,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/white.png
+
+#begin Textures/WhiteCircle.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/WhiteCircle.png
 
 #begin TopDown/Animations/BombBossIdle.png
 /importer:TextureImporter
