@@ -17,13 +17,14 @@ namespace AUTO_Matic
 
 
 
-        private Texture2D CurrTexture;
+        public Texture2D CurrTexture;
         private Point FrameSize;
         private Point CurrFrame;
         private Point SheetSize;
         private int MiliSecsPerFrame;
         private Vector2 position;
         bool stopLoop = false;
+        int widthMod = 0;
 
 
         int timeSinceLastFrame = 0;
@@ -38,7 +39,10 @@ namespace AUTO_Matic
             position = pos;
 
         }
-
+        public void SetWidthMod(int mod)
+        {
+            widthMod = mod;
+        }
         public void SetPos(Vector2 pos)
         {
             position = pos;
@@ -113,7 +117,7 @@ namespace AUTO_Matic
             if (isRight)
             {
                 
-                spriteBatch.Draw(CurrTexture, position, new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X, FrameSize.Y), color);
+                spriteBatch.Draw(CurrTexture, position, new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X + widthMod, FrameSize.Y), color);
             }
             else if (isLeft)
             {

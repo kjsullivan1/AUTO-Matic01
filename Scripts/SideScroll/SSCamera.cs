@@ -36,6 +36,7 @@ namespace AUTO_Matic.Scripts.SideScroll
 
         int cameraWidth = 1100;
         int cameraHeight = 900;
+        public bool freeze = false;
         public Vector2 Position
         {
             get { return center; }
@@ -112,9 +113,12 @@ namespace AUTO_Matic.Scripts.SideScroll
                     height = tile.Rectangle.Top - 4;
                 }
             }
-          
-           
-            if(dont)
+            
+            if(freeze)
+            {
+
+            }
+            else if(dont)
             {
                 //center = new Vector2(position.X, position.Y);
                 //transform = Matrix.CreateTranslation(new Vector3(-center.X, -center.Y, 0)) * Matrix.CreateScale(new Vector3(Zoom, Zoom, 0)) * Matrix.CreateTranslation(new Vector3(viewport.Width / 2, viewport.Height / 2, 0));

@@ -367,7 +367,7 @@ namespace AUTO_Matic
                 case "TitleCrawl":
                     //StreamReader sr = new StreamReader(Directory.GetCurrentDirectory() + "/TextFiles/TitleCrawl.txt");
 
-                    string text = "\n\n\n\n\n\n\n  In the 31st century, humanities reach has greatly expanded amongst the stars. \n  " +
+                    string text = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n  In the 31st century, humanities reach has greatly expanded amongst the stars. \n  " +
                         "With massive colonies suspended in space with millions of inhabitants.\n  None of these structures is more" +
                         "immaculate than that of Nuton 6, a beacon of \n  research and hope for tomorrow equipped with its own advanced A.I. named\n  M.O.N.O.," +
                         "managing each of the four primary quadrants of the facility, through\n  its secondary access modules. However, one day when everything" +
@@ -707,7 +707,7 @@ namespace AUTO_Matic
             //Background
             uiElements.Add("MainMenuBackground", UIHelper.CreateTextblock("MainMenuBackground", "", 0, 0));
             UIHelper.SetElementBGRect(uiElements["MainMenuBackground"], new Rectangle(new Point((int)uiElements["MainMenuBackground"].Position.X, (int)uiElements["MainMenuBackground"].Position.Y),
-                new Point(768, 432)));
+                new Point(1920, 1080)));
 
             uiElements.Add("TitleCrawl", UIHelper.CreateTextblock("TitleCrawl", "This is t he title crawl", ((int)dims.X / 2) - (550/2), (int)(dims.Y /2))); //Replace 550 with UIHelper.ScrollBG.Width
             UIHelper.SetElementRect(uiElements["TitleCrawl"], new Rectangle(new Point((int)uiElements["TitleCrawl"].Position.X, (int)uiElements["TitleCrawl"].Position.Y), new Point(80, 40)));
@@ -717,20 +717,20 @@ namespace AUTO_Matic
 
             ///Main Menu elements
             //Title
-            uiElements.Add("MainMenuTitle", UIHelper.CreateTextblock("MainMenuTitle", "", ((int)dims.X / 2) - (UIHelper.MenuTitle.Width / 4), //450 with UIHelper.MenuTitle.Width
+            uiElements.Add("MainMenuTitle", UIHelper.CreateTextblock("MainMenuTitle", "", ((int)dims.X / 2) - (UIHelper.MenuTitle.Width / 2), //450 with UIHelper.MenuTitle.Width
                 ((int)dims.Y /2) - (int)(UIHelper.MenuTitle.Height)));
             UIHelper.SetElementRect(uiElements["MainMenuTitle"], new Rectangle(new Point((int)(uiElements["MainMenuTitle"].Position.X + 180), (int)uiElements["MainMenuTitle"].Position.Y + 90), new Point(80, 40)));
-            UIHelper.SetElementBGRect(uiElements["MainMenuTitle"], new Rectangle((int)uiElements["MainMenuTitle"].Position.X, (int)uiElements["MainMenuTitle"].Position.Y, UIHelper.MenuTitle.Width /2, (int)(UIHelper.MenuTitle.Height/1.5f)));
+            UIHelper.SetElementBGRect(uiElements["MainMenuTitle"], new Rectangle((int)uiElements["MainMenuTitle"].Position.X, (int)uiElements["MainMenuTitle"].Position.Y, UIHelper.MenuTitle.Width, (int)(UIHelper.MenuTitle.Height)));
             //Play
-            uiElements.Add("MainMenuPlay", UIHelper.CreateButton("MainMenuPlay", "Play", ((int)dims.X / 2) - (200 / 2), //Multiplying the width * 2 in the Draw Method
-                UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Bottom + 20));
+            uiElements.Add("MainMenuPlay", UIHelper.CreateButton("MainMenuPlay", "Play", ((int)dims.X / 2) - (400 / 2), //Multiplying the width * 2 in the Draw Method
+                UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Bottom + 60));
             //Exit Button
-            uiElements.Add("MainMenuExit", UIHelper.CreateButton("MainMenuExit", "Exit", ((int)dims.X / 2) - (200 / 2), 
-                UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Bottom + 20));
+            uiElements.Add("MainMenuExit", UIHelper.CreateButton("MainMenuExit", "Exit", ((int)dims.X / 2) - (400 / 2), 
+                UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Bottom + 60));
             //Settings
             uiElements.Add("MainMenuSetting", UIHelper.CreateButton("MainMenuSetting", "", UIHelper.GetRectangle(uiElements["MainMenuExit"]).Right + 100, //Using width/2 of button
                 /*(int)(dims.Y) - 60))*/  UIHelper.GetRectangle(uiElements["MainMenuExit"]).Top + 25)); //Height of Exit button - Height of Settings button 
-            UIHelper.SetRectangle(uiElements["MainMenuSetting"], 50, 50);
+            UIHelper.SetRectangle(uiElements["MainMenuSetting"], 100, 100);
 
             ///Settings Menu elements
             //Title
@@ -738,6 +738,8 @@ namespace AUTO_Matic
             uiElements.Add("SettingsMenuTitle", UIHelper.CreateTextblock("SettingsMenuTitle", titleTxt, (int)(((dims.X * 1.5f)) - (titleTxt.Length * 11.0f)), // dividing the txt * 11 / 2 makes in longer?
                 UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Top - 75));
             UIHelper.SetElementRect(uiElements["SettingsMenuTitle"], new Rectangle(uiElements["SettingsMenuTitle"].Position.ToPoint(), new Point(titleTxt.Length, 20)));
+
+            uiElements["SettingsMenuTitle"].Visible = false;
 
             //Settings Box
             uiElements.Add("SettingsButtonBox", UIHelper.CreateTextblock("\n\tSettingsButtonBox", "", (int)(((dims.X * 1.5f))) - (525 / 2),
@@ -752,12 +754,12 @@ namespace AUTO_Matic
 
             ///Start Menu Elements
             //New Game Btn
-            uiElements.Add("StartNewGame", UIHelper.CreateButton("StartNewGame", "New", ((int)dims.X / 2) - (200 / 2),
+            uiElements.Add("StartNewGame", UIHelper.CreateButton("StartNewGame", "New", ((int)dims.X / 2) - (400 / 2),
                 (int)(UIHelper.GetElementBGRect(uiElements["TitleCrawl"]).Bottom + dims.Y)));
             buttonPos = uiElements["StartNewGame"].Position;
             //Load Game
-            uiElements.Add("LoadGame", UIHelper.CreateButton("LoadGame", "Load", ((int)dims.X / 2) - (200 / 2),
-                (int)(UIHelper.GetRectangle(uiElements["StartNewGame"]).Bottom + 20)));
+            uiElements.Add("LoadGame", UIHelper.CreateButton("LoadGame", "Load", ((int)dims.X / 2) - (400 / 2),
+                (int)(UIHelper.GetRectangle(uiElements["StartNewGame"]).Bottom + 60)));
             buttonPos2 = uiElements["LoadGame"].Position;
 
             //Delete save warning
@@ -778,7 +780,7 @@ namespace AUTO_Matic
 
             //Return 
             uiElements.Add("StartGameReturn", UIHelper.CreateButton("StartGameReturn", "", (int)uiElements["MainMenuSetting"].Position.X, (int)uiElements["MainMenuSetting"].Position.Y));
-            UIHelper.SetRectangle(uiElements["StartGameReturn"], 50, 50);
+            UIHelper.SetRectangle(uiElements["StartGameReturn"], 100, 100);
 
             uiElements.Add("HealthBar", UIHelper.CreateTextblock("HealthBar", "", 64, 64));
             UIHelper.SetElementRect(uiElements["HealthBar"], new Rectangle(uiElements["HealthBar"].Position.ToPoint(), new Point(1280, 512)));
@@ -1041,12 +1043,12 @@ namespace AUTO_Matic
         private void CreateVolumeSettings()
         {
             //Title
-            uiElements.Add("VolumeSettingsTitle", UIHelper.CreateTextblock("VolumeSettingsTitle", "Volume Settings", (int)(dims.X / 2 - (150 / 2)), (int)(60)));
+            uiElements.Add("VolumeSettingsTitle", UIHelper.CreateTextblock("VolumeSettingsTitle", "Volume Settings", (int)(1980 / 2 - (200 / 2)), (int)(380)));
             UIHelper.SetElementBGRect(uiElements["VolumeSettingsTitle"], new Rectangle(uiElements["VolumeSettingsTitle"].Position.ToPoint(), new Point(150, 25)));
             UIHelper.SetElementRect(uiElements["VolumeSettingsTitle"], new Rectangle(uiElements["VolumeSettingsTitle"].Position.ToPoint(), new Point(150, 25)));
 
             //Master volume title
-            uiElements.Add("VolumeSettingsMaster", UIHelper.CreateTextblock("VolumeSettingsMaster", "Master Volume", (int)(dims.X / 3.25f), (int)(dims.Y / 3)));
+            uiElements.Add("VolumeSettingsMaster", UIHelper.CreateTextblock("VolumeSettingsMaster", "Master Volume", (int)(1980 / 2.5f), (int)(1020 / 2.25f)));
             UIHelper.SetElementBGRect(uiElements["VolumeSettingsMaster"], new Rectangle(uiElements["VolumeSettingsMaster"].Position.ToPoint(), new Point(125, 25)));
             UIHelper.SetElementRect(uiElements["VolumeSettingsMaster"], new Rectangle(uiElements["VolumeSettingsMaster"].Position.ToPoint(), new Point(125, 25)));
 
@@ -1110,7 +1112,7 @@ namespace AUTO_Matic
 
 
             //Return Btn
-            uiElements.Add("VolumeSettingsReturnBtn", UIHelper.CreateButton("VolumeSettingsReturnBtn", "", 582,
+            uiElements.Add("VolumeSettingsReturnBtn", UIHelper.CreateButton("VolumeSettingsReturnBtn", "", UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Right - 65 - (int)(1920),
                 UIHelper.GetRectangle(uiElements["SettingsReturnBtn"]).Y));
             UIHelper.SetRectangle(uiElements["VolumeSettingsReturnBtn"], 50, 50);
             SetVolumeSettings(false);
@@ -1123,7 +1125,7 @@ namespace AUTO_Matic
                 if (i == 0)
                 {
                     uiElements.Add("TopDownBindTitle", UIHelper.CreateTextblock("TopDownBindTitle", "       Top Down Key Binds",
-                   (UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (int)(dims.X)) - (150 / 2), 60));
+                   (UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (int)(dims.X)) - (150 / 2), 380));
                     //uiElements["TopDownBindTitle"].Visible = true;
                     UIHelper.SetElementBGRect(uiElements["TopDownBindTitle"], new Rectangle(uiElements["TopDownBindTitle"].Position.ToPoint(), new Point(150, 25)));
                     UIHelper.SetElementRect(uiElements["TopDownBindTitle"], new Rectangle(uiElements["TopDownBindTitle"].Position.ToPoint(), new Point(150, 25)));
@@ -1201,7 +1203,7 @@ namespace AUTO_Matic
                 if (i == 0)
                 {
                     uiElements.Add("SideBindTitle", UIHelper.CreateTextblock("SideBindTitle", "       Side Scroll Key Binds",
-                        (UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (int)(dims.X)) - (150 / 2), 60));
+                        (UIHelper.GetElementBGRect(uiElements["SettingsButtonBox"]).Center.X - (int)(dims.X)) - (150 / 2), 380));
                    // uiElements["SideBindTitle"].Visible = true;
                     UIHelper.SetElementBGRect(uiElements["SideBindTitle"], new Rectangle(uiElements["SideBindTitle"].Position.ToPoint(), new Point(150, 25)));
                     UIHelper.SetElementRect(uiElements["SideBindTitle"], new Rectangle(uiElements["SideBindTitle"].Position.ToPoint(), new Point(150, 25)));
@@ -1309,18 +1311,23 @@ namespace AUTO_Matic
 
         public void CreateEndGameUI(Rectangle viewRect)
         {
-            if(uiElements.ContainsKey("EndGame") == false)
+            if(!uiElements.ContainsKey("EndGameBackground"))
             {
                 uiElements.Add("EndGameBackground", UIHelper.CreateTextblock("EndGameBackground", "", 0, 0));
-                UIHelper.SetElementBGRect(uiElements["EndGameBackground"], new Rectangle(uiElements["EndGameBackground"].Position.ToPoint(), new Point(viewRect.Width, viewRect.Height)));
-                UIHelper.SetElementRect(uiElements["EndGameBackground"], new Rectangle(uiElements["EndGameBackground"].Position.ToPoint(), new Point(viewRect.Width, viewRect.Height)));
+                UIHelper.SetElementBGRect(uiElements["MainMenuBackground"], new Rectangle(uiElements["EndGameBackground"].Position.ToPoint(), new Point(1920, 1080)));
+                UIHelper.SetElementRect(uiElements["MainMenuBackground"], new Rectangle(uiElements["EndGameBackground"].Position.ToPoint(), new Point(1920, 1080)));
 
-                uiElements["EndGameBackground"].Visible = true;
+                uiElements["MainMenuBackground"].Visible = true;
+
+             
+                UIHelper.SetRectangle(uiElements["PauseMenuReturn"], new Rectangle(viewRect.Center.X + (150/2), viewRect.Center.Y + (viewRect.Height/3), 150, 30));
+                UIHelper.SetRectangle(uiElements["PauseMenuQuit"], new Rectangle(viewRect.Center.X + (150 / 2), UIHelper.GetRectangle(uiElements["PauseMenuReturn"]).Bottom + 5, 150, 30));
 
 
-                UIHelper.SetRectangle(uiElements["PauseMenuReturn"], new Rectangle(viewRect.Center.X - (150/2), viewRect.Center.Y + (viewRect.Height/3), 150, 30));
-                UIHelper.SetRectangle(uiElements["PauseMenuQuit"], new Rectangle((int)uiElements["PauseMenuReturn"].Position.X, UIHelper.GetRectangle(uiElements["PauseMenuReturn"]).Bottom + 5, 150, 30));
-
+            }
+            else
+            {
+                uiElements["MainMenuBackground"].Visible = true;
                 uiElements["PauseMenuReturn"].Visible = true;
                 uiElements["PauseMenuQuit"].Visible = true;
                 uiElements["PauseMainMenuBtn"].Visible = false;
@@ -1336,6 +1343,10 @@ namespace AUTO_Matic
                 UIHelper.SetElementRect(uiElements["PauseMenuBox"], new Rectangle(uiElements["PauseMenuBox"].Position.ToPoint(), new Point(200, 200)));
 
                 //uiElements["PauseMenuBox"].Visible = true;
+
+                uiElements.Add("SelectBox", UIHelper.CreateTextblock("SelectBox", "", 0, 0));
+                UIHelper.SetElementBGRect(uiElements["SelectBox"], new Rectangle(uiElements["SelectBox"].Position.ToPoint(), new Point(150, 30)));
+                UIHelper.SetElementRect(uiElements["SelectBox"], new Rectangle(uiElements["SelectBox"].Position.ToPoint(), new Point(150, 30)));
 
                 uiElements.Add("PauseMainMenuBtn", UIHelper.CreateButton("PauseMainMenuBtn", "    Return to Game",
                     UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.X - (150 / 2), UIHelper.GetElementBGRect(uiElements["PauseMenuBox"]).Center.Y - (int)(150 / 3)));

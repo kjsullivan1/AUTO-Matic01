@@ -50,7 +50,7 @@ namespace AUTO_Matic.TopDown
         float boostedSpeed = 0;
         float speedBoostTime = 1.75f;
         float iSpeedBoostTime;
-        float speedBoostInputDelay = .65f;
+        float speedBoostInputDelay = .6f;
         float iSpeedBoostInputDelay;
         bool inputDelay = false;
 
@@ -1532,6 +1532,7 @@ namespace AUTO_Matic.TopDown
                             boostedSpeed = moveSpeed * 1.75f;
                             speedBoosted = true;
                             inputDelay = true;
+                            speedBoostInputDelay = .6f;
                             switch (environmentTile.direction)
                             {
                                 case "right":

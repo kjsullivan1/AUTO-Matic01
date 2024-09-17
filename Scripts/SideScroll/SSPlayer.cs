@@ -148,7 +148,7 @@ namespace AUTO_Matic.SideScroll
 
         float iShootDelay;
         bool startShoot = false;
-        public float bulletDmg = .85f;
+        public float bulletDmg =  100f;
         float pistolDmg = .85f;
         float shotGunDmg = 1.75f;
         float burstDmg = 1.35f;

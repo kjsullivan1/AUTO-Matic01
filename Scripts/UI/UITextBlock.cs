@@ -18,6 +18,8 @@ namespace AUTO_Matic
         public Rectangle Rect { get; set; }
         public float Scale { get; set; }
 
+        public Color drawColor = Color.White;
+
         SpriteFont font;
 
         public Texture2D BackGroundTexture { get; set; }
@@ -29,6 +31,8 @@ namespace AUTO_Matic
             Font = font;
             Text = text;
             TextTint = textTint;
+
+          
         }
 
         public UITextBlock(string id, Vector2 position, Vector2 textOffset, SpriteFont font, string text, Color textTint, Texture2D bgTxture)
@@ -41,8 +45,11 @@ namespace AUTO_Matic
             this.font = font;
             BackGroundTexture = bgTxture;
             Scale = 1;
-
-            if(Text != null && Text.Length > 0 && Rect != Rectangle.Empty)
+            if (id.Contains("SelectBox"))
+            {
+                drawColor = textTint;
+            }
+            if (Text != null && Text.Length > 0 && Rect != Rectangle.Empty)
             {
               
                 int endOfLineX = Text.Length;
@@ -97,7 +104,7 @@ namespace AUTO_Matic
                      
                 //}
 
-                spriteBatch.Draw(BackGroundTexture,TextureRect, color: Color.White);
+                spriteBatch.Draw(BackGroundTexture,TextureRect, color: drawColor);
                 if(Text == null)
                     spriteBatch.DrawString(spriteFont: Font, text: "", position: new Vector2(Rect.X, Rect.Y) + TextOffset, color: TextTint, rotation: 0, origin: new Vector2(0, 0), scale: Scale, SpriteEffects.None, layerDepth: 0);
                 else

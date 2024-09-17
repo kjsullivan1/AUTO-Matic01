@@ -36,7 +36,7 @@ namespace AUTO_Matic.Scripts.TopDown
         float iShootDelay;
         float chargeTime;
         bool startShoot = false;
-        public float bulletDmg = 2f;
+        public float bulletDmg = 2.22f;
         public float bulletTravelDist = 64 * 8;
         Texture2D visionTxture;
         int width;
@@ -1327,11 +1327,14 @@ namespace AUTO_Matic.Scripts.TopDown
                 //Sets up 4 unique colors
                 foreach(BossRect boss in bossRects)
                 {
-                    boss.animManager.Draw(spriteBatch, boss.color, boss.rotateAngle, boss.rect);
+                   
                     if (boss.chargeTime > 0 && boss.state == BossRect.BossState.Fire)
                     {
 
-                        spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.White, rotation: boss.rotateAngle);
+                        spriteBatch.Draw(line, destinationRectangle: boss.destRect, color: Color.Crimson * .5f, rotation: boss.rotateAngle);
+                        //spriteBatch.Draw(content.Load<Texture2D>("Textures/Reticle"), 
+                        //    destinationRectangle: new Rectangle(((boss.destRect.X + boss.destRect.Width) - 64) * (int)Math.Cos(MathHelper.ToDegrees(boss.rotateAngle)), (boss.destRect.Y) * (int)Math.Sin(MathHelper.ToDegrees(boss.rotateAngle)), 64, 64),
+                        //    color: Color.White);
                         //foreach (Rectangle rect in boss.bulletRects)
                         //{
                         //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rect, Color.White);
@@ -1344,7 +1347,7 @@ namespace AUTO_Matic.Scripts.TopDown
                             boss.bullets[j].Draw(spriteBatch, Color.Blue);
                         }
                     }
-
+                    boss.animManager.Draw(spriteBatch, boss.color, boss.rotateAngle, boss.rect);
                     boss.healthBar.Draw(spriteBatch);
                 }
              

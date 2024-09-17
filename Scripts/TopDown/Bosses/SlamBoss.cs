@@ -38,7 +38,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         float slamDmg = 1.5f;
 
         BossHealthBar healthBar;
-        float dmgResistance = 2f;
+        float dmgResistance = 2.45f;
 
         enum BossState { SetStats, Shoot, Slam}
         BossState state = BossState.SetStats;
@@ -56,6 +56,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         Point CurrFrame;//Location of currFram on the sheet
         Point SheetSize;//num of frames.xy
         int fpms;
+
+        GroundLoc closestLoc;
         public void ChangeAnimation()
         {
             switch (animState)
@@ -127,6 +129,8 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         bool respawnWalls = false;
         float respawnDelay;
         #endregion
+
+        int widthMod = -1;
 
         #region Constructor
         public SlamBoss(Rectangle currBounds, ContentManager content, TopDownMap tdMap, int[,] map, List<WallTiles> walls)
@@ -229,7 +233,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         }
         #endregion
 
-        public void Update(GameTime gameTime, TDPlayer tdPlayer, TopDownMap tdMap)
+        public void Update(GameTime gameTime, TDPlayer tdPlayer, TopDownMap tdMap, Rectangle currBounds)
         {
             if(animState == AnimationStates.Shoot && animManager.GetCurrFrame().X == animManager.GetSheetSize().X)
             {
@@ -243,7 +247,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     slamDelay = RandFloat(slameTimeMin, slamTimeMax);
                     state = BossState.Shoot;
                    
-                    respawnDelay = slamDelay / 2;
+                    respawnDelay = slamDelay / 1.5f;
                     airTimeDelay = RandFloat(airTimeMin, airTimeMax);
                     break;
                 case BossState.Shoot:
@@ -252,9 +256,26 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                     if (slamDelay <= 0)
                     {
-                        state = BossState.Slam;
+                        if(bossRect.Bottom > currBounds.Y)
+                        {
+                            bossRect.Y -= 10;
+                            //animManager.CurrTexture.Reload
+                            //bossRect.Width += widthMod;
+                            //bossRect.X -= widthMod;
+                            //animManager.SetWidthMod(widthMod);
+                            //widthMod--;
+                          
+                        }
+                        else
+                        {
+                            state = BossState.Slam;
                         //slamDelay = iSlamDelay;
-                        bossRect.X = 0;
+                            bossRect.X = 0;
+                            //bossRect.Width -= 192;
+                            //animManager.SetWidthMod(0); 
+                        }
+
+                        
                         break;
                     }
 
@@ -304,6 +325,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                             }
                         }
+                        this.closestLoc = closestLoc;
                         if(airTimeDelay <=0)
                         {
                             bossRect = new Rectangle(closestLoc.slamTiles[0].Rectangle.X, closestLoc.slamTiles[0].Rectangle.Y,
@@ -669,13 +691,32 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             {
                 tile.Draw(spriteBatch);
             }
+            if(state == BossState.Slam && closestLoc != null && airTimeDelay < 1f && !slamReady)
+            {
+                for(int i = 0; i < 3; i++)
+                {
+                    spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), new Rectangle(closestLoc.slamTiles[0].Rectangle.X + (64 * i), closestLoc.slamTiles[0].Rectangle.Y,
+                        closestLoc.slamTiles[0].Rectangle.Width, closestLoc.slamTiles[0].Rectangle.Height), Color.Black * .5f);
+                    spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), new Rectangle(closestLoc.slamTiles[0].Rectangle.X + (64 * i), closestLoc.slamTiles[0].Rectangle.Y + 64,
+                        closestLoc.slamTiles[0].Rectangle.Width, closestLoc.slamTiles[0].Rectangle.Height), Color.Black * .5f);
+                    spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), new Rectangle(closestLoc.slamTiles[0].Rectangle.X + (64 * i), closestLoc.slamTiles[0].Rectangle.Y + 128,
+                        closestLoc.slamTiles[0].Rectangle.Width, closestLoc.slamTiles[0].Rectangle.Height), Color.Black * .5f);
+                }
+                //for(int i )
+                //foreach (SlamTiles slamTile in closestLoc.slamTiles)
+                //{
+                //    spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), slamTile.Rectangle, Color.Black * .50f);
+                //}
+            }
+           
             //if (slamReady)
             //{
             //    spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), slam.rect.Bounds, Color.White * .25f);
             //}
 
             particles.Draw(spriteBatch);
-            healthBar.Draw(spriteBatch);
+            if(state != BossState.Slam && slamDelay > 0)
+                healthBar.Draw(spriteBatch);
             //foreach (GroundLoc loc in slamLocs)
             //{
             //    for (int i = 0; i < loc.slamTiles.Count; i++)

@@ -141,7 +141,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             set
             {
                 health = value;
-                damaged = false;
+                damaged = true;
                 if (health <= 0)
                     health = 0;
                 healthBar.ChangeHealth(health);
@@ -228,7 +228,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                     {
                         case 0:
                             chosenWeapon = "Shotgun";
-                            bulletDmg = 1.4f;
+                            bulletDmg = 1.85f;
                             break;
                         case 1:
                             chosenWeapon = "Laser";
@@ -1628,6 +1628,10 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             //{
             //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), SideWall[i], Color.Black);
             //}
+            if (destRect != Rectangle.Empty)
+            {
+                spriteBatch.Draw(line, destinationRectangle: destRect, color: Color.Crimson * .5f, rotation: angle);
+            }
             healthBar.Draw(spriteBatch);
             spriteBatch.Draw(content.Load<Texture2D>("SideScroll/Animations/FinalBoss/MonoBoss"), bossRect, Color.White);
 
@@ -1644,10 +1648,7 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
           
             }
 
-            if(destRect != Rectangle.Empty)
-            {
-                spriteBatch.Draw(line, destinationRectangle: destRect, color: Color.White, rotation: angle);
-            }
+         
 
             for(int i = 0; i < bullets.Count; i++)
             {

@@ -125,9 +125,9 @@ namespace AUTO_Matic.Scripts.TopDown
         Texture2D gunTexture;
         public List<Bullet> bullets = new List<Bullet>();
         float angle;
-        float bulletSpeed = 4f;
-        float bulletMaxX = 10f;
-        float bulletMaxY = 10f;
+        float bulletSpeed = 2f;
+        float bulletMaxX = 7.75f;
+        float bulletMaxY = 7.75f;
         int spread = 3;
         bool isShootDelay = false;
         float shootDelay = 1.45f;//In seconds
@@ -322,6 +322,18 @@ namespace AUTO_Matic.Scripts.TopDown
                 slamDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                 if (slamDelay <= 0)
                 {
+                    if(animState != AnimationStates.Slam)
+                    {
+                        animState = AnimationStates.Slam;
+                        ChangeAnimationBase();
+                    }
+                    if(animManagerBase.GetCurrFrame().X >= animManagerBase.GetSheetSize().X - 1)
+                    {
+                        animManagerBase.SetFrameToEnd();
+                        animManagerBase.StopLoop();
+                    }
+                  
+
                     float moveOffset = (float)growthRate;
                     slam.Radius += growthRate;
                     slam.SetWidth(currWidthMod);
@@ -363,6 +375,8 @@ namespace AUTO_Matic.Scripts.TopDown
                         slam = new Circle(new Vector2(bossRect.X + bossRect.Width / 2, bossRect.Y + bossRect.Height / 2), 2);
 
                         respawn = true;
+                        animState = AnimationStates.Idle;
+                        ChangeAnimationBase();
                         //currWidthMod += 1;
 
 

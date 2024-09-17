@@ -85,12 +85,12 @@ namespace AUTO_Matic
                 {
                     case "MainMenuPlay":
                         UIButton b = new UIButton(id, new Vector2(x, y),
-                            new Vector2(200, 75), ButtonFont, "", Color.White, PlayGameBtn);
+                            new Vector2(400, 125), ButtonFont, "", Color.White, PlayGameBtn);
                         b.Disabled = false;
                         return b;
                     case "MainMenuExit":
                         UIButton c = new UIButton(id, new Vector2(x, y),
-                           new Vector2(200, 75), ButtonFont, "", Color.White, ExitGameBtn);
+                           new Vector2(400, 125), ButtonFont, "", Color.White, ExitGameBtn);
                         c.Disabled = false;
                         return c;
                     case "MainMenuSetting":
@@ -109,15 +109,15 @@ namespace AUTO_Matic
                         f.Disabled = false;
                         return f;
                     case "StartNewGame":
-                        UIButton g = new UIButton(id, new Vector2(x, y), new Vector2(200, 75),
+                        UIButton g = new UIButton(id, new Vector2(x, y), new Vector2(400, 125),
                             ButtonFont, "", Color.White, StartGameBtn);
                         return g;
                     case "LoadGame":
-                        UIButton h = new UIButton(id, new Vector2(x, y), new Vector2(200, 75),
+                        UIButton h = new UIButton(id, new Vector2(x, y), new Vector2(400, 125),
                           ButtonFont, "", Color.White, LoadGameBtn);
                         return h;
                     default:
-                        UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(200, 75), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
+                        UIButton a = new UIButton(id, new Vector2(x, y), new Vector2(175, 75), ButtonFont, text, Color.White, ButtonTexture); //RectBounds:  new Vector2( ButtonTexture.Width, ButtonTexture.Height) for fitting exact size of texture
                         a.Disabled = false;
                         return a;
 
@@ -160,6 +160,11 @@ namespace AUTO_Matic
                 }
                
             }
+            else if(id.Contains("EndGame"))
+            {
+                UITextBlock b = new UITextBlock(id, new Vector2(x, y), new Vector2(25, 5), TutorialFont, text, Color.Black, MainMenuBG);
+                return b;
+            }
             else
             {
                 switch (id)
@@ -182,9 +187,13 @@ namespace AUTO_Matic
                     case "DashIcon":
                         UITextBlock f = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.White, DashIcon[0]);
                         return f;
+                    case "SelectBox":
+                        UITextBlock h = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.SteelBlue, ButtonTexture);
+                        return h;
                     default:
                         UITextBlock b = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, text, Color.Black, TutorialTexture);
                         return b;
+
 
 
                 }
@@ -207,9 +216,12 @@ namespace AUTO_Matic
         {
             foreach (string widget in uiElements.Keys)
             {
-                if (uiElements[widget].ID.Contains(keyWord))
+                
+                if (uiElements[widget].ID.Contains(keyWord) && uiElements[widget].ID != "SettingsMenuTitle")
                     ((UIWidget)uiElements[widget]).Visible = visible;
             }
+
+  
         }
 
         public static bool IsTextBlock(UIWidget uiElement)
