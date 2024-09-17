@@ -17,33 +17,14 @@ namespace AUTO_Matic.Scripts.TopDown
         public List<BossRect> bossRects = new List<BossRect>();
         ContentManager content;
         Random rand = new Random();
-        //Rectangle bounds;
-
-
-       
 
         #region Shooting
         Texture2D gunTexture;
        
-        //public float angle;
         public List<Bullet> bullets = new List<Bullet>();
-        float bulletSpeed = 5f;
-        float bulletMaxX = 20f;
-        float bulletMaxY = 20f;
-        int spread = 3;
-       // bool isShootDelay = false;
-        //float shootDelay = 2.5f;//In seconds
-        float iShootDelay;
-        float chargeTime;
-        bool startShoot = false;
         public float bulletDmg = 2.22f;
         public float bulletTravelDist = 64 * 8;
-        Texture2D visionTxture;
-        int width;
-        int height;
         Rectangle bounds;
-        Rectangle tempRect;
-
         PossibleJumpSide TopWalls;
         PossibleJumpSide BottomWalls;
         PossibleJumpSide RightWalls;
@@ -74,7 +55,6 @@ namespace AUTO_Matic.Scripts.TopDown
             worldRect = new Rectangle(((rect.X + rect.Width / 2) - size / 2), (((rect.Y + rect.Height / 2) - size / 2)), size, size);
             this.content = content;
             this.bounds = rect;
-            //iShootDelay = shootDelay;
           
             TopWalls.isUsed = false;
             BottomWalls.isUsed = false;
@@ -136,11 +116,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                     break;
                                 }
                             }
-                            //JumpWalls.Add(new WallTiles(map[y, x], 
-                            //    tRect));
-
-                            //JumpWalls.Add(new WallTiles(map[y, x],
-                            //   new Rectangle(bounds.X + (x * 64), bounds.Y + (y * 64), 64, 64)));
                         }
                     }
                    if(y > 0 && y < map.GetLength(0) - 1 && x == 0 ||
@@ -148,7 +123,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     {
                         if (map[y, x] != 10)
                         {
-                            //Rectangle tRect = Rectangle.Empty;
+                   
                             foreach (WallTiles wall in tdMap.WallTiles)
                             {
                                 if (wall.mapPoint[0] == y && wall.mapPoint[1] == x)
@@ -167,10 +142,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                     break;
                                 }
                             }
-                            
-
-                            //JumpWalls.Add(new WallTiles(map[y, x],
-                            //   new Rectangle(bounds.X + (x * 64), bounds.Y + (y * 64), 64, 64)));
                         }
                     }
                 }
@@ -315,7 +286,6 @@ namespace AUTO_Matic.Scripts.TopDown
                             {
                                 if(boss.rect.Center.Y <= TopWalls.walls[0].Rectangle.Bottom)
                                 {
-                                    //boss.rect.Y = TopWalls.walls[0].Rectangle.Bottom + boss.rect.Height/4;
                                     boss.state = BossRect.BossState.InWall;
                                 }
                             }
@@ -323,7 +293,6 @@ namespace AUTO_Matic.Scripts.TopDown
                             {
                                 if (boss.rect.Center.Y >= BottomWalls.walls[0].Rectangle.Top)
                                 {
-                                    //boss.rect.Y = BottomWalls.walls[0].Rectangle.Top - boss.rect.Height / 4;
                                     boss.state = BossRect.BossState.InWall;
                                 }
                             }
@@ -331,7 +300,6 @@ namespace AUTO_Matic.Scripts.TopDown
                             {
                                 if (boss.rect.Center.X >= RightWalls.walls[0].Rectangle.Left)
                                 {
-                                    //boss.rect.X = RightWalls.walls[0].Rectangle.Left - boss.rect.Width / 4;
                                     boss.state = BossRect.BossState.InWall;
                                 }
                             }
@@ -339,7 +307,6 @@ namespace AUTO_Matic.Scripts.TopDown
                             {
                                 if (boss.rect.Center.X <= LeftWalls.walls[0].Rectangle.Right)
                                 {
-                                    //boss.rect.X = LeftWalls.walls[0].Rectangle.Right + boss.rect.Width / 4;
                                     boss.state = BossRect.BossState.InWall;
                                 }
                             }
@@ -609,7 +576,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                 if(boss.jumpForce != 0)
                                 {
                                     boss.velocity.X = boss.jumpForce;
-                                   // boss.velocity.Y = 0;
                                     boss.jumpForce = 0;
                                     boss.hasWall = false;
                                     boss.moveDir = boss.velocity;
@@ -788,9 +754,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                 boss.state = BossRect.BossState.Idle;
                             }
                         }
-
-
-
                         break;
                         #endregion
                 }
@@ -850,10 +813,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     {
                         boss.health -= tdPlayer.bulletDmg / boss.dmgResistance;
                         boss.healthBar.RecieveDamage(tdPlayer.bulletDmg / boss.dmgResistance);
-                        //tdPlayer.bullets[i].delete = true;
                     }
-                      
-
                 }
 
                 boss.healthBar.Update(new Point(boss.rect.X, boss.rect.Y - 20));
@@ -1241,11 +1201,6 @@ namespace AUTO_Matic.Scripts.TopDown
                     count++;
                 }
             }
-            //else if(boss.prevState == BossRect.BossState.Attack)
-            //{
-            //    count++;
-            //    boss.prevState = BossRect.BossState.Idle;
-            //}
 
             if (boss.rect.Y < boss.destinationRect.Y)
             {
@@ -1354,12 +1309,6 @@ namespace AUTO_Matic.Scripts.TopDown
               
                
             }
-
-            //foreach (FloorTiles tile in floors)
-            //{
-            //    tile.Draw(spriteBatch);
-            //}
-            //spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"), slam.Position, slam.Bounds, Color.White * .5f);
         }
 
         public float RandFloat(int min, int max)
@@ -1410,196 +1359,6 @@ namespace AUTO_Matic.Scripts.TopDown
 
 
             }
-
-            #region OldRay
-            // if (angle < 16 || angle >= 155)//Right
-            // {
-            //     if (angle < 16)
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 2),
-            //             (int)bossPos.Y /*- (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 2)*/, size, size));
-
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (boss.bulletRects[boss.bulletRects.Count - 1].Right < RightWalls.walls[0].Rectangle.X)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.Right, startRect.Y, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-            //     else//Left
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X - (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 2),
-            //             (int)bossPos.Y /*- (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 2)*/, size, size));
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (boss.bulletRects[boss.bulletRects.Count - 1].X > LeftWalls.walls[0].Rectangle.X)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.X - size, startRect.Y, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-            // }
-            // if (angle >= 16 && angle < 35)//Right up
-            // {
-            //     if (boss.rect.Center.Y > playerRect.rectangle.Y)
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 2),
-            //    (int)bossPos.Y - (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 4), size, size));
-
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (boss.bulletRects[boss.bulletRects.Count - 1].Right < RightWalls.walls[0].Rectangle.X &&
-            //             boss.bulletRects[boss.bulletRects.Count - 1].Top > TopWalls.walls[0].Rectangle.Top)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.Right, startRect.Y - size / 4, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-            //     else
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 2),
-            //   (int)bossPos.Y + (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 4), size, size));
-
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (boss.bulletRects[boss.bulletRects.Count - 1].Right < RightWalls.walls[0].Rectangle.X &&
-            //           boss.bulletRects[boss.bulletRects.Count - 1].Bottom < BottomWalls.walls[0].Rectangle.Top)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.Right, startRect.Bottom - size / 2, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-
-            //     //Compare pos for down
-            // }
-            // if (angle >= 35 && angle < 75)//more right up
-            // {
-            //     if (boss.rect.Center.Y > playerRect.rectangle.Y)
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 4),
-            //    (int)bossPos.Y - (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 2), size, size));
-
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (boss.bulletRects[boss.bulletRects.Count - 1].Right < RightWalls.walls[0].Rectangle.X &&
-            //           boss.bulletRects[boss.bulletRects.Count - 1].Top > TopWalls.walls[0].Rectangle.Top)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.Right, startRect.Y - size, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-            //     else
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 4),
-            //   (int)bossPos.Y + (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 2), size, size));
-
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (boss.bulletRects[boss.bulletRects.Count - 1].Right < RightWalls.walls[0].Rectangle.X &&
-            //           boss.bulletRects[boss.bulletRects.Count - 1].Bottom < BottomWalls.walls[0].Rectangle.Top)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.Right, startRect.Bottom, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-            // }
-            // if (angle >= 75 && angle < 105)//up
-            // {
-            //     if (boss.rect.Center.Y > playerRect.rectangle.Y)
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X /*+ (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 4)*/,
-            //  (int)bossPos.Y - (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 2), size, size));
-
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (/*boss.bulletRects[boss.bulletRects.Count - 1].Right < RightWalls.walls[0].Rectangle.X &&*/
-            //           boss.bulletRects[boss.bulletRects.Count - 1].Top > TopWalls.walls[0].Rectangle.Top)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.X, startRect.Y - size, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-            //     else
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X /*+ (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 4)*/,
-            //  (int)bossPos.Y + (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 2), size, size));
-
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (/*boss.bulletRects[boss.bulletRects.Count - 1].Right < RightWalls.walls[0].Rectangle.X &&*/
-            //           boss.bulletRects[boss.bulletRects.Count - 1].Bottom < BottomWalls.walls[0].Rectangle.Bottom)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.X, startRect.Bottom, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-            // }
-            // if (angle >= 105 && angle < 135)//up left
-            // {
-            //     if (boss.rect.Center.Y > playerRect.rectangle.Y)
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X - (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 4),
-            // (int)bossPos.Y - (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 2), size, size));
-
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (boss.bulletRects[boss.bulletRects.Count - 1].X > LeftWalls.walls[0].Rectangle.Right &&
-            //           boss.bulletRects[boss.bulletRects.Count - 1].Top > TopWalls.walls[0].Rectangle.Bottom)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.X - size, startRect.Y - size, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-            //     else
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X - (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 4),
-            // (int)bossPos.Y + (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 2), size, size));
-
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (boss.bulletRects[boss.bulletRects.Count - 1].X > LeftWalls.walls[0].Rectangle.Right &&
-            //           boss.bulletRects[boss.bulletRects.Count - 1].Bottom < BottomWalls.walls[0].Rectangle.Top)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.X - size, startRect.Bottom, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-            // }
-            // if (angle >= 135 && angle < 155)
-            // {
-            //     if (boss.rect.Center.Y > playerRect.rectangle.Y)
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X - (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 2),
-            // (int)bossPos.Y - (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 4), size, size));
-
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (boss.bulletRects[boss.bulletRects.Count - 1].X > LeftWalls.walls[0].Rectangle.Right &&
-            //           boss.bulletRects[boss.bulletRects.Count - 1].Top > TopWalls.walls[0].Rectangle.Bottom)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.X - size, startRect.Y - size / 4, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-            //     else
-            //     {
-            //         boss.bulletRects.Add(new Rectangle((int)bossPos.X - (int)(playerRect.rectangle.Width / 2 + boss.rect.Width / 2),
-            //(int)bossPos.Y + (int)(playerRect.rectangle.Height / 2 + boss.rect.Height / 4), size, size));
-
-            //         Rectangle startRect = boss.bulletRects[0];
-
-            //         while (boss.bulletRects[boss.bulletRects.Count - 1].X > LeftWalls.walls[0].Rectangle.Right &&
-            //           boss.bulletRects[boss.bulletRects.Count - 1].Bottom < BottomWalls.walls[0].Rectangle.Top)
-            //         {
-            //             boss.bulletRects.Add(new Rectangle(startRect.X - size, startRect.Bottom - size / 2, size, size));
-            //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //         }
-            //     }
-            // }
-
-            #endregion
-
         }
     }
 

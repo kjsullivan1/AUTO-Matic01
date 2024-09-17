@@ -129,23 +129,9 @@ namespace AUTO_Matic
 
         public void Draw(SpriteBatch spriteBatch, Color color, float angle, Rectangle originRect)
         {
- 
 
             spriteBatch.Draw(CurrTexture,position:position, sourceRectangle: new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X, FrameSize.Y),
                 color: color, origin: new Vector2(originRect.Width/2, originRect.Height/2), rotation: angle);
-
-          
-
-            //if (isRight)
-            //{
-
-            //    spriteBatch.Draw(CurrTexture, position, new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X, FrameSize.Y), color);
-            //}
-            //else if (isLeft)
-            //{
-            //    spriteBatch.Draw(CurrTexture, position: position, sourceRectangle: new Rectangle(CurrFrame.X * FrameSize.X, CurrFrame.Y * FrameSize.Y, FrameSize.X, FrameSize.Y), color: color, effects: SpriteEffects.FlipHorizontally);
-            //}
-
 
         }
         //This is made to spite the fact spriteBatch cant consistantly use 'rotation:' as the variable will constantly shift in and out of existance depending on the overload
@@ -185,10 +171,6 @@ color: color, origin: new Vector2(originRect.Width / 2, originRect.Height / 2), 
                         break;
                 }
             }
-
-           
-      
-
         }
     }
 }

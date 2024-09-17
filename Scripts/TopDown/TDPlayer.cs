@@ -24,7 +24,6 @@ namespace AUTO_Matic.TopDown
         enum WeaponType { Pistol, Shotgun, Laser, Burst, Bomb }
         WeaponType currWeapon = WeaponType.Pistol;
 
-        GamePadState joystick = GamePad.GetState(0);
         WeaponWheel weaponWheel;
         int selectedWeapon = 0;
         float weaponWheelActiveDelay = .25f;
@@ -296,7 +295,6 @@ namespace AUTO_Matic.TopDown
         public posXLevels PosXLevels;
         public posYLevels PosYLevels;
 
-        List<int[,]> WallCords = new List<int[,]>();
         int levelCount = 0;
         public int levelInX = 1;
         public int levelInY = 1;
@@ -304,15 +302,12 @@ namespace AUTO_Matic.TopDown
         #endregion
 
         #region Shooting
-        Texture2D gunTexture;
         public List<Bullet> bullets = new List<Bullet>();
         public List<Bullet> bombs = new List<Bullet>();
         public List<Explosion> explosions = new List<Explosion>();
-        MouseState prevMs;
         float bulletSpeed = 2f;
         float bulletMaxX = 10f;
         float bulletMaxY = 10f;
-        bool isShootDelay = false;
         float shootDelay = .35f;//In seconds
         float iShootDelay;
 
@@ -336,7 +331,6 @@ namespace AUTO_Matic.TopDown
         float maxBombDelay = 1.5f;
         float bombDmg = .5f;
 
-        bool startShoot = false;
         public float bulletDmg = 1.2f;
         public float bulletTravelDist = 64 * 4.75f;
         #endregion
@@ -397,10 +391,6 @@ namespace AUTO_Matic.TopDown
             particles = new ParticleManager();
            
             weaponWheel = new WeaponWheel(this, 25);
-
-           
-
-        
         }
 
         public int DashIndex()//Returns the index needed for the dash icon    0: Full, 1: Empty, 2+ Growing rate
@@ -430,122 +420,6 @@ namespace AUTO_Matic.TopDown
             }
 
             return index;
-        }
-        public void GenerateMap(bool xLevel, bool yLevel, bool dLevel)
-        {
-
-
-            levelCount++;
-
-            //for (int j = 0; j < maxObstacles; j++)
-            //{
-            //    int tileNum;
-            //    int temp = 0;
-            //    rndRow = rnd.Next(1, map.rows[levelCount - 1] - 1);// gets a random row
-            //    rndCol = rnd.Next(1, map.cols[levelCount - 1] - 1);//random col
-            //    tileNum = rnd.Next(0, 3); // 1/3 chance of being a wall (set of 5) or a skull or nothing
-
-
-            //    if (tileNum == 2)//Wall block. Attempts to reach 7 block shape, but doesnt if there is something there
-            //    {
-            //        int directionX;
-            //        int directionY;
-            //        while (true)
-            //        {
-            //            directionX = rnd.Next(-1, 2); //sets direction of the wall
-            //            directionY = rnd.Next(-1, 2); //sets direction of wall
-            //            if (directionX != 0 || directionY != 0)
-            //                break;
-            //        }
-            //        while (temp < 5)
-            //        {
-
-            //            if (dimensions[rndRow, rndCol] == 0) //if there is nothing assigned 
-            //            {
-            //                dimensions[rndRow, rndCol] = 2;
-            //                wallCoords.Add(new int[rndRow, rndCol]);
-            //            }
-
-            //            if (directionX == -1 && rndRow == 0)
-            //            {
-            //                directionX = rnd.Next(0, 2);
-            //            }
-            //            else if (directionX == 1 && rndRow == map.rows[levelCount - 1] - 1)
-            //            {
-
-            //                directionX = rnd.Next(-1, 1);
-
-
-
-            //            }
-            //            else
-            //            {
-            //                rndRow += directionX;
-            //            }
-
-            //            if (directionY == -1 && rndCol == 0)
-            //            {
-
-            //                directionY = rnd.Next(0, 2);
-            //            }
-            //            else if (directionY == 1 && rndCol == map.cols[levelCount - 1] - 1)
-            //            {
-
-            //                directionY = rnd.Next(-1, 1);
-
-
-
-            //            }
-            //            else
-            //            {
-            //                rndCol += directionY;
-            //            }
-
-
-            //            temp++;
-            //        }
-            //        temp = 0;
-            //    }
-            //    else if (tileNum == 1)
-            //    {
-            //        if (dimensions[rndRow, rndCol] == 0)
-            //        {
-            //            dimensions[rndRow, rndCol] = 3;
-            //        }
-            //    }
-
-
-            //}
-
-            //for (int j = 0; j < map.rows[levelCount]; j++)
-            //{
-            //    for (int k = 0; k < map.cols[levelCount - 1]; k++)
-            //    {
-            //        if (dimensions[j, k] == 0)
-            //        {
-            //            dimensions[j, k] = 1;
-
-            //        }
-            //    }
-            //}
-
-            //if (xLevel)
-            //    PosXLevel.xLevels.Add(dimensions);
-            //if (yLevel)
-            //{
-            //    PosYLevel.yLevels.Add(dimensions);
-            //}
-            //if (dLevel)
-            //{
-            //    DiagLevels.dLevels.Add(dimensions);
-            //}
-            //dimensions = new int[row, col];
-
-
-            //map.Refresh(PosXLevel.xLevels, PosYLevel.yLevels, DiagLevels.dLevels, pixelBits, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight, PosXLevel.Points, PosYLevel.Points, DiagLevels.Points);
-            ////map.Refresh(currentLevels, pixelBits, Window.ClientBounds.Width + (Window.ClientBounds.Width * (levelInX - 1)), graphics.PreferredBackBufferHeight + (graphics.PreferredBackBufferHeight * (levelInY - 1)), levelInX, levelInY);
-
-
         }
 
         public void Update(GameTime gameTime, TopDownMap map, ShotGunBoss boss, List<TDEnemy> enemies)
@@ -899,17 +773,6 @@ namespace AUTO_Matic.TopDown
                         bullets.RemoveAt(i);
                         break;
                     }
-                    //foreach (SSEnemy enemy in enemies)
-                    //{
-                    //    if (bullets[i].rect.TouchBottomOf(enemy.enemyRect) || bullets[i].rect.TouchTopOf(enemy.enemyRect)
-                    //    || bullets[i].rect.TouchLeftOf(enemy.enemyRect) || bullets[i].rect.TouchRightOf(enemy.enemyRect))
-                    //    {
-                    //        enemy.Health -= bulletDmg;
-                    //        bullets.RemoveAt(i);
-                    //        break;
-                    //    }
-                    //}
-
                 }
             }
 
@@ -938,10 +801,7 @@ namespace AUTO_Matic.TopDown
                 explosions[i].Update(gameTime);
                 if (explosions[i].rect.Radius >= explosions[i].maxSize)
                 {
-                    //particles.CreateEffect(20);
-
                     explosions.RemoveAt(i);
-
                 }
             }
 
@@ -1132,15 +992,6 @@ namespace AUTO_Matic.TopDown
                 }
             }
 
-
-
-            //if(kb.IsKeyUp(Keys.A) && kb.IsKeyUp(Keys.D) && kb.IsKeyUp(Keys.S) && kb.IsKeyUp(Keys.W))
-            //{
-            //    moveDirs = new string[2];
-            //}
-           
-
-        
             switch(currWeapon)
             {
                 case WeaponType.Pistol:
@@ -1159,7 +1010,6 @@ namespace AUTO_Matic.TopDown
                     laserDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                     break;
             }
-        //shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) || currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released)
             {
                 float num1 = 180;
@@ -1374,117 +1224,10 @@ namespace AUTO_Matic.TopDown
 
                             bombDelay = maxBombDelay;
                         }
-                           
-
-                    //     if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) && bombDelay <= 0
-                    //|| currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released && bombDelay <= 0)
-                    //     {
-                    //         if (animManager.isRight)
-                    //         {
-                    //             sounds.AddSound("SoundEffects/ThrowBomb", false);
-                    //             sounds.PlaySound();
-
-                    //             bulletSpeed = 3.5f;
-                    //             bombs.Add(new Bomb(new Circle(new Vector2(position.X + rectangle.Width,
-                    //               (rectangle.Center.Y - (15) + rectangle.Height / 2f)), 15), bulletSpeed, -bulletSpeed * 5f, content));
-                    //         }
-                    //         else if (animManager.isLeft)
-                    //         {
-                    //             sounds.AddSound("SoundEffects/ThrowBomb", false);
-                    //             sounds.PlaySound();
-
-                    //             bulletSpeed = 3.5f;
-                    //             bombs.Add(new Bomb(new Circle(new Vector2(position.X/* - (18 / 2)*/,
-                    //                 (rectangle.Center.Y - (15) + rectangle.Height / 2f)), 15), -bulletSpeed, -bulletSpeed * 5f, content));
-                    //         }
-
-                    //         bombDelay = maxBombDelay;
-                    //     }
                          break;
                     case WeaponType.Laser:
-
-                      
-
-                   //     if (kb.IsKeyDown(KeyBinds.TopDownInputs[5]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[5]) && laserDelay <= 0
-                   //|| currButtons.X == ButtonState.Pressed && prevButtons.X == ButtonState.Released && laserDelay <= 0)
-                   //     {
-                   //         if (animManager.isRight)
-                   //         {
-                   //             bulletSpeed = 4.5f;
-                   //             bulletTravelDist = 64 * 4f;
-                   //             for (int j = 0; j < 8; j++)
-                   //             {
-                   //                 bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width,
-                   //               rectangle.Center.Y - (14 / 2)), bulletSpeed,
-                   //               new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist));
-                   //                 bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
-                   //                 sounds.AddSound("SoundEffects/Shoot", false, .5f);
-                   //                 sounds.PlaySound();
-                   //             }
-                   //         }
-                   //         else if (animManager.isLeft)
-                   //         {
-                   //             bulletSpeed = 4.5f;
-                   //             bulletTravelDist = 64 * 4f;
-                   //             for (int j = 0; j < 8; j++)
-                   //             {
-                   //                 bullets.Add(new Bullet(new Vector2(position.X /*- (18 / 2)*/,
-                   //               rectangle.Center.Y - (14 / 2)), -bulletSpeed,
-                   //               new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, angle: num1));
-                   //                 bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
-                   //                 sounds.AddSound("SoundEffects/Shoot", false, .5f);
-                   //                 sounds.PlaySound();
-                   //             }
-                   //         }
-
-                   //         laserDelay = maxLaserDelay;
-                   //     }
                         break;
                 }
-
-
-                //if (shootDelay <= 0)
-                //{
-                //    switch (lockedDirection)
-                //    {
-                //        case "up":
-                //            bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (22), rectangle.Y), -bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed, 
-                //                angle: MathHelper.ToRadians(-90)));
-
-                //            break;
-                //        case "down":
-                //            bullets.Add(new Bullet(new Vector2(rectangle.Center.X - (22), rectangle.Bottom), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed,
-                //                angle:MathHelper.ToRadians(90)));
-                //            break;
-                //        case "left":
-                //            bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist,
-                //                angle:MathHelper.ToRadians(180)));
-                //            break;
-                //        case "right":
-                //            bullets.Add(new Bullet(new Vector2(rectangle.Center.X, rectangle.Center.Y - (22)), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                //            break;
-                //    }
-                //    bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Player;
-
-                //    //if (animManager.isUp)
-                //    //    bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Top), -bulletSpeed, 
-                //    //        new Vector2(bulletMaxX, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
-                //    //else if(animManager.isDown)
-                //    //    bullets.Add(new Bullet(new Vector2(rectangle.X + rectangle.Width / 2, rectangle.Bottom), bulletSpeed, 
-                //    //        new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
-                //    //else if(animManager.isLeft)
-                //    //    bullets.Add(new Bullet(new Vector2(rectangle.Left, rectangle.Y + (rectangle.Height / 2)), -bulletSpeed, 
-                //    //        new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                //    //else if(animManager.isRight)
-                //    //    bullets.Add(new Bullet(new Vector2(rectangle.Right, rectangle.Y + (rectangle.Height / 2)), bulletSpeed, 
-                //    //        new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-
-
-
-                //    shootDelay = iShootDelay;
-                //}
-
-
             }
 
             if (kb.IsKeyDown(KeyBinds.TopDownInputs[4]) && prevKb.IsKeyUp(KeyBinds.TopDownInputs[4]) || currButtons.B == ButtonState.Pressed && prevButtons.B == ButtonState.Released)
@@ -1505,17 +1248,7 @@ namespace AUTO_Matic.TopDown
                 startPos = position;
             }
             moveDirs = new string[2];
-            //if(kb.IsKeyDown(Keys.F) && prevKb.IsKeyUp(Keys.F) && meleeDelay <= 0 || currButtons.A == ButtonState.Pressed && prevButtons.A == ButtonState.Released && meleeDelay <= 0)
-            //{
-            //    meleeDelay = iMeleeDelay;
-            //    foreach(TDEnemy enemy in enemies)
-            //    {
-            //        if(MeleeHitbox.Intersects(enemy.Rectangle))
-            //        {
-            //            enemy.Health -= meleeDmg;
-            //        }
-            //    }
-            //}
+           
             prevKb = kb;
             prevButtons = currButtons;
 
@@ -1566,7 +1299,7 @@ namespace AUTO_Matic.TopDown
                             }
                             else
                             {
-                                //triggerEnter = true;
+                
                                 inDOT = true;
                                 fireDmgRate = iFireDmgRate;
                             }
@@ -1661,22 +1394,10 @@ namespace AUTO_Matic.TopDown
                     particles.MakeFireSpit(map.EnvironmentTiles[currFireTile].Rectangle,
                         new Circle(new Vector2(map.EnvironmentTiles[currFireTile].Rectangle.Center.X, map.EnvironmentTiles[currFireTile].Rectangle.Center.Y),
                         1), 32);
-                    //particles.MakeFireSpit(map.EnvironmentTiles[currFireTile].Rectangle,
-                    //  new Circle(new Vector2(map.EnvironmentTiles[currFireTile].Rectangle.Center.X, map.EnvironmentTiles[currFireTile].Rectangle.Center.Y),
-                    //  1), 32);
-                    //particles.MakeFireSpit(map.EnvironmentTiles[currFireTile].Rectangle,
-                    //  new Circle(new Vector2(map.EnvironmentTiles[currFireTile].Rectangle.Center.X, map.EnvironmentTiles[currFireTile].Rectangle.Center.Y),
-                    //  1), 32);
                 }
             }
 
             position += velocity;
-            if(controllerMoveDir != Vector2.Zero)
-            {
-
-            }
-
-           
         }
 
         private void SetShootDelays()
@@ -1891,37 +1612,6 @@ namespace AUTO_Matic.TopDown
                 position.X = border;
 
             }
-            //switch(levelInIndex)
-            //{
-            //    case 0:
-            //        if(CanMove(newRect))
-            //        {
-            //            levelInX++;
-            //            changeLevel = true;
-
-            //        }
-            //        else
-            //        {
-            //            position.X = border;
-            //        }
-            //        break;
-            //    case 2:
-            //        //position.X = xOffset - rectangle.Width;  //right collision
-            //        if(CanMove(newRect))
-            //        {
-            //            levelInX = 3;
-            //            changeLevel = true;
-
-            //        }
-            //        else
-            //        {
-            //            position.X = border;
-            //        }
-            //        break;
-            //    case 3:
-            //        position.X = xOffset - rectangle.Width;
-            //        break;
-            //}
         }
         void CheckBorderCollisionLeft(int xOffset, Rectangle rect, int border)
         {
@@ -2035,16 +1725,10 @@ namespace AUTO_Matic.TopDown
             {
                 position.X = border;
             }
-
-
-
-
         }
 
         void CheckBorderCollisionTop(int bounds, Rectangle rect, int border) // missing check for x because to max top
         {
-
-
             if (game.levelCount == 0)
                 game.levelCount++;
 

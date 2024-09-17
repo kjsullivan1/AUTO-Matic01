@@ -26,7 +26,6 @@ namespace AUTO_Matic.Scripts.TopDown
         private Rectangle rectangle;
         public float moveSpeed = .75f;
         public float iMoveSpeed = .75f;
-        private bool hasJumped = false;
         public bool isColliding = false;
         int visionLength = 10;
         float health = 3f;
@@ -57,8 +56,6 @@ namespace AUTO_Matic.Scripts.TopDown
 
                 pause = false;
 
-                //isRunAway = true;
-
                 if(runAwayTime <= 0)
                 {
                     Random rand = new Random();
@@ -82,10 +79,7 @@ namespace AUTO_Matic.Scripts.TopDown
 
                     isRunAway = selected;
                 }
-              
-
-                enemyState = EnemyStates.Movement;
-                
+                enemyState = EnemyStates.Movement;  
             }
         }
 
@@ -97,56 +91,13 @@ namespace AUTO_Matic.Scripts.TopDown
         Point CurrFrame;//Location of currFram on the sheet
         Point SheetSize;//num of frames.xy
         int fpms;
-        public void ChangeAnimation()
-        {
-            //switch (animState)
-            //{
-            //    case AnimationStates.Idle:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerIdle");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(6, 1);
-            //        fpms = 120;
-            //        break;
-            //    case AnimationStates.Walking:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerWalk");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(8, 1);
-            //        fpms = 120;
-            //        break;
-            //    case AnimationStates.Shooting:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerShoot");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(4, 1);
-            //        fpms = 95;
-            //        break;
-            //}
-
-            //bool isRight = true, isLeft = false, isUp = false, isDown = false;
-            //if (animManager != null)
-            //{
-            //    isRight = animManager.isRight;
-            //    isLeft = animManager.isLeft;
-            //    isUp = animManager.isUp;
-            //    isDown = animManager.isDown;
-            //}
-
-            //animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, Position);
-
-            //animManager.isRight = isRight;
-            //animManager.isLeft = isLeft;
-            //animManager.isUp = isUp;
-            //animManager.isDown = isDown;
-        }
         #endregion
 
         public bool strafeUp;
         public bool strafeDown;
         public bool strafeLeft;
         public bool strafeRight;
-        bool isStuck = false;
+
 
         bool blockedRight;
         bool blockedLeft;
@@ -154,14 +105,11 @@ namespace AUTO_Matic.Scripts.TopDown
         bool blockedBottom;
 
         bool inSight = false;
-        //Vector2 spawnLoc = new Vector2(140, 280);
 
         bool xDiag = false;
         bool prioXStrafe = false;
-        bool hasTarget = false;
 
         public int points = 0;
-        int buffer = 64;
         int tileSize = 62;
 
         float pauseX = 0;
@@ -174,13 +122,11 @@ namespace AUTO_Matic.Scripts.TopDown
 
         public List<Vector2> targets = new List<Vector2>();
         public Vector2 target = new Vector2();
-        Vector2 tempTarget = new Vector2();
 
         public List<Rectangle> vision = new List<Rectangle>();
 
         public TopDownMap map;
 
-        int tilesOut = 1;
         public Vector2 distToTravel = new Vector2();
         int[,] mapDims;
 
@@ -189,15 +135,9 @@ namespace AUTO_Matic.Scripts.TopDown
         ContentManager content;
 
         #region Shooting
-        Texture2D gunTexture;
         public List<Bullet> bullets = new List<Bullet>();
-        float bulletSpeed = 2f;
-        float bulletMaxX = 10f;
-        float bulletMaxY = 10f;
-        bool isShootDelay = false;
         float shootDelay = 1.85f;//In seconds
         float iShootDelay;
-        bool startShoot = false;
         public float bulletDmg = .55f;
         public float bulletTravelDist = 64 *5;
         Texture2D visionTxture;
@@ -219,8 +159,6 @@ namespace AUTO_Matic.Scripts.TopDown
         int GetRow(int yMod)
         {
             return Math.Abs((int)((position.Y + yMod) / tileSize));
-
-
         }
         int GetCol(int xMod)
         {
@@ -267,143 +205,6 @@ namespace AUTO_Matic.Scripts.TopDown
             }
         }
 
-        //List<Vector2> GetTargets(List<SkullTiles> targets)
-        //{
-        //    List<Vector2> pos = new List<Vector2>();
-
-        //    foreach (SkullTiles tile in targets)
-        //    {
-        //        pos.Add(tile.GetPosition());
-        //    }
-
-        //    return pos;
-        //}
-
-        //public void GiveDims(int[,] mapDims)
-        //{
-        //    map.mapDims = mapDims;
-        //}
-
-        //void DetermineClosestTarget()
-        //{
-        //    Vector2 shortest = new Vector2();
-        //    List<int> distances = new List<int>();
-
-        //    for (int i = 0; i < targets.Count; i++)
-        //    {
-
-        //        if (i + 1 < targets.Count)
-        //        {
-        //            distances.Add(distForm(position, targets[i]));
-        //        }
-
-
-        //    }
-
-        //    if (targets.Count > 0)
-        //    {
-        //        shortest = targets[0];
-        //    }
-
-
-        //    for (int i = 0; i < distances.Count; i++)
-        //    {
-        //        for (int j = i + 1; j < distances.Count; j++)
-        //        {
-        //            if (distances[i] > distances[j])
-        //            {
-        //                shortest = targets[j];
-        //            }
-        //        }
-        //    }
-
-        //    target = shortest;
-        //    hasTarget = true;
-        //}
-
-        //public void SetTarget(List<SkullTiles> skulls)
-        //{
-        //    targets = GetTargets(skulls);
-        //    DetermineClosestTarget();
-        //}
-
-        //public void SetTarget(List<SkullTiles> skulls, int[,] mapDims)
-        //{
-        //    targets = GetTargets(skulls);
-        //    DetermineClosestTarget();
-        //    this.mapDims = mapDims;
-        //    map.Refresh(mapDims, tileSize);
-        //}
-
-        //public void SetTarget(List<SkullTiles> skulls, Vector2 collidedPos)
-        //{
-        //    targets = GetTargets(skulls);
-
-        //    if (collidedPos == target)
-        //    {
-        //        SetTarget(skulls);
-        //    }
-        //    else
-        //    {
-
-        //    }
-        //}
-
-        void SetRay(float angle, TDPlayer playerRect)
-        {
-            if (angle <= 205 && angle >= 165) //Fire left
-            {
-                //bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height / 2 - 15 / 2), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                angleOfLine = 179;
-            }
-            else if (angle >= 345 || angle <= 15) //Fire right
-            {
-                //bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y + rectangle.Height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                angleOfLine = 0;
-            }
-            else if (angle > 15 && angle < 75) // upRight
-            {
-                if (position.Y < playerRect.rectangle.Y)
-                {
-                    //bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y + rectangle.Height), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                    angleOfLine = 45;
-                }
-                else
-                {
-                    //bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y), bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                    angleOfLine = -45;
-                }
-
-            }
-            else if (angle >= 75 && angle <= 105)//Up
-            {
-                if (position.Y < playerRect.rectangle.Y)
-                {
-                    //bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width / 2, position.Y + rectangle.Height), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
-                    angleOfLine = -80;
-                }
-                else
-                {
-                    //bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width / 2 - 15 / 2, position.Y), 0, new Vector2(0, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
-                    angleOfLine = 80;
-                }
-
-            }
-            else if (angle > 105 && angle < 165)//Up and left
-            {
-                if (position.Y < playerRect.rectangle.Y)
-                {
-                    //bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                    angleOfLine = 140;
-                }
-                else
-                {
-                    //bullets.Add(new Bullet(new Vector2(position.X, position.Y), -bulletSpeed, new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                    angleOfLine = -140;
-                }
-
-            }
-        }
         public void SetTargetPersonality()
         {
             //Will determine a target personality of targeting left right up or down of the player
@@ -444,15 +245,7 @@ namespace AUTO_Matic.Scripts.TopDown
             {
                 shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                
-                //foreach (WallTiles tile in tdMap.WallTiles)
-                //{
-                //    if (destRect.Intersects(tile.Rectangle))
-                //    {
-                //        destRect.Width = distForm(new Vector2(destRect.X, destRect.Y), new Vector2(tile.Rectangle.X, tile.Rectangle.Y));
-                //        wallBlock = true;
-
-                //    }
-                //}
+           
             }
 
             switch (enemyState)
@@ -538,41 +331,22 @@ namespace AUTO_Matic.Scripts.TopDown
                     else if(distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(target.X, target.Y)) < bulletTravelDist && !isRunAway)
                     {
                         target = new Vector2(((playerRect.rectangle.Center.X / 64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
-                        //SetTargetPersonality();
+                    
                         enemyState = EnemyStates.Shoot;
                     }
                     else if (inSight && !isRunAway)
                     {
                         target = new Vector2(((playerRect.rectangle.Center.X / 64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
-                        //SetTargetPersonality();
+                
                         pause = false;
-                        //target = new Vector2(playerRect.rectangle.X, (playerRect.rectangle.Y) / (64 * playerRect.levelInY - 1) * (64 * playerRect.levelInY - 1));
-                        //           target = new Vector2((playerRect.rectangle.X / (64 * playerRect.levelInX - 1) * (64 * playerRect.levelInX - 1)),
-                        //(playerRect.rectangle.Y) / (64 * playerRect.levelInY - 1) * (64 * playerRect.levelInY - 1));
+              
              
                     }
                     else if(!isRunAway)
                     {
                         target = new Vector2(((playerRect.rectangle.Center.X /64) * 64) + targetOffset.X, ((playerRect.rectangle.Center.Y / 64) * 64) + targetOffset.Y);
                     }
-                    //for (int i = vision.Count - 1; i >= 0; i--)
-                    //{
-                    //    Vector2 temp = target;
-                    //    if (vision[i].Intersects(new Rectangle((int)target.X, (int)target.Y, 28, 28)))
-                    //    {
-                    //        target = temp;
-                    //        inSight = true;
-                    //        break;
-                    //    }
-                    //    else
-                    //    {
-                    //        inSight = false;
-                    //    }
-                    //}
-                    //if(!inSight)
-                    //{
-
-                    //}
+                 
                     foreach (WallTiles tile in map.WallTiles)
                     {
 
@@ -617,39 +391,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                 strafeDown = false;
                             //position.Y += moveSpeed;
                         }
-
-                        //if (vision[8].Contains(tile.Rectangle)) //Bottom right
-                        //{
-                        //    if (!blockedRight && (!blockedBottom || !blockedTop) && ((int)position.X < (int)target.X) && (!strafeDown && !strafeUp))
-                        //    {
-                        //        pauseY = tileSize;
-
-                        //    }
-                        //}
-                        //if (vision[10].Contains(tile.Rectangle)) //Bottom left
-                        //{
-                        //    if (!blockedLeft && (!blockedBottom || !blockedTop) && (position.X > target.X) && (!strafeDown && !strafeUp))
-                        //    {
-                        //        pauseY = tileSize;
-                        //    }
-                        //}
-                        //if (vision[12].Contains(tile.Rectangle)) //Top right
-                        //{
-                        //    if (!blockedRight && (!blockedBottom || !blockedTop) && (position.X < target.X) && (!strafeDown && !strafeUp))
-                        //    {
-                        //        pauseY = tileSize;
-                        //    }
-                        //}
-                        //if (vision[14].Contains(tile.Rectangle))//Top left
-                        //{
-                        //    if (!blockedLeft && (!blockedBottom || !blockedTop) && (position.X > target.X) && (!strafeDown && !strafeUp))
-                        //    {
-                        //        pauseY = tileSize;
-                        //    }
-                        //}
-
-
-
                     }
 
                     if (((distToTravel.X >= 0 && blockedRight) || (distToTravel.X <= 0 && blockedLeft)) || !prioXStrafe || strafeUp || strafeDown || pauseY <= 0 || pauseX <= 0)
@@ -816,8 +557,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                 prioXStrafe = false;
                                 distToTravel.X = 0;
 
-                                //stopper = false;
-                                //pauseX = 32;
                             }
 
                             if (blockedRight)
@@ -882,31 +621,15 @@ namespace AUTO_Matic.Scripts.TopDown
                                      || map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
                                 {
                                     ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "right");
-
-                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "right");
                                 }
                                 else
                                 {
-                                    //ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", );
-                                    //if(distToTravel.Y > 0) //Wants to go down
-                                    //{
-
-                                    //}
-                                    //if(distToTravel.Y < 0) //Wants to go up
-                                    //{ 
-                                    //    prioXStrafe = true;
-                                    //}
                                     distToTravel.X = -WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "left", "up", collidingTileY.mapPoint[0] - 1, 0) * (tileSize * 2);
                                     strafeLeft = true;
 
                                     ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), "", "right");
 
                                 }
-
-                                //distToTravel.Y = (-tileSize * 2) - 1;
-                                //strafeUp = true;
-
-
                             }
                             else if (blockedRight && blockedTop)
                             {
@@ -914,8 +637,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                     || (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
                                 {
                                     xDiag = true;
-                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "right");
-
                                 }
                                 else if ((int)position.Y > (int)target.Y)
                                 {
@@ -927,7 +648,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                      || (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0] + 1, collidingTileY.mapPoint[1], mapDims)))
                                 {
                                     xDiag = true;
-                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "right");
                                 }
                                 else if ((int)position.Y < (int)target.Y)
                                 {
@@ -949,8 +669,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                     strafeLeft = true;
 
                                     ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1] + (int)(distToTravel.X / 32), "", "right");
-                                    //distToTravel.Y = (tileSize * 2) + 1;
-                                    //strafeDown = true;
                                     prioXStrafe = true;
                                 }
 
@@ -962,19 +680,15 @@ namespace AUTO_Matic.Scripts.TopDown
                                      || (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims))) // 
                                 {
                                     xDiag = true;
-                                    //ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "up", "right");
                                 }
                                 else if ((int)position.Y > (int)target.Y)
                                 {
-                                    //distToTravel.Y = WallUntilOpening(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "right", 15 - collidingTileY.mapPoint[0], 0) * (tileSize);
-                                    //strafeDown = true;
-                                    //prioXStrafe = true;
+
                                 }
                                 if ((int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], mapDims) - 1)
                                      || (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))// 
                                 {
                                     xDiag = true;
-                                    //ChooseDiagStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "down", "right");
                                 }
                                 else if ((int)position.Y < (int)target.Y)
                                 {
@@ -989,7 +703,7 @@ namespace AUTO_Matic.Scripts.TopDown
                             }
                             else if (blockedRight && (!blockedTop && !blockedBottom))
                             {
-                                //ChooseYStrafe(collidingTileX.mapPoint[0], collidingTileX.mapPoint[1], "", "left");
+
                             }
                             else if (!blockedRight)
                             {
@@ -1000,7 +714,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                 {
                                     distToTravel.X = 0;
                                 }
-                                //blockedLeft = false;
                             }
 
 
@@ -1041,8 +754,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                     prioXStrafe = true;
                                 }
 
-                                //distToTravel.Y = (-tileSize * 2) - 1;
-                                //strafeUp = true;
 
                             }
                             else if (blockedLeft && blockedTop)
@@ -1051,7 +762,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                      || (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
                                 {
                                     xDiag = true;
-                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "left");
                                 }
                                 else if ((int)position.Y > (int)target.Y)
                                 {
@@ -1063,7 +773,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                      || (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] + 1, collidingTileX.mapPoint[1], mapDims)))
                                 {
                                     xDiag = true;
-                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "left");
                                 }
                                 else if ((int)position.Y < (int)target.Y)
                                 {
@@ -1097,7 +806,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                      && (int)position.Y > (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))
                                 {
                                     xDiag = true;
-                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "up", "left");
                                 }
                                 else if ((int)position.Y > (int)target.Y)
                                 {
@@ -1108,7 +816,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                      && (int)position.Y < (int)target.Y && map.FloorIndexes.Contains(map.GetPoint(collidingTileX.mapPoint[0] - 1, collidingTileX.mapPoint[1], mapDims)))
                                 {
                                     xDiag = true;
-                                    //ChooseDiagStrafe(collidingTileY.mapPoint[0], collidingTileY.mapPoint[1], "down", "left");
                                 }
                                 else if ((int)position.Y < (int)target.Y)
                                 {
@@ -1174,10 +881,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                     strafeDown = true;
                                     ChooseXStrafe(collidingTileY.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileY.mapPoint[1], "");
                                 }
-
-
-                                //distToTravel.X = tileSize + 1;
-                                //strafeRight = true;
                             }
                             else if (blockedTop && blockedRight)
                             {
@@ -1215,9 +918,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                     strafeDown = true;
                                     ChooseXStrafe(collidingTileY.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileY.mapPoint[1], "");
                                 }
-
-                                //distToTravel.X = -tileSize - 1;
-                                //strafeLeft = true;
 
                             }
                             else if (blockedTop && blockedLeft)
@@ -1263,7 +963,7 @@ namespace AUTO_Matic.Scripts.TopDown
                                 {
                                     distToTravel.Y = 0;
                                 }
-                                //blockedTop = false;
+    
                             }
                         }
 
@@ -1298,9 +998,6 @@ namespace AUTO_Matic.Scripts.TopDown
                                     strafeUp = true;
                                     ChooseXStrafe(collidingTileY.mapPoint[0] + (int)(distToTravel.Y / 32), collidingTileY.mapPoint[1], "");
                                 }
-
-                                //distToTravel.X = tileSize;
-                                //strafeRight=true;
 
                             }
                             else if (blockedBottom && blockedRight)
@@ -1410,210 +1107,12 @@ namespace AUTO_Matic.Scripts.TopDown
 
                         }
                     }
-
-
-
-
-                    #region OLD MOVEMENT (POSITION BASED)
-                    //if (strafeRight)
-                    //{
-                    //    if (distToTravel.X > 0)
-                    //    {
-                    //        position.X += moveSpeed;
-                    //        distToTravel.X -= moveSpeed;
-                    //    }
-                    //    else if (distToTravel.X <= 0)
-                    //    {
-                    //        strafeRight = false;
-                    //    }
-                    //    else if (isStuck)
-                    //    {
-                    //        strafeRight = false;
-                    //        strafeLeft = false;
-                    //        distToTravel.X = -tileSize;
-                    //        isStuck = false;
-                    //    }
-
-                    //}
-                    //else if ((position.X < target.X && !strafeLeft)
-                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) < 1) //right
-                    //{
-                    //    position.X += moveSpeed;
-                    //    blockedRight = false;
-                    //}
-                    //else if ((position.X < target.X && (int)position.Y == (int)target.Y)
-                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) >= 1)
-                    //{
-                    //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), tilesOut);
-                    //}
-                    //else if (position.X < target.X && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) >= 1 && !strafeDown && !strafeUp)
-                    //{
-                    //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), tilesOut);
-                    //}
-                    //else if (WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)), 0) >= 1 && !strafeLeft && !strafeRight)
-                    //{
-                    //    position.X -= moveSpeed;
-                    //    blockedRight = true;
-                    //}
-
-                    ////else if(WallsFromCenter(2, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X + 28) / tileSize)) ) > 4)
-                    ////{
-                    ////    tempTarget = target;
-
-                    ////    target = 
-
-                    ////}
-
-                    //if (strafeLeft)
-                    //{
-                    //    if (distToTravel.X < 0)
-                    //    {
-                    //        position.X -= moveSpeed;
-                    //        distToTravel.X += moveSpeed;
-                    //    }
-                    //    else if (distToTravel.X >= 0)
-                    //    {
-                    //        strafeLeft = false;
-                    //    }
-                    //    else if (isStuck)
-                    //    {
-                    //        strafeLeft = false;
-                    //        strafeRight = true;
-                    //        distToTravel.X = tileSize;
-                    //        isStuck = false;
-                    //    }
-                    //}
-                    //else if ((position.X > target.X && !strafeRight)
-                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), 1) < 1) //left
-                    //{
-                    //    position.X -= moveSpeed;
-                    //    blockedLeft = false;
-                    //}
-                    //else if ((position.X > target.X && (int)position.Y == (int)target.Y)
-                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)(position.X) / tileSize), 1) >= 1)
-                    //{
-                    //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), -tilesOut);
-                    //}
-                    //else if (position.X > target.X && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), 1) >= 1 && !strafeDown && !strafeUp)
-                    //{
-                    //    ChooseYStrafe(Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), -tilesOut);
-                    //}
-                    //else if (WallsFromPoint(tilesOut, Math.Abs((int)((position.Y) / tileSize)), Math.Abs((int)((position.X) / tileSize)), 1) >= 1 && !strafeRight && !strafeLeft)
-                    //{
-                    //    position.X += moveSpeed;
-                    //    blockedLeft = true;
-                    //}
-
-
-
-
-                    //if (strafeDown)
-                    //{
-                    //    if (distToTravel.Y > 0)
-                    //    {
-                    //        position.Y += moveSpeed;
-                    //        distToTravel.Y -= moveSpeed;
-                    //    }
-                    //    else if (distToTravel.Y <= 0)
-                    //    {
-                    //        strafeDown = false;
-                    //    }
-                    //    else if (isStuck)
-                    //    {
-                    //        strafeUp = true;
-                    //        strafeDown = false;
-                    //        distToTravel.Y = -tileSize;
-                    //        isStuck = false;
-                    //    }
-
-                    //}
-                    //else if ((position.Y < target.Y && !strafeUp
-                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y)) / tileSize), Math.Abs((int)((position.X) / tileSize)), 2) < 1)) //down
-                    //{
-                    //    position.Y += moveSpeed;
-                    //    blockedBottom = false;
-                    //}
-                    //else if ((position.Y < target.Y && position.X == target.X)
-                    //    && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 2) >= 1)
-                    //{
-                    //    ChooseXStrafe(Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), tilesOut);
-                    //}
-                    //else if (position.Y < target.Y && WallsFromPoint(tilesOut, Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 2) >= 1 && !strafeLeft && !strafeRight)
-                    //{
-                    //    ChooseXStrafe(Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), tilesOut);
-                    //}
-                    //else if (WallsFromPoint(tilesOut, Math.Abs((int)((position.Y + 28)) / tileSize), Math.Abs((int)((position.X) / tileSize)), 2) >= 1 && (!strafeUp && !strafeDown))
-                    //{
-                    //    position.Y -= moveSpeed;
-                    //    blockedBottom = true;
-                    //}
-
-
-
-
-
-                    //if (strafeUp)
-                    //{
-                    //    if (distToTravel.Y < 0)
-                    //    {
-                    //        position.Y -= moveSpeed;
-                    //        distToTravel.Y += moveSpeed;
-                    //    }
-                    //    else if (distToTravel.Y >= 0)
-                    //    {
-                    //        strafeUp = false;
-                    //    }
-                    //    else if (isStuck)
-                    //    {
-                    //        strafeDown = true;
-                    //        strafeUp = false;
-                    //        distToTravel.Y = tileSize;
-                    //        isStuck = false;
-                    //    }
-
-                    //}
-                    //else if ((position.Y > target.Y && !strafeDown
-                    //    && WallsFromPoint(tilesOut, Math.Abs((int)(position.Y) / tileSize), Math.Abs((int)((position.X) / tileSize)), 3) < 1)) //up
-                    //{
-                    //    position.Y -= moveSpeed;
-                    //    blockedTop = false;
-                    //}
-                    //else if ((position.Y > target.Y && position.X == target.X)
-                    //    && WallsFromPoint(tilesOut, Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 3) >= 1)
-                    //{
-                    //    ChooseXStrafe(Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), -tilesOut);
-                    //}
-                    //else if (position.Y > target.Y && WallsFromPoint(tilesOut, Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), 3) >= 1 && !strafeLeft && !strafeRight)
-                    //{
-                    //    ChooseXStrafe(Math.Abs((int)(position.Y - 28) / tileSize), Math.Abs((int)((position.X + 5) / tileSize)), -tilesOut);
-                    //}
-                    //else if (WallsFromPoint(tilesOut, Math.Abs((int)(position.Y) / tileSize), Math.Abs((int)((position.X) / tileSize)), 3) >= 1 && !strafeDown && !strafeUp)
-                    //{
-                    //    position.Y += moveSpeed;
-                    //    blockedTop = true;
-                    //}
-                    #endregion
-
-
-
-
-
                     break;
                 #endregion
                 #region Shoot
                 case EnemyStates.Shoot:
                     if(!wallBlock)
                     {
-                        
-                        //if (rectangle.Y + rectangle.Height / 2 < playerRect.rectangle.Y + playerRect.rectangle.Height / 2)
-                        //{
-                        //    angleOfLine = Math.Abs(angle);
-                        //}
-                        //else
-                        //{
-                        //    angleOfLine = angle;
-                        //}
-
                         if (shootDelay <= 0)
                         {
                             float bulletSpeedX = (float)Math.Cos((double)angle) * 8;
@@ -1640,64 +1139,7 @@ namespace AUTO_Matic.Scripts.TopDown
                             }
                 
                             shootDelay = RandFloat(2, 4);
-                            //    if (angle <= 205 && angle >= 165) //Fire left
-                            //    {
-                            //        bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height / 2 - 15 / 2), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                            //        //angleOfLine = 179;
-                            //    }
-                            //    else if (angle >= 345 || angle <= 15) //Fire right
-                            //    {
-                            //        bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y + rectangle.Height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-                            //        //angleOfLine = 0;
-                            //    }
-                            //    else if (angle > 15 && angle < 75) // upRight
-                            //    {
-                            //        if (position.Y < playerRect.rectangle.Y)
-                            //        {
-                            //            bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y + rectangle.Height), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                            //            //angleOfLine = 45;
-                            //        }
-                            //        else
-                            //        {
-                            //            bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width, position.Y), bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                            //            //angleOfLine = -45;
-                            //        }
-
-                            //    }
-                            //    else if (angle >= 75 && angle <= 105)//Up
-                            //    {
-                            //        if (position.Y < playerRect.rectangle.Y)
-                            //        {
-                            //            bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width / 2, position.Y + rectangle.Height), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
-                            //            //angleOfLine = -80;
-                            //        }
-                            //        else
-                            //        {
-                            //            bullets.Add(new Bullet(new Vector2(position.X + rectangle.Width / 2 - 15 / 2, position.Y), 0, new Vector2(0, -bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
-                            //            //angleOfLine = 80;
-                            //        }
-
-                            //    }
-                            //    else if (angle > 105 && angle < 165)//Up and left
-                            //    {
-                            //        if (position.Y < playerRect.rectangle.Y)
-                            //        {
-                            //            bullets.Add(new Bullet(new Vector2(position.X, position.Y + rectangle.Height), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-                            //            //angleOfLine = 140;
-                            //        }
-                            //        else
-                            //        {
-                            //            bullets.Add(new Bullet(new Vector2(position.X, position.Y), -bulletSpeed, new Vector2(-bulletMaxX, -bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-                            //            //angleOfLine = -140;
-                            //        }
-
-                            //    }
-                            //
-                        }
-
-
-
-                        
+                        }  
                     }
                     enemyState = EnemyStates.Movement;
                     break;
@@ -1738,18 +1180,7 @@ namespace AUTO_Matic.Scripts.TopDown
                         bullets.RemoveAt(i);
                         break;
                     }
-                    
-                    //foreach (SSEnemy enemy in enemies)
-                    //{
-                    //    if (bullets[i].rect.TouchBottomOf(enemy.enemyRect) || bullets[i].rect.TouchTopOf(enemy.enemyRect)
-                    //    || bullets[i].rect.TouchLeftOf(enemy.enemyRect) || bullets[i].rect.TouchRightOf(enemy.enemyRect))
-                    //    {
-                    //        enemy.Health -= bulletDmg;
-                    //        bullets.RemoveAt(i);
-                    //        break;
-                    //    }
-                    //}
-
+                   
                 }
             }
 
@@ -1813,20 +1244,6 @@ namespace AUTO_Matic.Scripts.TopDown
                 {
                     vision.Add(new Rectangle((int)pos.X + (pixelSize * k), (int)pos.Y + (pixelSize * i), pixelSize, pixelSize));
                 }
-
-                //if (enemyState != EnemyStates.Jumping && prevState != EnemyStates.Jumping)
-                //{
-                //    for (int k = i; k < visionLength + 1; k++)//Left and down
-                //    {
-                //        vision.Add(new Rectangle((int)pos.X - (pixelSize * k), (int)pos.Y + (pixelSize * i), pixelSize, pixelSize));
-                //    }
-                //    for (int k = i; k < visionLength + 1; k++)//Right and down
-                //    {
-                //        vision.Add(new Rectangle((int)pos.X + (pixelSize * k), (int)pos.Y + (pixelSize * i), pixelSize, pixelSize));
-                //    }
-                //}
-
-
             }
 
         }
@@ -3093,94 +2510,6 @@ namespace AUTO_Matic.Scripts.TopDown
             //SetStrafe(numUp, numDown, numLeft, numRight);
         }
 
-        private void SetStrafe(int numUp, int numDown, int numLeft, int numRight, string xDir, string yDir)
-        {
-
-            if ((numLeft > numRight && numLeft > numDown) && (numUp > numRight && numUp > numDown)) // if left and up is more than right and down
-            {
-                distToTravel.Y = numDown * (tileSize * 2);
-                distToTravel.X = -numLeft * tileSize;
-            }
-            if ((numDown > numLeft && numDown > numUp) && (numRight > numLeft && numRight > numUp)) //if right and down is more than left and up
-            {
-                distToTravel.Y = -numUp * tileSize;
-                distToTravel.X = numRight * (tileSize * 2);
-            }
-            if ((numLeft > numRight && numLeft > numUp) && (numDown > numUp && numDown > numRight))//Left and Down is more than Right and Up
-            {
-                distToTravel.Y = -numUp * tileSize;
-                distToTravel.X = -numLeft * tileSize;
-            }
-            if ((numRight > numLeft && numRight > numDown) && (numUp > numLeft && numUp > numDown))//Right and Up is more than Left and Down
-            {
-                distToTravel.X = numRight * (tileSize * 2);
-                distToTravel.Y = numDown * (tileSize * 2);
-            }
-
-
-
-
-            //if (numDown < numUp)
-            //{
-            //    strafeDown = true;
-            //    strafeUp = false;
-            //    distToTravel.Y = numDown * tileSize;
-            //}
-            //if (numUp < numDown)
-            //{
-            //    strafeUp = true;
-            //    strafeDown = false;
-            //    distToTravel.Y = -numUp * tileSize;
-            //}
-
-            //if (numUp == numDown)
-            //{
-            //    Random rand = new Random();
-            //    if (rand.Next(0, 2) > 0)
-            //    {
-            //        strafeUp = true;
-            //        strafeDown = false;
-            //        distToTravel.Y = -numUp * tileSize;
-            //    }
-            //    else
-            //    {
-            //        strafeDown = true;
-            //        strafeUp = false;
-            //        distToTravel.Y = numDown * (tileSize * 2);
-            //    }
-            //}
-
-            //if (numRight < numLeft)
-            //{
-            //    strafeRight = true;
-            //    strafeLeft = false;
-            //    distToTravel.X = numRight * tileSize;
-            //}
-            //if (numLeft < numRight)
-            //{
-            //    strafeLeft = true;
-            //    strafeRight = false;
-            //    distToTravel.X = -numLeft * tileSize;
-            //}
-
-            //if (numLeft == numRight)
-            //{
-            //    Random rand = new Random();
-            //    if (rand.Next(0, 2) > 0)
-            //    {
-            //        strafeLeft = true;
-            //        strafeRight = false;
-            //        distToTravel.X = -numLeft * tileSize;
-            //    }
-            //    else
-            //    {
-            //        strafeRight = true;
-            //        strafeLeft = false;
-            //        distToTravel.X = numRight * (tileSize * 2);
-            //    }
-            //}
-        }
-
         void ChooseYStrafe(int row, int col, string dir, string blockDir)
         {
             int numDown = 1; //Number of walls going down
@@ -3537,53 +2866,6 @@ namespace AUTO_Matic.Scripts.TopDown
             return walls;
         }
 
-        int WallsFromCenter(int blocksOut, int row, int col)
-        {
-            int numBlocks = 0;
-            int[,] startPos = new int[row, col];
-
-            for (int i = 0; i < blocksOut; i++) // Check right
-            {
-                if (row + i < 15 && map.WallIndexes.Contains(map.GetPoint(row + i, col, mapDims)))
-                    numBlocks++;
-            }
-            for (int i = -1; i < -blocksOut; i--) //checks left
-            {
-                if (row - i > 0 && map.WallIndexes.Contains(map.GetPoint(row + i, col, mapDims)))
-                    numBlocks++;
-            }
-            for (int i = 1; i < blocksOut; i++) //checks down
-            {
-                if (col + i < 25 && map.WallIndexes.Contains(map.GetPoint(row, col + i, mapDims)))
-                    numBlocks++;
-            }
-            for (int i = -1; i < -blocksOut; i--) //checks up
-            {
-                if (col - i > 0 && map.WallIndexes.Contains(map.GetPoint(row, col + i, mapDims)))
-                    numBlocks++;
-            }
-            for (int i = 1; i < blocksOut; i++) //check diagonally 
-            {
-                if (col + i < 25 && row + i < 15 && map.WallIndexes.Contains(map.GetPoint(row + i, col + i, mapDims)))
-                    numBlocks++;
-            }
-            for (int i = -1; i < -blocksOut; i--)
-            {
-                if (col + i > 0 && row + i > 0 && map.WallIndexes.Contains(map.GetPoint(row + i, col + i, mapDims)))
-                    numBlocks++;
-            }
-            for (int i = 1; i < blocksOut; i++)
-            {
-                if (col - i > 0 && row + i < 15 && map.WallIndexes.Contains(map.GetPoint(row + i, col - i, mapDims)))
-                    numBlocks++;
-            }
-            for (int i = 1; i < blocksOut; i++)
-            {
-                if (col + i < 25 && row - i > 0 && map.WallIndexes.Contains(map.GetPoint(row - i, col + i, mapDims)))
-                    numBlocks++;
-            }
-            return numBlocks;
-        }
         void ChooseXStrafe(int row, int col, string blocDir)
         {
             int numRight = 1;
@@ -3714,88 +2996,6 @@ namespace AUTO_Matic.Scripts.TopDown
             }
         }
 
-        int WallsFromPoint(int blocksOut, int row, int col, int checkDir)
-        {
-            int numBlocks = 0;
-            int[,] startPos = new int[row, col];
-
-            switch (checkDir)
-            {
-                case 0:
-                    for (int i = 0; i < blocksOut; i++) // Check right
-                    {
-                        if (col + i <= 25 && map.WallIndexes.Contains(map.GetPoint(row, col + i, mapDims)))
-                        {
-                            strafeRight = false;
-                            numBlocks++;
-                        }
-
-                    }
-                    break;
-                case 1:
-                    for (int i = 0; i < blocksOut; i++) //checks left
-                    {
-                        if (col - i >= 0 && map.WallIndexes.Contains(map.GetPoint(row, col - i, mapDims)))
-                        {
-                            strafeLeft = false;
-                            numBlocks++;
-                        }
-
-                    }
-                    break;
-                case 2:
-                    for (int i = 0; i < blocksOut; i++) //checks down
-                    {
-                        if (row + i <= 15 && map.WallIndexes.Contains(map.GetPoint(row + i, col, mapDims)))
-                        {
-                            strafeDown = false;
-                            numBlocks++;
-                        }
-
-                    }
-                    break;
-                case 3:
-                    for (int i = 0; i < blocksOut; i++) //checks up
-                    {
-                        if (row - i >= 0 && map.WallIndexes.Contains(map.GetPoint(row - i, col, mapDims)))
-                        {
-                            strafeUp = false;
-                            numBlocks++;
-                        }
-
-                    }
-                    break;
-
-
-            }
-
-
-            return numBlocks;
-
-
-            //for (int i = 1; i < blocksOut; i++) //check diagonally 
-            //{
-            //    if (col + i < 25 && row + i < 15 && map.GetPoint(row + i, col + i) == 2)
-            //        numBlocks++;
-            //}
-            //for (int i = -1; i < -blocksOut; i--)
-            //{
-            //    if (col + i > 0 && row + i > 0 && map.GetPoint(row + i, col + i) == 2)
-            //        numBlocks++;
-            //}
-            //for (int i = 1; i < blocksOut; i++)
-            //{
-            //    if (col - i > 0 && row + i < 15 && map.GetPoint(row + i, col - i) == 2)
-            //        numBlocks++;
-            //}
-            //for (int i = 1; i < blocksOut; i++)
-            //{
-            //    if (col + i < 25 && row - i > 0 && map.GetPoint(row - i, col + i) == 2)
-            //        numBlocks++;
-            //}
-
-        }
-
         public float RandFloat(int min, int max)
         {
             Random r = new Random();
@@ -3814,11 +3014,6 @@ namespace AUTO_Matic.Scripts.TopDown
             return (int)Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2));
             
         }
-
-        //SkullTiles DetermineClosestTarget()
-        //{
-
-        //}
 
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -3850,18 +3045,6 @@ namespace AUTO_Matic.Scripts.TopDown
             {
                 healthBar.Draw(spriteBatch);
             }
-        
-        
-            //foreach (Rectangle rect in vision)
-            //{
-            //    spriteBatch.Draw(visionTxture, rect, Color.White * .25f);
-
-
-            //}
-            //if (vision.Count > 5)
-            //{
-            //    spriteBatch.Draw(texture, vision[4], Color.White * .5f);
-            //}
 
             //foreach (Rectangle rect in vision)
             //{

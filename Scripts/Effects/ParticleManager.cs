@@ -12,9 +12,6 @@ namespace AUTO_Matic.Scripts.Effects
     class ParticleManager
     {
         #region Fields
-        //private static GraphicsDevice graphicsDevice;
-        //private static List<Particle> particles = new List<Particle>();
-        //private static Effect particleEffect;
         private static Texture2D particleTexture;
         private static Random rand = new Random();
 
@@ -26,13 +23,7 @@ namespace AUTO_Matic.Scripts.Effects
         #region Initialization
         public void Initialize(Texture2D texture)
         {
-            //graphicsDevice = device;
-            //particleEffect = effect;
             particleTexture = texture;
-            //Particle.GraphicsDevice = device;
-
-
-        
         }
         #endregion
 
@@ -43,8 +34,6 @@ namespace AUTO_Matic.Scripts.Effects
             particles.Clear();
             for(int i = 0; i < particleCount; i++)
             {
-                //particles.Add(new Particle(new Rectangle(startRect.X + startRect.Width/2, startRect.Y - 1, startRect.Width, startRect.Height), 
-                //    rand, width));
                 particles.Add(new Particle(startRect,
                     rand, width, ParticleEffect.Type.Explosion));
             }
@@ -54,7 +43,6 @@ namespace AUTO_Matic.Scripts.Effects
             effect.particles = particles;
             effect.boundingRect = new Rectangle();
             effect.boundingCircle = new Circle(new Vector2(boundRect.Bounds.X + boundRect.Bounds.Width/2, boundRect.Bounds.Y + boundRect.Bounds.Height/2), boundRect.Radius);
-            //effect.boundingCircle = boundRect;
 
             particleEffects.Add(effect);
 
@@ -86,8 +74,6 @@ namespace AUTO_Matic.Scripts.Effects
 
             for (int i = 0; i < particleCount; i++)
             {
-                //particles.Add(new Particle(new Rectangle(startRect.X + startRect.Width/2, startRect.Y - 1, startRect.Width, startRect.Height), 
-                //    rand, width));
                 particles.Add(new Particle(startRect,
                     rand, width, ParticleEffect.Type.Pillar));
             }
@@ -97,7 +83,6 @@ namespace AUTO_Matic.Scripts.Effects
             effect.particles = particles;
             effect.boundingRect = new Rectangle();
             effect.boundingCircle = new Circle(new Vector2(boundRect.Bounds.X + boundRect.Bounds.Width / 2, boundRect.Bounds.Y + boundRect.Bounds.Height / 2), boundRect.Radius);
-            //effect.boundingCircle = boundRect;
 
             particleEffects.Add(effect);
 
@@ -180,13 +165,6 @@ namespace AUTO_Matic.Scripts.Effects
                     particleEffects.RemoveAt(j);
                 }
             }
-
-            
-            //foreach (Particle particle in particles)
-            //{
-            //    if (particle.IsActive)
-            //        particle.Update(gameTime);
-            //}
         }
         #endregion
 

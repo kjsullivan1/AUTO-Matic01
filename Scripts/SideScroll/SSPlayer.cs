@@ -34,7 +34,6 @@ namespace AUTO_Matic.SideScroll
         SoundManager sounds;
 
         #region Fields
-        float dashHelperBuffer = 10f;
         float collisionOffsetX = 20f;
         float collisionInputCooldown = .25f;
         int pixelSize = 64;
@@ -64,7 +63,6 @@ namespace AUTO_Matic.SideScroll
         Vector2 controllerMoveDir;
         GamePadButtons currControllerBtn;
         GamePadButtons prevControllerBtn;
-        GamePadDPad prevDpad;
 
         float health = 10f;
         public int redFrames = 4;
@@ -148,7 +146,7 @@ namespace AUTO_Matic.SideScroll
 
         float iShootDelay;
         bool startShoot = false;
-        public float bulletDmg =  100f;
+        public float bulletDmg =  .85f;
         float pistolDmg = .85f;
         float shotGunDmg = 1.75f;
         float burstDmg = 1.35f;
@@ -491,7 +489,6 @@ namespace AUTO_Matic.SideScroll
             content = Content;
             texture = Content.Load<Texture2D>("SideScroll/MapTiles/Tile4");
             prevVel = velocity;
-            //maxVelocity = new Vector2(maxRunSpeed, terminalVel);
             this.friction = friction;
             iJumpF = jumpForce;
             ChangeAnimation();
@@ -602,27 +599,12 @@ namespace AUTO_Matic.SideScroll
                 {
                     #region Movement
                     case PlayerStates.Movement:
-
-                        //if (prevPlayerState == PlayerStates.Dashing)
-                        //{
-                        //    //Slow down over time instead of instant set to run speed
-                        //    maxRunSpeed -= moveSpeed * force;
-                        //    if(maxRunSpeed < iMaxRunSpeed)
-                        //    {
-                        //        maxRunSpeed = iMaxRunSpeed;
-                        //        prevPlayerState = PlayerStates.Movement;
-                        //    }
-                        //}
-                        //else
-                        //{
-
-                        //}
                         maxRunSpeed = iMaxRunSpeed;
 
                         if (isFalling)
                         {
                             velocity.Y += gravity.Y;
-                            //moveSpeed = fallMoveSpeed;
+             
 
                             if (Velocity.X > 0)
                             {
@@ -670,26 +652,7 @@ namespace AUTO_Matic.SideScroll
                             playerState = PlayerStates.Movement;
 
                         }
-                        //if (Velocity.X >= maxDashAirSpeed && isFalling && Velocity.X > 0)
-                        //{
-                        //    prevPlayerState = playerState;
-                        //    playerState = PlayerStates.Movement;
-                        //}
-                        //else if (Velocity.X <= -maxDashAirSpeed && isFalling && Velocity.X < 0)
-                        //{
-                        //    prevPlayerState = playerState;
-                        //    playerState = PlayerStates.Movement;
-                        //}
-                        //if (Velocity.X >= maxDashSpeed && !isFalling && Velocity.X > 0)
-                        //{
-                        //    prevPlayerState = playerState;
-                        //    playerState = PlayerStates.Movement;
-                        //}
-                        //else if (Velocity.X <= -maxDashSpeed && isFalling && Velocity.X < 0)
-                        //{
-                        //    prevPlayerState = playerState;
-                        //    playerState = PlayerStates.Movement;
-                        //}
+                       
                         break;
                     #endregion
 
@@ -902,8 +865,6 @@ namespace AUTO_Matic.SideScroll
                                explosions[explosions.Count - 1].rect.Bounds.Y - radiusDif), explosions[explosions.Count - 1].maxSize / 2),
                                20);
 
-                        //sounds.AddSound("SoundEffects/explosion", false);
-                        //sounds.PlaySound();
 
                         bombs.RemoveAt(i);
                     }
@@ -928,9 +889,7 @@ namespace AUTO_Matic.SideScroll
                                 }
 
                             }
-                               
-                           
-                 
+                              
 
                             ApplyKnockback(enemies[j]);
                         }
@@ -940,7 +899,6 @@ namespace AUTO_Matic.SideScroll
 
                     if (explosions[i].rect.Radius >= explosions[i].maxSize)
                     {
-                        //particles.CreateEffect(20);
 
                         explosions.RemoveAt(i);
 
@@ -955,14 +913,6 @@ namespace AUTO_Matic.SideScroll
                         KeyBindData.CreateInteractUI(new Point(dungeonEntrance.Rectangle.X, dungeonEntrance.Rectangle.Y - 64));
                         interactActive = true;
                         active = true;
-                        //if (game.GameState == Game1.GameStates.Tutorial)
-                        //{
-                        //    game.prevGameState = Game1.GameStates.Tutorial;
-                        //    game.StartNewGame();
-                        //    break;
-                        //}
-                        //else if (game.GetDungeonNum() >= game.bossKillCount)
-                        //    game.StartDungeon();
                     }
 
                 }
@@ -973,12 +923,6 @@ namespace AUTO_Matic.SideScroll
                 }
                 particles.Update(gameTime);
                 sounds.Update(gameTime);
-                //switch (playerState)
-                //{
-                //    case PlayerStates.Movement:
-
-                //        break;
-                //}
             }
 
         }
@@ -2043,49 +1987,10 @@ namespace AUTO_Matic.SideScroll
 
                     bulletDmg = burstDmg;
                     SetShootDelays();
-                    //if (selectedWeapon == 0)
-                    //{
-                    //    currWeapon = WeaponType.Burst;
-                    //    selectedWeapon = 2;
-
-                    //    bulletDmg = burstDmg;
-                    //    shootDelay = burstDelay;
-                    //    iShootDelay = shootDelay;
-
-                    //}
-                    //else if (selectedWeapon == 1)
-                    //{
-                    //    currWeapon = WeaponType.Pistol;
-                    //    selectedWeapon = 0;
-
-                    //    bulletDmg = pistolDmg;
-                    //    shootDelay = pistolDelay;
-                    //    iShootDelay = shootDelay;
-                    //}
-
-
                 }
                 else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[8]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[8]) && gameData.bossKillCount >= 4||
                     RightStick.X < 0 && gameData.bossKillCount >= 4)
                 {
-                    //if (selectedWeapon == 2)
-                    //{
-                    //    currWeapon = WeaponType.Pistol;
-                    //    selectedWeapon = 0;
-
-                    //    bulletDmg = pistolDmg;
-                    //    shootDelay = pistolDelay;
-                    //    iShootDelay = shootDelay;
-                    //}
-                    //else if (selectedWeapon == 0)
-                    //{
-                    //    currWeapon = WeaponType.Laser;
-                    //    selectedWeapon = 1;
-
-                    //    bulletDmg = laserDmg;
-                    //    shootDelay = laserDelay;
-                    //    iShootDelay = shootDelay;
-                    //}
                     currWeapon = WeaponType.Laser;
                     selectedWeapon = 1;
 
@@ -2100,48 +2005,10 @@ namespace AUTO_Matic.SideScroll
 
                     bulletDmg = bombDmg;
                     SetShootDelays();
-                    //if (selectedWeapon == 0)
-                    //{
-                    //    currWeapon = WeaponType.Bomb;
-                    //    selectedWeapon = 3;
-
-                    //    bulletDmg = bombDmg;
-                    //    shootDelay = bombDelay;
-                    //    iShootDelay = shootDelay;
-
-                    //}
-                    //else if (selectedWeapon == 4)
-                    //{
-                    //    currWeapon = WeaponType.Pistol;
-                    //    selectedWeapon = 0;
-
-                    //    bulletDmg = pistolDmg;
-                    //    shootDelay = pistolDelay;
-                    //    iShootDelay = shootDelay;
-                    //}
                 }
                 else if(kb.IsKeyDown(KeyBindData.SideScrollInputs[11]) && prevKb.IsKeyUp(KeyBindData.SideScrollInputs[11]) && gameData.bossKillCount >= 1||
                     RightStick.Y < 0 && gameData.bossKillCount >= 1)
                 {
-                    //if (selectedWeapon == 0)
-                    //{
-                    //    currWeapon = WeaponType.Shotgun;
-                    //    selectedWeapon = 4;
-
-                    //    bulletDmg = shotGunDmg;
-                    //    shootDelay = shotGunDelay;
-                    //    iShootDelay = shootDelay;
-
-                    //}
-                    //else if (selectedWeapon == 3)
-                    //{
-                    //    currWeapon = WeaponType.Pistol;
-                    //    selectedWeapon = 0;
-
-                    //    bulletDmg = pistolDmg;
-                    //    shootDelay = pistolDelay;
-                    //    iShootDelay = shootDelay;
-                    //}
                     currWeapon = WeaponType.Shotgun;
                     selectedWeapon = 4;
 
@@ -2152,7 +2019,6 @@ namespace AUTO_Matic.SideScroll
             }
             prevKb = kb;
             prevControllerBtn = currControllerBtn;
-            prevDpad = GamePad.GetState(0).DPad;
         }
 
         private void SetShootDelays()
@@ -2170,10 +2036,6 @@ namespace AUTO_Matic.SideScroll
 
         public void Collision(Rectangle newRect /*int xOffset, int yOffset, int levelInX, int levelInY, Rectangle bounds*/, bool isEnemy = false)
         {
-            //isColliding = false;
-            //blockBottom = false;
-
-
             if (!isEnemy)
             {
                 if (playerRect.TouchTopOf(newRect))

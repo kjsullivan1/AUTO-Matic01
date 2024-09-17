@@ -57,11 +57,6 @@ namespace AUTO_Matic
         Point SheetSize;//num of frames.xy
         int fpms;
         public AnimationManager animManagerRobo;
-        Texture2D textureRobo;
-        Point FrameSizeRobo;//Size of frame
-        Point CurrFrameRobo;//Location of currFram on the sheet
-        Point SheetSizeRobo;//num of frames.xy
-        int fpmsRobo;
         public Vector2 animOffset = Vector2.Zero;
 
         public void ChangeAnimation()
@@ -190,21 +185,11 @@ namespace AUTO_Matic
             {
                 animManager.StopLoop();
             }
-            //if (bulletSpeed.X < 0)
-            //{
-            //    animManager.isLeft = true;
-            //    animManager.isRight = false;
-            //}
-            //else if(bulletSpeed.X > 0)
-            //{
-            //    animManager.isRight = true;
-            //    animManager.isLeft = false;
-            //}
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            //spriteBatch.Draw(bulletTexture, new Rectangle((int)position.X, (int)position.Y, width, height), Color.White);
+   
             switch(BulletType)
             {
                 case BulletTypes.Player:

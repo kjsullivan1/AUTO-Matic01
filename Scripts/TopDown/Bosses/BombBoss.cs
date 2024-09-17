@@ -71,26 +71,15 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         #endregion
 
         #region Shooting
-        Texture2D gunTexture;
 
         public float angle;
         public List<Bullet> bullets = new List<Bullet>();
-        float bulletSpeed = 1.5f;
-        float bulletMaxX = 4f;
-        float bulletMaxY = 4f;
         int growthRate = 5;
-        int spread = 3;
-        bool isShootDelay = false;
         float shootDelay = 1.75f;//In seconds
         float iShootDelay;
-        bool startShoot = false;
         public float bulletDmg = 1.8f;
         public float bulletTravelDist = 64 * 8;
-        Texture2D visionTxture;
-        int width;
-        int height;
         Rectangle bounds;
-        Rectangle tempRect;
 
         WallSide TopWalls;
         WallSide BottomWalls;
@@ -108,8 +97,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         int hitCountMin = 8;
         int hitCountMax = 15;
         public float bossHealth = 20;
-        //float dmgResistance = 2f;
- 
 
         #region Constructor
         public BombBoss(Rectangle currBounds, ContentManager content, TopDownMap tdMap, int[,] map,
@@ -252,14 +239,8 @@ bossRect.Width, bossRect.Height);
                 #region Shoot&Explosion
                 LaunchBomb(tdPlayer);
 
-               
-
-              
                // particles.Update(gameTime);
                 #endregion
-
-                
-            
             }
 
             for (int i = bullets.Count - 1; i >= 0; i--)
@@ -297,10 +278,7 @@ bossRect.Width, bossRect.Height);
                 explosions[i].Update(gameTime);
                 if (explosions[i].rect.Radius >= explosions[i].maxSize)
                 {
-                    //particles.CreateEffect(20);
-
                     explosions.RemoveAt(i);
-
                 }
             }
 
@@ -451,20 +429,6 @@ bossRect.Width, bossRect.Height);
 
         public void Draw(SpriteBatch spriteBatch)
         {
-
-            //foreach (GroundLoc loc in slamLocs)
-            //{
-            //    for (int i = 0; i < loc.slamTiles.Count; i++)
-            //    {
-            //        spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile0"), loc.slamTiles[i].Rectangle, Color.White);
-            //    }
-
-            //}
-            //spriteBatch.Draw(content.Load<Texture2D>("TopDown/MapTiles/Tile11"), bossRect, Color.White);
-            //
-            //ChangeAnimation();
-
-
             for (int i = 0; i < bullets.Count; i++)
             {
                 bullets[i].Draw(spriteBatch);
@@ -543,11 +507,6 @@ bossRect.Width, bossRect.Height);
                                     break;
                                 }
                             }
-                            //JumpWalls.Add(new WallTiles(map[y, x], 
-                            //    tRect));
-
-                            //JumpWalls.Add(new WallTiles(map[y, x],
-                            //   new Rectangle(bounds.X + (x * 64), bounds.Y + (y * 64), 64, 64)));
                         }
                     }
                     if (y > 0 && y < map.GetLength(0) - 1 && x == 0 ||
@@ -575,9 +534,6 @@ bossRect.Width, bossRect.Height);
                                 }
                             }
 
-
-                            //JumpWalls.Add(new WallTiles(map[y, x],
-                            //   new Rectangle(bounds.X + (x * 64), bounds.Y + (y * 64), 64, 64)));
                         }
                     }
                 }

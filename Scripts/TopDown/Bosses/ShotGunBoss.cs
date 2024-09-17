@@ -15,7 +15,6 @@ namespace AUTO_Matic.Scripts.TopDown
     {
         Rectangle bossRect;
         ContentManager content;
-        Rectangle turretRect;
         BossHealthBar healthBar;
         public float dmgResistance = 1.75f;
 
@@ -122,17 +121,11 @@ namespace AUTO_Matic.Scripts.TopDown
         #endregion
 
         #region Shooting
-        Texture2D gunTexture;
         public List<Bullet> bullets = new List<Bullet>();
         float angle;
         float bulletSpeed = 2f;
-        float bulletMaxX = 7.75f;
-        float bulletMaxY = 7.75f;
-        int spread = 3;
-        bool isShootDelay = false;
         float shootDelay = 1.45f;//In seconds
         float iShootDelay;
-        bool startShoot = false;
         public float bulletDmg = 1.75f;
         public float bulletTravelDist = 64 * 15;
         Texture2D visionTxture;
@@ -234,26 +227,6 @@ namespace AUTO_Matic.Scripts.TopDown
 
                     ShootShotgun(tdPlayer, turretAngle);
 
-                    #region BrokenAngle
-                  //  float angle = (float)Math.Atan2(targetDir.Y, targetDir.X);
-                  //  bossRect = new Rectangle(((bounds.X + bounds.Width / 2) - width / 2), (((bounds.Y + bounds.Height / 2) - height / 2)), width, height);
-
-                  //  float bulletSpeedX = (float)Math.Cos((double)angle) * 2;
-                  //  float bulletSpeedY = (float)Math.Sin((double)angle) * 2;
-                  //  float bulletSpeedX0 = bulletSpeedX / 2;
-                  //  float bulletSpeedY0 = bulletSpeedY / 2;
-
-
-                  //  bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletSpeedX + bulletSpeedX0, new Vector2(bulletSpeedX, bulletSpeedY),
-                  //   content, true, bulletTravelDist, true, bulletSpeedY - bulletSpeedY0));
-
-                  //  bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
-                  // content, true, bulletTravelDist, true, bulletSpeedY));
-
-                  //  bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletSpeedX - bulletSpeedX0, new Vector2(bulletSpeedX, bulletSpeedY),
-                  //content, true, bulletTravelDist, true, bulletSpeedY + bulletSpeedX0));
-                    #endregion
-
                     bossRect = tempRect;
                     while (shootDelay < 0.7f)
                     {
@@ -337,7 +310,6 @@ namespace AUTO_Matic.Scripts.TopDown
                     float moveOffset = (float)growthRate;
                     slam.Radius += growthRate;
                     slam.SetWidth(currWidthMod);
-                    //moveBack = false;
                     for (int i = tdMap.WallTiles.Count - 1; i >= 0; i--)
                     {
                         if (slam.Bounds.Intersects(tdMap.WallTiles[i].Rectangle))
@@ -345,7 +317,6 @@ namespace AUTO_Matic.Scripts.TopDown
                             if(walls.Contains(tdMap.WallTiles[i].Rectangle) == false)
                                 walls.Add(tdMap.WallTiles[i].Rectangle);
                             floors.Add(new FloorTiles(9, tdMap.WallTiles[i].Rectangle));
-                            //tdMap.FloorTiles.Add());
                             tdMap.WallTiles.Remove(tdMap.WallTiles[i]);
                            
                         }
@@ -354,9 +325,7 @@ namespace AUTO_Matic.Scripts.TopDown
                     if (slam.Radius <= maxSize)
                     {
                         slam.Position = new Vector2(slam.Bounds.X - (moveOffset + currWidthMod), slam.Bounds.Y - moveOffset);
-                        //currWidthMod = 1;
                         Circle circle1 = new Circle(slam.Position, slam.Radius);
-                        //circle1.Radius += 30;
                         if (slam.Bounds.X < worldRect.X)
                         {
                             particleManager.MakeExplosion(new Rectangle((int)worldRect.X, (int)worldRect.Y, worldRect.Width, worldRect.Height),
@@ -369,29 +338,14 @@ namespace AUTO_Matic.Scripts.TopDown
                     {
                         slamWave = false;
 
-
                         slamDelay = RandFloat(1, 3);
-                        //slamDelay = iSlamDelay;
                         slam = new Circle(new Vector2(bossRect.X + bossRect.Width / 2, bossRect.Y + bossRect.Height / 2), 2);
 
                         respawn = true;
                         animState = AnimationStates.Idle;
                         ChangeAnimationBase();
-                        //currWidthMod += 1;
-
-
-                        //articleManager.MakeExplosion(new Rectangle(slam.Bounds.Center.X, slam.Bounds.Center.Y, slam.Bounds.Width, slam.Bounds.Height), circle1, 30);
                     }
-
-
-                    
-                 
-
-
-
                 }
-
-
             }
             else if (respawn)
             {
@@ -405,15 +359,10 @@ namespace AUTO_Matic.Scripts.TopDown
 
                     foreach (Rectangle rect in walls)
                     {
-                        //tdMap.FloorTiles.Remove(i);
                         tdMap.WallTiles.Add(new WallTiles(10, rect));
-                      
-                        //i++;
                     }
                     respawn = false;
                 }
-
-
             }
             if (slam.Bounds.TouchBottomOf(tdPlayer.rectangle))
             {
@@ -428,10 +377,8 @@ namespace AUTO_Matic.Scripts.TopDown
 
                     if(!tdPlayer.damaged)
                     {
-                        //tdPlayer.damaged = true;
                         tdPlayer.Health -= slamDmg;
                     }
-                 
                 }
             }
             if (slam.Bounds.TouchTopOf(tdPlayer.rectangle))
@@ -447,7 +394,6 @@ namespace AUTO_Matic.Scripts.TopDown
 
                     if (!tdPlayer.damaged)
                     {
-                        //tdPlayer.damaged = true;
                         tdPlayer.Health -= slamDmg;
                     }
                 }
@@ -466,7 +412,6 @@ namespace AUTO_Matic.Scripts.TopDown
 
                     if (!tdPlayer.damaged)
                     {
-                        //tdPlayer.damaged = true;
                         tdPlayer.Health -= slamDmg;
                     }
                 }
@@ -484,12 +429,10 @@ namespace AUTO_Matic.Scripts.TopDown
 
                     if (!tdPlayer.damaged)
                     {
-                        //tdPlayer.damaged = true;
                         tdPlayer.Health -= slamDmg;
                     }
                 }
             }
-           // moveBack = false;
             particleManager.Update(gameTime, tdPlayer,true);
             if (Health <= 0)
             {
@@ -498,12 +441,7 @@ namespace AUTO_Matic.Scripts.TopDown
                 particleManager = new ParticleManager();
                 floors.Clear();
             }
-            //foreach(Bullet bullet in bullets)
-            //{
-            //    bullet.Update();
-            //}
-        
-                animManagerTurret.Update(gameTime, new Vector2(worldRect.Center.X, worldRect.Center.Y));
+            animManagerTurret.Update(gameTime, new Vector2(worldRect.Center.X, worldRect.Center.Y));
 
             animManagerBase.Update(gameTime, new Vector2(worldRect.X - 8, worldRect.Y));
             healthBar.Update(new Point(worldRect.X, worldRect.Y - 100));
@@ -511,8 +449,6 @@ namespace AUTO_Matic.Scripts.TopDown
 
         private void ShootShotgun(TDPlayer tdPlayer, float angle)
         {
-
-
             float bulletUpSpeedX = (float)Math.Cos((double)angle - .15f) * bulletSpeed;
             float bulletUpSpeedY = (float)Math.Sin((double)angle - .15f) * bulletSpeed;
 
@@ -534,100 +470,6 @@ namespace AUTO_Matic.Scripts.TopDown
             bullets.Add(new Bullet(new Vector2(worldRect.Center.X, worldRect.Center.Y), bulletDownSpeedX, new Vector2(bulletDownSpeedX, bulletDownSpeedY),
              content, true, bulletTravelDist, true, bulletDownSpeedY, angle: angle));
             bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
-
-
-            //if (angle < 18 || angle >= 155)//Right
-            //{
-            //    if (angle < 18)//Right
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width/2 - 15/2, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 7));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height / 2 - 15 / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 7));
-            //    }
-            //    else//Left
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height / 2 - 15 / 2), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height / 2 - 15 / 2), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 7));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height / 2 - 15 / 2), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 7));
-            //    }
-
-
-            //}
-            //if (angle >= 18 && angle < 45)
-            //{
-            //    if (tdPlayer.position.Y < bossRect.Y + 64 / 2)//Right up
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 4));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 1.75f));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //    }
-            //    else//Right Down
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 6));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2 - 15 / 2, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 2));
-            //    }
-            //}
-            //if (angle >= 45 && angle < 75)
-            //{
-            //    if (tdPlayer.position.Y < bossRect.Y + 64 / 2)//
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //    }
-            //}
-            //if (angle >= 75 && angle < 105)
-            //{
-            //    if (tdPlayer.position.Y < bossRect.Y + 64 / 2)
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X + width / 2, bossRect.Y + height - 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //    }
-            //}
-            //if (angle >= 105 && angle < 135)
-            //{
-            //    if (tdPlayer.position.Y < bossRect.Y + 64 / 2)
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //    }
-            //}
-            //if (angle >= 135 && angle < 155)
-            //{
-            //    if (tdPlayer.position.Y < bossRect.Y + 64 / 2)
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 3.75f));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 1.75f));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 3.75f));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 1.75f));
-            //        bullets.Add(new Bullet(new Vector2(bossRect.X, bossRect.Y + height - 15), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //    }
-            //}
         }
 
         public float RandFloat(int min, int max)
@@ -665,16 +507,8 @@ namespace AUTO_Matic.Scripts.TopDown
                 }
             }
 
-            healthBar.Draw(spriteBatch);
-           
-      
-           //spriteBatch.Draw(content.Load<Texture2D>("TopDown/Textures/Player"),slam.Position, slam.Bounds, Color.White * .5f);
-           
+            healthBar.Draw(spriteBatch);       
         }
-        //void CreateBulletSpread()
-        //{
-        //    bullets.Add(new Bullet(Rectangle.))
-        //}
     }
    
 }

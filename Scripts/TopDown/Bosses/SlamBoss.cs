@@ -104,23 +104,11 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         #endregion
 
         #region Shooting
-        Texture2D gunTexture;
         public List<Bullet> bullets = new List<Bullet>();
-        float bulletSpeed = 2.5f;
-        float bulletMaxX = 10f;
-        float bulletMaxY = 10f;
-        int spread = 3;
-        bool isShootDelay = false;
         float shootDelay = .9f;//In seconds
         float iShootDelay;
-        bool startShoot = false;
         public float bulletDmg = .7f;
         public float bulletTravelDist = 64 * 8;
-        Texture2D visionTxture;
-        int width;
-        int height;
-        Rectangle bounds;
-        Rectangle tempRect;
         public Rectangle worldRect;
         public float angle;
 
@@ -129,8 +117,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
         bool respawnWalls = false;
         float respawnDelay;
         #endregion
-
-        int widthMod = -1;
 
         #region Constructor
         public SlamBoss(Rectangle currBounds, ContentManager content, TopDownMap tdMap, int[,] map, List<WallTiles> walls)
@@ -146,7 +132,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             int height = 64 * sizeMod;
             bossRect = new Rectangle(((currBounds.X + currBounds.Width / 2) - width / 2), (((currBounds.Y + currBounds.Height / 2) - height / 2)), width, height);
             healthBar = new BossHealthBar(new Rectangle(bossRect.X, bossRect.Y - 286, bossRect.Width, (int)(bossRect.Height / 3.5f)), content);
-            //worldRect = new Rectangle(((rect.X + rect.Width / 2) - size / 2), (((rect.Y + rect.Height / 2) - size / 2)), size, size);
             //Gain the slam locs
             foreach (SlamTiles tile in tdMap.SlamTiles)
             {
@@ -155,81 +140,16 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 list.Add(tile);
 
                 SlamTiles tTile = tile;
-                int i = 1;
 
                 list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Bottom,
                        tTile.Rectangle.Width, tTile.Rectangle.Height)));
                 list[list.Count - 1].mapPoint = new int[] { tile.mapPoint[0] + 1, tile.mapPoint[1] +1 };
-
-                //while (list.Count < 3)
-                //{
-                //    list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Y,
-                //        tTile.Rectangle.Width, tTile.Rectangle.Height)));
-
-                //    list[list.Count - 1].mapPoint = new int[] { tile.mapPoint[0], tile.mapPoint[1] + i };
-                //    i++;
-
-                //    //tdMap.dMapDims[tdMap.dMapDims.Count - 1][list[list.Count - 1].mapPoint[0],
-                //    //    list[list.Count - 1].mapPoint[1]] = 0;
-                //    tTile = list[list.Count - 1];
-                //}
-                //tTile = tile;
-                //tTile.Rectangle = new Rectangle(tTile.Rectangle.X, tTile.Rectangle.Y + tTile.Rectangle.Height,
-                //    tTile.Rectangle.Width, tTile.Rectangle.Height);
-                //i = 0;
-                //while (list.Count < 6)
-                //{
-                //    list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Y,
-                //          tTile.Rectangle.Width, tTile.Rectangle.Height)));
-                //    list[list.Count - 1].mapPoint = new int[] { tile.mapPoint[0] + 1, tile.mapPoint[1] + i };
-                //    i++;
-
-                //    //tdMap.dMapDims[tdMap.dMapDims.Count - 1][list[list.Count - 1].mapPoint[0],
-                //    //list[list.Count - 1].mapPoint[1]] = 0;
-                //    tTile = list[list.Count - 1];
-                //}
-
-                //tTile = tile;
-                ////tTile.Rectangle = new Rectangle(tTile.Rectangle.X, tTile.Rectangle.Bottom + (tTile.Rectangle.Height),
-                ////    tTile.Rectangle.Width, tTile.Rectangle.Height);
-                //i = 0;
-                //while (list.Count < 9)
-                //{
-                //    if (i < 3)
-                //    {
-                //        list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Bottom + (tTile.Rectangle.Height),
-                //         tTile.Rectangle.Width, tTile.Rectangle.Height)));
-
-                //        list[list.Count - 1].mapPoint = new int[] { tile.mapPoint[0] + 2, tile.mapPoint[1] + i };
-                //        i++;
-
-                //        //tdMap.dMapDims[tdMap.dMapDims.Count - 1][list[list.Count - 1].mapPoint[0],
-                //        //list[list.Count - 1].mapPoint[1]] = 0;
-                //        tTile = list[list.Count - 1];
-                //    }
-                //    else
-                //    {
-                //        list.Add(new SlamTiles(tdMap.SlamIndexes[0], new Rectangle(tTile.Rectangle.Right, tTile.Rectangle.Bottom,
-                //         tTile.Rectangle.Width, tTile.Rectangle.Height)));
-                //    }
-
-                //}
-
-                //tdMap.dMapDims[tdMap.dMapDims.Count - 1][tile.mapPoint[0] + 3, tile.mapPoint[1]] = 10;
-                //tdMap.dMapDims[tdMap.dMapDims.Count - 1][list[4].mapPoint[0], list[4].mapPoint[1]] = 9;
-                //list.RemoveAt(4);
                 slamLocs.Add(new GroundLoc(list));
 
             }
 
             ChangeAnimation();
 
-            //int locNum = 4;
-            //for(int i = 0; i < slamLocs[locNum].slamTiles.Count; i++)
-            //{
-            //    tdMap.dMapDims[tdMap.dMapDims.Count - 1][slamLocs[locNum].slamTiles[i].mapPoint[0],
-            //        slamLocs[locNum].slamTiles[i].mapPoint[1]] = 9;
-            //}
         }
         #endregion
 
@@ -259,23 +179,12 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                         if(bossRect.Bottom > currBounds.Y)
                         {
                             bossRect.Y -= 10;
-                            //animManager.CurrTexture.Reload
-                            //bossRect.Width += widthMod;
-                            //bossRect.X -= widthMod;
-                            //animManager.SetWidthMod(widthMod);
-                            //widthMod--;
-                          
                         }
                         else
                         {
                             state = BossState.Slam;
-                        //slamDelay = iSlamDelay;
                             bossRect.X = 0;
-                            //bossRect.Width -= 192;
-                            //animManager.SetWidthMod(0); 
                         }
-
-                        
                         break;
                     }
 
@@ -345,16 +254,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                         slam.Update(gameTime);
 
-                        //for(int i = BreakableWalls.Count - 1; i >= 0; i--)
-                        //{
-                        //    if(slam.rect.Bounds.Intersects(BreakableWalls[i].Rectangle))
-                        //    {
-                        //        tdMap.WallTiles.Remove(BreakableWalls[i]);
-                        //        tdMap.dMapDims[tdMap.dMapDims.Count - 1][BreakableWalls[i].mapPoint[0], BreakableWalls[i].mapPoint[1]]
-                        //            = 9;
-                        //        BrokenWalls.Add(BreakableWalls[i]);
-                        //    }
-                        //}
 
                         for (int i = tdMap.WallTiles.Count - 1; i >= 0; i--)
                         {
@@ -364,7 +263,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                                     && tdMap.dMapDims[tdMap.dMapDims.Count - 1][tdMap.WallTiles[i].mapPoint[0], tdMap.WallTiles[i].mapPoint[1]] == 10)
                                     walls.Add(tdMap.WallTiles[i]);
                                
-                                //tdMap.FloorTiles.Add());
                                 if(tdMap.dMapDims[tdMap.dMapDims.Count - 1][tdMap.WallTiles[i].mapPoint[0], tdMap.WallTiles[i].mapPoint[1]] == 10)
                                 {
                                     floors.Add(new FloorTiles(27, tdMap.WallTiles[i].Rectangle));
@@ -395,7 +293,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                                 if (!tdPlayer.damaged)
                                 {
-                                    //tdPlayer.damaged = true;
                                     tdPlayer.Health -= slamDmg;
                                 }
 
@@ -414,7 +311,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                                 if (!tdPlayer.damaged)
                                 {
-                                    //tdPlayer.damaged = true;
                                     tdPlayer.Health -= slamDmg;
                                 }
                             }
@@ -433,7 +329,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                                 if (!tdPlayer.damaged)
                                 {
-                                    //tdPlayer.damaged = true;
                                     tdPlayer.Health -= slamDmg;
                                 }
                             }
@@ -451,19 +346,11 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                                 if (!tdPlayer.damaged)
                                 {
-                                    //tdPlayer.damaged = true;
                                     tdPlayer.Health -= slamDmg;
                                 }
                             }
                         }
                     }
-                   
-
-                    
-
-                  
-
-                   
                     break;
             }
 
@@ -475,7 +362,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 {
                     if(!tdPlayer.damaged)
                     {
-                        //tdPlayer.damaged = true;
                         tdPlayer.Health -= bulletDmg;
                     }
                     bullets[i].delete = true;
@@ -515,10 +401,7 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
 
                     foreach (WallTiles rect in walls)
                     {
-                        //tdMap.FloorTiles.Remove(i);
                         tdMap.WallTiles.Add(rect);
-
-                        //i++;
                     }
                     respawnWalls = false;
                 }
@@ -534,7 +417,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             if (shootDelay <= 0)
             {
                 animState = AnimationStates.Shoot;
-                //animManager.StopLoop();
                 ChangeAnimation();
 
                 shootDelay = iShootDelay;
@@ -548,7 +430,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 float bulletSpeedX = (float)Math.Cos((double)angle) * 2;
                 float bulletSpeedY = (float)Math.Sin((double)angle) * 2;
 
-                //bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
                 int i = 1;
                 int xOffset = 0;
                 int yOffset = 0;
@@ -579,108 +460,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                 bullets[bullets.Count - 1].animOffset = new Vector2(xOffset, yOffset);
 
                 #endregion
-
-                //if (angle < 16 || angle >= 155)//Right
-                //{
-                //    if (angle < 16)
-                //    {
-
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY),
-                //            content, true, 64 * 25));
-
-                //    }
-                //    else//Left
-                //    {
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY),
-                //                content, true, 64 * 25));
-
-                //    }
-                //}
-                //if (angle >= 16 && angle < 35)//Right up
-                //{
-                //    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
-                //    {
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), bulletSpeed / 4, new Vector2(bulletMaxX, -bulletMaxY),
-                //            content, true, 64 * 25, true, -bulletSpeed / 8));
-                //    }
-                //    else
-                //    {
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), bulletSpeed / 4, new Vector2(bulletMaxX, bulletMaxY),
-                //          content, true, 64 * 25, true, bulletSpeed / 8));
-
-
-                //    }
-
-                //    //Compare pos for down
-                //}
-                //if (angle >= 35 && angle < 75)//more right up
-                //{
-                //    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
-                //    {
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), bulletSpeed / 2, new Vector2(bulletMaxX, -bulletMaxY),
-                //          content, true, 64 * 25, true, -bulletSpeed / 4));
-
-
-                //    }
-                //    else
-                //    {
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY),
-                //          content, true, 64 * 25, true, bulletSpeed / 4));
-
-
-                //    }
-                //}
-                //if (angle >= 75 && angle < 105)//up
-                //{
-                //    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
-                //    {
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X, bossPos.Y - bossRect.Height / 2), bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY),
-                //      content, false, 64 * 25, true, -bulletSpeed));
-
-
-                //    }
-                //    else
-                //    {
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X, bossPos.Y + bossRect.Height / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY),
-                //   content, false, 64 * 25, true, bulletSpeed));
-
-
-                //    }
-                //}
-                //if (angle >= 105 && angle < 135)//up left
-                //{
-                //    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
-                //    {
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), -bulletSpeed / 4, new Vector2(-bulletMaxX, -bulletMaxY),
-                //  content, true, 64 * 25, true, -bulletSpeed / 8));
-
-
-                //    }
-                //    else
-                //    {
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), -bulletSpeed / 4, new Vector2(-bulletMaxX, bulletMaxY),
-                //   content, true, 64 * 25, true, bulletSpeed / 8));
-
-
-                //    }
-                //}
-                //if (angle >= 135 && angle < 155)
-                //{
-                //    if (bossRect.Center.Y > tdPlayer.rectangle.Y)
-                //    {
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), -bulletSpeed / 2, new Vector2(-bulletMaxX, -bulletMaxY),
-                //      content, true, 64 * 25, true, -bulletSpeed / 4));
-
-
-                //    }
-                //    else
-                //    {
-                //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), -bulletSpeed / 2, new Vector2(-bulletMaxX, bulletMaxY),
-                //   content, true, 64 * 25, true, bulletSpeed / 4));
-
-
-                //    }
-                //}
             }
         }
 
@@ -702,11 +481,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
                     spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), new Rectangle(closestLoc.slamTiles[0].Rectangle.X + (64 * i), closestLoc.slamTiles[0].Rectangle.Y + 128,
                         closestLoc.slamTiles[0].Rectangle.Width, closestLoc.slamTiles[0].Rectangle.Height), Color.Black * .5f);
                 }
-                //for(int i )
-                //foreach (SlamTiles slamTile in closestLoc.slamTiles)
-                //{
-                //    spriteBatch.Draw(content.Load<Texture2D>("Textures/white"), slamTile.Rectangle, Color.Black * .50f);
-                //}
             }
            
             //if (slamReady)
@@ -733,9 +507,6 @@ namespace AUTO_Matic.Scripts.TopDown.Bosses
             {
                 bullets[i].Draw(spriteBatch);
             }
-            
-
-
         }
 
         public float RandFloat(int min, int max)

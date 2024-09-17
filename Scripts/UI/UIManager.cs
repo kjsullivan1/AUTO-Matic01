@@ -410,16 +410,6 @@ namespace AUTO_Matic
                     break;
 
             }
-
-           
-            //float p2Elevation =
-            //MathHelper.ToDegrees(tanks[1].GunElevation) * -1;
-            //float p2Rot = MathHelper.ToDegrees(tanks[1].TurretRotation);
-            //p2Rot = 180 - p2Rot;
-            //UIHelper.SetElementText(uiElements["p2Rotation"], "Angle: " + p2Rot.ToString("N2"));
-            //UIHelper.SetElementText(uiElements["p2Elevation"], "Elevation: " + p2Elevation.ToString("N2"));
-            //float p1Power = shotPower;
-            //UIHelper.SetElementText(uiElements["p2Power"], "Power: " + p2Power.ToString("N2"));
         }
 
         public void SkipCrawl(string keyWord)
@@ -794,14 +784,6 @@ namespace AUTO_Matic
             UIHelper.SetElementRect(uiElements["BossRoomCounter"], new Rectangle(uiElements["BossRoomCounter"].Position.ToPoint(), new Point(128, 96)));
             UIHelper.SetElementBGRect(uiElements["BossRoomCounter"], new Rectangle(uiElements["BossRoomCounter"].Position.ToPoint(), new Point(215, 70)));
 
-            //CreateKeyBindsUI(game);
-
-            //uiElements.Add("p2Rotation", UIHelper.CreateTextblock("p2Rotation", "x", 580, 120));
-            //uiElements.Add("p2Elevation", UIHelper.CreateTextblock("p2Elevation", "x", 580, 135));
-            //uiElements.Add("p2PowerUp", UIHelper.CreateButton("p2PowerUp", "P+", 505, 5));
-            //uiElements.Add("p2PowerDown", UIHelper.CreateButton("p2PowerDown", "P-", 505, 60));
-            //uiElements.Add("p2Power", UIHelper.CreateTextblock("p2Power", "x", 580, 155));
-
             foreach (UIWidget widget in uiElements.Values)
             {
                 if (widget is UIButton)
@@ -848,18 +830,6 @@ namespace AUTO_Matic
                     }
                   
                 }
-
-
-            //    uiElements.Add("TutorialBoxGame", UIHelper.CreateTextblock("TutorialBoxGame", "" +
-            //                   "\n\n  Use WASD or Left Analog Stick to move" +
-            //                   "\n\n  Press space bar or (A) button to jump" +
-            //                   "\n\n  Hold down to get into shooting stance and press Enter key or (X) button to fire" +
-            //                   "\n\n  If you time it right while in the air, you can ground pound" +
-            //                   "\n\n  Press LShift key or (B) button to dash forwards" +
-            //                   "\n\n  The E key and (Y) button allows you to open doors and go into the dungeon" +
-            //                   "\n\n  Hold them to jump out and play as the pilot\n\n", (int)(dims.X + 192/2), (int)(dims.Y - 300)));
-            //    UIHelper.SetElementRect(uiElements["TutorialBoxGame"], new Rectangle(uiElements["TutorialBoxGame"].Position.ToPoint(), new Point(450, 600)));
-            //    UIHelper.SetElementBGRect(uiElements["TutorialBoxGame"], new Rectangle(uiElements["TutorialBoxGame"].Position.ToPoint(), new Point(400, 225)));
             }
      
 

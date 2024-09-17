@@ -34,64 +34,12 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         float returnDelay = .75f;
         float iReturn;
         #region Animations
-        AnimationManager animManager;
-        Texture2D texture;
-        Point FrameSize;//Size of frame
-        Point CurrFrame;//Location of currFram on the sheet
-        Point SheetSize;//num of frames.xy
-        int fpms;
-
         BossHealthBar healthBar;
-        public void ChangeAnimation()
-        {
-            //switch (animState)
-            //{
-            //    case AnimationStates.Idle:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerIdle");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(6, 1);
-            //        fpms = 120;
-            //        break;
-            //    case AnimationStates.Walking:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerWalk");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(8, 1);
-            //        fpms = 120;
-            //        break;
-            //    case AnimationStates.Shooting:
-            //        texture = content.Load<Texture2D>("TopDown/Animations/PlayerShoot");
-            //        FrameSize = new Point(64, 64);
-            //        CurrFrame = new Point(0, 0);
-            //        SheetSize = new Point(4, 1);
-            //        fpms = 95;
-            //        break;
-            //}
-
-            //bool isRight = true, isLeft = false, isUp = false, isDown = false;
-            //if (animManager != null)
-            //{
-            //    isRight = animManager.isRight;
-            //    isLeft = animManager.isLeft;
-            //    isUp = animManager.isUp;
-            //    isDown = animManager.isDown;
-            //}
-
-            //animManager = new AnimationManager(texture, FrameSize, CurrFrame, SheetSize, fpms, Position);
-
-            //animManager.isRight = isRight;
-            //animManager.isLeft = isLeft;
-            //animManager.isUp = isUp;
-            //animManager.isDown = isDown;
-        }
         #endregion
 
         #region Shooting
-        Texture2D gunTexture;
         float angle;
         Texture2D line;
-        float specialAttackChance = 25;
         bool stopRotate = false;
         bool useTopWall = false;
         bool clockWise = false;
@@ -108,13 +56,8 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         float chargeTime = 4;
         float fireTime = .75f;
         float bulletSpeed = 5f;
-        float bulletMaxX = 20f;
-        float bulletMaxY = 20f;
-        int spread = 3;
-        bool isShootDelay = false;
         float shootDelay = 1.5f;//In seconds
         float iShootDelay;
-        bool startShoot = false;
         public float bulletDmg = 1.5f;
         public float bulletTravelDist = 64 * 24;
         Texture2D visionTxture;
@@ -123,11 +66,6 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
         Rectangle bounds;
         Rectangle tempRect;
         string chosenWeapon;
-        //PossibleJumpSide TopWalls;
-        //PossibleJumpSide BottomWalls;
-        //PossibleJumpSide RightWalls;
-        //PossibleJumpSide LeftWalls;
-        List<WallTiles> JumpWalls = new List<WallTiles>();
         float burstDelay = .05f;
         #endregion
 
@@ -336,15 +274,6 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 #endregion
                 #region Move
                 case BossStates.Move:
-
-                    //shootDelay -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                    //if(shootDelay <= 0)
-                    //{
-                    //    stopRotate = false;
-                    //    bossState = BossStates.ChooseWeapon;
-                    //    shootDelay = iShootDelay;
-                    //}
                     bossRect = new Rectangle((int)(bossRect.X + velocity.X), (int)(bossRect.Y + velocity.Y), bossRect.Width, bossRect.Height);
                     Vector2 bossPos = new Vector2(bossRect.Center.X - ssPlayer.Rectangle.Width / 2,
                         bossRect.Center.Y - ssPlayer.Rectangle.Height / 2);
@@ -654,100 +583,6 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletDownSpeedX, new Vector2(bulletDownSpeedX, bulletDownSpeedY),
              content, true, bulletTravelDist, true, bulletDownSpeedY, angle: angle));
             bullets[bullets.Count - 1].BulletType = Bullet.BulletTypes.Boss;
-
-            //if (angle < 18 || angle >= 155)//Right
-            //{
-            //    if (angle < 18)//Right
-            //    {
-
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 7));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 7));
-            //    }
-            //    else//Left
-            //    {
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 7));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 7));
-            //    }
-
-
-            //}
-            //if (angle >= 18 && angle < 45)
-            //{
-            //    if (ssPlayer.Rectangle.Y < bossRect.Y + 64 / 2)//Right up
-            //    {
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 4));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 1.75f));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //    }
-            //    else//Right Down
-            //    {
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 6));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 2));
-            //    }
-            //}
-            //if (angle >= 45 && angle < 75)
-            //{
-            //    if (ssPlayer.Rectangle.Y < bossRect.Y + 64 / 2)//
-            //    {
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //    }
-            //}
-            //if (angle >= 75 && angle < 105)
-            //{
-            //    if (ssPlayer.Rectangle.Y < bossRect.Y + 64 / 2)
-            //    {
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed / 4, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed / 4, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, false, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), bulletSpeed / 4, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed/2));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed / 4, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed/2));
-            //    }
-            //}
-            //if (angle >= 105 && angle < 135)
-            //{
-            //    if (ssPlayer.Rectangle.Y < bossRect.Y + 64 / 2)
-            //    {
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed / 5f, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //    }
-            //}
-            //if (angle >= 135 && angle < 155)
-            //{
-            //    if (ssPlayer.Rectangle.Y < bossRect.Y + 64 / 2)
-            //    {
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 3.75f));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed / 1.75f));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, -bulletSpeed));
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 3.75f));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed / 1.75f));
-            //        bullets.Add(new Bullet(shootLocs[0].rect.Center.ToVector2(), -bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, true, bulletSpeed));
-            //    }
-            //}
         }
 
         private void UpdateShootLocs()
@@ -931,14 +766,6 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
         private void FireSemiAuto(SSPlayer ssPlayer, float angle, GameTime gameTime)
         {
-
-            //shootDelay = iShootDelay;
-
-            //Vector2 targetDir = new Vector2(ssPlayer.Rectangle.X + ssPlayer.Rectangle.Width / 2, ssPlayer.Rectangle.Y + ssPlayer.Rectangle.Height / 2) -
-            //   new Vector2(bossRect.Center.X, bossRect.Center.Y);
-            //angle = Math.Abs(MathHelper.ToDegrees((float)Math.Atan2(targetDir.Y, targetDir.X)));
-
-            //Vector2 bossPos = new Vector2(bossRect.Center.X - ssPlayer.Rectangle.Width / 2, bossRect.Center.Y - ssPlayer.Rectangle.Height / 2);
             Vector2 targetDir = new Vector2(ssPlayer.playerRect.X + ssPlayer.playerRect.Width / 2, ssPlayer.playerRect.Y + ssPlayer.playerRect.Height / 2) -
               new Vector2(bossRect.Center.X, bossRect.Center.Y);
             angle = (float)Math.Atan2(targetDir.Y, targetDir.X);
@@ -947,9 +774,9 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
             float bulletSpeedX = (float)Math.Cos((double)angle) * 2;
             float bulletSpeedY = (float)Math.Sin((double)angle) * 2;
-           
-            
-            if(burstDelay <= 0)
+
+
+            if (burstDelay <= 0)
             {
                 #region BurstShot
                 bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
@@ -964,131 +791,13 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
                 #endregion
                 burstDelay = .05f;
             }
-
-
-
-            //bullets.Add(new Bullet(bossPos, bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY), content, true, bulletTravelDist, true, bulletSpeedY));
-
-            //  bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
-            //      content, true, bulletTravelDist, true, bulletSpeedY, isPlayer: true, angle: angle));
-
-            //  bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX * 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
-            // content, true, bulletTravelDist, true, bulletSpeedY * 1.5f, isPlayer: true, angle: angle));
-
-            //  bullets.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX / 1.5f, new Vector2(bulletSpeedX, bulletSpeedY),
-            //content, true, bulletTravelDist, true, bulletSpeedY / 1.5f, isPlayer: true, angle: angle));
-
-            //if (angle < 16 || angle >= 155)//Right
-            //{
-            //    if (angle < 16)
-            //    {
-
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY),
-            //            content, true, 64 * 25));
-
-            //    }
-            //    else//Left
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY),
-            //                content, true, 64 * 25));
-
-            //    }
-            //}
-            //if (angle >= 16 && angle < 35)//Right up
-            //{
-            //    if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), bulletSpeed / 4, new Vector2(bulletMaxX, -bulletMaxY),
-            //            content, true, 64 * 25, true, -bulletSpeed / 8));
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), bulletSpeed / 4, new Vector2(bulletMaxX, bulletMaxY),
-            //          content, true, 64 * 25, true, bulletSpeed / 8));
-
-
-            //    }
-
-            //    //Compare pos for down
-            //}
-            //if (angle >= 35 && angle < 75)//more right up
-            //{
-            //    if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), bulletSpeed / 2, new Vector2(bulletMaxX, -bulletMaxY),
-            //          content, true, 64 * 25, true, -bulletSpeed / 4));
-
-
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X + bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY),
-            //          content, true, 64 * 25, true, bulletSpeed / 4));
-
-
-            //    }
-            //}
-            //if (angle >= 75 && angle < 105)//up
-            //{
-            //    if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X, bossPos.Y - bossRect.Height / 2), bulletSpeed, new Vector2(bulletMaxX, -bulletMaxY),
-            //      content, false, 64 * 25, true, -bulletSpeed));
-
-
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X, bossPos.Y + bossRect.Height / 2), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY),
-            //   content, false, 64 * 25, true, bulletSpeed));
-
-
-            //    }
-            //}
-            //if (angle >= 105 && angle < 135)//up left
-            //{
-            //    if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), -bulletSpeed / 4, new Vector2(-bulletMaxX, -bulletMaxY),
-            //  content, true, 64 * 25, true, -bulletSpeed / 8));
-
-
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), -bulletSpeed / 4, new Vector2(-bulletMaxX, bulletMaxY),
-            //   content, true, 64 * 25, true, bulletSpeed / 8));
-
-
-            //    }
-            //}
-            //if (angle >= 135 && angle < 155)
-            //{
-            //    if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y - bossRect.Height / 2), -bulletSpeed / 2, new Vector2(-bulletMaxX, -bulletMaxY),
-            //      content, true, 64 * 25, true, -bulletSpeed / 4));
-
-
-            //    }
-            //    else
-            //    {
-            //        bullets.Add(new Bullet(new Vector2(bossPos.X - bossRect.Width / 2, bossPos.Y + bossRect.Height / 2), -bulletSpeed / 2, new Vector2(-bulletMaxX, bulletMaxY),
-            //   content, true, 64 * 25, true, bulletSpeed / 4));
-
-
-            //    }
-            //}
-
         }
 
         private void LaunchBomb(SSPlayer ssPlayer, float angle)
         {
            
-                //shootDelay = iShootDelay;
                 bulletTravelDist = DistForm(ssPlayer.Rectangle.Center.ToVector2(), bossRect.Center.ToVector2()) + bossRect.Width;
 
-            //Vector2 bossPos = new Vector2(bossRect.Center.X - ssPlayer.playerRect.Width / 2, bossRect.Center.Y - ssPlayer.playerRect.Height / 2);
 
             float bulletSpeedX = (float)Math.Cos((double)angle) * 2;
             float bulletSpeedY = (float)Math.Sin((double)angle) * 2;
@@ -1096,315 +805,12 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             bombs.Add(new Bullet(new Vector2(bossRect.Center.X, bossRect.Center.Y), bulletSpeedX, new Vector2(bulletSpeedX, bulletSpeedY),
                 content, true, bulletTravelDist, true, bulletSpeedY, size: 42));
             bombs[bombs.Count - 1].BulletType = Bullet.BulletTypes.Bomb;
-            //     if (angle < 15 || angle >= 170)//Right
-            //     {
-            //         if (angle < 15)
-            //         {
-            //             //boss.bulletRects.Add(new Rectangle((int)bossRect.X + (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2),
-            //             //    (int)bossRect.Y /*- (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)*/, bossRect.Width, bossRect.Height));
-
-
-            //             bombs.Add(new Bullet(new Vector2(bossRect.Right,
-            //                 (int)bossRect.Center.Y), bulletSpeed, new Vector2(bulletMaxX, bulletMaxY), content, true, bulletTravelDist, size: 42));
-            //         }
-            //         else//Left
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2),
-            //                 (int)bossRect.Y + (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4)), -bulletSpeed, new Vector2(-bulletMaxX, bulletMaxY), content, true, bulletTravelDist, size: 42));
-            //             //boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2),
-            //             //    (int)bossRect.Y /*- (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)*/, bossRect.Width, bossRect.Height));
-
-            //         }
-            //     }
-            //     else if (angle >= 15 && angle < 25)//Right up
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //                       (int)bossRect.Center.Y /*- (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4)*/), bulletSpeed / 1.5f, new Vector2(bulletMaxX, -bulletMaxY),
-            //                       content, true, bulletTravelDist, true, -bulletSpeed / 2.5f, size: 42));
-
-            //             //     boss.bulletRects.Add(new Rectangle((int)bossRect.X + (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2),
-            //             //(int)bossRect.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
-
-
-            //         }
-            //         else
-            //         {
-
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //                   (int)bossRect.Center.Y /*- (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4)*/), bulletSpeed / 1.5f, new Vector2(bulletMaxX, bulletMaxY),
-            //                   content, true, bulletTravelDist, true, bulletSpeed / 2.5f, size: 42));
-            //             //      boss.bulletRects.Add(new Rectangle((int)bossRect.X + (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2),
-            //             //(int)bossRect.Y + (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
-
-            //         }
-
-            //         //Compare pos for down
-            //     }
-            //     else if (angle >= 25 && angle < 35)//more right up
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-            //             //     boss.bulletRects.Add(new Rectangle((int)bossRect.X + (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4),
-            //             //(int)bossRect.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //                     (int)bossRect.Center.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4)), bulletSpeed / 2, new Vector2(bulletMaxX, -bulletMaxY),
-            //                     content, true, bulletTravelDist, true, -bulletSpeed / 2.25f, size: 42));
-
-            //         }
-            //         else
-            //         {
-            //             //      boss.bulletRects.Add(new Rectangle((int)bossRect.X + (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4),
-            //             //(int)bossRect.Y + (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //                   (int)bossRect.Bottom /*- (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4)*/), bulletSpeed / 2, new Vector2(bulletMaxX, bulletMaxY),
-            //                   content, true, bulletTravelDist, true, bulletSpeed / 2.25f, size: 42));
-            //         }
-            //     }
-
-            //     else if (angle >= 35 && angle < 45)
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //                     (int)bossRect.Center.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2) - 21), bulletSpeed / 2.5f, new Vector2(bulletMaxX, -bulletMaxY),
-            //                     content, true, bulletTravelDist, true, -bulletSpeed / 2f, size: 42));
-            //         }
-            //         else
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //           (int)bossRect.Bottom/*- (int)(ssPlayer.Rectangle.Height / 2 - bossRect.Height / 2)*/), bulletSpeed / 2.5f, new Vector2(bulletMaxX, bulletMaxY),
-            //           content, true, bulletTravelDist, true, bulletSpeed / 2f, size: 42));
-            //         }
-            //     }
-
-            //     else if (angle >= 45 && angle < 55)
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //               (int)bossRect.Center.Y - (int)(ssPlayer.Rectangle.Height / 2 /*+ bossRect.Height / 2*/)), bulletSpeed / 3, new Vector2(bulletMaxX, -bulletMaxY),
-            //               content, true, bulletTravelDist, true, -bulletSpeed / 1.75f, size: 42));
-            //         }
-            //         else
-            //         {
-
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //(int)bossRect.Center.Y + (int)(ssPlayer.Rectangle.Height / 2 /*+ bossRect.Height / 2*/)), bulletSpeed / 3f, new Vector2(bulletMaxX, bulletMaxY),
-            //content, true, bulletTravelDist, true, bulletSpeed / 1.75f, size: 42));
-            //         }
-            //     }
-
-            //     else if (angle >= 55 && angle < 65)
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right /*+ (int)(-ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4)*/,
-            //                        (int)bossRect.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)), bulletSpeed / 3.5f, new Vector2(bulletMaxX, -bulletMaxY),
-            //                        content, true, bulletTravelDist, true, -bulletSpeed / 1.5f, size: 42));
-            //         }
-            //         else
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right /*+ (int)(-ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4)*/,
-            //                         (int)bossRect.Y + (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)),
-            //                         bulletSpeed / 3.5f, new Vector2(bulletMaxX, bulletMaxY),
-            //                         content, true, bulletTravelDist, true, bulletSpeed / 1.5f, size: 42));
-            //         }
-            //     }
-
-            //     else if (angle >= 65 && angle < 75)
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right /*- (int)(-ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4)*/,
-            //                        (int)bossRect.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)), bulletSpeed / 4, new Vector2(bulletMaxX, -bulletMaxY),
-            //                        content, true, bulletTravelDist, true, -bulletSpeed / 1.25f, size: 42));
-            //         }
-            //         else
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.Right /*- (int)(-ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4)*/,
-            //                       (int)bossRect.Y + (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)), bulletSpeed / 4, new Vector2(bulletMaxX, bulletMaxY),
-            //                       content, true, bulletTravelDist, true, bulletSpeed / 1.25f, size: 42));
-            //         }
-            //     }
-            //     else if (angle >= 75 && angle < 105)//up
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X + ((int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4) - 21),
-            //                        (int)bossRect.Y - 21/*- (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)*/), -bulletSpeed / 4, new Vector2(-bulletMaxX, -bulletMaxY),
-            //                        content, false, bulletTravelDist, true, -bulletSpeed, size: 42));
-            //             //       boss.bulletRects.Add(new Rectangle((int)bossRect.X /*+ (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4)*/,
-            //             //(int)bossRect.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
-
-            //         }
-            //         else
-            //         {
-            //             //       boss.bulletRects.Add(new Rectangle((int)bossRect.X /*+ (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4)*/,
-            //             //(int)bossRect.Y + (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
-
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X + ((int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4) - 21),
-            //                        (int)bossRect.Bottom/*- (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)*/), -bulletSpeed / 4, new Vector2(-bulletMaxX, bulletMaxY),
-            //                        content, false, bulletTravelDist, true, bulletSpeed, size: 42));
-
-            //         }
-            //     }
-            //     else if (angle >= 105 && angle < 115)//up left..
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X + (int)(-ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4),
-            //                         (int)bossRect.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)), -bulletSpeed / 4, new Vector2(-bulletMaxX, -bulletMaxY),
-            //                         content, true, bulletTravelDist, true, -bulletSpeed / 1.25f, size: 42));
-
-            //             //        boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4),
-            //             //(int)bossRect.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
-
-
-            //         }
-            //         else
-            //         {
-            //             //        boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4),
-            //             //(int)bossRect.Y + (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2), bossRect.Width, bossRect.Height));
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X + (int)(-ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4),
-            //                         (int)bossRect.Y + (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)), -bulletSpeed / 4, new Vector2(-bulletMaxX, bulletMaxY),
-            //                         content, true, bulletTravelDist, true, bulletSpeed / 1.25f, size: 42));
-
-            //         }
-            //     }
-            //     else if (angle >= 115 && angle < 125)
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X + (int)(-ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4),
-            //                         (int)bossRect.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)), -bulletSpeed / 3.5f, new Vector2(-bulletMaxX, -bulletMaxY),
-            //                         content, true, bulletTravelDist, true, -bulletSpeed / 1.5f, size: 42));
-            //             //        boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2),
-            //             //(int)bossRect.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
-
-            //         }
-            //         else
-            //         {
-            //             //         boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2),
-            //             //(int)bossRect.Y + (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
-
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X + (int)(-ssPlayer.Rectangle.Width / 2 + bossRect.Width / 4),
-            //                         (int)bossRect.Y + (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2)),
-            //                         -bulletSpeed / 3.5f, new Vector2(-bulletMaxX, bulletMaxY),
-            //                         content, true, bulletTravelDist, true, bulletSpeed / 1.5f, size: 42));
-
-            //         }
-            //     }
-            //     else if (angle >= 125 && angle < 135)
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //                       (int)bossRect.Center.Y - (int)(ssPlayer.Rectangle.Height / 2 /*+ bossRect.Height / 2*/)), -bulletSpeed / 3, new Vector2(-bulletMaxX, -bulletMaxY),
-            //                       content, true, bulletTravelDist, true, -bulletSpeed / 1.75f, size: 42));
-            //             //        boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2),
-            //             //(int)bossRect.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
-
-            //             //        Rectangle startRect = boss.bulletRects[0];
-
-            //             //        while (boss.bulletRects[boss.bulletRects.Count - 1].X > LeftWalls.walls[0].Rectangle.Right &&
-            //             //          boss.bulletRects[boss.bulletRects.Count - 1].Top > TopWalls.walls[0].Rectangle.Bottom)
-            //             //        {
-            //             //            boss.bulletRects.Add(new Rectangle(startRect.X - bossRect.Width, startRect.Y - bossRect.Height / 4, bossRect.Width, bossRect.Height));
-            //             //            startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //             //        }
-            //         }
-            //         else
-            //         {
-
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //(int)bossRect.Center.Y + (int)(ssPlayer.Rectangle.Height / 2 /*+ bossRect.Height / 2*/)), -bulletSpeed / 3f, new Vector2(-bulletMaxX, bulletMaxY),
-            //content, true, bulletTravelDist, true, bulletSpeed / 1.75f, size: 42));
-            //             //         boss.bulletRects.Add(new Rectangle((int)bossRect.X - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2),
-            //             //(int)bossRect.Y + (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4), bossRect.Width, bossRect.Height));
-
-            //             //         Rectangle startRect = boss.bulletRects[0];
-
-            //             //         while (boss.bulletRects[boss.bulletRects.Count - 1].X > LeftWalls.walls[0].Rectangle.Right &&
-            //             //           boss.bulletRects[boss.bulletRects.Count - 1].Bottom < BottomWalls.walls[0].Rectangle.Top)
-            //             //         {
-            //             //             boss.bulletRects.Add(new Rectangle(startRect.X - bossRect.Width, startRect.Bottom - bossRect.Height / 2, bossRect.Width, bossRect.Height));
-            //             //             startRect = boss.bulletRects[boss.bulletRects.Count - 1];
-            //             //         }
-            //         }
-            //     }
-
-            //     else if (angle >= 135 && angle < 145)
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X - 21/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //                      (int)bossRect.Center.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 2) - 21), -bulletSpeed / 2.5f, new Vector2(-bulletMaxX, -bulletMaxY),
-            //                      content, true, bulletTravelDist, true, -bulletSpeed / 2f, size: 42));
-            //         }
-            //         else
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X - 21/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //           (int)bossRect.Bottom/*- (int)(ssPlayer.Rectangle.Height / 2 - bossRect.Height / 2)*/), -bulletSpeed / 2.5f, new Vector2(-bulletMaxX, bulletMaxY),
-            //           content, true, bulletTravelDist, true, bulletSpeed / 2f, size: 42));
-            //         }
-
-
-            //     }
-
-            //     else if (angle >= 145 && angle < 155)
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //                      (int)bossRect.Center.Y - (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4)), -bulletSpeed / 2, new Vector2(-bulletMaxX, -bulletMaxY),
-            //                      content, true, bulletTravelDist, true, -bulletSpeed / 2.25f, size: 42));
-            //         }
-            //         else
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //                    (int)bossRect.Bottom /*- (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4)*/), -bulletSpeed / 2, new Vector2(-bulletMaxX, bulletMaxY),
-            //                    content, true, bulletTravelDist, true, bulletSpeed / 2.25f, size: 42));
-            //         }
-            //     }
-            //     else if (angle >= 155 && angle < 170)
-            //     {
-            //         if (bossRect.Center.Y > ssPlayer.Rectangle.Y)
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //                     (int)bossRect.Center.Y /*- (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4)*/), -bulletSpeed / 1.5f, new Vector2(-bulletMaxX, -bulletMaxY),
-            //                     content, true, bulletTravelDist, true, -bulletSpeed / 2.5f, size: 42));
-            //         }
-            //         else
-            //         {
-            //             bombs.Add(new Bullet(new Vector2((int)bossRect.X/* - (int)(ssPlayer.Rectangle.Width / 2 + bossRect.Width / 2)*/,
-            //                    (int)bossRect.Center.Y /*- (int)(ssPlayer.Rectangle.Height / 2 + bossRect.Height / 4)*/), -bulletSpeed / 1.5f, new Vector2(-bulletMaxX, bulletMaxY),
-            //                    content, true, bulletTravelDist, true, bulletSpeed / 2.5f, size: 42));
-            //         }
-            //     }
-
         }
         void SetRay(float angle, SSPlayer playerRect, Vector2 bossPos, GameTime gameTime)
         {
 
             int size = 64;
             chargeTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-            //if (playerRect.playerRect.Center.Y > bossRect.Center.Y)
-            //{
-            //    destRect = new Rectangle(bossRect.Center.X, bossRect.Center.Y - 28 / 2,
-            //       distForm(new Vector2(bossRect.Center.X, bossRect.Center.Y),
-            //       new Vector2(playerRect.playerRect.Center.X, playerRect.playerRect.Center.Y)), 28);
-            //}
-            //else
-            //{
-            //    destRect = new Rectangle(bossRect.Center.X, bossRect.Center.Y + 28 / 2,
-            //       distForm(new Vector2(bossRect.Center.X, bossRect.Center.Y),
-            //       new Vector2(playerRect.playerRect.Center.X, playerRect.playerRect.Center.Y)), 28);
-            //}
             destRect = new Rectangle(bossRect.Center.X, bossRect.Center.Y,
                   distForm(new Vector2(bossRect.Center.X, bossRect.Center.Y),
                   new Vector2(playerRect.playerRect.Center.X, playerRect.playerRect.Center.Y)), 28);
@@ -1421,196 +827,6 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
 
 
             }
-
-            // int size = 64;
-            // if (angle < 16 || angle >= 155)//Right
-            // {
-            //     if (angle < 16)
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 2),
-            //             (int)bossPos.Y /*- (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 2)*/, size, size));
-
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (rayRects[rayRects.Count - 1].Right < SideTileMap.GetWorldDims().X)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.Right, startRect.Y, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-            //     else//Left
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X - (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 2),
-            //             (int)bossPos.Y /*- (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 2)*/, size, size));
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (rayRects[rayRects.Count - 1].X > 0)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.X - size, startRect.Y, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-            // }
-            // if (angle >= 16 && angle < 35)//Right up
-            // {
-            //     if (bossRect.Center.Y > playerRect.playerRect.Y)
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 2),
-            //    (int)bossPos.Y - (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 4), size, size));
-
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (rayRects[rayRects.Count - 1].Right < SideTileMap.GetWorldDims().X &&
-            //             rayRects[rayRects.Count - 1].Top > 0)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.Right, startRect.Y - size / 4, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-            //     else
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 2),
-            //   (int)bossPos.Y + (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 4), size, size));
-
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (rayRects[rayRects.Count - 1].Right < SideTileMap.GetWorldDims().X &&
-            //           rayRects[rayRects.Count - 1].Bottom < SideTileMap.GetWorldDims().Y)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.Right, startRect.Bottom - size / 2, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-
-            //     //Compare pos for down
-            // }
-            // if (angle >= 35 && angle < 75)//more right up
-            // {
-            //     if (bossRect.Center.Y > playerRect.playerRect.Y)
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 4),
-            //    (int)bossPos.Y - (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 2), size, size));
-
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (rayRects[rayRects.Count - 1].Right < SideTileMap.GetWorldDims().X &&
-            //           rayRects[rayRects.Count - 1].Top > 0)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.Right, startRect.Y - size, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-            //     else
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X + (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 4),
-            //   (int)bossPos.Y + (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 2), size, size));
-
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (rayRects[rayRects.Count - 1].Right < SideTileMap.GetWorldDims().X &&
-            //           rayRects[rayRects.Count - 1].Bottom < SideTileMap.GetWorldDims().Y)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.Right, startRect.Bottom, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-            // }
-            // if (angle >= 75 && angle < 105)//up
-            // {
-            //     if (bossRect.Center.Y > playerRect.playerRect.Y)
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X /*+ (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 4)*/,
-            //  (int)bossPos.Y - (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 2), size, size));
-
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (/*rayRects[rayRects.Count - 1].Right < SideTileMap.GetWorldDims().X &&*/
-            //           rayRects[rayRects.Count - 1].Top > 0)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.X, startRect.Y - size, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-            //     else
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X /*+ (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 4)*/,
-            //  (int)bossPos.Y + (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 2), size, size));
-
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (/*rayRects[rayRects.Count - 1].Right < SideTileMap.GetWorldDims().X &&*/
-            //           rayRects[rayRects.Count - 1].Bottom < SideTileMap.GetWorldDims().Y)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.X, startRect.Bottom, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-            // }
-            // if (angle >= 105 && angle < 135)//up left
-            // {
-            //     if (bossRect.Center.Y > playerRect.playerRect.Y)
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X - (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 4),
-            // (int)bossPos.Y - (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 2), size, size));
-
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (rayRects[rayRects.Count - 1].X > 0 &&
-            //           rayRects[rayRects.Count - 1].Top > 0)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.X - size, startRect.Y - size, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-            //     else
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X - (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 4),
-            // (int)bossPos.Y + (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 2), size, size));
-
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (rayRects[rayRects.Count - 1].X > 0 &&
-            //           rayRects[rayRects.Count - 1].Bottom < SideTileMap.GetWorldDims().Y)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.X - size, startRect.Bottom, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-            // }
-            // if (angle >= 135 && angle < 155)
-            // {
-            //     if (bossRect.Center.Y > playerRect.playerRect.Y)
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X - (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 2),
-            // (int)bossPos.Y - (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 4), size, size));
-
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (rayRects[rayRects.Count - 1].X > 0 &&
-            //           rayRects[rayRects.Count - 1].Top > 0)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.X - size, startRect.Y - size / 4, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-            //     else
-            //     {
-            //         rayRects.Add(new Rectangle((int)bossPos.X - (int)(playerRect.playerRect.Width / 2 + bossRect.Width / 2),
-            //(int)bossPos.Y + (int)(playerRect.playerRect.Height / 2 + bossRect.Height / 4), size, size));
-
-            //         Rectangle startRect = rayRects[0];
-
-            //         while (rayRects[rayRects.Count - 1].X > 0 &&
-            //           rayRects[rayRects.Count - 1].Bottom < SideTileMap.GetWorldDims().Y)
-            //         {
-            //             rayRects.Add(new Rectangle(startRect.X - size, startRect.Bottom - size / 2, size, size));
-            //             startRect = rayRects[rayRects.Count - 1];
-            //         }
-            //     }
-            // }
-
-
-
         }
         int distForm(Vector2 pos1, Vector2 pos2)
         {
@@ -1654,11 +870,6 @@ namespace AUTO_Matic.Scripts.SideScroll.Enemy
             {
                 bullets[i].Draw(spriteBatch);
             }
-
-            //for(int i = 0; i < rayRects.Count; i++)
-            //{
-            //    spriteBatch.Draw(content.Load<Texture2D>("Textures/Button"), rayRects[i], Color.Crimson);
-            //}
 
             for(int i = 0; i < bombs.Count; i++)
             {

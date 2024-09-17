@@ -13,7 +13,6 @@ namespace AUTO_Matic.Scripts.Effects
     {
         Microsoft.Xna.Framework.Audio.SoundEffect sound;
         SoundEffectInstance soundInstance;
-        List<SoundEffectInstance> soundList = new List<SoundEffectInstance>();
         List<SoundEffectInstance> MusicList = new List<SoundEffectInstance>(); //List of all music
         List<SoundEffectInstance> EffectList = new List<SoundEffectInstance>();
         List<List<SoundEffectInstance>> masterList = new List<List<SoundEffectInstance>>();
@@ -94,7 +93,6 @@ namespace AUTO_Matic.Scripts.Effects
             sound = content.Load<Microsoft.Xna.Framework.Audio.SoundEffect>(@"Audio\" + effectName);
             soundInstance = sound.CreateInstance();
             soundInstance.IsLooped = canLoop;
-            //soundInstance.v
             currEffectName = effectName;
 
            
@@ -104,11 +102,6 @@ namespace AUTO_Matic.Scripts.Effects
             }
             
         }
-
-        //public void AddSoundEffect(string effectName, bool canLoop, float pitch = -1001100)
-        //{
-        //    sound = content.Load<Microsoft.Xna.Framework.Audio.SoundEffect>(@"Audio\SoundEffects")
-        //}
 
         public void ClearSounds()
         {
@@ -136,7 +129,6 @@ namespace AUTO_Matic.Scripts.Effects
 
             if(currEffectName.Contains("Theme") || currEffectName.Contains("Level"))//Music list
             {
-                //soundInstance.Volume = MusicVolume;
                 MusicList.Add(soundInstance);
                 MusicList[MusicList.Count - 1].Play();
             }
@@ -147,31 +139,10 @@ namespace AUTO_Matic.Scripts.Effects
             }
 
             ChangeVolume(MasterVolume, EffectVolume, MusicVolume);
-
-
-
-            //soundList.Add(soundInstance);
-            //soundList[soundList.Count - 1].Play();
         }
 
         public void Update(GameTime gameTime)
         {
-            //for (int i = 0; i < soundList.Count; i++)
-            //{
-            //    if (soundList[i].IsLooped)
-            //    {
-                    
-            //    }
-            //    else
-            //    {
-            //        if (soundList[i].State == SoundState.Stopped)
-            //        {
-            //            soundList.RemoveAt(i);
-            //        }
-
-            //    }
-            //}
-
             for(int i = 0; i < MasterList.Count; i++)
             {
                 for(int j = MasterList[i].Count - 1; j >= 0; j--)

@@ -196,20 +196,6 @@ namespace AUTO_Matic
 
                         backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size, size)));
 
-
-                        //if(x < map.GetLength(1) -1 && y < map.GetLength(0) - 1 && map[y,x + 1] == num || x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && PlayerSpawnIndexes.Contains(map[y, x + 1]) ||
-                        //     x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && TopDoorIndexes.Contains(map[y, x + 1]) || x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && BottomDoorIndexes.Contains(map[y, x + 1]) ||
-                        //      x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && PlatformIndexes.Contains(map[y, x + 1]) || x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && EnemySpawnIndexes.Contains(map[y, x + 1]) ||
-                        //       x < map.GetLength(1) - 1 && y < map.GetLength(0) - 1 && map[y, x + 1] >= 27 )
-                        //{
-                        //    backgroundTiles.Add(new BackgroundTile(num, new Rectangle(x * size, y * size, size * 2, size * 2)));
-                        //    if(BackgroundIndexes.Contains(map[y + 1, x + 1]))
-                        //        map[y + 1, x + 1] = 69;
-                        //    if(BackgroundIndexes.Contains(map[y + 1, x]))
-                        //        map[y + 1, x] = 69;
-                        //    if(BackgroundIndexes.Contains(map[y, x + 1]))
-                        //        map[y, x + 1] = 69;
-                        //}
                         //This was a way to track where the levels end
                         if (backgroundTiles[backgroundTiles.Count - 1].mapPoint.GetLength(1) > tileMap.level0MaxPoint.GetLength(1) && num == 1)
                         {

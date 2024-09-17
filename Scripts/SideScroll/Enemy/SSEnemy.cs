@@ -32,7 +32,6 @@ namespace AUTO_Matic.SideScroll
         public Rectangle enemyRect;
         bool blockBottom = false; 
         bool isFalling = true;
-        bool isColliding = false;
 
         Vector2 TargetPos; //Position of where the GOTO targets 
         public float health = 5;
@@ -67,25 +66,18 @@ namespace AUTO_Matic.SideScroll
         }
 
         float moveSpeed = .5f;
-        float mass = 20.0f;
         public float accel = 0;
         public float force = 0;
         public float friction = 0;
-        float coeFric = 0;
         public float changeInTime = 0;
         //bool canJump;
         int jumpDelay = 5;
-        int maxJumpDelay = 0;
         Vector2 gravity;//Stored version of gravity 
 
         public float maxRunSpeed = 5f;
         float terminalVel = 12f;
-        float maxJumpSpeed = 8f;
         int maxJumpForce = 20;
-        int minJumpForce = 16;
-        float maxAirSpeed;
         public bool isShoot;
-        bool targetLeftOnX = false;
         #endregion
 
         #region Velocity
@@ -131,13 +123,6 @@ namespace AUTO_Matic.SideScroll
         {
             switch (animState)
             {
-                //case AnimationStates.Idle:
-                //    texture = content.Load<Texture2D>("SideScroll/Animations/PlayerIdle");
-                //    FrameSize = new Point(64, 64);
-                //    CurrFrame = new Point(0, 0);
-                //    SheetSize = new Point(6, 1);
-                //    fpms = 120;
-                //    break;
                 case AnimationStates.Walking:
                     if(isShoot)
                     {
@@ -174,13 +159,6 @@ namespace AUTO_Matic.SideScroll
                         fpms = 120;
                     }
                     break;
-                    //case AnimationStates.Jump:
-                    //    texture = content.Load<Texture2D>("SideScroll/Animations/PlayerJump");
-                    //    FrameSize = new Point(64, 64);
-                    //    CurrFrame = new Point(0, 0);
-                    //    SheetSize = new Point(4, 1);
-                    //    fpms = 95;
-                    //    break;
             }
 
             bool isRight = true, isLeft = false, isUp = false, isDown = false;
@@ -245,24 +223,17 @@ namespace AUTO_Matic.SideScroll
         public List<Rectangle> possibleJumpLocations = new List<Rectangle>(); 
         int visionLength = 1;
         Texture2D visionTxture;
-        GAJump gaJump = new GAJump();
-        bool canJump = false;
         bool jumpSuccess = false;
         bool jumpFail = false;
-        JumpChromosome jumpInfo;
         Rectangle goalRect;
         Rectangle secondBest;
-        bool blockTop = false;
         Rectangle currPlatform;
         public bool onPlatform = false;
         bool blockLeft = false;
         bool blockRight = false;
         bool goTo = false; //A hard setting goTo that forces to go towards TargetPos regardless of checks
         Vector2 landingPos;
-        bool canWalk = true;
         public List<Vector2> leftOn = new List<Vector2>(); //This is used for when the player jump/falls from current platform
-        bool forceRun = false;
-        bool atBounds = false;
         #endregion
 
         #region Attack Helpers
@@ -288,7 +259,6 @@ namespace AUTO_Matic.SideScroll
         float meleeDmg = 1.5f;
         bool outOfRange = false;
         bool cantReach = true;
-        float waitTime = .75f;
         bool launch = false;
         Rectangle HitBox
         {
@@ -570,17 +540,9 @@ namespace AUTO_Matic.SideScroll
             CreateVision();
             possibleJumpLocations.Clear();
             blockBottom = false;
-            //blockTop = false;
-            //onPlatform = false;
-            //isFalling = true;
             blockLeft = false;
             blockRight = false;
             outOfRange = false;
-
-            //if(dead)
-            //{
-            //    position = new Vector2(-100, 10000);
-            //}
 
             foreach(GroundTile tile in SideTileMap.GroundTiles)
             {
@@ -643,10 +605,6 @@ namespace AUTO_Matic.SideScroll
                             cantReach = false;
                             velocity = Vector2.Zero;
                        }
-                       //else if(enemyRect.Center.Y/64 > player.playerRect.Center.Y/64 && player.blockBottom)
-                       //{
-                       //     cantReach = false;
-                       //}
                     }
                     else
                     {
@@ -677,18 +635,12 @@ namespace AUTO_Matic.SideScroll
                                         TargetPos = new Vector2(player.playerRect.X + player.playerRect.Width, enemyRect.Y);
                                     }
                                 }
-                                //bounds = SideTileMap.GetNumTilesOfGround((int)(position.Y / 64) + 1, (int)position.X / 64); //Recalc bounds 
-                                //if (bounds != Vector2.Zero)
-                                //{
-                                //    bounds *= 64;
-                                //}
                                 if (MathHelper.Distance(enemyRect.X + enemyRect.Width / 2, player.playerRect.X + player.playerRect.Width / 2) > (visionLength) * 64)
                                 {
                                     enemyState = EnemyStates.Idle;
                                     velocity.X = 0;
                                     break;
                                 }
-                                //prevState = enemyState;
                                 enemyState = EnemyStates.GoTo;
                                 goTo = false;
                                 break;
@@ -697,10 +649,6 @@ namespace AUTO_Matic.SideScroll
 
                         }
                     }
-                    //if(enemyState 
-                    //leftOnX.Clear();
-                   
-                   
                     break;
                 #endregion
                 #region GoTo
@@ -709,10 +657,8 @@ namespace AUTO_Matic.SideScroll
                     //bool outOfSight = true;
                     if (!goTo) //If not forced to into goTo
                     {
-                      
                         foreach (Rectangle rect in vision)//Update TargetPos if player is in vision
                         {
-    
                             if (rect.Intersects(player.playerRect))
                             {
                                 //outOfSight = false;
@@ -752,11 +698,6 @@ namespace AUTO_Matic.SideScroll
                                 }
                                 //landingPos = position;
                             }
-                            //if(outOfSight && prevState != EnemyStates.Idle)
-                            //{
-                            //    enemyState = EnemyStates.Idle;
-                            //    break;
-                            //}
                         }
                     }
 
@@ -780,10 +721,6 @@ namespace AUTO_Matic.SideScroll
                     if (player.playerRect.Bottom < enemyRect.Top && player.velocity.Y >= 0 && blockBottom && !cantReach /* && !goTo*/ /*&& player.blockBottom*/ && prevState != EnemyStates.Jumping
                         || prevState != EnemyStates.Jumping && blockLeft && goTo|| prevState != EnemyStates.Jumping && blockRight && goTo)
                     {
-                        //if (player.velocity.Y >= -5)
-                        //{
-                        //    leftOnX = player.playerRect.X; //where the playere was last to set direction priority if jump fails
-                        //}
                         goTo = false;
                         if (player.blockBottom || blockLeft && blockBottom|| blockRight && blockBottom)
                         {
@@ -816,36 +753,6 @@ namespace AUTO_Matic.SideScroll
                         else if (enemyRect.X > leftOn[0].X)
                             velocity.X = -maxRunSpeed;
                     }
-                    //else if (velocity.X < 0 && bounds.X == 0 && blockBottom && player.velocity.Y <= 0 && !goTo && leftOnY != 0 && leftOnY > enemyRect.Bottom)
-                    //{
-                    //    enemyState = EnemyStates.Falling;
-                    //    break;
-                    //}
-                    //else if (leftOnY == 0 && bounds.X == 0 && velocity.X < 0 && blockBottom && player.velocity.Y <= 0 && !goTo && player.playerRect.Top > enemyRect.Bottom)
-                    //{
-                    //    enemyState = EnemyStates.Falling;
-                    //    break;
-                    //}
-                    //else if (velocity.X > 0 && bounds.Y == 0 && blockBottom && player.velocity.Y <= 0 && !goTo && leftOnY != 0 && leftOnY > enemyRect.Bottom)
-                    //{
-                    //    enemyState = EnemyStates.Falling;
-                    //    break;
-                    //}
-                    //else if (leftOnY == 0 && velocity.X > 0 && bounds.Y == 0 && blockBottom && player.velocity.Y <= 0 && !goTo && player.playerRect.Top > enemyRect.Bottom)
-                    //{
-                    //    enemyState = EnemyStates.Falling;
-                    //    break;
-                    //}
-                    //else if (leftOnY != 0 && leftOnY > enemyRect.Bottom && player.velocity.Y <= 0 && blockBottom && !goTo)//Player is below enemy and will check to see if can go down
-                    //{
-                    //    enemyState = EnemyStates.Falling;
-                    //    break;
-                    //}
-                    //else if (player.playerRect.Top > enemyRect.Bottom && player.velocity.Y <= 0 && blockBottom && !goTo)
-                    //{
-                    //    enemyState = EnemyStates.Falling;
-                    //    break;
-                    //}
 
                     //Attack conditions Makes sure the enemy isnt jumping and that they are on the same level
                     //left
@@ -856,8 +763,6 @@ namespace AUTO_Matic.SideScroll
                         {
                             if (MathHelper.Distance(enemyRect.Left, player.playerRect.Right) < attackOffsetFromPlayer)
                             {
-                                //attackLeft = true;
-                                //attackRight = false;
                                 enemyState = EnemyStates.Attacking;
                                 velocity.X = 0;
                             }
@@ -881,8 +786,6 @@ namespace AUTO_Matic.SideScroll
                         {
                             if (MathHelper.Distance(enemyRect.Right, player.playerRect.Left) < attackOffsetFromPlayer)
                             {
-                                //attackLeft = false;
-                                //attackRight = true;
                                 enemyState = EnemyStates.Attacking;
                                 velocity.X = 0;
                             }
@@ -1029,65 +932,10 @@ namespace AUTO_Matic.SideScroll
 
                                                 secondBest = possibleJumpLocations[k];
                                             }
-                                            //if (MathHelper.Distance(secondBest.Center.X, player.playerRect.Center.X) >
-                                            //    MathHelper.Distance(possibleJumpLocations[k].Center.X, player.playerRect.Center.X))
-                                            //{
-                                            //    secondBest = possibleJumpLocations[k];
-                                            //}
                                         }
                                     }
 
                                 }
-
-                                #region Old ForEach Loop
-                                //foreach (Rectangle rect in possibleJumpLocations)
-                                //{
-                                //    if (MathHelper.Distance(goalRect.Y, position.Y) > MathHelper.Distance(rect.Y, position.Y))
-                                //    {
-                                //        goalRect = rect; //If the location is the closest on the Y, prioritize as the best
-                                //    }
-                                //    else if (MathHelper.Distance(goalRect.Y, position.Y) == MathHelper.Distance(rect.Y, position.Y))
-                                //    {
-                                //        //If the locations are even of the same Y 
-
-                                //        //if (MathHelper.Distance(goalRect.X, position.X) > MathHelper.Distance(rect.X, position.X))
-                                //        //{
-                                //        //    goalRect = rect;
-                                //        //    //if (closestToPlayer.Y == goalRect.Y)
-                                //        //    //{
-                                //        //    //    if(MathHelper.Distance(closestToPlayer.X, position.X) < MathHelper.Distance(goalRect.X, position.X))
-                                //        //    //    {
-                                //        //    //        goalRect = closestToPlayer;
-                                //        //    //    }
-                                //        //    //}
-                                //        //}
-
-                                //        //This is closest to player, it gets weird
-                                //        //if (MathHelper.Distance(goalRect.X, player.Position.X) > MathHelper.Distance(rect.X, player.Position.X)) //If closest to player 
-                                //        //{
-                                //        //    goalRect = rect;
-                                //        //    //Save second best in case this doesnt work?...Saved the closest to player (works better than second best?)
-                                //        //}
-                                //        if (MathHelper.Distance(goalRect.X + goalRect.Width / 2, position.X + enemyRect.Width / 2) > MathHelper.Distance(rect.X + rect.Width / 2, position.X + enemyRect.Width / 2)) //If closest to player 
-                                //        {
-                                //            goalRect = rect;
-                                //            //Save second best in case this doesnt work?...Saved the closest to player (works better than second best?)
-                                //        }
-                                //        //else
-                                //        //{
-                                //        //    if (MathHelper.Distance(goalRect.X, position.X) > MathHelper.Distance(rect.X, position.X))
-                                //        //    {
-                                //        //        goalRect = rect;
-                                //        //    }
-                                //        //}
-                                //    }
-
-                                //    //else if (Distance(new Vector2(goalRect.X, goalRect.Y), position) > Distance(new Vector2(rect.X, rect.Y), position))
-                                //    //{
-                                //    //    goalRect = rect; //If all else fails, whichever is the closest in general
-                                //    //}
-                                //}
-                                #endregion
 
                                 Vector2 tempVel = Velocity; //Correct velocity to go in direction of the goalRect
                                 Vector2 tempVel1 = Velocity;
@@ -1233,9 +1081,6 @@ namespace AUTO_Matic.SideScroll
                                     }
                                 }
 
-
-
-
                                 if (i == 2 && secondTest == 2) //Cant jump conditions
                                 {
                                     if (leftOn.Count != 0 && leftOn[0].Y/64 == enemyRect.Y/64) //If there is a leftOnX
@@ -1259,21 +1104,10 @@ namespace AUTO_Matic.SideScroll
 
                                         TargetPos = new Vector2(leftOn[0].X, position.Y);
                                         if (enemyRect.X == leftOn[0].X)
-                                            leftOn.Clear();
-                                        //leftOnX.Clear();
+                                            leftOn.Clear();;
                                         goTo = true;
-                                        //prevState = enemyState;
                                         enemyState = EnemyStates.GoTo;
-                                        //goTo = true;
                                         maxRunSpeed *= 1.05f;
-                                        //bounds = SideTileMap.GetNumTilesOfGround((int)(position.Y/64) + 1, (int)position.X/64); //Recalc bounds 
-                                        //if(bounds != Vector2.Zero)
-                                        //{
-                                        //    bounds *= 64;
-                                        //}
-                                        //landingPos = position;
-
-                                        //enemyState = EnemyStates.GoTo;
                                     }
                                     else if(leftOn.Count != 0 && leftOn[0].Y/64 != enemyRect.Y/64)
                                     {
@@ -1302,78 +1136,6 @@ namespace AUTO_Matic.SideScroll
                                         enemyState = EnemyStates.Idle;
                                         cantReach = true;
                                     }
-
-                                    //else if(position.X > ((goalRect.X + goalRect.Width) + goalRect.Width/2))
-                                    //{
-                                    //    velocity.X = -maxRunSpeed;
-                                    //    forceRun = true;
-                                    //}
-                                    //else if(position.X < goalRect.Left)
-                                    //{
-                                    //    velocity.X = Math.Abs(maxAirSpeed);
-                                    //    forceRun = true;
-                                    //}
-                                    //else
-                                    //{
-                                    //    goTo = true;
-                                    //    if(RandFloat(0,1) > .5f)
-                                    //    {
-                                    //        velocity.X = -maxRunSpeed;
-                                    //    }
-                                    //    else
-                                    //    {
-                                    //        velocity.X = maxRunSpeed;
-                                    //    }
-                                    //}
-
-                                    //if (blockRight && velocity.X > 0)
-                                    //{
-                                    //    velocity.X = -maxRunSpeed;
-                                    //    enemyState = EnemyStates.GoTo;
-                                    //    //goTo = true;
-                                    //}
-                                    //else if (blockLeft)
-                                    //{
-                                    //    velocity.X = maxRunSpeed;
-                                    //    enemyState = EnemyStates.GoTo;
-                                    //    //goTo = true;
-                                    //}
-                                    //else
-                                    //{
-                                    //    enemyState = EnemyStates.Idle;
-                                    //    cantReach = true;
-                                    //}
-                                    //else if (RandFloat(0, 1) > .5f)
-                                    //{
-                                    //    velocity.X = maxRunSpeed;
-                                    //}
-                                    //else
-                                    //{
-                                    //    velocity.X = -maxRunSpeed;
-                                    //}
-                                    //goTo = true; 
-                                    //enemyState = EnemyStates.GoTo;
-                                    //velocity.X = 0;
-                                    //if (position.X < player.Position.X)
-                                    //{
-                                    //    //SetTarget to the left most position of the current bounds
-
-                                    //    //if(position.x == bounds.x)
-                                    //    //{
-                                    //    //Can't reach...change logic
-                                    //    //}
-                                    //}
-                                    //if (position.X > player.Position.X)
-                                    //{
-                                    //    //SetTarget to right most position of current bounds
-
-                                    //    //if(position.x == bounds.x + width)
-                                    //    //{
-                                    //    //Can't reach...change logic
-                                    //    //}
-                                    //}
-
-
                                 }
                                 else if (i == 1 || secondTest == 1)  //Success
                                 {
@@ -1400,8 +1162,6 @@ namespace AUTO_Matic.SideScroll
                                     {
                                         velocity = new Vector2(tempVel.X - randForce);
                                     }
-
-
 
                                     if (enemyRect.X > goalRect.X)
                                         TargetPos = new Vector2((goalRect.X), goalRect.Top - enemyRect.Height); //Target pos is the center of the goalRect
@@ -1874,50 +1634,10 @@ namespace AUTO_Matic.SideScroll
                 animManager.isRight = false;
 
             }
-            
-       
-            
-
-        }
-
-        private void TileCollision(GroundTile tile)
-        {
-            Collision(tile.Rectangle);
-
-            if(tile.Rectangle.Top < enemyRect.Top)
-            {
-                //for (int i = vision.Count - 1; i >= 0; i--)
-                //{
-                //    if (vision[i].Intersects(tile.Rectangle))
-                //    {
-                //        if (i == 0)
-                //        {
-                //            blockTop = true;
-                //        }
-                //        if (i == vision.Count - 1)
-                //        {
-                //            currPlatform = tile.Rectangle;
-                //            onPlatform = true;
-                //        }
-                //        vision.RemoveAt(i);
-                //        //j++;
-                //        //bool test1 = possibleJumpLocations.Contains(tile.Rectangle);
-                //        //bool test2 = player.playerRect.TouchTopOf(tile.Rectangle);
-                //        if (!possibleJumpLocations.Contains(tile.Rectangle) && enemyRect.TouchTopOf(tile.Rectangle) == false)
-                //            possibleJumpLocations.Add(tile.Rectangle);
-
-                //    }
-                //}
-            }
-           
-
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-
-
-            //tRect.X += tRect.Width/5;
             if (damaged)
             {
                 if (redCount <= whiteCount || redCount == 0 && whiteCount == 0)
@@ -2015,19 +1735,6 @@ namespace AUTO_Matic.SideScroll
                         enemyRect.Y = (int)position.Y;
                         
                     }
-                    //jumpDelay++;
-                    //if(jumpDelay > maxJumpDelay)
-                    //{
-
-                    //}
-                    //if(velocity.X > 0)
-                    //{
-                    //    canWalk = SideTileMap.CanWalk(newRect.Y / 64, newRect.X / 64, "right");
-                    //}
-                    //if(velocity.X < 0)
-                    //{
-                    //    canWalk = SideTileMap.CanWalk(newRect.Y / 64, newRect.X / 64, "right");
-                    //}
                 }
 
                
@@ -2078,8 +1785,6 @@ namespace AUTO_Matic.SideScroll
                 //position.X += -Velocity.X;
                 enemyRect.X = (int)position.X;
             }
-
-           
         }
 
         Vector2 TestCollision(Vector2 startPos, Rectangle tile, Vector2 goalPos, Vector2 tempVel, bool isPlatforms) //Same as collisions but restructured for the TestJump()
@@ -2294,42 +1999,6 @@ namespace AUTO_Matic.SideScroll
             }
             return num;
         }
-
-        public float Distance(Vector2 pos1, Vector2 pos2)
-        {
-            return (float)Math.Sqrt(Math.Pow(pos2.X - pos1.X, 2) + Math.Pow(pos2.Y - pos1.Y, 2));
-        }
-
-        public float RandFloat(int min, int max)
-        {
-            Random r = new Random();
-            float decimalNumber;
-            string beforePoint = r.Next(min, max).ToString();//number before decimal point
-            string afterPoint = r.Next(0, 10).ToString();
-            string afterPoint2 = r.Next(0, 10).ToString();
-            string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
-                                                          //string secondDP = r.Next(0, 9).ToString();//2nd decimal point
-            string combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
-            return decimalNumber = float.Parse(combined);
-        }
-        public float RandNegFloat(int min, int max)
-        {
-            Random r = new Random();
-            float decimalNumber;
-            string beforePoint = r.Next(min, max).ToString();//number before decimal point
-            string afterPoint = r.Next(0, 10).ToString();
-            string afterPoint2 = r.Next(0, 10).ToString();
-            string afterPoint3 = r.Next(0, 10).ToString();//1st decimal point
-                                                          //string secondDP = r.Next(0, 9).ToString();//2nd decimal point
-            string combined = beforePoint + "." + afterPoint + afterPoint2 + afterPoint3;
-            return decimalNumber = -float.Parse(combined);
-        }
-
     }
 
-    struct JumpChromosome
-    {
-        public Vector2 startPos;
-        public float jumpForce;
-    }
 }

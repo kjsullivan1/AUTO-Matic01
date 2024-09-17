@@ -106,6 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Audio\BossTheme.mp3" />
+    <Content Include="Content\Audio\EndingTheme.mp3" />
     <Content Include="Content\Audio\FinalBossTheme.mp3" />
     <Content Include="Content\Audio\Level0Side.mp3" />
     <Content Include="Content\Audio\Level1Side.mp3" />
