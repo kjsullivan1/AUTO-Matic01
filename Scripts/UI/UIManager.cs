@@ -510,6 +510,35 @@ namespace AUTO_Matic
                             transition = false;
                         }
                     }
+                    else if(!transition || UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).X >= ((int)dims.X / 2) - (UIHelper.MenuTitle.Width / 2))
+                    {
+                        UIHelper.SetElementBGRect(uiElements["MainMenuTitle"],
+                                               new Rectangle(((int)dims.X / 2) - UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Width / 2, UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Y,
+                                               UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Width, UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Height));
+
+                        UIHelper.SetElementRect(uiElements["MainMenuTitle"],
+                    new Rectangle(((int)dims.X / 2) - UIHelper.GetElementBGRect(uiElements["MainMenuTitle"]).Width / 2, UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Y,
+                    UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Width, UIHelper.GetElementRect(uiElements["MainMenuTitle"]).Height));
+
+
+                        UIHelper.SetRectangle(uiElements["MainMenuPlay"], new Rectangle(((int)dims.X / 2) - (200 / 2),
+                            UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Y, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Width, UIHelper.GetRectangle(uiElements["MainMenuPlay"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["MainMenuExit"], new Rectangle(((int)dims.X / 2) - (200 / 2),
+                           UIHelper.GetRectangle(uiElements["MainMenuExit"]).Y, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Width, UIHelper.GetRectangle(uiElements["MainMenuExit"]).Height));
+
+                     
+
+                        UIHelper.SetRectangle(uiElements["LoadGame"], new Rectangle((int)uiElements["MainMenuExit"].Position.X,
+                          (int)uiElements["LoadGame"].Position.Y, UIHelper.GetRectangle(uiElements["LoadGame"]).Width,
+                          UIHelper.GetRectangle(uiElements["LoadGame"]).Height));
+
+                        UIHelper.SetRectangle(uiElements["StartNewGame"], new Rectangle((int)uiElements["MainMenuPlay"].Position.X,
+                                 (int)uiElements["StartNewGame"].Position.Y, UIHelper.GetRectangle(uiElements["StartNewGame"]).Width,
+                                 UIHelper.GetRectangle(uiElements["StartNewGame"]).Height));
+
+                        transition = false;
+                    }
 
                     //All settings Move back
                     if (UIHelper.GetElementRect(uiElements["SettingsMenuTitle"]).X <
