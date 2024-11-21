@@ -308,8 +308,8 @@ namespace AUTO_Matic.Scripts.TopDown
                     }
                     
 
-                    if(distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(target.X, target.Y)) < 64 && 
-                        distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(target.X, target.Y)) < bulletTravelDist && !isRunAway)
+                    if(distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(target.X, target.Y)) < 64 && distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(target.X, target.Y)) > 32 
+                        && distForm(new Vector2(rectangle.Center.X, rectangle.Center.Y), new Vector2(target.X, target.Y)) < bulletTravelDist && !isRunAway)
                     {
                         //inSight = false;
                         if(playerRect.rectangle.Center.Y < rectangle.Center.Y && !blockedTop || playerRect.rectangle.Center.Y > rectangle.Center.Y && !blockedBottom

@@ -26,7 +26,7 @@ namespace AUTO_Matic.Scripts.SideScroll
         public bool reached = false;
         float moveSpeed = 4.25f;
         float moveSpeedY = 4.25f;
-        float maxMoveSpeedY = 12;
+        float maxMoveSpeedY = 12f;
         float maxMoveSpeed = 5.5f;
         public int min = 0;
         Vector2 prevPos = Vector2.One;

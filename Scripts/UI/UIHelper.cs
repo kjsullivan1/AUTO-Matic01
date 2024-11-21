@@ -24,6 +24,7 @@ namespace AUTO_Matic
         public static SpriteFont CrawlFont;
         public static SpriteFont TitleFont;
         public static SpriteFont TutorialFont;
+        public static SpriteFont CreditFont;
         public static Texture2D TutorialTexture;
         public static Texture2D CrawlBgTxture;
         public static Texture2D MenuTitle;
@@ -190,6 +191,10 @@ namespace AUTO_Matic
                     case "SelectBox":
                         UITextBlock h = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TitleFont, "", Color.SteelBlue, ButtonTexture);
                         return h;
+                    case "Credits":
+                        
+                        UITextBlock i = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, CreditFont, text, Color.White, CrawlBgTxture);
+                        return i;
                     default:
                         UITextBlock b = new UITextBlock(id, new Vector2(x, y), Vector2.Zero, TutorialFont, text, Color.Black, TutorialTexture);
                         return b;

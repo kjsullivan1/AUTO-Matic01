@@ -134,6 +134,13 @@
 /processorParam:TextureFormat=Compressed
 /build:Fonts/CrawlFont.spritefont
 
+#begin Fonts/CreditFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/CreditFont.spritefont
+
 #begin Fonts/TitleFont.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor

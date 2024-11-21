@@ -1322,6 +1322,12 @@ namespace AUTO_Matic
                 UIHelper.SetRectangle(uiElements["PauseMenuReturn"], new Rectangle(viewRect.Center.X + (150/2), viewRect.Center.Y + (viewRect.Height/3), 150, 30));
                 UIHelper.SetRectangle(uiElements["PauseMenuQuit"], new Rectangle(viewRect.Center.X + (150 / 2), UIHelper.GetRectangle(uiElements["PauseMenuReturn"]).Bottom + 5, 150, 30));
 
+                uiElements.Add("Credits", UIHelper.CreateTextblock("Credits", "Character Design: Dominic Pacheco\nSide-Scroll Design: Dominic Pacheco\nSound Effects: Dominic Pacheco\nGame Design: Dominic Pacheco\n\nLevel Design: Andrew Hill" +
+                   "\nTop-Down Design: Andrew Hill\nGame Design: Andrew Hill\n\nEngine Development: Keegan Sullivan\nPlayer Controller: Keegan Sullivan\nEnemy AI: Keegan Sullivan\n\nMusic: Logan Lapierre", viewRect.Center.X - (150) / 2,
+                   viewRect.Center.Y - (viewRect.Height / 2)));
+                UIHelper.SetElementBGRect(uiElements["Credits"], new Rectangle(uiElements["Credits"].Position.ToPoint(), new Point(150, 300)));
+                UIHelper.SetElementRect(uiElements["Credits"], new Rectangle(uiElements["Credits"].Position.ToPoint(), new Point(150, 300)));
+
 
             }
             else
@@ -1330,6 +1336,7 @@ namespace AUTO_Matic
                 uiElements["PauseMenuReturn"].Visible = true;
                 uiElements["PauseMenuQuit"].Visible = true;
                 uiElements["PauseMainMenuBtn"].Visible = false;
+                uiElements["Credits"].Visible = true;
             }
         }
 

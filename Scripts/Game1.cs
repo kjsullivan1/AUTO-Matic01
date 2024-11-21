@@ -37,7 +37,7 @@ namespace AUTO_Matic
         int dropRateTD = 42;
         float healAmount = 2.25f;
         public int openDoorCount = 0; //Counts how many times opened doors in the main SideScroll section
-        public int bossKillCount = 0; //How many bosses defeated
+        public int bossKillCount = 4; //How many bosses defeated
 
         Rectangle LeaveDungeon = Rectangle.Empty;
         public bool deleteSave = false;
@@ -147,7 +147,7 @@ namespace AUTO_Matic
 
         Vector2 savedDoorY = Vector2.One;
 
-        int dungeonNum = 0;
+        int dungeonNum = 3;
 
         Rectangle interactActive = Rectangle.Empty;
         float groundPoundX = 16;
@@ -178,6 +178,7 @@ namespace AUTO_Matic
         Vector2 endPlayerVelocity = Vector2.Zero;
         float endPlayerRotation = 0;
         float rotateRate = .025f;
+        bool gaming = false;
 
         public Game1()
         {
@@ -249,6 +250,7 @@ namespace AUTO_Matic
             UIHelper.MainMenuBG = Content.Load<Texture2D>(@"Textures\TitleScreen");
             UIHelper.TutorialTexture = Content.Load<Texture2D>(@"Textures\Textbox");
             UIHelper.MenuTitle = Content.Load<Texture2D>(@"Textures\Title");
+            UIHelper.CreditFont = Content.Load<SpriteFont>(@"Fonts\CreditFont");
 
             UIHelper.PlayGameBtn = Content.Load<Texture2D>(@"Textures\UI\PlayButton");
             UIHelper.ExitGameBtn = Content.Load<Texture2D>(@"Textures\UI\ExitButton");
@@ -1067,6 +1069,8 @@ namespace AUTO_Matic
 
                             if (fade || doorTrans)
                             {
+
+
                                 ssCamera.Update(fadePos, dont, fade);
                                 ssPlayer.Update(gameTime, Gravity, enemies, this ,true);
                                 if (fade)
@@ -1145,6 +1149,15 @@ namespace AUTO_Matic
 
                             if (fade || doorTrans)
                             {
+                                if(ssCamera.ViewRect.Contains(ssPlayer.position) == false && fade && !gaming && !doorTrans && !updateDoor)
+                                {
+                                    //fade = true;
+                                    prevGameState = GameState;
+                                    GameState = GameStates.Paused;
+                                    fadePos = new Vector2(ssPlayer.position.X - ssCamera.ViewRect.Width/4, ssPlayer.position.Y);
+                                    dont = false;
+                                }
+
                                 ssCamera.Update(fadePos, dont, fade);
                                 UIManager.uiElements["DashIcon"].Visible = false;
                                 UIManager.uiElements["HealthBar"].Visible = false;
@@ -1152,12 +1165,13 @@ namespace AUTO_Matic
 
                                 if (fade)
                                 {
+                                    gaming = false;
                                     foreach (BottomDoorTile door in SideTileMap.BottomDoorTiles)
                                     {
                                         float num = MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X);
                                        
                                     
-                                        if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.playerRect.X, door.Rectangle.X) < 64 * 8/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
+                                        if (ssCamera.CameraBounds.Contains(door.Rectangle) && MathHelper.Distance(ssPlayer.position.X, door.Rectangle.X) < 64 * 8/* && ssPlayer.Y/64 == door.Rectangle.Y/64*/)
                                         {
                                             dont = true; //dont move camera
                                         }
@@ -1174,6 +1188,7 @@ namespace AUTO_Matic
                                 if (updateDoor)
                                 {
                                     UpdateDoor(topIndex, bottomIndex);
+                                    gaming = false;
                                 }
 
                             }
@@ -1195,6 +1210,8 @@ namespace AUTO_Matic
                             }  
                             else
                             {
+                                if (gaming == false)
+                                    gaming = true;
                                 SideScrollPhysics(gameTime, kb, worldRect);
                                 if (kb.IsKeyDown(Keys.J) && prevKB.IsKeyUp(Keys.J))
                                 {
@@ -2158,6 +2175,8 @@ namespace AUTO_Matic
                                         break;
                                 }
                             }
+                            if (UIManager.uiElements["Credits"].Visible == false)
+                                UIManager.uiElements["Credits"].Visible = true;
                             break;
                             #endregion
                     }
@@ -2617,7 +2636,7 @@ namespace AUTO_Matic
                 UIManager.uiElements["DashIcon"].Visible = true;
                 UIManager.uiElements["HealthBar"].Visible = true;
 
-                if(openDoorCount > 1)
+                if(openDoorCount > 1 && ssPlayer.animManager.isRight)
                     SaveGame();
 
             }
@@ -3478,7 +3497,7 @@ namespace AUTO_Matic
                     {
                         ssCamera = new SSCamera(GraphicsDevice.Viewport, new Vector2(int.Parse(gameData[4]) /*+ (int.Parse(gameData[10]))*/, int.Parse(gameData[5])), int.Parse(gameData[6]), int.Parse(gameData[7]));
                         //ssCamera.SetBounds(new Rectangle(int.Parse(gameData[4]), int.Parse(gameData[5]), int.Parse(gameData[6]), int.Parse(gameData[7])));
-
+                       
                         if (openDoorCount == 1)
                             fadePos = new Vector2(int.Parse(gameData[1]) - (int.Parse(gameData[10])/2), int.Parse(gameData[2]));
                         else if (openDoorCount == 4)
